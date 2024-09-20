@@ -1,0 +1,13 @@
+{
+  "plugins": ["@trivago/prettier-plugin-sort-imports"],
+  "importOrder": [
+    "^[./]",
+    "^@/",
+    "^react",
+    "^@mantine/core",
+    "^@mantine/",
+    "^"
+  ],
+  "importOrderSeparation": true,
+  "importOrderSortSpecifiers": true
+}
