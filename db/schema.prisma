@@ -1,99 +1,148 @@
-enum Role {
-  Admin
-  Mentor
-  Helper
-  Grader
-  Participant
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_URL")
 }
 
-model User {
-  id       String   @id @default(uuid())
-  authId   String
-  name     String
-  roleAssignment RoleAssignment?
-  teamMembers   TeamMember[]
-  sidequestAttempts SidequestAttempt[]
+enum role {
+  ADMIN
+  MENTOR
+  HELPER
+  PARTICIPANT
+  GRADER
 }
 
-model Sidequest {
-  id          String   @id @default(uuid())
+model user {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  // fields
+  auth_id String
+  name    String
+
+  // related models
+  sidequest_attempt sidequest_attempt[]
+  team_member       team_member[]
+  role_assignment   role_assignment[]
+}
+
+model role_assignment {
+  user_id String @db.Uuid
+  role    role
+
+  // relations
+  user user @relation(fields: [user_id], references: [id])
+
+  // meta
+  @@id([user_id, role])
+}
+
+model team {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  // fields
+  name String
+
+  // related models
+  team_score         team_score[]
+  team_member        team_member[]
+  project_preference project_preference[]
+  project_assignment project_assignment[]
+}
+
+model team_member {
+  user_id String @db.Uuid
+  team_id String @db.Uuid
+
+  // relations
+  user user @relation(fields: [user_id], references: [id])
+  team team @relation(fields: [team_id], references: [id])
+
+  // meta
+  @@id([user_id, team_id])
+}
+
+model project {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  // fields
+  title   String
+  content String
+
+  // related models
+  project_preference project_preference[]
+  project_assignment project_assignment[]
+}
+
+model project_preference {
+  team_id    String @db.Uuid
+  project_id String @db.Uuid
+
+  // fields
+  score Int
+
+  // relations
+  team    team    @relation(fields: [team_id], references: [id])
+  project project @relation(fields: [project_id], references: [id])
+
+  @@id([team_id, project_id])
+}
+
+model project_assignment {
+  team_id    String @db.Uuid
+  project_id String @db.Uuid
+
+  //  relations
+  team    team    @relation(fields: [team_id], references: [id])
+  project project @relation(fields: [project_id], references: [id])
+
+  // meta
+  @@id([team_id, project_id])
+}
+
+model sidequest {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  // fields
   name        String
   description String
   accending   Boolean
-  sidequestAttempts SidequestAttempt[]
+
+  // related_models
+  sidequest_attempt sidequest_attempt[]
 }
 
-model SidequestAttempt {
-  id          String   @id @default(uuid())
-  sidequest   Sidequest @relation(fields: [sidequestId], references: [id])
-  sidequestId String
-  user        User @relation(fields: [userId], references: [id])
-  userId      String
-  attemptedAt DateTime
-  result      Int
+model sidequest_attempt {
+  id           String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sidequest_id String @db.Uuid
+  user_id      String @db.Uuid
+
+  // fields
+  attempted_at DateTime
+  result       Float
+
+  // relations
+  sidequest sidequest @relation(fields: [sidequest_id], references: [id])
+  user      user      @relation(fields: [user_id], references: [id])
 }
 
-model TeamScore {
-  team      Team @relation(fields: [teamId], references: [id])
-  teamId    String
-  score     Int
-  validAt   DateTime
-  @@id([teamId, validAt])
+model team_score {
+  id      String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  team_id String @db.Uuid
+
+  // fields
+  score    Int
+  valid_at DateTime
+
+  // relations
+  team team @relation(fields: [team_id], references: [id])
 }
 
-model Team {
-  id         String   @id @default(uuid())
-  name       String
-  members    TeamMember[]
-  teamScores TeamScore[]
-  preferences ProjectPreference[]
-  assignments ProjectAssignment[]
-}
+model timeline_event {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
 
-model TeamMember {
-  user   User @relation(fields: [userId], references: [id])
-  userId String
-  team   Team @relation(fields: [teamId], references: [id])
-  teamId String
-  @@id([userId, teamId])
-}
-
-model RoleAssignment {
-  user   User @relation(fields: [userId], references: [id])
-  userId String @unique
-  role   Role
-}
-
-model Project {
-  id          String   @id @default(uuid())
-  title       String
-  content     String
-  preferences ProjectPreference[]
-  assignments ProjectAssignment[]
-}
-
-model ProjectPreference {
-  team    Team @relation(fields: [teamId], references: [id])
-  teamId  String
-  project Project @relation(fields: [projectId], references: [id])
-  projectId String
-  score   Int
-  @@id([teamId, projectId])
-}
-
-model ProjectAssignment {
-  team    Team @relation(fields: [teamId], references: [id])
-  teamId  String
-  project Project @relation(fields: [projectId], references: [id])
-  projectId String
-  @@id([teamId, projectId])
-}
-
-model TimelineEvent {
-  id          String   @id @default(uuid())
-  start       DateTime
-  end         DateTime
+  // fields
   title       String
   description String
   content     String
+  start       DateTime
+  end         DateTime
 }

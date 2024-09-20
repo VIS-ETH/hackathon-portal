@@ -1,0 +1,80 @@
+version: "3"
+services:
+  db:
+    image: postgres
+    container_name: hackd_db
+    command: postgres # -c 'log_statement=all'
+    env_file:
+      - stack.env
+    volumes:
+      - hackd_db:/var/lib/postgresql/data
+    networks:
+      - hackd_backend
+    ports:
+      - 5432:5432 # TODO: remove this in production
+    restart: unless-stopped
+
+  backend:
+    container_name: hackd_backend
+    build:
+      context: backend
+      dockerfile: Dockerfile
+    env_file:
+      - stack.env
+    networks:
+      - hackd_backend
+    ports:
+      - 8000:8000
+    labels:
+      traefik.enable: true
+      traefik.network: hackd_backend
+      traefik.http.routers.hackd_backend.rule: PathPrefix(`/api`)
+      traefik.http.services.hackd_backend.loadbalancer.server.port: 8000
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  frontend:
+    container_name: hackd_frontend
+    build:
+      context: frontend
+      dockerfile: Dockerfile
+    networks:
+      - hackd_frontend
+      - hackd_backend
+    ports:
+      - 3000:3000
+    labels:
+      traefik.enable: true
+      traefik.network: hackd_frontend
+      traefik.http.routers.hackd_frontend.rule: PathPrefix(`/`)
+      traefik.http.services.hackd_frontend.loadbalancer.server.port: 3000
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  traefik:
+    container_name: hackd_traefik
+    image: traefik
+    command:
+      - --api.insecure=true
+      - --providers.docker=true
+      - --entrypoints.web.address=:80
+    networks:
+      - hackd_frontend
+    ports:
+      - 80:80
+      - 8080:8080 # TODO: remove this in production
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    restart: unless-stopped
+
+volumes:
+  hackd_db:
+    external: true
+
+networks:
+  hackd_frontend:
+    external: true
+  hackd_backend:
+    external: true
