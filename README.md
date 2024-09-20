@@ -8,6 +8,8 @@ docker volume create hackd_db
 docker network create hackd_public
 docker network create hackd_private
 
+cp stack.env.example stack.env # and fill in the values
+
 docker-compose up -d db         # just run the db
 docker-compose up -d --build    # run the whole stack
 ```
