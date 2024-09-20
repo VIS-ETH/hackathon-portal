@@ -14,25 +14,26 @@ services:
       - 5432:5432 # TODO: remove this in production
     restart: unless-stopped
 
-  backend:
-    container_name: hackd_backend
-    build:
-      context: backend
-      dockerfile: Dockerfile
-    env_file:
-      - stack.env
-    networks:
-      - hackd_backend
-    ports:
-      - 8000:8000
-    labels:
-      traefik.enable: true
-      traefik.network: hackd_backend
-      traefik.http.routers.hackd_backend.rule: PathPrefix(`/api`)
-      traefik.http.services.hackd_backend.loadbalancer.server.port: 8000
-    depends_on:
-      - db
-    restart: unless-stopped
+  # backend:
+  #   container_name: hackd_backend
+  #   build:
+  #     context: backend
+  #     dockerfile: Dockerfile
+  #   env_file:
+  #     - stack.env
+  #   networks:
+  #     - hackd_backend
+  #   ports:
+  #     - 8000:8000
+  #   labels:
+  #     traefik.enable: true
+  #     traefik.docker.network: hackd_backend
+  #
+  #     traefik.http.routers.hackd_backend.rule: PathPrefix(`/api`)
+  #     traefik.http.services.hackd_backend.loadbalancer.server.port: 8000
+  #   depends_on:
+  #     - db
+  #   restart: unless-stopped
 
   frontend:
     container_name: hackd_frontend
@@ -46,11 +47,12 @@ services:
       - 3000:3000
     labels:
       traefik.enable: true
-      traefik.network: hackd_frontend
+      traefik.docker.network: hackd_frontend
+
       traefik.http.routers.hackd_frontend.rule: PathPrefix(`/`)
       traefik.http.services.hackd_frontend.loadbalancer.server.port: 3000
-    depends_on:
-      - backend
+    # depends_on:
+    #   - backend
     restart: unless-stopped
 
   traefik:
