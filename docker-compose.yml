@@ -9,7 +9,7 @@ services:
     volumes:
       - hackd_db:/var/lib/postgresql/data
     networks:
-      - hackd_backend
+      - hackd_private
     ports:
       - 5432:5432 # TODO: remove this in production
     restart: unless-stopped
@@ -22,12 +22,13 @@ services:
   #   env_file:
   #     - stack.env
   #   networks:
-  #     - hackd_backend
+  #     - hackd_public
+  #     - hackd_private
   #   ports:
   #     - 8000:8000
   #   labels:
   #     traefik.enable: true
-  #     traefik.docker.network: hackd_backend
+  #     traefik.docker.network: hackd_public
   #
   #     traefik.http.routers.hackd_backend.rule: PathPrefix(`/api`)
   #     traefik.http.services.hackd_backend.loadbalancer.server.port: 8000
@@ -41,14 +42,11 @@ services:
       context: frontend
       dockerfile: Dockerfile
     networks:
-      - hackd_frontend
-      - hackd_backend
+      - hackd_public
     ports:
       - 3000:3000
     labels:
       traefik.enable: true
-      traefik.docker.network: hackd_frontend
-
       traefik.http.routers.hackd_frontend.rule: PathPrefix(`/`)
       traefik.http.services.hackd_frontend.loadbalancer.server.port: 3000
     # depends_on:
@@ -63,7 +61,7 @@ services:
       - --providers.docker=true
       - --entrypoints.web.address=:80
     networks:
-      - hackd_frontend
+      - hackd_public
     ports:
       - 80:80
       - 8080:8080 # TODO: remove this in production
@@ -76,7 +74,7 @@ volumes:
     external: true
 
 networks:
-  hackd_frontend:
+  hackd_public:
     external: true
-  hackd_backend:
+  hackd_private:
     external: true
