@@ -1,3 +1,14 @@
+"use client";
+
+import { useGetUsers } from "@/api/gen";
+
 export default function Home() {
-  return <h1>Hello, world!</h1>;
+  const { data: users } = useGetUsers(); // example API call
+
+  return (
+    <>
+      <h1>Hello, world!</h1>
+      <pre>{JSON.stringify(users, null, 2)}</pre>
+    </>
+  );
 }

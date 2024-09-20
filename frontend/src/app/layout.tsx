@@ -1,5 +1,6 @@
 "use client";
 
+import QueryProvider from "./QueryProvider";
 import "./globals.css";
 
 import { PropsWithChildren } from "react";
@@ -18,7 +19,7 @@ export default function RootLayout({ children }: Readonly<PropsWithChildren>) {
       <head></head>
       <body>
         <MantineProvider theme={theme} defaultColorScheme="light">
-          {children}
+          <QueryProvider>{children}</QueryProvider>
         </MantineProvider>
       </body>
     </html>
