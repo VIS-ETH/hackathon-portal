@@ -178,8 +178,8 @@ model appointment {
 
   // fields
   title       String
-  description String
-  content     String
+  description String?
+  content     String?
   start       DateTime
   end         DateTime?
 
