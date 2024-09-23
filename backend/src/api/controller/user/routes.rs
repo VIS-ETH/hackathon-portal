@@ -1,13 +1,13 @@
 use crate::api::schema::user::CreateUser;
+use crate::api::service::user as ServiceUser;
 use crate::appState::AppState;
+use crate::entity::user as DbUser;
 use crate::error::BackendResult;
 use axum::extract::{Path, Query, State};
 use axum::Json;
 use sea_orm::prelude::Uuid;
 use sea_orm::{DeleteResult, TransactionTrait};
 use utoipauto::utoipauto;
-use crate::api::service::user as ServiceUser;
-use crate::entity::user as DbUser;
 
 #[utoipa::path(
     get,
@@ -19,10 +19,9 @@ use crate::entity::user as DbUser;
 pub async fn get_all_users(state: State<AppState>) -> BackendResult<Json<Vec<DbUser::Model>>> {
     let trx: sea_orm::DatabaseTransaction = state.db.begin().await?;
     let result: Vec<DbUser::Model> = ServiceUser::get_all_users(&trx).await?;
-    let _  = trx.commit().await?;
+    let _ = trx.commit().await?;
     Ok(Json(result))
 }
-
 
 #[utoipa::path(
     get,
@@ -31,7 +30,10 @@ pub async fn get_all_users(state: State<AppState>) -> BackendResult<Json<Vec<DbU
         (status = StatusCode::OK, body = DbUser::Model),
     )
 )]
-pub async fn get_user_by_id(state: State<AppState>, Path(id) : Path<Uuid>) -> BackendResult<Json<DbUser::Model>> {
+pub async fn get_user_by_id(
+    state: State<AppState>,
+    Path(id): Path<Uuid>,
+) -> BackendResult<Json<DbUser::Model>> {
     let trx: sea_orm::DatabaseTransaction = state.db.begin().await?;
     let result = ServiceUser::get_user_by_id(&trx, id).await?;
     let _ = trx.commit().await?;
@@ -45,7 +47,7 @@ pub async fn get_user_by_id(state: State<AppState>, Path(id) : Path<Uuid>) -> Ba
         (status = StatusCode::OK, body = ()),
     )
 )]
-pub async fn delete_user_by_id(state: State<AppState>, Path(id) : Path<Uuid>) -> BackendResult<()> {
+pub async fn delete_user_by_id(state: State<AppState>, Path(id): Path<Uuid>) -> BackendResult<()> {
     let trx: sea_orm::DatabaseTransaction = state.db.begin().await?;
     let result = ServiceUser::delete_user(&trx, id).await?;
     let _ = trx.commit().await?;
@@ -60,7 +62,10 @@ pub async fn delete_user_by_id(state: State<AppState>, Path(id) : Path<Uuid>) ->
         (status = StatusCode::OK, body = DbUser::Model),
     )
 )]
-pub async fn post_user(State(state): State<AppState>, Json(user): Json<CreateUser>) -> BackendResult<Json<DbUser::Model>> {
+pub async fn post_user(
+    State(state): State<AppState>,
+    Json(user): Json<CreateUser>,
+) -> BackendResult<Json<DbUser::Model>> {
     let trx: sea_orm::DatabaseTransaction = state.db.begin().await?;
     let result = ServiceUser::add_user(&trx, user).await?;
     let _ = trx.commit().await?;

@@ -2,8 +2,8 @@ mod api;
 mod appState;
 mod config;
 mod docs;
-mod error;
 mod entity;
+mod error;
 
 use crate::config::BackendConfig;
 use crate::docs::ApiDocs;
