@@ -43,3 +43,9 @@ pub async fn update_event(trx: &impl ConnectionTrait, event: DbEvent::Model) -> 
     let result = active.update(trx).await?;
     Ok(result)
 }
+
+pub async fn delete_event(trx: &impl ConnectionTrait, id: Uuid) -> BackendResult<DeleteResult> {
+    let event = get_event_by_id(trx, id).await?;
+    let result = event.delete(trx).await?;
+    Ok(result)
+}
