@@ -5,7 +5,7 @@ use serde::Deserialize;
 pub struct BackendConfig {
     pub database_url: String,
     pub port: u32,
-    pub prod: bool
+    pub prod: bool,
 }
 
 impl BackendConfig {
@@ -16,4 +16,3 @@ impl BackendConfig {
         s.try_deserialize()
     }
 }
-

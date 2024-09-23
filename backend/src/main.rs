@@ -1,26 +1,23 @@
-mod docs;
-mod config;
-mod appState;
 mod api;
+mod appState;
+mod config;
+mod docs;
 mod error;
 
-use std::net::SocketAddr;
+use crate::config::BackendConfig;
+use crate::docs::ApiDocs;
 use appState::create;
 use axum::{routing::get, Json, Router};
+use http::Method;
+use std::net::SocketAddr;
+use tower_http::cors::{Any, CorsLayer};
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
-use crate::docs::ApiDocs;
-use tower_http::cors::{Any, CorsLayer};
-use http::Method;
-use crate::config::BackendConfig;
 
 #[tokio::main]
 async fn main() {
-
     let config_path = "Config.toml";
     let config = BackendConfig::new(config_path).unwrap();
-
-
 
     let socket_address = std::format!("127.0.0.1:{}", config.port);
     let listener = tokio::net::TcpListener::bind(socket_address).await.unwrap();
@@ -48,7 +45,6 @@ async fn main() {
         .nest("/api", api::controller::get_router(&app_state))
         .merge(SwaggerUi::new("/api/docs").url("/api/docs/openapi.json", ApiDocs::openapi()))
         .layer(cors);
-
 
     axum::serve(listener, app.into_make_service())
         .await
