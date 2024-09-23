@@ -2,6 +2,7 @@ mod api;
 mod appState;
 mod config;
 mod docs;
+mod entity;
 mod error;
 
 use crate::config::BackendConfig;
