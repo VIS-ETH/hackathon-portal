@@ -1,3 +1,4 @@
+use axum::http::header::InvalidHeaderValue;
 use derive_more::{Display, From};
 
 pub type Result<T> = core::result::Result<T, Error>;
@@ -6,6 +7,18 @@ pub type Result<T> = core::result::Result<T, Error>;
 pub enum Error {
     #[from]
     Config(config::ConfigError),
+
+    #[from]
+    Repositories(repositories::Error),
+
+    #[from]
+    Db(repositories::db::Error),
+
+    #[from]
+    Io(std::io::Error),
+
+    #[from]
+    InvalidHeaderValue(InvalidHeaderValue),
 }
 
 impl std::error::Error for Error {}

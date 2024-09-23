@@ -2,8 +2,8 @@
 
 use sea_orm::{Database, DbConn};
 
-pub mod prelude;
 pub mod error;
+pub mod prelude;
 
 pub mod appointment;
 pub mod event;
@@ -20,15 +20,14 @@ pub mod user;
 
 pub use error::{Error, Result};
 
+#[derive(Clone)]
 pub struct DbRepository {
-    pub conn: DbConn,
+    conn: DbConn,
 }
 
 impl DbRepository {
     pub fn new(conn: DbConn) -> Self {
-        Self {
-            conn
-        }
+        Self { conn }
     }
 
     pub async fn from_url(url: &str) -> Result<Self> {
@@ -37,5 +36,9 @@ impl DbRepository {
         };
 
         Ok(result)
+    }
+
+    pub fn conn(&self) -> &DbConn {
+        &self.conn
     }
 }

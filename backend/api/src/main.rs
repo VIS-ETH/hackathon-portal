@@ -1,27 +1,37 @@
-mod api_config;
-mod error;
 mod api_args;
+mod api_config;
+mod api_state;
+mod error;
+mod routers;
 
 use crate::api_args::ApiArgs;
 use crate::api_config::ApiConfig;
+use crate::api_state::ApiState;
+use crate::routers::get_api_router;
 use clap::Parser;
 pub use error::Result;
 use repositories::DbRepository;
+use std::net::SocketAddr;
+use tokio::net::TcpListener;
+use tracing::info;
 
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<()> {
     let args = ApiArgs::parse();
-    let config = match ApiConfig::parse(&args.config) {
-        Ok(config) => config,
-        Err(e) => {
-            eprintln!("Error parsing config: {}", e);
-            return;
-        }
-    };
+    let config = ApiConfig::parse(&args.config)?;
 
-    let db_repo = DbRepository::from_url(&config.db).await.unwrap();
+    let api_state = ApiState::from_config(&config).await?;
 
-    println!("Hello, world!");
+    let api_router = get_api_router(api_state).await?;
+    let addr = SocketAddr::new(config.server.ip, config.server.port);
+    let listener = TcpListener::bind(&addr).await?;
 
-    // dbg!(db_repo);
+    info!(
+        "listening on http://{}, docs on http://{}/api/docs",
+        addr, addr
+    );
+
+    axum::serve(listener, api_router).await?;
+
+    Ok(())
 }

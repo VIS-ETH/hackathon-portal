@@ -37,10 +37,11 @@ model event {
   phase               event_phase
 
   // related models
-  team        team[]
-  project     project[]
-  sidequest   sidequest[]
-  appointment appointment[]
+  team                  team[]
+  project               project[]
+  sidequest             sidequest[]
+  appointment           appointment[]
+  event_role_assignment event_role_assignment[]
 }
 
 model team {
@@ -81,7 +82,8 @@ model event_role_assignment {
   role     event_role
 
   // relations
-  user user @relation(fields: [user_id], references: [id])
+  user  user  @relation(fields: [user_id], references: [id])
+  event event @relation(fields: [event_id], references: [id])
 
   // meta
   @@id([user_id, event_id, role])
