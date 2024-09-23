@@ -44,20 +44,21 @@ model event {
 }
 
 model team {
-  id       String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  event_id String @db.Uuid
+  id         String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  event_id   String  @db.Uuid
+  project_id String? @db.Uuid
 
   // fields
   name  String
   index Int
 
   // relations
-  event event @relation(fields: [event_id], references: [id])
+  event   event    @relation(fields: [event_id], references: [id])
+  project project? @relation(fields: [project_id], references: [id])
 
   // related models
   team_role_assignment team_role_assignment[]
   project_preference   project_preference[]
-  project_assignment   project_assignment[]
   sidequest_score      sidequest_score[]
 }
 
@@ -111,8 +112,8 @@ model project {
   event event @relation(fields: [event_id], references: [id])
 
   // related models
+  team               team[]
   project_preference project_preference[]
-  project_assignment project_assignment[]
 }
 
 model project_preference {
@@ -126,18 +127,6 @@ model project_preference {
   team    team    @relation(fields: [team_id], references: [id])
   project project @relation(fields: [project_id], references: [id])
 
-  @@id([team_id, project_id])
-}
-
-model project_assignment {
-  team_id    String @db.Uuid
-  project_id String @db.Uuid
-
-  //  relations
-  team    team    @relation(fields: [team_id], references: [id])
-  project project @relation(fields: [project_id], references: [id])
-
-  // meta
   @@id([team_id, project_id])
 }
 
