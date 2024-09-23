@@ -2,9 +2,6 @@ use sea_orm::prelude::DateTime;
 
 use crate::entity::sea_orm_active_enums::EventPhase;
 
-
-
-
 pub struct CreateEvent {
     pub name: String,
     pub start: DateTime,
