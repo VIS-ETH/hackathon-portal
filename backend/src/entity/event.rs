@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 #[derive(
     Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize, utoipa :: ToSchema,
 )]
+#[schema(as = DbEvent::Model)]
 #[sea_orm(table_name = "event")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
