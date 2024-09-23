@@ -1,14 +1,20 @@
-"use client";
+'use client';
 
-import { useGetUsers } from "@/api/gen";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function Home() {
-  const { data: users } = useGetUsers(); // example API call
+  const router = useRouter();
 
   return (
     <>
-      <h1>Hello, world!</h1>
-      <pre>{JSON.stringify(users, null, 2)}</pre>
+      <p>Please select the role you want to assume for now. (Visualy only)</p>
+      <ol>
+        <li><Link href="/member">Member</Link></li>
+        <li><Link href="/mentor">Mentor</Link></li>
+        <li><Link href="/team">Team</Link></li>
+      </ol>
     </>
   );
 }
