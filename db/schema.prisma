@@ -3,12 +3,62 @@ datasource db {
   url      = env("POSTGRES_URL")
 }
 
-enum role {
+enum event_phase {
+  REGISTRATION
+  HACKING
+  GRADING
+  READONLY
+}
+
+enum event_role {
   ADMIN
   MENTOR
-  HELPER
+  STAKEHOLDER
   PARTICIPANT
-  GRADER
+  SIDEQUEST_MASTER
+}
+
+enum team_role {
+  MENTOR
+  MEMBER
+}
+
+model event {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  // fields
+  name                String      @unique
+  start               DateTime
+  end                 DateTime
+  max_team_size       Int
+  kdf_secret          String
+  is_feedback_visible Boolean
+  is_hidden           Boolean
+  phase               event_phase
+
+  // related models
+  team        team[]
+  project     project[]
+  sidequest   sidequest[]
+  appointment appointment[]
+}
+
+model team {
+  id       String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  event_id String @db.Uuid
+
+  // fields
+  name  String
+  index Int
+
+  // relations
+  event event @relation(fields: [event_id], references: [id])
+
+  // related models
+  team_role_assignment team_role_assignment[]
+  project_preference   project_preference[]
+  project_assignment   project_assignment[]
+  sidequest_score      sidequest_score[]
 }
 
 model user {
@@ -19,53 +69,46 @@ model user {
   name    String
 
   // related models
-  sidequest_attempt sidequest_attempt[]
-  team_member       team_member[]
-  role_assignment   role_assignment[]
+  event_role_assignment event_role_assignment[]
+  team_role_assignment  team_role_assignment[]
+  sidequest_attempt     sidequest_attempt[]
 }
 
-model role_assignment {
-  user_id String @db.Uuid
-  role    role
+model event_role_assignment {
+  user_id  String     @db.Uuid
+  event_id String     @db.Uuid
+  role     event_role
 
   // relations
   user user @relation(fields: [user_id], references: [id])
 
   // meta
-  @@id([user_id, role])
+  @@id([user_id, event_id, role])
 }
 
-model team {
-  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-
-  // fields
-  name String
-
-  // related models
-  team_score         team_score[]
-  team_member        team_member[]
-  project_preference project_preference[]
-  project_assignment project_assignment[]
-}
-
-model team_member {
-  user_id String @db.Uuid
-  team_id String @db.Uuid
+model team_role_assignment {
+  user_id String    @db.Uuid
+  team_id String    @db.Uuid
+  role    team_role
 
   // relations
   user user @relation(fields: [user_id], references: [id])
   team team @relation(fields: [team_id], references: [id])
 
   // meta
-  @@id([user_id, team_id])
+  @@id([user_id, team_id, role])
 }
 
 model project {
-  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id       String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  event_id String @db.Uuid
 
   // fields
   title   String
   content String
+
+  // relations
+  event event @relation(fields: [event_id], references: [id])
 
   // related models
   project_preference project_preference[]
@@ -99,12 +142,16 @@ model project_assignment {
 }
 
 model sidequest {
-  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id       String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  event_id String @db.Uuid
 
   // fields
-  name        String
-  description String
-  accending   Boolean
+  name                    String
+  description             String
+  is_higher_result_better Boolean
+
+  // relations
+  event event @relation(fields: [event_id], references: [id])
 
   // related_models
   sidequest_attempt sidequest_attempt[]
@@ -116,15 +163,15 @@ model sidequest_attempt {
   user_id      String @db.Uuid
 
   // fields
-  attempted_at DateTime
   result       Float
+  attempted_at DateTime
 
   // relations
   sidequest sidequest @relation(fields: [sidequest_id], references: [id])
   user      user      @relation(fields: [user_id], references: [id])
 }
 
-model team_score {
+model sidequest_score {
   id      String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   team_id String @db.Uuid
 
@@ -136,13 +183,17 @@ model team_score {
   team team @relation(fields: [team_id], references: [id])
 }
 
-model timeline_event {
-  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+model appointment {
+  id       String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  event_id String @db.Uuid
 
   // fields
   title       String
   description String
   content     String
   start       DateTime
-  end         DateTime
+  end         DateTime?
+
+  // relations
+  event event @relation(fields: [event_id], references: [id])
 }
