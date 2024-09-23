@@ -1,2 +1,3 @@
 pub mod controller;
-// pub mod service;
+pub mod service;
+pub mod schema;

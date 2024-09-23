@@ -14,3 +14,4 @@ use utoipauto::utoipauto;
 pub async fn get_test(state: State<AppState>) -> BackendResult<Json<bool>> {
     Ok(Json(false))
 }
+
