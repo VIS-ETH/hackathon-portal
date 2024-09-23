@@ -18,5 +18,5 @@ pub mod team_role_assignment;
 pub mod user;
 
 pub struct DbRepository {
-    pub db: DbConn,
+    pub conn: DbConn,
 }
