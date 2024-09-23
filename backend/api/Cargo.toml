@@ -1,26 +1,24 @@
 [package]
-name = "backend"
+name = "api"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-axum = "0.7.6"
-tokio = {version = "1.40.0", features = ["full"] }
-utoipa = { version = "4.2.3", features = ["axum_extras", "uuid", "chrono"] }
-utoipa-swagger-ui = { version = "5.0.0", features = ["axum"] }
-tower-http = { version = "0.5.0", features = ["cors"] }
-utoipauto = "0.1.2"
-http = "1.1.0"
-config = "0.14.0"
-serde = "1.0.210"
-sea-orm = {version = "1.0.1", features = [
-    "sqlx-postgres",
-    "runtime-tokio-native-tls",
-    "macros",
-    "with-json",
-    "with-uuid",
-]}
-thiserror = "1.0.64"
+repositories = { path = "../repositories" }
 
+tokio = { version = "1.39.2", features = ["full"] }
+serde = { version = "1.0.204", features = ["derive"] }
+chrono = "0.4.38"
+chrono-tz = "0.10.0"
+config = "0.14.0"
+derive_more = { version = "1.0.0", features = ["full"] }
+
+# web
+axum = "0.7.5"
+tower-http = { version = "0.6.1", features = ["cors"] }
+utoipa = { version = "4.2.3", features = ["axum_extras", "uuid", "chrono"] }
+utoipa-swagger-ui = { version = "7.1.0", features = ["axum"] }
+utoipauto = "0.1.12"
+clap = { version = "4.5.18", features = ["derive"] }

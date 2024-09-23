@@ -3,6 +3,6 @@
 members = [
     "repositories",
     "services",
-    # "api",
+    "api",
     # "cli",
 ]

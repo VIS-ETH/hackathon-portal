@@ -1,52 +1,27 @@
-mod api;
-mod appState;
-mod config;
-mod docs;
+mod api_config;
 mod error;
+mod api_args;
 
-use crate::config::BackendConfig;
-use crate::docs::ApiDocs;
-use appState::create;
-use axum::{routing::get, Json, Router};
-use http::Method;
-use std::net::SocketAddr;
-use tower_http::cors::{Any, CorsLayer};
-use utoipa::OpenApi;
-use utoipa_swagger_ui::SwaggerUi;
+use crate::api_args::ApiArgs;
+use crate::api_config::ApiConfig;
+use clap::Parser;
+pub use error::Result;
+use repositories::DbRepository;
 
 #[tokio::main]
 async fn main() {
-    let config_path = "Config.toml";
-    let config = BackendConfig::new(config_path).unwrap();
+    let args = ApiArgs::parse();
+    let config = match ApiConfig::parse(&args.config) {
+        Ok(config) => config,
+        Err(e) => {
+            eprintln!("Error parsing config: {}", e);
+            return;
+        }
+    };
 
-    let socket_address = std::format!("127.0.0.1:{}", config.port);
-    let listener = tokio::net::TcpListener::bind(socket_address).await.unwrap();
+    let db_repo = DbRepository::from_url(&config.db).await.unwrap();
 
-    let origins = [
-        // frontend location
-        "http://localhost:3000".parse().unwrap(),
-        "http://localhost:8000".parse().unwrap(),
-    ];
+    println!("Hello, world!");
 
-    let app_state = create(&config).await;
-
-    let cors = CorsLayer::new()
-        .allow_methods([
-            Method::GET,
-            Method::POST,
-            Method::PUT,
-            Method::DELETE,
-            Method::OPTIONS,
-        ])
-        .allow_headers(Any)
-        .allow_origin(origins);
-
-    let app = Router::new()
-        .nest("/api", api::controller::get_router(&app_state))
-        .merge(SwaggerUi::new("/api/docs").url("/api/docs/openapi.json", ApiDocs::openapi()))
-        .layer(cors);
-
-    axum::serve(listener, app.into_make_service())
-        .await
-        .unwrap()
+    // dbg!(db_repo);
 }
