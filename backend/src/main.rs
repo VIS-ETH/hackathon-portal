@@ -1,8 +1,12 @@
 mod docs;
 mod config;
+mod appState;
+mod api;
+mod error;
 
 use std::net::SocketAddr;
-use axum::{routing::get, Json};
+use appState::create;
+use axum::{routing::get, Json, Router};
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 use crate::docs::ApiDocs;
@@ -27,6 +31,8 @@ async fn main() {
         "http://localhost:8000".parse().unwrap(),
     ];
 
+    let app_state = create(&config).await;
+
     let cors = CorsLayer::new()
         .allow_methods([
             Method::GET,
@@ -38,7 +44,8 @@ async fn main() {
         .allow_headers(Any)
         .allow_origin(origins);
 
-    let app = axum::Router::new()
+    let app = Router::new()
+        .nest("/api", api::controller::get_router(&app_state))
         .merge(SwaggerUi::new("/api/docs").url("/api/docs/openapi.json", ApiDocs::openapi()))
         .layer(cors);
 

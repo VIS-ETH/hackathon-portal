@@ -1,7 +1,7 @@
 use config::{Config, ConfigError};
 use serde::Deserialize;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct BackendConfig {
     pub database_url: String,
     pub port: u32,
