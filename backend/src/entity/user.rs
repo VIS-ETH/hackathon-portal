@@ -6,7 +6,6 @@ use serde::{Deserialize, Serialize};
 #[derive(
     Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize, utoipa :: ToSchema,
 )]
-#[schema(as=DbUser::Model)]
 #[sea_orm(table_name = "user")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
@@ -19,17 +18,17 @@ pub struct Model {
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
-    #[sea_orm(has_many = "super::role_assignment::Entity")]
-    RoleAssignment,
+    #[sea_orm(has_many = "super::event_role_assignment::Entity")]
+    EventRoleAssignment,
     #[sea_orm(has_many = "super::sidequest_attempt::Entity")]
     SidequestAttempt,
-    #[sea_orm(has_many = "super::team_member::Entity")]
-    TeamMember,
+    #[sea_orm(has_many = "super::team_role_assignment::Entity")]
+    TeamRoleAssignment,
 }
 
-impl Related<super::role_assignment::Entity> for Entity {
+impl Related<super::event_role_assignment::Entity> for Entity {
     fn to() -> RelationDef {
-        Relation::RoleAssignment.def()
+        Relation::EventRoleAssignment.def()
     }
 }
 
@@ -39,18 +38,9 @@ impl Related<super::sidequest_attempt::Entity> for Entity {
     }
 }
 
-impl Related<super::team_member::Entity> for Entity {
+impl Related<super::team_role_assignment::Entity> for Entity {
     fn to() -> RelationDef {
-        Relation::TeamMember.def()
-    }
-}
-
-impl Related<super::team::Entity> for Entity {
-    fn to() -> RelationDef {
-        super::team_member::Relation::Team.def()
-    }
-    fn via() -> Option<RelationDef> {
-        Some(super::team_member::Relation::User.def().rev())
+        Relation::TeamRoleAssignment.def()
     }
 }
 

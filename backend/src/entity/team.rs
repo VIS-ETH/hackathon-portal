@@ -12,23 +12,40 @@ pub struct Model {
     pub id: Uuid,
     #[sea_orm(column_type = "Text")]
     pub name: String,
+    pub event_id: Uuid,
+    pub index: i32,
+    pub project_id: Option<Uuid>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
-    #[sea_orm(has_many = "super::project_assignment::Entity")]
-    ProjectAssignment,
+    #[sea_orm(
+        belongs_to = "super::event::Entity",
+        from = "Column::EventId",
+        to = "super::event::Column::Id",
+        on_update = "Cascade",
+        on_delete = "Restrict"
+    )]
+    Event,
+    #[sea_orm(
+        belongs_to = "super::project::Entity",
+        from = "Column::ProjectId",
+        to = "super::project::Column::Id",
+        on_update = "Cascade",
+        on_delete = "SetNull"
+    )]
+    Project,
     #[sea_orm(has_many = "super::project_preference::Entity")]
     ProjectPreference,
-    #[sea_orm(has_many = "super::team_member::Entity")]
-    TeamMember,
-    #[sea_orm(has_many = "super::team_score::Entity")]
-    TeamScore,
+    #[sea_orm(has_many = "super::sidequest_score::Entity")]
+    SidequestScore,
+    #[sea_orm(has_many = "super::team_role_assignment::Entity")]
+    TeamRoleAssignment,
 }
 
-impl Related<super::project_assignment::Entity> for Entity {
+impl Related<super::event::Entity> for Entity {
     fn to() -> RelationDef {
-        Relation::ProjectAssignment.def()
+        Relation::Event.def()
     }
 }
 
@@ -38,24 +55,24 @@ impl Related<super::project_preference::Entity> for Entity {
     }
 }
 
-impl Related<super::team_member::Entity> for Entity {
+impl Related<super::sidequest_score::Entity> for Entity {
     fn to() -> RelationDef {
-        Relation::TeamMember.def()
+        Relation::SidequestScore.def()
     }
 }
 
-impl Related<super::team_score::Entity> for Entity {
+impl Related<super::team_role_assignment::Entity> for Entity {
     fn to() -> RelationDef {
-        Relation::TeamScore.def()
+        Relation::TeamRoleAssignment.def()
     }
 }
 
-impl Related<super::user::Entity> for Entity {
+impl Related<super::project::Entity> for Entity {
     fn to() -> RelationDef {
-        super::team_member::Relation::User.def()
+        super::project_preference::Relation::Project.def()
     }
     fn via() -> Option<RelationDef> {
-        Some(super::team_member::Relation::Team.def().rev())
+        Some(super::project_preference::Relation::Team.def().rev())
     }
 }
 

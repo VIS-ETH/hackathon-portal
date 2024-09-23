@@ -14,13 +14,28 @@ pub struct Model {
     pub name: String,
     #[sea_orm(column_type = "Text")]
     pub description: String,
-    pub accending: bool,
+    pub event_id: Uuid,
+    pub is_higher_result_better: bool,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
+    #[sea_orm(
+        belongs_to = "super::event::Entity",
+        from = "Column::EventId",
+        to = "super::event::Column::Id",
+        on_update = "Cascade",
+        on_delete = "Restrict"
+    )]
+    Event,
     #[sea_orm(has_many = "super::sidequest_attempt::Entity")]
     SidequestAttempt,
+}
+
+impl Related<super::event::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::Event.def()
+    }
 }
 
 impl Related<super::sidequest_attempt::Entity> for Entity {

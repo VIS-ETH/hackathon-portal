@@ -14,16 +14,56 @@ use serde::{Deserialize, Serialize};
     Deserialize,
     utoipa :: ToSchema,
 )]
-#[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "role")]
-pub enum Role {
+#[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "event_phase")]
+pub enum EventPhase {
+    #[sea_orm(string_value = "GRADING")]
+    Grading,
+    #[sea_orm(string_value = "HACKING")]
+    Hacking,
+    #[sea_orm(string_value = "READONLY")]
+    Readonly,
+    #[sea_orm(string_value = "REGISTRATION")]
+    Registration,
+}
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Eq,
+    EnumIter,
+    DeriveActiveEnum,
+    Serialize,
+    Deserialize,
+    utoipa :: ToSchema,
+)]
+#[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "event_role")]
+pub enum EventRole {
     #[sea_orm(string_value = "ADMIN")]
     Admin,
-    #[sea_orm(string_value = "GRADER")]
-    Grader,
-    #[sea_orm(string_value = "HELPER")]
-    Helper,
     #[sea_orm(string_value = "MENTOR")]
     Mentor,
     #[sea_orm(string_value = "PARTICIPANT")]
     Participant,
+    #[sea_orm(string_value = "SIDEQUEST_MASTER")]
+    SidequestMaster,
+    #[sea_orm(string_value = "STAKEHOLDER")]
+    Stakeholder,
+}
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Eq,
+    EnumIter,
+    DeriveActiveEnum,
+    Serialize,
+    Deserialize,
+    utoipa :: ToSchema,
+)]
+#[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "team_role")]
+pub enum TeamRole {
+    #[sea_orm(string_value = "MEMBER")]
+    Member,
+    #[sea_orm(string_value = "MENTOR")]
+    Mentor,
 }

@@ -14,25 +14,43 @@ pub struct Model {
     pub title: String,
     #[sea_orm(column_type = "Text")]
     pub content: String,
+    pub event_id: Uuid,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
-    #[sea_orm(has_many = "super::project_assignment::Entity")]
-    ProjectAssignment,
+    #[sea_orm(
+        belongs_to = "super::event::Entity",
+        from = "Column::EventId",
+        to = "super::event::Column::Id",
+        on_update = "Cascade",
+        on_delete = "Restrict"
+    )]
+    Event,
     #[sea_orm(has_many = "super::project_preference::Entity")]
     ProjectPreference,
+    #[sea_orm(has_many = "super::team::Entity")]
+    Team,
 }
 
-impl Related<super::project_assignment::Entity> for Entity {
+impl Related<super::event::Entity> for Entity {
     fn to() -> RelationDef {
-        Relation::ProjectAssignment.def()
+        Relation::Event.def()
     }
 }
 
 impl Related<super::project_preference::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::ProjectPreference.def()
+    }
+}
+
+impl Related<super::team::Entity> for Entity {
+    fn to() -> RelationDef {
+        super::project_preference::Relation::Team.def()
+    }
+    fn via() -> Option<RelationDef> {
+        Some(super::project_preference::Relation::Project.def().rev())
     }
 }
 

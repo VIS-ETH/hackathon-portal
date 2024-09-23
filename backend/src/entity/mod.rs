@@ -2,15 +2,15 @@
 
 pub mod prelude;
 
+pub mod appointment;
+pub mod event;
+pub mod event_role_assignment;
 pub mod project;
-pub mod project_assignment;
 pub mod project_preference;
-pub mod role_assignment;
 pub mod sea_orm_active_enums;
 pub mod sidequest;
 pub mod sidequest_attempt;
+pub mod sidequest_score;
 pub mod team;
-pub mod team_member;
-pub mod team_score;
-pub mod timeline_event;
+pub mod team_role_assignment;
 pub mod user;
