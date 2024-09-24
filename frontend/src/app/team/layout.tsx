@@ -1,7 +1,6 @@
 "use client";
-import { Footer } from "@/componentes/layout/footer";
-import Navbar from "@/componentes/layout/navbar";
 import { PropsWithChildren } from "react";
+import AppLayout from "@/componentes/layout/app-layout";
 
 const tabs = [
   { label: 'Home', path: '/team' },
@@ -12,15 +11,19 @@ const tabs = [
 ];
 
 
-export default function Layout({ children }: Readonly<PropsWithChildren>) {
+const user = {
+  name: 'Andri Florin',
+  email: 'florina@vis.ethz.ch',
+  image: 'https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-5.png',
+};
 
+export default function Layout({ children }: Readonly<PropsWithChildren>) {
 
   return (
     <>
-      <Navbar items={tabs} section="TEAM">
+      <AppLayout headerItems={tabs} section="TEAM" user={user}>
         {children}
-        <Footer />
-      </Navbar>
+      </AppLayout>
     </>
   );
 }
