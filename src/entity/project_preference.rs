@@ -6,12 +6,13 @@ use serde::{Deserialize, Serialize};
 #[derive(
     Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize, utoipa :: ToSchema,
 )]
-#[sea_orm(table_name = "project_assignment")]
+#[sea_orm(table_name = "project_preference")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub team_id: Uuid,
     #[sea_orm(primary_key, auto_increment = false)]
     pub project_id: Uuid,
+    pub score: i32,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

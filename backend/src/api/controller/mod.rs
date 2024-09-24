@@ -1,3 +1,4 @@
+pub mod event;
 pub mod test;
 pub mod user;
 use crate::appState::AppState;
@@ -7,4 +8,5 @@ pub fn get_router(state: &AppState) -> Router {
     Router::new()
         .nest("/test", test::get_router(state))
         .nest("/user", user::get_router(state))
+        .nest("/event", event::get_router(state))
 }

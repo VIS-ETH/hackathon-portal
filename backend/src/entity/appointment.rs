@@ -6,30 +6,36 @@ use serde::{Deserialize, Serialize};
 #[derive(
     Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize, utoipa :: ToSchema,
 )]
-#[sea_orm(table_name = "team_score")]
+#[sea_orm(table_name = "appointment")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: Uuid,
-    pub team_id: Uuid,
-    pub score: i32,
-    pub valid_at: DateTime,
+    pub event_id: Uuid,
+    #[sea_orm(column_type = "Text")]
+    pub title: String,
+    #[sea_orm(column_type = "Text")]
+    pub description: String,
+    #[sea_orm(column_type = "Text")]
+    pub content: String,
+    pub start: DateTime,
+    pub end: Option<DateTime>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
     #[sea_orm(
-        belongs_to = "super::team::Entity",
-        from = "Column::TeamId",
-        to = "super::team::Column::Id",
+        belongs_to = "super::event::Entity",
+        from = "Column::EventId",
+        to = "super::event::Column::Id",
         on_update = "Cascade",
         on_delete = "Restrict"
     )]
-    Team,
+    Event,
 }
 
-impl Related<super::team::Entity> for Entity {
+impl Related<super::event::Entity> for Entity {
     fn to() -> RelationDef {
-        Relation::Team.def()
+        Relation::Event.def()
     }
 }
 

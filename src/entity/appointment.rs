@@ -6,10 +6,11 @@ use serde::{Deserialize, Serialize};
 #[derive(
     Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize, utoipa :: ToSchema,
 )]
-#[sea_orm(table_name = "timeline_event")]
+#[sea_orm(table_name = "appointment")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: Uuid,
+    pub event_id: Uuid,
     #[sea_orm(column_type = "Text")]
     pub title: String,
     #[sea_orm(column_type = "Text")]
@@ -17,10 +18,25 @@ pub struct Model {
     #[sea_orm(column_type = "Text")]
     pub content: String,
     pub start: DateTime,
-    pub end: DateTime,
+    pub end: Option<DateTime>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {}
+pub enum Relation {
+    #[sea_orm(
+        belongs_to = "super::event::Entity",
+        from = "Column::EventId",
+        to = "super::event::Column::Id",
+        on_update = "Cascade",
+        on_delete = "Restrict"
+    )]
+    Event,
+}
+
+impl Related<super::event::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::Event.def()
+    }
+}
 
 impl ActiveModelBehavior for ActiveModel {}
