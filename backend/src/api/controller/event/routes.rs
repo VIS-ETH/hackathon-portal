@@ -73,7 +73,6 @@ pub async fn post_event(
     Ok(Json(result))
 }
 
-
 #[utoipa::path(
     put,
     path = "/api/event",

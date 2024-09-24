@@ -1,4 +1,4 @@
-use sea_orm::prelude::DateTime;
+use sea_orm::{prelude::DateTime, IntoActiveModel};
 use serde::{Deserialize, Serialize};
 
 use crate::entity::sea_orm_active_enums::EventPhase;

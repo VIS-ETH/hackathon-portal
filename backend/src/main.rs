@@ -38,6 +38,7 @@ async fn main() {
             Method::PUT,
             Method::DELETE,
             Method::OPTIONS,
+            Method::HEAD,
         ])
         .allow_headers(Any)
         .allow_origin(origins);
