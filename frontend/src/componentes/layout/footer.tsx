@@ -5,54 +5,31 @@ import {
   AppLayoutSection,
 } from "@/componentes/layout/app-layout";
 
-import { ActionIcon, Container, Group, rem } from "@mantine/core";
-
-import {
-  IconBrandInstagram,
-  IconBrandTwitter,
-  IconBrandYoutube,
-} from "@tabler/icons-react";
+import { Container, Group, Image } from "@mantine/core";
 import Link from "next/link";
+
 
 type NavbarProps = {
   footerItems: AppLayoutLink[];
   section: AppLayoutSection;
 };
 
-export default function Footer({ footerItems }: Readonly<NavbarProps>) {
+export default function Footer({  }: Readonly<NavbarProps>) {
   return (
     <div className={classes.footer}>
       <Container>
-        <div className={classes.inner}>
-          <Group className={classes.links}>
-            {footerItems.map((link) => (
-              <Link key={link.label} href={link.path}>
-                {link.label}
-              </Link>
-            ))}
-          </Group>
+        <Group justify="space-between" my="md">
+          <Link href="https://inf.ethz.ch">
+            <Image src="/assets/logos/dinfk/ethz_dinfk.svg" h={62} w="auto" alt="viscon logo" />
+          </Link>
+          <Link href="https://vis.ethz.ch">
+            <Image src="/assets/logos/vis/vis_logo.svg" h={52} w="auto" alt="viscon logo" />
+          </Link>
+          <Link href="https://vseth.ethz.ch">
+          <Image src="/assets/logos/vseth/vseth_Logo_bylines_Fachverein.png" h={62} w="auto" alt="viscon logo" />
+          </Link>
+        </Group>
 
-          <Group gap="xs" justify="flex-end" wrap="nowrap">
-            <ActionIcon size="lg" variant="default" radius="xl">
-              <IconBrandTwitter
-                style={{ width: rem(18), height: rem(18) }}
-                stroke={1.5}
-              />
-            </ActionIcon>
-            <ActionIcon size="lg" variant="default" radius="xl">
-              <IconBrandYoutube
-                style={{ width: rem(18), height: rem(18) }}
-                stroke={1.5}
-              />
-            </ActionIcon>
-            <ActionIcon size="lg" variant="default" radius="xl">
-              <IconBrandInstagram
-                style={{ width: rem(18), height: rem(18) }}
-                stroke={1.5}
-              />
-            </ActionIcon>
-          </Group>
-        </div>
       </Container>
     </div>
   );
