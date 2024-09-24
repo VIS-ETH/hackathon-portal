@@ -23,7 +23,7 @@ import {
   Tabs,
   Text,
   UnstyledButton,
-  rem,
+  rem, Badge
 } from "@mantine/core";
 
 import { useDisclosure } from "@mantine/hooks";
@@ -37,14 +37,20 @@ type NavbarProps = {
   headerItems: AppLayoutLink[];
   section: AppLayoutSection;
   user: AppLayoutUser;
+  baseUrl: string;
 };
 
 export default function Navbar({
-  headerItems,
+  headerItems: headerItemsRaw,
   section,
   user,
+  baseUrl
 }: Readonly<NavbarProps>) {
   const pathname = usePathname();
+
+  const headerItems: AppLayoutLink[] = headerItemsRaw.map((item) => ({...item, path: baseUrl + item.path}));
+
+
   const [drawerOpen, { toggle: toggleDrawer, close: closeDrawer }] =
     useDisclosure(false);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
@@ -63,9 +69,13 @@ export default function Navbar({
           w="auto"
           alt="viscon logo"
         />
-        <Text fw={700} size="lg">
-          HACKATHON {section != "MEMBER" && `[${section}]`}
-        </Text>
+
+        <Group align="center">
+          <Text fw={700} size="lg">
+            HACKATHON
+          </Text>
+          <Badge variant="default" size="md" radius="sm">{section}</Badge>
+        </Group>
       </Group>
     </Link>
   );
@@ -89,7 +99,7 @@ export default function Navbar({
   ));
 
   const sectionClass =
-    section == "MEMBER"
+    section == "PARTICIPANT"
       ? classes.sectionMember
       : section == "MENTOR"
         ? classes.sectionMentor
@@ -153,13 +163,13 @@ export default function Navbar({
                     Logout
                   </Menu.Item>
                   <Menu.Label>DEBUG</Menu.Label>
-                  <Link href={"/member"}>
-                    <Menu.Item>Switch to MEMBER</Menu.Item>
+                  <Link href={baseUrl + "/participant"}>
+                    <Menu.Item>Switch to PARTICIPANT</Menu.Item>
                   </Link>
-                  <Link href={"/mentor"}>
+                  <Link href={baseUrl + "/mentor"}>
                     <Menu.Item>Switch to MENTOR</Menu.Item>
                   </Link>
-                  <Link href={"/team"}>
+                  <Link href={baseUrl + "/team"}>
                     <Menu.Item>Switch to TEAM</Menu.Item>
                   </Link>
                 </Menu.Dropdown>

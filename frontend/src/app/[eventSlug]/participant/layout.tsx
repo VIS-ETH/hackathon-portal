@@ -4,10 +4,10 @@ import AppLayout from "@/componentes/layout/app-layout";
 import { useParams } from "next/navigation";
 
 const tabs = [
-  { label: 'Home', path: '' },
-  { label: 'Time Schedule', path: '/schedule' },
-  { label: 'Documentation', path: '/docs' },
-  { label: 'Sidequests', path: '/sidequests' },];
+  { label: 'Home', path: '/participant' },
+  { label: 'Time Schedule', path: '/participant/schedule' },
+  { label: 'Documentation', path: '/participant/docs' },
+  { label: 'Sidequests', path: '/participant/sidequests' },];
 
 const user = {
   name: 'Andri Florin',
@@ -20,7 +20,7 @@ export default function Layout({ children }: Readonly<PropsWithChildren>) {
 
   return (
     <>
-      <AppLayout headerItems={tabs} section="MEMBER" user={user} pathBaseUrl={`/${slug}/member`}>
+      <AppLayout headerItems={tabs} section="PARTICIPANT" user={user} pathBaseUrl={`/${slug}`}>
         {children}
       </AppLayout>
     </>

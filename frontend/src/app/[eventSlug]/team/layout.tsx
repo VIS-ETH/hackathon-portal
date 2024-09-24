@@ -4,11 +4,11 @@ import AppLayout from "@/componentes/layout/app-layout";
 import { useParams } from "next/navigation";
 
 const tabs = [
-  { label: 'Home', path: '' },
-  { label: 'Time Schedule', path: '/schedule' },
-  { label: 'Teams', path: '/teams' },
-  { label: 'Projects', path: '/projects' },
-  { label: 'Sidequests', path: '/sidequests' },
+  { label: 'Home', path: '/team' },
+  { label: 'Time Schedule', path: '/team/schedule' },
+  { label: 'Teams', path: '/team/teams' },
+  { label: 'Projects', path: '/team/projects' },
+  { label: 'Sidequests', path: '/team/sidequests' },
 ];
 
 
@@ -23,7 +23,7 @@ export default function Layout({ children }: Readonly<PropsWithChildren>) {
 
   return (
     <>
-      <AppLayout headerItems={tabs} section="TEAM" user={user} pathBaseUrl={`/${slug}/team`}>
+      <AppLayout headerItems={tabs} section="TEAM" user={user} pathBaseUrl={`/${slug}`}>
         {children}
       </AppLayout>
     </>
