@@ -1,11 +1,13 @@
 "use client";
 
 
+import Sponsors from "@/componentes/Sponsors";
+
 export default function Page() {
 
   return (
     <>
-      <h1>Hello, world!</h1>
+      <Sponsors/>
     </>
   );
 }
