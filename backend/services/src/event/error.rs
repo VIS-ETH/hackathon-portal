@@ -4,7 +4,9 @@ pub type Result<T> = core::result::Result<T, Error>;
 
 #[derive(Debug, Display, From)]
 pub enum Error {
-    EventNameNotUnique,
+    EventNameNotUnique { name: String },
+
+    EventSlugNotUnique { slug: String },
 }
 
 impl std::error::Error for Error {}

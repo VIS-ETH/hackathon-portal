@@ -28,6 +28,7 @@ model event {
 
   // fields
   name                String      @unique
+  slug                String      @unique
   start               DateTime
   end                 DateTime
   max_team_size       Int
@@ -51,6 +52,7 @@ model team {
 
   // fields
   name  String
+  slug  String
   index Int
 
   // relations
@@ -61,13 +63,17 @@ model team {
   team_role_assignment team_role_assignment[]
   project_preference   project_preference[]
   sidequest_score      sidequest_score[]
+
+  // meta
+  @@unique([event_id, name])
+  @@unique([event_id, slug])
 }
 
 model user {
   id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
 
   // fields
-  auth_id String
+  auth_id String @unique
   name    String
 
   // related models
@@ -108,6 +114,7 @@ model project {
 
   // fields
   title   String
+  slug    String
   content String
 
   // relations
@@ -116,6 +123,10 @@ model project {
   // related models
   team               team[]
   project_preference project_preference[]
+
+  // meta
+  @@unique([event_id, title])
+  @@unique([event_id, slug])
 }
 
 model project_preference {
@@ -138,6 +149,7 @@ model sidequest {
 
   // fields
   name                    String
+  slug                    String
   description             String
   is_higher_result_better Boolean
 
@@ -146,6 +158,10 @@ model sidequest {
 
   // related_models
   sidequest_attempt sidequest_attempt[]
+
+  // meta
+  @@unique([event_id, name])
+  @@unique([event_id, slug])
 }
 
 model sidequest_attempt {

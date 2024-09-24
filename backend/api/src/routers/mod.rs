@@ -6,7 +6,7 @@ use axum::extract::Request;
 use axum::http::{Method, StatusCode};
 use axum::response::IntoResponse;
 use axum::{Extension, Router};
-use services::event::EventService;
+use services::event::{DefaultEventService, EventService};
 use tower_http::cors::{Any, CorsLayer};
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
@@ -44,7 +44,7 @@ pub async fn get_api_router(api_state: ApiState) -> Result<Router> {
     let router = get_router(&api_state);
     // let docs_router = SwaggerUi::new("/api/docs").url("/api/docs/openapi.json", Docs::openapi());
 
-    let event_service = EventService;
+    let event_service = DefaultEventService::new(api_state.db_repo);
 
     let api_router = Router::new()
         .nest("/api", router)

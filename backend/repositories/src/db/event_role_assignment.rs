@@ -4,9 +4,7 @@ use super::sea_orm_active_enums::EventRole;
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
-#[derive(
-    Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize, utoipa :: ToSchema,
-)]
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
 #[sea_orm(table_name = "event_role_assignment")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
@@ -20,6 +18,14 @@ pub struct Model {
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
     #[sea_orm(
+        belongs_to = "super::event::Entity",
+        from = "Column::EventId",
+        to = "super::event::Column::Id",
+        on_update = "Cascade",
+        on_delete = "Restrict"
+    )]
+    Event,
+    #[sea_orm(
         belongs_to = "super::user::Entity",
         from = "Column::UserId",
         to = "super::user::Column::Id",
@@ -27,6 +33,12 @@ pub enum Relation {
         on_delete = "Restrict"
     )]
     User,
+}
+
+impl Related<super::event::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::Event.def()
+    }
 }
 
 impl Related<super::user::Entity> for Entity {

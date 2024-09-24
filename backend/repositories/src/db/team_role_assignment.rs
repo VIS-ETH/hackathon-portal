@@ -4,9 +4,7 @@ use super::sea_orm_active_enums::TeamRole;
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
-#[derive(
-    Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize, utoipa :: ToSchema,
-)]
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
 #[sea_orm(table_name = "team_role_assignment")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]

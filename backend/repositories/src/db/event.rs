@@ -4,15 +4,15 @@ use super::sea_orm_active_enums::EventPhase;
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
-#[derive(
-    Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize, utoipa :: ToSchema,
-)]
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
 #[sea_orm(table_name = "event")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: Uuid,
     #[sea_orm(column_type = "Text")]
     pub name: String,
+    #[sea_orm(column_type = "Text")]
+    pub slug: String,
     pub start: DateTime,
     pub end: DateTime,
     pub max_team_size: i32,
@@ -27,6 +27,8 @@ pub struct Model {
 pub enum Relation {
     #[sea_orm(has_many = "super::appointment::Entity")]
     Appointment,
+    #[sea_orm(has_many = "super::event_role_assignment::Entity")]
+    EventRoleAssignment,
     #[sea_orm(has_many = "super::project::Entity")]
     Project,
     #[sea_orm(has_many = "super::sidequest::Entity")]
@@ -38,6 +40,12 @@ pub enum Relation {
 impl Related<super::appointment::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Appointment.def()
+    }
+}
+
+impl Related<super::event_role_assignment::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::EventRoleAssignment.def()
     }
 }
 
