@@ -1,15 +1,13 @@
 "use client";
 import { PropsWithChildren } from "react";
 import AppLayout from "@/componentes/layout/app-layout";
+import { useParams } from "next/navigation";
 
 const tabs = [
-  { label: 'Home', path: '/team' },
-  { label: 'Time Schedule', path: '/team/schedule' },
-  { label: 'Teams', path: '/team/teams' },
-  { label: 'Projects', path: '/team/projects' },
-  { label: 'Sidequests', path: '/team/sidequests' },
-];
-
+  { label: 'Home', path: '' },
+  { label: 'Time Schedule', path: '/schedule' },
+  { label: 'Documentation', path: '/docs' },
+  { label: 'Sidequests', path: '/sidequests' },];
 
 const user = {
   name: 'Andri Florin',
@@ -18,10 +16,11 @@ const user = {
 };
 
 export default function Layout({ children }: Readonly<PropsWithChildren>) {
+  const {eventSlug: slug} = useParams<{eventSlug: string}>();
 
   return (
     <>
-      <AppLayout headerItems={tabs} section="TEAM" user={user}>
+      <AppLayout headerItems={tabs} section="MEMBER" user={user} pathBaseUrl={`/${slug}/member`}>
         {children}
       </AppLayout>
     </>
