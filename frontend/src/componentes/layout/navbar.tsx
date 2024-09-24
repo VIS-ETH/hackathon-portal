@@ -1,69 +1,109 @@
 "use client";
-import { Burger, Group, Avatar, Container, Menu, rem, Tabs, UnstyledButton, Text, Image, Drawer, Button, Divider, ScrollArea } from "@mantine/core";
-import cx from 'clsx';
+
+import classes from "./navbar.module.css";
+
+import {
+  AppLayoutLink,
+  AppLayoutSection,
+  AppLayoutUser,
+} from "@/componentes/layout/app-layout";
+
+import { useEffect, useState } from "react";
+
+import {
+  Avatar,
+  Burger,
+  Container,
+  Divider,
+  Drawer,
+  Group,
+  Image,
+  Menu,
+  ScrollArea,
+  Tabs,
+  Text,
+  UnstyledButton,
+  rem, Badge
+} from "@mantine/core";
+
 import { useDisclosure } from "@mantine/hooks";
-import { PropsWithChildren, useEffect, useState } from "react";
-import { IconLogout, IconChevronDown } from '@tabler/icons-react';
-import classes from './navbar.module.css';
+
+import { IconChevronDown, IconLogout } from "@tabler/icons-react";
+import cx from "clsx";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const user = {
-  name: 'Andri Florin',
-  email: 'florina@vis.ethz.ch',
-  image: 'https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-5.png',
+type NavbarProps = {
+  headerItems: AppLayoutLink[];
+  section: AppLayoutSection;
+  user: AppLayoutUser;
+  baseUrl: string;
 };
 
-interface Item {
-  label: string;
-  path: string;
-}
-
-
-type Props = PropsWithChildren & {
-  items: Item[]
-  section: "TEAM" | "MENTOR" | "MEMBER"
-}
-
-
-
-export default function Navbar({ children, items, section }: Readonly<Props>) {
+export default function Navbar({
+  headerItems: headerItemsRaw,
+  section,
+  user,
+  baseUrl
+}: Readonly<NavbarProps>) {
   const pathname = usePathname();
-  const [drawerOpen, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false);
+
+  const headerItems: AppLayoutLink[] = headerItemsRaw.map((item) => ({...item, path: baseUrl + item.path}));
+
+
+  const [drawerOpen, { toggle: toggleDrawer, close: closeDrawer }] =
+    useDisclosure(false);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<string>(items[0].path);
+  const [activeTab, setActiveTab] = useState<string>(headerItems[0].path);
 
   useEffect(() => {
-    setActiveTab(pathname)
+    setActiveTab(pathname);
   }, [pathname]);
 
   const NavTitle = (
-    <Link href={items[0].path}>
+    <Link href={headerItems[0].path}>
       <Group>
-        <Image src="/assets/viscon-logo.svg" h={28} w="auto" alt="viscon logo" />
-        <Text fw={700} size="lg">HACKATHON {section != "MEMBER" && `[${section}]`}</Text>
+        <Image
+          src="/assets/viscon-logo.svg"
+          h={28}
+          w="auto"
+          alt="viscon logo"
+        />
+
+        <Group align="center">
+          <Text fw={700} size="lg">
+            HACKATHON
+          </Text>
+          <Badge variant="default" size="md" radius="sm">{section}</Badge>
+        </Group>
       </Group>
     </Link>
-  )
+  );
 
-  const mobileItems = items.map(t => (
+  const mobileItems = headerItems.map((t) => (
     <Link
-      className={cx(classes.mobileLink, { [classes.mobileLinkActive]: t.path == pathname })}
+      className={cx(classes.mobileLink, {
+        [classes.mobileLinkActive]: t.path == pathname,
+      })}
       key={t.path}
       href={t.path}
-    >{t.label}</Link>
-  ))
-
-
-  const desktopItems = items.map((t) => (
-    <Link href={t.path} key={t.path}>
-      <Tabs.Tab value={t.path} >
-        {t.label}
-      </Tabs.Tab>
+    >
+      {t.label}
     </Link>
   ));
 
-  const sectionClass = section == "MEMBER" ? classes.sectionMember : (section == "MENTOR" ? classes.sectionMentor : classes.sectionTeam);
+  const desktopItems = headerItems.map((t) => (
+    <Link href={t.path} key={t.path}>
+      <Tabs.Tab value={t.path}>{t.label}</Tabs.Tab>
+    </Link>
+  ));
+
+  const sectionClass =
+    section == "PARTICIPANT"
+      ? classes.sectionMember
+      : section == "MENTOR"
+        ? classes.sectionMentor
+        : classes.sectionTeam;
 
   return (
     <>
@@ -72,43 +112,66 @@ export default function Navbar({ children, items, section }: Readonly<Props>) {
           <Group justify="space-between">
             {NavTitle}
 
-            <Burger opened={drawerOpen} onClick={toggleDrawer} hiddenFrom="sm" size="sm" />
+            <Burger
+              opened={drawerOpen}
+              onClick={toggleDrawer}
+              hiddenFrom="sm"
+              size="sm"
+            />
 
             <Group visibleFrom="sm">
               <Menu
                 width={260}
                 position="bottom-end"
-                transitionProps={{ transition: 'pop-top-right' }}
+                transitionProps={{ transition: "pop-top-right" }}
                 onClose={() => setAccountMenuOpen(false)}
                 onOpen={() => setAccountMenuOpen(true)}
                 withinPortal
               >
                 <Menu.Target>
                   <UnstyledButton
-                    className={cx(classes.user, { [classes.userActive]: accountMenuOpen })}
+                    className={cx(classes.user, {
+                      [classes.userActive]: accountMenuOpen,
+                    })}
                   >
                     <Group gap={7}>
-                      <Avatar src={user.image} alt={user.name} radius="xl" size={20} />
+                      <Avatar
+                        src={user.image}
+                        alt={user.name}
+                        radius="xl"
+                        size={20}
+                      />
                       <Text fw={500} size="sm" lh={1} mr={3}>
                         {user.name}
                       </Text>
-                      <IconChevronDown style={{ width: rem(12), height: rem(12) }} stroke={1.5} />
+                      <IconChevronDown
+                        style={{ width: rem(12), height: rem(12) }}
+                        stroke={1.5}
+                      />
                     </Group>
                   </UnstyledButton>
                 </Menu.Target>
                 <Menu.Dropdown>
                   <Menu.Item
                     leftSection={
-                      <IconLogout style={{ width: rem(16), height: rem(16) }} stroke={1.5} />
+                      <IconLogout
+                        style={{ width: rem(16), height: rem(16) }}
+                        stroke={1.5}
+                      />
                     }
                   >
                     Logout
                   </Menu.Item>
                   <Menu.Label>DEBUG</Menu.Label>
-                  <Link href={"/member"}><Menu.Item>Switch to MEMBER</Menu.Item></Link>
-                  <Link href={"/mentor"}><Menu.Item>Switch to MENTOR</Menu.Item></Link>
-                  <Link href={"/team"}><Menu.Item>Switch to TEAM</Menu.Item></Link>
-
+                  <Link href={baseUrl + "/participant"}>
+                    <Menu.Item>Switch to PARTICIPANT</Menu.Item>
+                  </Link>
+                  <Link href={baseUrl + "/mentor"}>
+                    <Menu.Item>Switch to MENTOR</Menu.Item>
+                  </Link>
+                  <Link href={baseUrl + "/team"}>
+                    <Menu.Item>Switch to TEAM</Menu.Item>
+                  </Link>
                 </Menu.Dropdown>
               </Menu>
             </Group>
@@ -151,9 +214,6 @@ export default function Navbar({ children, items, section }: Readonly<Props>) {
           </Tabs>
         </Container>
       </div>
-      <Container>
-        {children}
-      </Container>
     </>
   );
 }

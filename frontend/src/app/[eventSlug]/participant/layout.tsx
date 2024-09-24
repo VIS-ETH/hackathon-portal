@@ -1,0 +1,28 @@
+"use client";
+import { PropsWithChildren } from "react";
+import AppLayout from "@/componentes/layout/app-layout";
+import { useParams } from "next/navigation";
+
+const tabs = [
+  { label: 'Home', path: '/participant' },
+  { label: 'Time Schedule', path: '/participant/schedule' },
+  { label: 'Documentation', path: '/participant/docs' },
+  { label: 'Sidequests', path: '/participant/sidequests' },];
+
+const user = {
+  name: 'Andri Florin',
+  email: 'florina@vis.ethz.ch',
+  image: 'https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-5.png',
+};
+
+export default function Layout({ children }: Readonly<PropsWithChildren>) {
+  const {eventSlug: slug} = useParams<{eventSlug: string}>();
+
+  return (
+    <>
+      <AppLayout headerItems={tabs} section="PARTICIPANT" user={user} pathBaseUrl={`/${slug}`}>
+        {children}
+      </AppLayout>
+    </>
+  );
+}

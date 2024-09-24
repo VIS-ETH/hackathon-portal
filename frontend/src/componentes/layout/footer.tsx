@@ -1,43 +1,36 @@
-import { Group, ActionIcon, rem } from '@mantine/core';
-import { IconBrandTwitter, IconBrandYoutube, IconBrandInstagram } from '@tabler/icons-react';
-import classes from './footer.module.css';
-import Link from 'next/link';
+import classes from "./footer.module.css";
 
-const links = [
-  { link: 'https://viscon.ethz.ch', label: 'VISCON' },
-  { link: 'https://vis.ethz.ch', label: 'VIS' },
-  { link: 'https://vseth.ethz.ch', label: 'VSETH' },
-];
+import {
+  AppLayoutLink,
+  AppLayoutSection,
+} from "@/componentes/layout/app-layout";
 
-export function Footer() {
-  const items = links.map((link) => (
-    <Link
-      key={link.label}
-      href={link.link}
-    >
-      {link.label}
-    </Link>
-  ));
+import { Container, Group, Image } from "@mantine/core";
+import Link from "next/link";
 
+
+type NavbarProps = {
+  footerItems: AppLayoutLink[];
+  section: AppLayoutSection;
+};
+
+export default function Footer({  }: Readonly<NavbarProps>) {
   return (
     <div className={classes.footer}>
-      <div className={classes.inner}>
-
-
-        <Group className={classes.links}>{items}</Group>
-
-        <Group gap="xs" justify="flex-end" wrap="nowrap">
-          <ActionIcon size="lg" variant="default" radius="xl">
-            <IconBrandTwitter style={{ width: rem(18), height: rem(18) }} stroke={1.5} />
-          </ActionIcon>
-          <ActionIcon size="lg" variant="default" radius="xl">
-            <IconBrandYoutube style={{ width: rem(18), height: rem(18) }} stroke={1.5} />
-          </ActionIcon>
-          <ActionIcon size="lg" variant="default" radius="xl">
-            <IconBrandInstagram style={{ width: rem(18), height: rem(18) }} stroke={1.5} />
-          </ActionIcon>
+      <Container>
+        <Group justify="space-between" my="md">
+          <Link href="https://inf.ethz.ch">
+            <Image src="/assets/logos/dinfk/ethz_dinfk.svg" h={62} w="auto" alt="viscon logo" />
+          </Link>
+          <Link href="https://vis.ethz.ch">
+            <Image src="/assets/logos/vis/vis_logo.svg" h={52} w="auto" alt="viscon logo" />
+          </Link>
+          <Link href="https://vseth.ethz.ch">
+          <Image src="/assets/logos/vseth/vseth_Logo_bylines_Fachverein.png" h={62} w="auto" alt="viscon logo" />
+          </Link>
         </Group>
-      </div>
+
+      </Container>
     </div>
   );
 }
