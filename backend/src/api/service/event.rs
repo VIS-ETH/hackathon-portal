@@ -36,6 +36,9 @@ pub async fn add_event(
         end: Set(event.end),
         max_team_size: Set(event.max_team_size),
         kdf_secret: Set(event.kdf_secret),
+        is_feedback_visible : Set(event.is_feedback_visible),
+        is_hidden : Set(event.is_hidden),
+        phase : Set(event.phase),
         ..Default::default()
     };
 

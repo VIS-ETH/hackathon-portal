@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::entity::sea_orm_active_enums::EventPhase;
 
-#[derive(Clone, Deserialize, Serialize, utoipa :: ToSchema)]
+#[derive(Clone, Deserialize, Serialize, utoipa :: ToSchema, Debug)]
 pub struct CreateEvent {
     pub name: String,
     pub start: DateTime,

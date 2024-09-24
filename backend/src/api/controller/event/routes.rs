@@ -67,6 +67,7 @@ pub async fn post_event(
     Json(event): Json<CreateEvent>,
 ) -> BackendResult<Json<DbEvent::Model>> {
     let trx: sea_orm::DatabaseTransaction = state.db.begin().await?;
+    println!("{:?}", event);
     let result = ServiceEvent::add_event(&trx, event).await?;
     let _ = trx.commit().await?;
     Ok(Json(result))
