@@ -1,15 +1,15 @@
+mod docs;
 mod events;
 
 use crate::api_state::ApiState;
+use crate::routers::docs::get_swagger;
 use crate::Result;
 use axum::extract::Request;
 use axum::http::{Method, StatusCode};
 use axum::response::IntoResponse;
-use axum::{Extension, Router};
-use services::event::{DefaultEventService, EventService};
+use axum::Router;
 use tower_http::cors::{Any, CorsLayer};
 use utoipa::OpenApi;
-use utoipa_swagger_ui::SwaggerUi;
 
 async fn handler_404(request: Request) -> impl IntoResponse {
     (
@@ -42,15 +42,12 @@ pub async fn get_api_router(api_state: ApiState) -> Result<Router> {
         .allow_credentials(false);
 
     let router = get_router(&api_state);
-    // let docs_router = SwaggerUi::new("/api/docs").url("/api/docs/openapi.json", Docs::openapi());
-
-    let event_service = DefaultEventService::new(api_state.db_repo);
+    let swagger = get_swagger();
 
     let api_router = Router::new()
         .nest("/api", router)
-        // .merge(docs_router)
+        .merge(swagger)
         .fallback(handler_404)
-        .layer(Extension(event_service))
         .layer(cors);
 
     Ok(api_router)

@@ -19,6 +19,12 @@ pub enum Error {
 
     #[from]
     InvalidHeaderValue(InvalidHeaderValue),
+
+    #[from]
+    TracingSetGlobalDefault(tracing::subscriber::SetGlobalDefaultError),
+
+    #[from]
+    TracingFilterParse(tracing_subscriber::filter::ParseError),
 }
 
 impl std::error::Error for Error {}

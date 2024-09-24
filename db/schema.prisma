@@ -113,7 +113,7 @@ model project {
   event_id String @db.Uuid
 
   // fields
-  title   String
+  name    String
   slug    String
   content String
 
@@ -125,7 +125,7 @@ model project {
   project_preference project_preference[]
 
   // meta
-  @@unique([event_id, title])
+  @@unique([event_id, name])
   @@unique([event_id, slug])
 }
 

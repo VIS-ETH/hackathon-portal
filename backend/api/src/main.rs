@@ -3,11 +3,13 @@ mod api_config;
 mod api_state;
 mod error;
 mod routers;
+mod utils;
 
 use crate::api_args::ApiArgs;
 use crate::api_config::ApiConfig;
 use crate::api_state::ApiState;
 use crate::routers::get_api_router;
+use crate::utils::setup_logging;
 use clap::Parser;
 pub use error::Result;
 use repositories::DbRepository;
@@ -19,6 +21,8 @@ use tracing::info;
 async fn main() -> Result<()> {
     let args = ApiArgs::parse();
     let config = ApiConfig::parse(&args.config)?;
+
+    setup_logging(args.verbose)?;
 
     let api_state = ApiState::from_config(&config).await?;
 
