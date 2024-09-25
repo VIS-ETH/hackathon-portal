@@ -1,5 +1,4 @@
 use crate::api_state::ApiState;
-use crate::Result;
 use axum::extract::State;
 use axum::routing::{get, patch, post};
 use axum::{Extension, Json, Router};

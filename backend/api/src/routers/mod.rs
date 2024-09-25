@@ -2,15 +2,15 @@ mod docs;
 mod events;
 
 use crate::api_state::ApiState;
+use crate::mw::{mw_require_auth, mw_resolve_ctx};
 use crate::routers::docs::get_swagger;
-use crate::Result;
 use axum::extract::Request;
 use axum::http::{Method, StatusCode};
 use axum::response::IntoResponse;
 use axum::{middleware, Router};
 use tower_http::cors::{Any, CorsLayer};
 use utoipa::OpenApi;
-use crate::mw::{mw_require_auth, mw_resolve_ctx};
+use crate::ApiResult;
 
 async fn handler_404(request: Request) -> impl IntoResponse {
     (
@@ -23,7 +23,7 @@ pub fn get_router(state: &ApiState) -> Router {
     Router::new().nest("/events", events::get_router(state))
 }
 
-pub async fn get_api_router(api_state: ApiState) -> Result<Router> {
+pub async fn get_api_router(api_state: ApiState) -> ApiResult<Router> {
     let origins = ["http://localhost:3000".parse()?];
 
     let cors = CorsLayer::new()
@@ -44,8 +44,7 @@ pub async fn get_api_router(api_state: ApiState) -> Result<Router> {
 
     let router = get_router(&api_state)
         .route_layer(middleware::from_fn(mw_require_auth))
-        .layer(middleware::from_fn_with_state(api_state, mw_resolve_ctx))
-        ;
+        .layer(middleware::from_fn_with_state(api_state, mw_resolve_ctx));
 
     let swagger = get_swagger();
 

@@ -1,8 +1,8 @@
-use crate::Result;
 use config::{Config, Environment};
 use serde::Deserialize;
 use std::net::IpAddr;
 use std::path::Path;
+use crate::error::ApiResult;
 
 #[derive(Debug, Deserialize)]
 pub struct ServerConfig {
@@ -17,7 +17,7 @@ pub struct ApiConfig {
 }
 
 impl ApiConfig {
-    pub fn parse(path: &Path) -> Result<Self> {
+    pub fn parse(path: &Path) -> ApiResult<Self> {
         let s = Config::builder()
             .add_source(config::File::with_name(path.to_string_lossy().as_ref()).required(false))
             .add_source(Environment::with_prefix("portal").separator("_"))

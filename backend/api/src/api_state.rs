@@ -1,5 +1,5 @@
 use crate::api_config::ApiConfig;
-use crate::Result;
+use crate::ApiResult;
 use repositories::DbRepository;
 use services::event::EventService;
 use std::sync::Arc;
@@ -17,11 +17,11 @@ impl ApiState {
         }
     }
 
-    pub async fn from_config(config: &ApiConfig) -> Result<Self> {
+    pub async fn from_config(config: &ApiConfig) -> ApiResult<Self> {
         let db_repo = DbRepository::from_url(&config.db).await?;
 
         let event_service = EventService::new(db_repo);
-        
+
         Ok(Self::new(event_service))
     }
 }

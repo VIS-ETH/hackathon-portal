@@ -1,27 +1,33 @@
 mod api_args;
 mod api_config;
 mod api_state;
-mod api_error;
+mod ctx;
 mod error;
+mod mw;
 mod routers;
 mod utils;
-mod mw;
-mod ctx;
 
 use crate::api_args::ApiArgs;
 use crate::api_config::ApiConfig;
 use crate::api_state::ApiState;
 use crate::routers::get_api_router;
 use crate::utils::setup_logging;
+use axum::http::StatusCode;
 use clap::Parser;
-pub use error::Result;
+use derive_more::{Display, From};
 use repositories::DbRepository;
+use serde::Serialize;
+use serde_with::{serde_as, DisplayFromStr};
 use std::net::SocketAddr;
+use std::sync::Arc;
 use tokio::net::TcpListener;
 use tracing::info;
 
+pub use error::{ApiError, PublicError, ApiResult};
+
+
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> ApiResult<()> {
     let args = ApiArgs::parse();
     let config = ApiConfig::parse(&args.config)?;
 
@@ -39,6 +45,7 @@ async fn main() -> Result<()> {
     );
 
     axum::serve(listener, api_router).await?;
+
 
     Ok(())
 }

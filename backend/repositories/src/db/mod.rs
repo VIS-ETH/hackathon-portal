@@ -2,7 +2,6 @@
 
 use sea_orm::{Database, DbConn};
 
-pub mod error;
 pub mod prelude;
 
 pub mod appointment;
@@ -18,7 +17,9 @@ pub mod team;
 pub mod team_role_assignment;
 pub mod user;
 
-pub use error::{Error, Result};
+pub use crate::{RepositoryResult};
+
+pub use sea_orm::DbErr;
 
 #[derive(Clone)]
 pub struct DbRepository {
@@ -30,9 +31,9 @@ impl DbRepository {
         Self { conn }
     }
 
-    pub async fn from_url(url: &str) -> Result<Self> {
+    pub async fn from_url(url: &str) -> RepositoryResult<Self> {
         let result = Self {
-            conn: Database::connect(url).await?,
+            conn: Database::connect(url).await.unwrap(),
         };
 
         Ok(result)

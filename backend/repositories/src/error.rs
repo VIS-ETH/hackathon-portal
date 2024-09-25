@@ -1,12 +1,22 @@
-use crate::*;
-use derive_more::{Display, From};
+use std::fmt;
+use std::sync::Arc;
+use derive_more::{From};
+use serde::Serialize;
+use serde_with::{serde_as, DisplayFromStr};
 
-pub type Result<T> = core::result::Result<T, Error>;
+pub type RepositoryResult<T> = Result<T, RepositoryError>;
 
-#[derive(Debug, Display, From)]
-pub enum Error {
+#[serde_as]
+#[derive(Debug, Serialize, From)]
+pub enum RepositoryError {
     #[from]
-    Db(db::Error),
+    SeaORM(#[serde_as(as = "DisplayFromStr")] sea_orm::DbErr),
 }
 
-impl std::error::Error for Error {}
+impl fmt::Display for RepositoryError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
+impl std::error::Error for RepositoryError {}

@@ -1,10 +1,10 @@
-use crate::Result;
+use crate::{ApiResult};
 use std::str::FromStr;
 use tracing_subscriber::filter::Directive;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::EnvFilter;
 
-pub fn setup_logging(verbose: bool) -> Result<()> {
+pub fn setup_logging(verbose: bool) -> ApiResult<()> {
     let (stdout_writer, stdout_guard) = tracing_appender::non_blocking(std::io::stdout());
 
     Box::leak(Box::new(stdout_guard));

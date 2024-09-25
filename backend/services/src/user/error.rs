@@ -4,9 +4,13 @@ pub type Result<T> = core::result::Result<T, Error>;
 
 #[derive(Debug, Display, From)]
 pub enum Error {
-    EventNameNotUnique { name: String },
+    EventNameNotUnique {
+        name: String,
+    },
 
-    EventSlugNotUnique { slug: String },
+    EventSlugNotUnique {
+        slug: String,
+    },
 
     #[from]
     SeaORM(sea_orm::DbErr),

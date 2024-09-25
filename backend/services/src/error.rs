@@ -1,12 +1,19 @@
-use crate::*;
-use derive_more::{Display, From};
+use serde::Serialize;
+use std::fmt;
 
-pub type Result<T> = core::result::Result<T, Error>;
+pub type ServiceResult<T> = Result<T, ServiceError>;
 
-#[derive(Debug, Display, From)]
-pub enum Error {
-    #[from]
-    Event(event::EventError),
+#[derive(Debug, Serialize)]
+pub enum ServiceError {
+    NameNotUnique { name: String },
+
+    SlugNotUnique { slug: String },
 }
 
-impl std::error::Error for Error {}
+impl fmt::Display for ServiceError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
+impl std::error::Error for ServiceError {}

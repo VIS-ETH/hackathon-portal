@@ -1,12 +1,11 @@
+use crate::api_state::ApiState;
 use axum::body::Body;
-use axum::extract::{FromRequestParts, State};
 use axum::extract::Request;
+use axum::extract::{FromRequestParts, State};
 use axum::http::{HeaderValue, StatusCode};
 use axum::middleware::Next;
 use axum::response::Response;
 use services::ctx::Ctx;
-use crate::api_error::{ApiError, ApiResult};
-use crate::api_state::ApiState;
 
 const AUTH_ID_KEY: &str = "X-Authentik-Email";
 
@@ -24,10 +23,7 @@ const AUTH_ID_KEY: &str = "X-Authentik-Email";
 //     }
 // }
 
-pub async fn mw_impersonate(
-    mut req: Request<Body>,
-    next: Next,
-) -> Result<Response, StatusCode> {
+pub async fn mw_impersonate(mut req: Request<Body>, next: Next) -> Result<Response, StatusCode> {
     let target_id = "hannes.eberhard@hotmail.com";
 
     req.headers_mut().insert(
@@ -87,11 +83,7 @@ pub async fn mw_resolve_ctx(
     next.run(req).await
 }
 
-
-async fn my_middleware(
-    request: Request,
-    next: Next,
-) -> Response {
+async fn my_middleware(request: Request, next: Next) -> Response {
     // do something with `request`...
 
     let response = next.run(request).await;

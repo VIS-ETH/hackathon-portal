@@ -3,4 +3,4 @@ pub mod error;
 pub mod event;
 pub mod user;
 
-pub use error::{Error, Result};
+pub use error::{ServiceError, ServiceResult};

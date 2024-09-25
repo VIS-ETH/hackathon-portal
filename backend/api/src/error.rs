@@ -1,41 +1,51 @@
+use std::fmt;
+use std::sync::Arc;
 use axum::http::header::InvalidHeaderValue;
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use derive_more::{Display, From};
-use serde_with::{serde_as, DisplayFromStr};
 use serde::Serialize;
+use serde_with::{serde_as, DisplayFromStr};
 
-pub type Result<T> = core::result::Result<T, Error>;
+pub type ApiResult<T> = Result<T, ApiError>;
 
-#[derive(Debug, Display, From)]
-pub enum Error {
+#[serde_as]
+#[derive(Debug, Serialize, From)]
+pub enum ApiError {
     AuthNoCtxInRequest,
 
     #[from]
-    Config(config::ConfigError),
+    Service(services::ServiceError),
 
     #[from]
-    Repositories(repositories::Error),
+    Repositories(repositories::RepositoryError),
 
     #[from]
-    Db(repositories::db::Error),
+    Config(#[serde_as(as = "DisplayFromStr")] config::ConfigError),
 
     #[from]
-    Io(std::io::Error),
+    Io(#[serde_as(as = "DisplayFromStr")] std::io::Error),
 
     #[from]
-    InvalidHeaderValue(InvalidHeaderValue),
+    InvalidHeaderValue(#[serde_as(as = "DisplayFromStr")] InvalidHeaderValue),
 
     #[from]
-    TracingSetGlobalDefault(tracing::subscriber::SetGlobalDefaultError),
+    TracingSetGlobalDefault(#[serde_as(as = "DisplayFromStr"
+    )] tracing::subscriber::SetGlobalDefaultError),
 
     #[from]
-    TracingFilterParse(tracing_subscriber::filter::ParseError),
+    TracingFilterParse(#[serde_as(as = "DisplayFromStr")] tracing_subscriber::filter::ParseError),
 }
 
-impl std::error::Error for Error {}
+impl fmt::Display for ApiError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
 
-impl IntoResponse for Error {
+impl std::error::Error for ApiError {}
+
+impl IntoResponse for ApiError {
     fn into_response(self) -> Response {
         let mut response = StatusCode::INTERNAL_SERVER_ERROR.into_response();
         // response.extensions_mut().insert(self);
@@ -43,8 +53,7 @@ impl IntoResponse for Error {
     }
 }
 
-
 #[derive(Debug, Display, From)]
-pub enum ClientError {
+pub enum PublicError {
     InternalServerError,
 }

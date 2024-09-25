@@ -18,3 +18,4 @@ sea-orm = { version = "1.0.0", features = [
     "macros",
     "with-json",
 ] }
+serde_with = "3.9.0"
