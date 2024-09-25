@@ -6,6 +6,7 @@ use derive_more::From;
 use serde::Serialize;
 use serde_with::{serde_as, DisplayFromStr, TryFromInto};
 use std::fmt;
+use std::sync::Arc;
 use utoipa::ToSchema;
 
 pub type ApiResult<T> = Result<T, ApiError>;
@@ -55,8 +56,10 @@ impl std::error::Error for ApiError {}
 
 impl IntoResponse for ApiError {
     fn into_response(self) -> Response {
-        let public_error = PublicError::from(self);
-        public_error.into_response()
+        // dummy response, will be replaced by the response mapper
+        let mut response = StatusCode::INTERNAL_SERVER_ERROR.into_response();
+        response.extensions_mut().insert(Arc::new(self));
+        response
     }
 }
 
@@ -101,6 +104,12 @@ impl IntoResponse for PublicError {
 
 impl From<ApiError> for PublicError {
     fn from(value: ApiError) -> Self {
+        PublicError::from(&value)
+    }
+}
+
+impl From<&ApiError> for PublicError {
+    fn from(value: &ApiError) -> Self {
         let (status, message) = match value {
             ApiError::NoAuthIdInRequest => (StatusCode::BAD_REQUEST, "No auth id in request"),
             ApiError::NoCtxInRequest => (StatusCode::BAD_REQUEST, "No context in request"),

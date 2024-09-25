@@ -3,7 +3,8 @@ use crate::{ApiError, PublicError};
 use axum::async_trait;
 use axum::extract::FromRequestParts;
 use axum::http::request::Parts;
-use services::ctx::Ctx as ServicesCtx;
+use services::ctx::{Ctx as ServicesCtx, User};
+use repositories::db::prelude::*;
 
 #[derive(Debug, Clone)]
 pub struct Ctx {
@@ -13,6 +14,10 @@ pub struct Ctx {
 impl Ctx {
     pub fn new(srv_ctx: ServicesCtx) -> Self {
         Self { srv_ctx }
+    }
+
+    pub fn user(&self) -> &User {
+        self.srv_ctx.user()
     }
 }
 
