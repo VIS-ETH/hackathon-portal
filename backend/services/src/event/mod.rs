@@ -5,9 +5,9 @@ use crate::event::model::{CreateEventRequest, CreateEventResponse, ListEventsRes
 use sea_orm::prelude::*;
 use sea_orm::{ActiveModelTrait, QueryOrder, Set, TransactionTrait};
 
+use crate::ServiceResult;
 use repositories::db::prelude::{db_event, db_event_role_assignment, EventPhase, EventRole};
 use repositories::DbRepository;
-use crate::ServiceResult;
 
 #[derive(Clone)]
 pub struct EventService {
@@ -52,7 +52,11 @@ impl EventService {
         false
     }
 
-    pub async fn create(&self, req: CreateEventRequest, ctx: &Ctx) -> ServiceResult<CreateEventResponse> {
+    pub async fn create(
+        &self,
+        req: CreateEventRequest,
+        ctx: &Ctx,
+    ) -> ServiceResult<CreateEventResponse> {
         if !matches!(ctx.user(), User::Service) {
             // return Err(Error::Unauthorized);
             todo!()

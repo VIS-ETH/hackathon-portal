@@ -6,9 +6,9 @@ use repositories::db::prelude::*;
 use sea_orm::prelude::*;
 use sea_orm::{ActiveModelTrait, QueryOrder, Set, TransactionTrait};
 
+use crate::ServiceResult;
 use repositories::db::prelude::{db_event, EventPhase};
 use repositories::DbRepository;
-use crate::ServiceResult;
 
 #[derive(Clone)]
 pub struct UserService {

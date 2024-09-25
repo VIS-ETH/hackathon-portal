@@ -2,7 +2,7 @@ mod docs;
 mod events;
 
 use crate::api_state::ApiState;
-use crate::mw::{mw_require_auth, mw_resolve_ctx};
+use crate::mw::{mw_impersonate, mw_require_auth, mw_resolve_ctx};
 use crate::routers::docs::get_swagger;
 use crate::ApiResult;
 use axum::extract::Request;
@@ -43,7 +43,8 @@ pub async fn get_api_router(api_state: ApiState) -> ApiResult<Router> {
 
     let router = get_router(&api_state)
         .route_layer(middleware::from_fn(mw_require_auth))
-        .layer(middleware::from_fn_with_state(api_state, mw_resolve_ctx));
+        .layer(middleware::from_fn_with_state(api_state, mw_resolve_ctx))
+        .layer(middleware::from_fn(mw_impersonate));
 
     let swagger = get_swagger();
 
