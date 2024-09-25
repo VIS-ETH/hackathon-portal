@@ -3,7 +3,7 @@ pub mod model;
 
 use crate::ctx::{Ctx, User};
 use crate::event::model::{CreateEventRequest, CreateEventResponse, ListEventsResponse};
-pub use error::{Error, Result};
+pub use error::{EventError, Result};
 use sea_orm::prelude::*;
 use sea_orm::{ActiveModelTrait, QueryOrder, Set, TransactionTrait};
 
@@ -53,7 +53,7 @@ impl EventService {
         false
     }
 
-    pub async fn create(&self, ctx: &Ctx, req: CreateEventRequest) -> Result<CreateEventResponse> {
+    pub async fn create(&self, req: CreateEventRequest, ctx: &Ctx) -> Result<CreateEventResponse> {
         if !matches!(ctx.user(), User::Service) {
             // return Err(Error::Unauthorized);
             todo!()

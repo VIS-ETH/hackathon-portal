@@ -1,12 +1,12 @@
 use derive_more::{Display, From};
 
-pub type Result<T> = core::result::Result<T, Error>;
+pub type Result<T> = core::result::Result<T, EventError>;
 
-#[derive(Debug, Display)]
-pub enum Error {
+#[derive(Debug, Clone, Display)]
+pub enum EventError {
     EventNameNotUnique { name: String },
 
     EventSlugNotUnique { slug: String },
 }
 
-impl std::error::Error for Error {}
+impl std::error::Error for EventError {}

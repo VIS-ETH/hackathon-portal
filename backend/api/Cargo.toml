@@ -29,3 +29,4 @@ log = "0.4.22"
 tracing = "0.1.40"
 tracing-appender = "0.2.3"
 tracing-subscriber = { version = "0.3.18", features = ["registry", "json", "env-filter"] }
+serde_with = "3.9.0"

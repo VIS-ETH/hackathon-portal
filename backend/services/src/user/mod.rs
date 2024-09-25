@@ -47,8 +47,8 @@ impl UserService {
         Ok(user)
     }
 
-    pub async fn create(&self, ctx: &Ctx, req: CreateEventRequest) -> Result<CreateEventResponse> {
-        if !matches!(ctx.user(), User::Service) {
+    pub async fn create(&self, req: CreateEventRequest, auth_ctx: &Ctx) -> Result<CreateEventResponse> {
+        if !matches!(auth_ctx.user(), User::Service) {
             // return Err(Error::Unauthorized);
             todo!()
         }
@@ -90,7 +90,7 @@ impl UserService {
         Ok(response)
     }
 
-    pub async fn list(&self, ctx: &Ctx) -> crate::event::Result<ListEventsResponse> {
+    pub async fn list(&self, auth_ctx: &Ctx) -> crate::event::Result<ListEventsResponse> {
         // let User::Regular(user) = ctx.user() else {
         let events = db_event::Entity::find()
             .order_by_asc(db_event::Column::Start)

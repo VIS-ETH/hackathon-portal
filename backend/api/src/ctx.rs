@@ -6,8 +6,11 @@ use axum::http::request::Parts;
 use services::ctx::Ctx as ServicesCtx;
 use crate::error::{Error, Result};
 
-#[derive(Clone)]
-struct Ctx(pub ServicesCtx);
+#[derive(Debug, Clone)]
+pub struct Ctx {
+    srv_ctx: ServicesCtx,
+}
+
 
 #[async_trait]
 impl<S: Send + Sync> FromRequestParts<S> for Ctx {
@@ -15,16 +18,17 @@ impl<S: Send + Sync> FromRequestParts<S> for Ctx {
 
     fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self>
     {
-        parts
-            .extensions
-            .get::<Result<Ctx>>()
-            .ok_or(Error::AuthNoCtxInRequest)?
-            .clone()
+        // parts
+        //     .extensions
+        //     .get::<Result<Ctx>>()
+        //     .ok_or(Error::AuthNoCtxInRequest)
+        //     .clone()
+        todo!()
     }
 }
 
 impl From<Ctx> for ServicesCtx {
     fn from(ctx: Ctx) -> Self {
-        ctx.0
+        ctx.srv_ctx
     }
 }
