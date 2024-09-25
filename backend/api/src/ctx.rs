@@ -4,7 +4,6 @@ use axum::async_trait;
 use axum::extract::FromRequestParts;
 use axum::http::request::Parts;
 use services::ctx::{Ctx as ServicesCtx, User};
-use repositories::db::prelude::*;
 
 #[derive(Debug, Clone)]
 pub struct Ctx {

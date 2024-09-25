@@ -1,16 +1,15 @@
-use std::sync::Arc;
 use crate::api_state::ApiState;
 use crate::ctx::Ctx;
 use crate::{ApiError, ApiResult, PublicError};
 use axum::body::Body;
 use axum::extract::Request;
 use axum::extract::State;
-use axum::http::{HeaderValue, Method, StatusCode, Uri};
-use axum::Json;
+use axum::http::{HeaderValue, Method, Uri};
 use axum::middleware::Next;
 use axum::response::{IntoResponse, Response};
-use tracing::info;
 use services::ctx::Ctx as ServiceCtx;
+use std::sync::Arc;
+use tracing::info;
 use uuid::Uuid;
 
 const AUTH_ID_KEY: &str = "X-Authentik-Email";
