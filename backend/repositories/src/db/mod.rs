@@ -17,7 +17,7 @@ pub mod team;
 pub mod team_role_assignment;
 pub mod user;
 
-pub use crate::{RepositoryResult};
+pub use crate::RepositoryResult;
 
 pub use sea_orm::DbErr;
 

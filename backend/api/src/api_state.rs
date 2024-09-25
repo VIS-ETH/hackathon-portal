@@ -3,7 +3,6 @@ use crate::ApiResult;
 use repositories::DbRepository;
 use services::event::EventService;
 use std::sync::Arc;
-use tokio::sync::Mutex;
 
 #[derive(Clone)]
 pub struct ApiState {

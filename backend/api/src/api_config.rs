@@ -1,8 +1,8 @@
+use crate::error::ApiResult;
 use config::{Config, Environment};
 use serde::Deserialize;
 use std::net::IpAddr;
 use std::path::Path;
-use crate::error::ApiResult;
 
 #[derive(Debug, Deserialize)]
 pub struct ServerConfig {

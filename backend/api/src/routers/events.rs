@@ -1,10 +1,9 @@
 use crate::api_state::ApiState;
 use axum::extract::State;
-use axum::routing::{get, patch, post};
-use axum::{Extension, Json, Router};
+use axum::routing::get;
+use axum::{Json, Router};
 use services::ctx::Ctx;
-use services::event::model::{GetEventResponse, ListEventsResponse};
-use services::event::EventService;
+use services::event::model::ListEventsResponse;
 
 pub fn get_router(state: &ApiState) -> Router {
     Router::new()

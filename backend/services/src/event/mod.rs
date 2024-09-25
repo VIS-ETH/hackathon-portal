@@ -72,7 +72,7 @@ impl EventService {
             todo!()
         }
 
-        let mut active_event = db_event::ActiveModel {
+        let active_event = db_event::ActiveModel {
             name: Set(req.name),
             start: Set(req.start),
             end: Set(req.end),

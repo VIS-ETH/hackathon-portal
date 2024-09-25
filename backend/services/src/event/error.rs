@@ -1,4 +1,4 @@
-use derive_more::{Display, From};
+use derive_more::Display;
 
 pub type Result<T> = core::result::Result<T, EventError>;
 

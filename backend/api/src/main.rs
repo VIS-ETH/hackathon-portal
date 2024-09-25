@@ -12,19 +12,12 @@ use crate::api_config::ApiConfig;
 use crate::api_state::ApiState;
 use crate::routers::get_api_router;
 use crate::utils::setup_logging;
-use axum::http::StatusCode;
 use clap::Parser;
-use derive_more::{Display, From};
-use repositories::DbRepository;
-use serde::Serialize;
-use serde_with::{serde_as, DisplayFromStr};
 use std::net::SocketAddr;
-use std::sync::Arc;
 use tokio::net::TcpListener;
 use tracing::info;
 
-pub use error::{ApiError, PublicError, ApiResult};
-
+pub use error::{ApiError, ApiResult, PublicError};
 
 #[tokio::main]
 async fn main() -> ApiResult<()> {
@@ -45,7 +38,6 @@ async fn main() -> ApiResult<()> {
     );
 
     axum::serve(listener, api_router).await?;
-
 
     Ok(())
 }

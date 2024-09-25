@@ -4,13 +4,12 @@ mod events;
 use crate::api_state::ApiState;
 use crate::mw::{mw_require_auth, mw_resolve_ctx};
 use crate::routers::docs::get_swagger;
+use crate::ApiResult;
 use axum::extract::Request;
 use axum::http::{Method, StatusCode};
 use axum::response::IntoResponse;
 use axum::{middleware, Router};
 use tower_http::cors::{Any, CorsLayer};
-use utoipa::OpenApi;
-use crate::ApiResult;
 
 async fn handler_404(request: Request) -> impl IntoResponse {
     (

@@ -7,7 +7,7 @@ use repositories::db::prelude::*;
 use sea_orm::prelude::*;
 use sea_orm::{ActiveModelTrait, QueryOrder, Set, TransactionTrait};
 
-use repositories::db::prelude::{db_event, db_event_role_assignment, EventPhase, EventRole};
+use repositories::db::prelude::{db_event, EventPhase};
 use repositories::DbRepository;
 
 pub use error::{Error, Result};
@@ -70,7 +70,7 @@ impl UserService {
             todo!()
         }
 
-        let mut active_event = db_event::ActiveModel {
+        let active_event = db_event::ActiveModel {
             name: Set(req.name),
             start: Set(req.start),
             end: Set(req.end),

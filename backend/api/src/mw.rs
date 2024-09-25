@@ -1,11 +1,10 @@
 use crate::api_state::ApiState;
 use axum::body::Body;
 use axum::extract::Request;
-use axum::extract::{FromRequestParts, State};
+use axum::extract::State;
 use axum::http::{HeaderValue, StatusCode};
 use axum::middleware::Next;
 use axum::response::Response;
-use services::ctx::Ctx;
 
 const AUTH_ID_KEY: &str = "X-Authentik-Email";
 
@@ -28,7 +27,7 @@ pub async fn mw_impersonate(mut req: Request<Body>, next: Next) -> Result<Respon
 
     req.headers_mut().insert(
         AUTH_ID_KEY,
-        HeaderValue::from_str(&target_id).map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?,
+        HeaderValue::from_str(target_id).map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?,
     );
 
     Ok(next.run(req).await)
@@ -50,7 +49,7 @@ pub async fn mw_require_auth(
 
 pub async fn mw_resolve_ctx(
     State(state): State<ApiState>,
-    mut req: Request<Body>,
+    req: Request<Body>,
     next: Next,
 ) -> Response {
     println!("->> {:<12} - mw_ctx_resolver", "MIDDLEWARE");
@@ -86,9 +85,7 @@ pub async fn mw_resolve_ctx(
 async fn my_middleware(request: Request, next: Next) -> Response {
     // do something with `request`...
 
-    let response = next.run(request).await;
-
     // do something with `response`...
 
-    response
+    next.run(request).await
 }

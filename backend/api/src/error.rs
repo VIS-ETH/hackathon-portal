@@ -1,11 +1,10 @@
-use std::fmt;
-use std::sync::Arc;
 use axum::http::header::InvalidHeaderValue;
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use derive_more::{Display, From};
 use serde::Serialize;
 use serde_with::{serde_as, DisplayFromStr};
+use std::fmt;
 
 pub type ApiResult<T> = Result<T, ApiError>;
 
@@ -30,8 +29,9 @@ pub enum ApiError {
     InvalidHeaderValue(#[serde_as(as = "DisplayFromStr")] InvalidHeaderValue),
 
     #[from]
-    TracingSetGlobalDefault(#[serde_as(as = "DisplayFromStr"
-    )] tracing::subscriber::SetGlobalDefaultError),
+    TracingSetGlobalDefault(
+        #[serde_as(as = "DisplayFromStr")] tracing::subscriber::SetGlobalDefaultError,
+    ),
 
     #[from]
     TracingFilterParse(#[serde_as(as = "DisplayFromStr")] tracing_subscriber::filter::ParseError),
@@ -47,9 +47,8 @@ impl std::error::Error for ApiError {}
 
 impl IntoResponse for ApiError {
     fn into_response(self) -> Response {
-        let mut response = StatusCode::INTERNAL_SERVER_ERROR.into_response();
         // response.extensions_mut().insert(self);
-        response
+        StatusCode::INTERNAL_SERVER_ERROR.into_response()
     }
 }
 
