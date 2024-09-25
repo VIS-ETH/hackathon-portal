@@ -13,11 +13,17 @@ pub type ApiResult<T> = Result<T, ApiError>;
 pub enum ApiError {
     AuthNoCtxInRequest,
 
+    // region: external library errors
+
     #[from]
     Service(services::ServiceError),
 
     #[from]
     Repositories(repositories::RepositoryError),
+
+    // endregion
+
+    // region: external library errors
 
     #[from]
     Config(#[serde_as(as = "DisplayFromStr")] config::ConfigError),
@@ -35,6 +41,8 @@ pub enum ApiError {
 
     #[from]
     TracingFilterParse(#[serde_as(as = "DisplayFromStr")] tracing_subscriber::filter::ParseError),
+
+    // endregion
 }
 
 impl fmt::Display for ApiError {

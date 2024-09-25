@@ -1,4 +1,3 @@
-pub mod error;
 pub mod model;
 
 use crate::ctx::{Ctx, User};
@@ -9,8 +8,7 @@ use sea_orm::{ActiveModelTrait, QueryOrder, Set, TransactionTrait};
 
 use repositories::db::prelude::{db_event, EventPhase};
 use repositories::DbRepository;
-
-pub use error::{Error, Result};
+use crate::ServiceResult;
 
 #[derive(Clone)]
 pub struct UserService {
@@ -22,7 +20,7 @@ impl UserService {
         Self { db_repo }
     }
 
-    pub async fn get_or_create(&self, auth_id: &str) -> Result<db_user::Model> {
+    pub async fn get_or_create(&self, auth_id: &str) -> ServiceResult<db_user::Model> {
         let user = db_user::Entity::find()
             .filter(db_user::Column::AuthId.eq(auth_id))
             .one(self.db_repo.conn())
@@ -51,7 +49,7 @@ impl UserService {
         &self,
         req: CreateEventRequest,
         auth_ctx: &Ctx,
-    ) -> Result<CreateEventResponse> {
+    ) -> ServiceResult<CreateEventResponse> {
         if !matches!(auth_ctx.user(), User::Service) {
             // return Err(Error::Unauthorized);
             todo!()
@@ -94,7 +92,7 @@ impl UserService {
         Ok(response)
     }
 
-    pub async fn list(&self, auth_ctx: &Ctx) -> crate::event::Result<ListEventsResponse> {
+    pub async fn list(&self, auth_ctx: &Ctx) -> ServiceResult<ListEventsResponse> {
         // let User::Regular(user) = ctx.user() else {
         let events = db_event::Entity::find()
             .order_by_asc(db_event::Column::Start)

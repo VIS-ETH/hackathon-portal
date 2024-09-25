@@ -8,8 +8,12 @@ pub type RepositoryResult<T> = Result<T, RepositoryError>;
 #[serde_as]
 #[derive(Debug, Serialize, From)]
 pub enum RepositoryError {
+    // region: external library errors
+
     #[from]
     SeaORM(#[serde_as(as = "DisplayFromStr")] sea_orm::DbErr),
+
+    // endregion
 }
 
 impl fmt::Display for RepositoryError {
