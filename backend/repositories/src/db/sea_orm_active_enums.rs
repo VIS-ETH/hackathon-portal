@@ -37,6 +37,7 @@ pub enum EventPhase {
     Deserialize,
     utoipa::ToSchema,
     Hash,
+    Copy,
 )]
 #[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "event_role")]
 pub enum EventRole {

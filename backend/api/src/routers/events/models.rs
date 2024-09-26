@@ -1,7 +1,8 @@
 use chrono::NaiveDateTime;
-use repositories::db::prelude::{db_event, EventPhase};
+use repositories::db::prelude::{db_event, EventPhase, EventRole};
 use repositories::db::sea_orm_active_enums::EventVisibility;
 use serde::{Deserialize, Serialize};
+use services::user::model::UserForCreate;
 use utoipa::ToSchema;
 use uuid::Uuid;
 
@@ -32,4 +33,10 @@ impl From<db_event::Model> for EventDTO {
             phase: event.phase,
         }
     }
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+pub struct InviteUsersDTO {
+    pub users: Vec<UserForCreate>,
+    pub default_roles: Vec<EventRole>,
 }

@@ -109,7 +109,7 @@ impl EventService {
         }
 
         if let Some(visibility) = &patch.visibility {
-            active_event.visibility = Set(visibility.clone());
+            active_event.visibility = Set(*visibility);
         }
 
         if let Some(phase) = &patch.phase {

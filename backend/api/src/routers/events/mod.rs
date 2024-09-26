@@ -2,16 +2,16 @@ pub mod models;
 
 use crate::api_state::ApiState;
 use crate::ctx::Ctx;
-use crate::routers::events::models::EventDTO;
-use crate::ApiResult;
+use crate::models::AffectedRowsDTO;
+use crate::routers::events::models::{EventDTO, InviteUsersDTO};
+use crate::{ApiError, ApiResult};
 use axum::extract::{Path, State};
-use axum::routing::{delete, get, patch, put};
+use axum::routing::{delete, get, patch, post, put};
 use axum::{Json, Router};
 use repositories::db::prelude::EventRole;
 use services::event::model::EventForPatch;
 use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
-use crate::models::AffectedRowsDTO;
 
 pub fn get_router(state: &ApiState) -> Router {
     Router::new()
@@ -22,6 +22,7 @@ pub fn get_router(state: &ApiState) -> Router {
         .route("/:event_id/roles", get(get_event_roles))
         .route("/:event_id/roles", put(put_event_roles))
         .route("/:event_id/roles", delete(delete_event_roles))
+        .route("/:event_id/invite", post(invite_users))
         .with_state(state.clone())
 }
 
@@ -47,6 +48,42 @@ pub async fn get_events(ctx: Ctx, State(state): State<ApiState>) -> ApiResult<Js
         .collect::<Vec<_>>();
 
     let dto = events.into_iter().map(EventDTO::from).collect();
+
+    Ok(Json(dto))
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/events/{event_id}/invite",
+    responses(
+        (status = StatusCode::OK, body = AffectedRowsDTO),
+        (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
+    )
+)]
+pub async fn invite_users(
+    ctx: Ctx,
+    State(state): State<ApiState>,
+    Path(event_id): Path<Uuid>,
+    Json(body): Json<InviteUsersDTO>,
+) -> ApiResult<Json<AffectedRowsDTO>> {
+    state
+        .authorization_service
+        .edit_event_guard(ctx.roles(), event_id)?;
+
+    let auth_ids = body
+        .users
+        .iter()
+        .map(|user| user.auth_id.clone())
+        .collect::<Vec<_>>();
+    let roles = body.default_roles.iter().cloned().collect::<HashSet<_>>();
+
+    let affected_rows = state.user_service.create_users(body.users).await?;
+    let _ = state
+        .authorization_service
+        .assign_default_event_roles(event_id, auth_ids, roles)
+        .await?;
+
+    let dto = AffectedRowsDTO { affected_rows };
 
     Ok(Json(dto))
 }
@@ -154,7 +191,7 @@ pub async fn put_event_roles(
 
     let affected_rows = state
         .authorization_service
-        .assign_event_role(event_id, body)
+        .assign_event_roles(event_id, body)
         .await?;
 
     let dto = AffectedRowsDTO { affected_rows };
@@ -180,9 +217,21 @@ pub async fn delete_event_roles(
         .authorization_service
         .edit_event_guard(ctx.roles(), event_id)?;
 
+    // Prevent admins from unassigning themselves
+    if body
+        .get(&ctx.user().id)
+        .is_some_and(|roles| roles.contains(&EventRole::Admin))
+    {
+        return Err(ApiError::Forbidden {
+            resource: "event".to_string(),
+            id: event_id.to_string(),
+            action: "unassign self".to_string(),
+        });
+    }
+
     let affected_rows = state
         .authorization_service
-        .unassign_event_role(event_id, body)
+        .unassign_event_roles(event_id, body)
         .await?;
 
     let dto = AffectedRowsDTO { affected_rows };

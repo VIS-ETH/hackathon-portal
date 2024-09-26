@@ -1,7 +1,9 @@
 pub mod model;
 
 use crate::authorization::model::{EventRolesMap, TeamRolesMap, UserRoles};
+use crate::utils::try_insert_result_to_int;
 use crate::{ServiceError, ServiceResult};
+use repositories::db::prelude::*;
 use repositories::db::prelude::{
     db_event, db_event_role_assignment, db_team_role_assignment, EventRole,
 };
@@ -9,7 +11,7 @@ use repositories::db::sea_orm_active_enums::EventVisibility;
 use repositories::DbRepository;
 use sea_orm::prelude::*;
 use sea_orm::sea_query::OnConflict;
-use sea_orm::{ActiveModelTrait, Condition, Set, TryInsertResult};
+use sea_orm::{ActiveModelTrait, Condition, Set};
 use std::collections::{HashMap, HashSet};
 
 #[derive(Clone)]
@@ -33,7 +35,7 @@ impl AuthorizationService {
                 .into_iter()
                 .fold(HashMap::new(), |mut acc: EventRolesMap, assignment| {
                     acc.entry(assignment.event_id)
-                        .or_insert_with(HashSet::new)
+                        .or_default()
                         .insert(assignment.role);
 
                     acc
@@ -53,7 +55,7 @@ impl AuthorizationService {
                 .into_iter()
                 .fold(HashMap::new(), |mut acc: TeamRolesMap, assignment| {
                     acc.entry(assignment.team_id)
-                        .or_insert_with(HashSet::new)
+                        .or_default()
                         .insert(assignment.role);
 
                     acc
@@ -71,7 +73,7 @@ impl AuthorizationService {
         Ok(response)
     }
 
-    pub async fn assign_event_role(
+    pub async fn assign_event_roles(
         &self,
         event_id: Uuid,
         roles: EventRolesMap,
@@ -111,16 +113,29 @@ impl AuthorizationService {
             .exec_without_returning(self.db_repo.conn())
             .await?;
 
-        let rows_affected = match result {
-            TryInsertResult::Empty => 0,
-            TryInsertResult::Conflicted => 0,
-            TryInsertResult::Inserted(n) => n,
-        };
-
-        Ok(rows_affected)
+        Ok(try_insert_result_to_int(result))
     }
 
-    pub async fn unassign_event_role(
+    pub async fn assign_default_event_roles(
+        &self,
+        event_id: Uuid,
+        auth_ids: Vec<String>,
+        roles: HashSet<EventRole>,
+    ) -> ServiceResult<u64> {
+        let users = db_user::Entity::find()
+            .filter(db_user::Column::AuthId.is_in(auth_ids))
+            .all(self.db_repo.conn())
+            .await?;
+
+        let roles_map = users
+            .into_iter()
+            .map(|user| (user.id, roles.clone()))
+            .collect::<EventRolesMap>();
+
+        self.assign_event_roles(event_id, roles_map).await
+    }
+
+    pub async fn unassign_event_roles(
         &self,
         event_id: Uuid,
         roles: EventRolesMap,
