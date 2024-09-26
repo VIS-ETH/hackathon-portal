@@ -1,10 +1,10 @@
 pub mod model;
 
-use std::collections::{HashMap, HashSet};
 use crate::ctx::{ServiceCtx, User};
 use repositories::db::prelude::*;
 use sea_orm::prelude::*;
 use sea_orm::{ActiveModelTrait, QueryOrder, Set, TransactionTrait};
+use std::collections::{HashMap, HashSet};
 
 use crate::ServiceResult;
 use repositories::db::prelude::{db_event, EventPhase};
@@ -50,38 +50,38 @@ impl UserService {
             .all(self.db_repo.conn())
             .await?;
 
-        let events_roles = event_role_assignments
-            .into_iter()
-            .fold(HashMap::new(), |mut acc, assignment| {
-                acc.entry(assignment.event_id)
-                    .or_insert_with(HashSet::new)
-                    .insert(assignment.role);
+        let events_roles =
+            event_role_assignments
+                .into_iter()
+                .fold(HashMap::new(), |mut acc, assignment| {
+                    acc.entry(assignment.event_id)
+                        .or_insert_with(HashSet::new)
+                        .insert(assignment.role);
 
-                acc
-            });
+                    acc
+                });
 
         let team_role_assignments = db_team_role_assignment::Entity::find()
             .filter(db_team_role_assignment::Column::UserId.eq(user.id))
             .all(self.db_repo.conn())
             .await?;
 
+        let teams_roles =
+            team_role_assignments
+                .into_iter()
+                .fold(HashMap::new(), |mut acc, assignment| {
+                    acc.entry(assignment.team_id)
+                        .or_insert_with(HashSet::new)
+                        .insert(assignment.role);
 
-        let teams_roles = team_role_assignments
-            .into_iter()
-            .fold(HashMap::new(), |mut acc, assignment| {
-                acc.entry(assignment.team_id)
-                    .or_insert_with(HashSet::new)
-                    .insert(assignment.role);
-
-                acc
-            });
+                    acc
+                });
 
         let user = User::Regular {
             user,
             events_roles,
             teams_roles,
         };
-
 
         Ok(user)
     }

@@ -1,7 +1,10 @@
 pub mod model;
 
 use crate::ctx::{ServiceCtx, User};
-use crate::event::model::{CreateEventRequest, GetEventResponse, GetEventRolesResponse, GetEventsResponse, GetEventsRolesResponse, PatchEventRequest};
+use crate::event::model::{
+    CreateEventRequest, GetEventResponse, GetEventRolesResponse, GetEventsResponse,
+    GetEventsRolesResponse, PatchEventRequest,
+};
 use crate::{ServiceError, ServiceResult};
 use repositories::db::prelude::{db_event, db_event_role_assignment, EventPhase, EventRole};
 use repositories::DbRepository;

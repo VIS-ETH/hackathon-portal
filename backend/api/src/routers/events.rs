@@ -1,16 +1,16 @@
-use std::collections::{HashMap, HashSet};
 use crate::api_state::ApiState;
+use crate::ctx::Ctx;
 use crate::ApiResult;
 use axum::extract::{Path, State};
 use axum::routing::get;
 use axum::{Json, Router};
+use repositories::db::prelude::EventRole;
+use services::ctx::ServiceCtx;
 use services::event::model::{
     GetEventResponse, GetEventRolesResponse, GetEventsResponse, GetEventsRolesResponse,
 };
+use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
-use repositories::db::prelude::EventRole;
-use crate::ctx::Ctx;
-use services::ctx::ServiceCtx;
 
 pub fn get_router(state: &ApiState) -> Router {
     Router::new()

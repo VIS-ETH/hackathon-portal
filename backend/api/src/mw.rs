@@ -7,7 +7,7 @@ use axum::extract::State;
 use axum::http::{HeaderValue, Method, Uri};
 use axum::middleware::Next;
 use axum::response::{IntoResponse, Response};
-use services::ctx::{ServiceCtx as ServiceCtx, User};
+use services::ctx::{ServiceCtx, User};
 use std::sync::Arc;
 use tracing::info;
 use uuid::Uuid;

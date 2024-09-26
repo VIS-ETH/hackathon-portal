@@ -1,6 +1,6 @@
+use repositories::db::prelude::*;
 use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
-use repositories::db::prelude::*;
 
 #[derive(Debug, Clone)]
 pub enum User {
@@ -17,15 +17,29 @@ pub trait ServiceCtx: Send + Sync {
 
     fn event_roles(&self, event_id: Uuid) -> HashSet<EventRole> {
         match self.user() {
-            User::Service => vec![EventRole::Admin, EventRole::Mentor, EventRole::Participant, EventRole::SidequestMaster, EventRole::Stakeholder].into_iter().collect(),
-            User::Regular { events_roles, .. } => events_roles.get(&event_id).cloned().unwrap_or_default(),
+            User::Service => vec![
+                EventRole::Admin,
+                EventRole::Mentor,
+                EventRole::Participant,
+                EventRole::SidequestMaster,
+                EventRole::Stakeholder,
+            ]
+            .into_iter()
+            .collect(),
+            User::Regular { events_roles, .. } => {
+                events_roles.get(&event_id).cloned().unwrap_or_default()
+            }
         }
     }
 
     fn team_roles(&self, team_id: Uuid) -> HashSet<TeamRole> {
         match self.user() {
-            User::Service => vec![TeamRole::Mentor, TeamRole::Member].into_iter().collect(),
-            User::Regular { teams_roles, .. } => teams_roles.get(&team_id).cloned().unwrap_or_default(),
+            User::Service => vec![TeamRole::Mentor, TeamRole::Member]
+                .into_iter()
+                .collect(),
+            User::Regular { teams_roles, .. } => {
+                teams_roles.get(&team_id).cloned().unwrap_or_default()
+            }
         }
     }
 }
