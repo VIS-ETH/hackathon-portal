@@ -2,12 +2,11 @@ use chrono::NaiveDateTime;
 use repositories::db::prelude::*;
 use repositories::db::sea_orm_active_enums::EventVisibility;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 use utoipa::ToSchema;
 use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
-pub struct CreateEventRequest {
+pub struct EventForCreate {
     pub name: String,
     pub start: NaiveDateTime,
     pub end: NaiveDateTime,
@@ -15,12 +14,7 @@ pub struct CreateEventRequest {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
-pub struct GetEventsResponse {
-    pub events: Vec<GetEventResponse>,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
-pub struct GetEventResponse {
+pub struct EventResponse {
     pub id: Uuid,
     pub name: String,
     pub slug: String,
@@ -32,7 +26,7 @@ pub struct GetEventResponse {
     pub phase: EventPhase,
 }
 
-impl From<db_event::Model> for GetEventResponse {
+impl From<db_event::Model> for EventResponse {
     fn from(event: db_event::Model) -> Self {
         Self {
             id: event.id,
@@ -49,7 +43,7 @@ impl From<db_event::Model> for GetEventResponse {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
-pub struct PatchEventRequest {
+pub struct EventForPatch {
     pub name: Option<String>,
     pub start: Option<NaiveDateTime>,
     pub end: Option<NaiveDateTime>,
@@ -57,14 +51,4 @@ pub struct PatchEventRequest {
     pub is_feedback_visible: Option<bool>,
     pub visibility: Option<EventVisibility>,
     pub phase: Option<EventPhase>,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
-pub struct GetEventsRolesResponse {
-    pub roles: HashMap<Uuid, Vec<EventRole>>,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
-pub struct GetEventRolesResponse {
-    pub roles: Vec<EventRole>,
 }

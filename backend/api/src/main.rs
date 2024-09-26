@@ -6,6 +6,7 @@ mod error;
 mod mw;
 mod routers;
 mod utils;
+mod models;
 
 use crate::api_args::ApiArgs;
 use crate::api_config::ApiConfig;
