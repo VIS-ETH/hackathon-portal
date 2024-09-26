@@ -12,34 +12,40 @@ pub enum User {
     },
 }
 
-pub trait ServiceCtx: Send + Sync {
-    fn user(&self) -> &User;
+impl User {
+    pub fn events_roles(&self) -> HashMap<Uuid, HashSet<EventRole>> {
+        match self {
+            User::Service => Default::default(),
+            User::Regular { events_roles, .. } => events_roles.clone(),
+        }
+    }
 
-    fn event_roles(&self, event_id: Uuid) -> HashSet<EventRole> {
-        match self.user() {
-            User::Service => vec![
-                EventRole::Admin,
-                EventRole::Mentor,
-                EventRole::Participant,
-                EventRole::SidequestMaster,
-                EventRole::Stakeholder,
-            ]
-            .into_iter()
-            .collect(),
+    pub fn event_roles(&self, event_id: Uuid) -> HashSet<EventRole> {
+        match self {
+            User::Service => Default::default(),
             User::Regular { events_roles, .. } => {
                 events_roles.get(&event_id).cloned().unwrap_or_default()
             }
         }
     }
 
-    fn team_roles(&self, team_id: Uuid) -> HashSet<TeamRole> {
-        match self.user() {
-            User::Service => vec![TeamRole::Mentor, TeamRole::Member]
-                .into_iter()
-                .collect(),
+    pub fn teams_roles(&self) -> HashMap<Uuid, HashSet<TeamRole>> {
+        match self {
+            User::Service => Default::default(),
+            User::Regular { teams_roles, .. } => teams_roles.clone(),
+        }
+    }
+
+    pub fn team_roles(&self, team_id: Uuid) -> HashSet<TeamRole> {
+        match self {
+            User::Service => Default::default(),
             User::Regular { teams_roles, .. } => {
                 teams_roles.get(&team_id).cloned().unwrap_or_default()
             }
         }
     }
+}
+
+pub trait ServiceCtx: Send + Sync {
+    fn user(&self) -> &User;
 }

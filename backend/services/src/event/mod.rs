@@ -6,13 +6,17 @@ use crate::event::model::{
     GetEventsRolesResponse, PatchEventRequest,
 };
 use crate::{ServiceError, ServiceResult};
+use rand::distributions::{Alphanumeric, DistString};
+use rand::rngs::StdRng;
+use rand::{Rng, SeedableRng};
 use repositories::db::prelude::{db_event, db_event_role_assignment, EventPhase, EventRole};
+use repositories::db::sea_orm_active_enums::EventVisibility;
 use repositories::DbRepository;
 use sea_orm::prelude::*;
 use sea_orm::sea_query::{Asterisk, IntoColumnRef};
 use sea_orm::{
-    ActiveModelTrait, Condition, FromQueryResult, QueryOrder, QuerySelect, SelectColumns, Set,
-    TransactionTrait,
+    ActiveModelTrait, Condition, FromQueryResult, IntoActiveModel, QueryOrder, QuerySelect,
+    SelectColumns, Set, TransactionTrait,
 };
 use slug::slugify;
 use std::collections::HashMap;
@@ -36,25 +40,10 @@ impl EventService {
             return Err(ServiceError::ServiceUserRequired);
         }
 
+        self.check_event_name_conflict(&req.name).await?;
+
         let slug = slugify(&req.name);
-        let txn = self.db_repo.conn().begin().await?;
-
-        let existing = db_event::Entity::find()
-            .filter(
-                Condition::any()
-                    .add(db_event::Column::Name.eq(&req.name))
-                    .add(db_event::Column::Slug.eq(&slug)),
-            )
-            .one(&txn)
-            .await?;
-
-        if let Some(existing) = existing {
-            return if existing.slug == slug {
-                Err(ServiceError::SlugNotUnique { slug })
-            } else {
-                Err(ServiceError::NameNotUnique { name: req.name })
-            };
-        }
+        let kdf_secret = self.generate_kdf_secret();
 
         let active_event = db_event::ActiveModel {
             name: Set(req.name),
@@ -62,18 +51,16 @@ impl EventService {
             start: Set(req.start),
             end: Set(req.end),
             max_team_size: Set(req.max_team_size as i32),
-            kdf_secret: Set(Uuid::new_v4().to_string()),
+            kdf_secret: Set(kdf_secret),
             is_feedback_visible: Set(false),
-            is_hidden: Set(true),
+            visibility: Set(EventVisibility::Private),
             phase: Set(EventPhase::Registration),
             ..Default::default()
         };
 
         let event = db_event::Entity::insert(active_event)
-            .exec_with_returning(&txn)
+            .exec_with_returning(self.db_repo.conn())
             .await?;
-
-        txn.commit().await?;
 
         let response = GetEventResponse::from(event);
 
@@ -81,18 +68,15 @@ impl EventService {
     }
 
     pub async fn get_events(&self, ctx: &impl ServiceCtx) -> ServiceResult<GetEventsResponse> {
-        let condition = self.view_event_condition(ctx.user());
-
         let events = db_event::Entity::find()
-            .left_join(db_event_role_assignment::Entity)
-            .filter(condition)
-            .distinct_on([
-                db_event::Column::Id.into_column_ref(),
-                db_event::Column::Start.into_column_ref(),
-            ])
             .order_by_asc(db_event::Column::Start)
             .all(self.db_repo.conn())
             .await?;
+
+        let events = events
+            .into_iter()
+            .filter(|event| self.can_view_event(ctx.user(), event))
+            .collect::<Vec<_>>();
 
         let response = GetEventsResponse {
             events: events.into_iter().map(|event| event.into()).collect(),
@@ -106,21 +90,22 @@ impl EventService {
         event_id: Uuid,
         ctx: &impl ServiceCtx,
     ) -> ServiceResult<GetEventResponse> {
-        let condition = self.view_event_condition(ctx.user());
-
         let event = db_event::Entity::find()
-            .left_join(db_event_role_assignment::Entity)
-            .filter(condition)
             .filter(db_event::Column::Id.eq(event_id))
             .one(self.db_repo.conn())
-            .await?;
-
-        let Some(event) = event else {
-            return Err(ServiceError::ResourceNotFound {
+            .await?
+            .ok_or_else(|| ServiceError::ResourceNotFound {
                 resource: "Event".to_string(),
                 id: event_id.to_string(),
+            })?;
+
+        if !self.can_view_event(ctx.user(), &event) {
+            return Err(ServiceError::Forbidden {
+                resource: "Event".to_string(),
+                id: event_id.to_string(),
+                action: "view".to_string(),
             });
-        };
+        }
 
         let response = GetEventResponse::from(event);
 
@@ -133,23 +118,61 @@ impl EventService {
         patch: &PatchEventRequest,
         ctx: &impl ServiceCtx,
     ) -> ServiceResult<GetEventResponse> {
-        let condition = self.view_event_condition(ctx.user());
-
         let event = db_event::Entity::find()
-            .left_join(db_event_role_assignment::Entity)
-            .filter(condition)
             .filter(db_event::Column::Id.eq(event_id))
             .one(self.db_repo.conn())
-            .await?;
-
-        let Some(event) = event else {
-            return Err(ServiceError::ResourceNotFound {
+            .await?
+            .ok_or_else(|| ServiceError::ResourceNotFound {
                 resource: "Event".to_string(),
                 id: event_id.to_string(),
+            })?;
+
+        if !self.can_modify_event(ctx.user(), &event) {
+            return Err(ServiceError::Forbidden {
+                resource: "Event".to_string(),
+                id: event_id.to_string(),
+                action: "modify".to_string(),
             });
-        };
+        }
+
+        let mut active_event = event.into_active_model();
+
+        if let Some(name) = &patch.name {
+            self.check_event_name_conflict(name).await?;
+            active_event.name = Set(name.clone());
+            active_event.slug = Set(slugify(name));
+        }
+
+        if let Some(start) = patch.start {
+            active_event.start = Set(start);
+        }
+
+        if let Some(end) = patch.end {
+            active_event.end = Set(end);
+        }
+
+        if let Some(max_team_size) = patch.max_team_size {
+            active_event.max_team_size = Set(max_team_size as i32);
+        }
+
+        if let Some(is_feedback_visible) = patch.is_feedback_visible {
+            active_event.is_feedback_visible = Set(is_feedback_visible);
+        }
+
+        if let Some(visibility) = &patch.visibility {
+            active_event.visibility = Set(visibility.clone());
+        }
+
+        if let Some(phase) = &patch.phase {
+            active_event.phase = Set(phase.clone());
+        }
+
+        let event = active_event
+            .update(self.db_repo.conn())
+            .await?;
 
         let response = GetEventResponse::from(event);
+
 
         Ok(response)
     }
@@ -157,37 +180,60 @@ impl EventService {
     fn can_view_event(&self, user: &User, event: &db_event::Model) -> bool {
         match user {
             User::Service => true,
-            User::Regular {
-                user,
-                events_roles,
-                teams_roles,
-            } => {
-                todo!()
-            }
+            User::Regular { events_roles, .. } => match event.visibility {
+                EventVisibility::Private => events_roles.get(&event.id).is_some_and(|roles| {
+                    roles.contains(&EventRole::Admin)
+                        || roles.contains(&EventRole::Mentor)
+                        || roles.contains(&EventRole::Stakeholder)
+                        || roles.contains(&EventRole::SidequestMaster)
+                }),
+                EventVisibility::Restricted => events_roles
+                    .get(&event.id)
+                    .is_some_and(|roles| !roles.is_empty()),
+                EventVisibility::Public => true,
+            },
         }
     }
 
-    fn view_event_condition(&self, user: &User) -> Condition {
-        todo!()
-        // match user {
-        //     User::Service => Condition::all(),
-        //     User::Regular(user) => {
-        //         let participant_and_not_hidden = Condition::all()
-        //             .add(db_event::Column::IsHidden.eq(false))
-        //             .add(db_event_role_assignment::Column::UserId.eq(user.id))
-        //             .add(db_event_role_assignment::Column::Role.eq(EventRole::Participant));
-        //
-        //         let staff = Condition::all()
-        //             .add(db_event_role_assignment::Column::UserId.eq(user.id))
-        //             .add(db_event_role_assignment::Column::Role.is_in(&[
-        //                 EventRole::Admin.to_value(),
-        //                 EventRole::Mentor.to_value(),
-        //                 EventRole::Stakeholder.to_value(),
-        //                 EventRole::SidequestMaster.to_value(),
-        //             ]));
-        //
-        //         Condition::any().add(participant_and_not_hidden).add(staff)
-        //     }
-        // }
+    fn can_modify_event(&self, user: &User, event: &db_event::Model) -> bool {
+        match user {
+            User::Service => true,
+            User::Regular { events_roles, .. } => events_roles
+                .get(&event.id)
+                .is_some_and(|roles| roles.contains(&EventRole::Admin)),
+        }
+    }
+
+    fn generate_kdf_secret(&self) -> String {
+        let rng = StdRng::from_entropy();
+        rng.sample_iter(&Alphanumeric)
+            .take(32)
+            .map(char::from)
+            .collect::<String>()
+    }
+
+    async fn check_event_name_conflict(&self, name: &str) -> ServiceResult<()> {
+        let slug = slugify(name);
+
+        let existing = db_event::Entity::find()
+            .filter(
+                Condition::any()
+                    .add(db_event::Column::Name.eq(name))
+                    .add(db_event::Column::Slug.eq(&slug)),
+            )
+            .one(self.db_repo.conn())
+            .await?;
+
+        if let Some(existing) = existing {
+            return if existing.slug == slug {
+                Err(ServiceError::SlugNotUnique { slug })
+            } else {
+                Err(ServiceError::NameNotUnique {
+                    name: name.to_string(),
+                })
+            };
+        }
+
+        Ok(())
     }
 }

@@ -1,5 +1,6 @@
 use chrono::NaiveDateTime;
 use repositories::db::prelude::{db_event, EventPhase};
+use repositories::db::sea_orm_active_enums::EventVisibility;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use uuid::Uuid;
@@ -36,7 +37,7 @@ pub struct GetEventResponse {
     pub end: NaiveDateTime,
     pub max_team_size: u32,
     pub is_feedback_visible: bool,
-    pub is_hidden: bool,
+    pub visibility: EventVisibility,
     pub phase: EventPhase,
 }
 
@@ -49,7 +50,7 @@ impl From<db_event::Model> for GetEventResponse {
             end: event.end,
             max_team_size: event.max_team_size as u32,
             is_feedback_visible: event.is_feedback_visible,
-            is_hidden: event.is_hidden,
+            visibility: event.visibility,
             phase: event.phase,
         }
     }

@@ -144,6 +144,17 @@ impl From<&ApiError> for PublicError {
                     StatusCode::NOT_FOUND,
                     format!("{} '{}' not found", resource, id),
                 ),
+                ServiceError::Forbidden {
+                    resource,
+                    id,
+                    action,
+                } => (
+                    StatusCode::FORBIDDEN,
+                    format!(
+                        "You do not have permission to {} {} '{}'",
+                        action, resource, id
+                    ),
+                ),
                 ServiceError::SeaORM(_) => ise.clone(),
             },
             ApiError::Repositories(_)

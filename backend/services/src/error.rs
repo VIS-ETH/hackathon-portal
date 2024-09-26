@@ -24,6 +24,12 @@ pub enum ServiceError {
         id: String,
     },
 
+    Forbidden {
+        resource: String,
+        id: String,
+        action: String,
+    },
+
     // region: external library errors
     #[from]
     SeaORM(#[serde_as(as = "DisplayFromStr")] sea_orm::DbErr),

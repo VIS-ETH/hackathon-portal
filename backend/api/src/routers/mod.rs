@@ -2,6 +2,7 @@ mod docs;
 mod events;
 
 use crate::api_state::ApiState;
+use crate::ctx::Ctx;
 use crate::mw::{mw_impersonate, mw_map_response, mw_require_auth, mw_resolve_ctx};
 use crate::routers::docs::get_swagger;
 use crate::{ApiError, ApiResult};
@@ -9,6 +10,9 @@ use axum::extract::Request;
 use axum::http::{Method, StatusCode};
 use axum::response::IntoResponse;
 use axum::{middleware, Router};
+use chrono::NaiveDateTime;
+use services::ctx::User;
+use services::event::model::CreateEventRequest;
 use tower_http::cors::{Any, CorsLayer};
 
 async fn handler_404(request: Request) -> ApiResult<()> {
@@ -48,7 +52,6 @@ pub async fn get_api_router(api_state: ApiState) -> ApiResult<Router> {
         .allow_credentials(false);
 
     let router = get_router(&api_state).route_layer(middleware::from_fn(mw_require_auth));
-
     let swagger = get_swagger();
 
     let api_router = Router::new()
