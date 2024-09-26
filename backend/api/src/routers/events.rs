@@ -2,15 +2,11 @@ use crate::api_state::ApiState;
 use crate::ctx::Ctx;
 use crate::ApiResult;
 use axum::extract::{Path, State};
-use axum::http::StatusCode;
 use axum::routing::{get, patch};
 use axum::{Json, Router};
 use repositories::db::prelude::EventRole;
 use services::ctx::ServiceCtx;
-use services::event::model::{
-    GetEventResponse, GetEventRolesResponse, GetEventsResponse, GetEventsRolesResponse,
-    PatchEventRequest,
-};
+use services::event::model::{GetEventResponse, GetEventsResponse, PatchEventRequest};
 use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
 
@@ -87,9 +83,7 @@ pub async fn patch_event(
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     )
 )]
-pub async fn get_events_roles(
-    ctx: Ctx,
-) -> ApiResult<Json<HashMap<Uuid, HashSet<EventRole>>>> {
+pub async fn get_events_roles(ctx: Ctx) -> ApiResult<Json<HashMap<Uuid, HashSet<EventRole>>>> {
     let dto = ctx.user().events_roles();
     Ok(Json(dto))
 }

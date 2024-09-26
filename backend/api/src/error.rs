@@ -3,6 +3,7 @@ use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use axum::Json;
 use derive_more::From;
+use repositories::RepositoryError;
 use serde::Serialize;
 use serde_with::{serde_as, DisplayFromStr, TryFromInto};
 use services::ServiceError;
@@ -24,10 +25,10 @@ pub enum ApiError {
 
     // region: external library errors
     #[from]
-    Service(services::ServiceError),
+    Service(ServiceError),
 
     #[from]
-    Repositories(repositories::RepositoryError),
+    Repositories(RepositoryError),
 
     // endregion
 
@@ -66,8 +67,6 @@ impl IntoResponse for ApiError {
         response
     }
 }
-
-pub type PublicResult<T> = Result<T, PublicError>;
 
 #[serde_as]
 #[derive(Debug, Serialize, ToSchema)]

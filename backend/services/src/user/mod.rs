@@ -1,13 +1,12 @@
 pub mod model;
 
-use crate::ctx::{ServiceCtx, User};
+use crate::ctx::User;
 use repositories::db::prelude::*;
 use sea_orm::prelude::*;
-use sea_orm::{ActiveModelTrait, QueryOrder, Set, TransactionTrait};
+use sea_orm::Set;
 use std::collections::{HashMap, HashSet};
 
 use crate::ServiceResult;
-use repositories::db::prelude::{db_event, EventPhase};
 use repositories::DbRepository;
 
 #[derive(Clone)]

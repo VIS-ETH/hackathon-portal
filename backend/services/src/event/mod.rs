@@ -2,24 +2,18 @@ pub mod model;
 
 use crate::ctx::{ServiceCtx, User};
 use crate::event::model::{
-    CreateEventRequest, GetEventResponse, GetEventRolesResponse, GetEventsResponse,
-    GetEventsRolesResponse, PatchEventRequest,
+    CreateEventRequest, GetEventResponse, GetEventsResponse, PatchEventRequest,
 };
 use crate::{ServiceError, ServiceResult};
-use rand::distributions::{Alphanumeric, DistString};
+use rand::distributions::Alphanumeric;
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
-use repositories::db::prelude::{db_event, db_event_role_assignment, EventPhase, EventRole};
+use repositories::db::prelude::{db_event, EventPhase, EventRole};
 use repositories::db::sea_orm_active_enums::EventVisibility;
 use repositories::DbRepository;
 use sea_orm::prelude::*;
-use sea_orm::sea_query::{Asterisk, IntoColumnRef};
-use sea_orm::{
-    ActiveModelTrait, Condition, FromQueryResult, IntoActiveModel, QueryOrder, QuerySelect,
-    SelectColumns, Set, TransactionTrait,
-};
+use sea_orm::{ActiveModelTrait, Condition, IntoActiveModel, QueryOrder, Set};
 use slug::slugify;
-use std::collections::HashMap;
 
 #[derive(Clone)]
 pub struct EventService {
@@ -167,12 +161,9 @@ impl EventService {
             active_event.phase = Set(phase.clone());
         }
 
-        let event = active_event
-            .update(self.db_repo.conn())
-            .await?;
+        let event = active_event.update(self.db_repo.conn()).await?;
 
         let response = GetEventResponse::from(event);
-
 
         Ok(response)
     }

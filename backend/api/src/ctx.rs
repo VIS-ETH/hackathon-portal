@@ -1,13 +1,8 @@
-use crate::error::PublicResult;
-use crate::{ApiError, ApiResult, PublicError};
+use crate::{ApiError, ApiResult};
 use axum::async_trait;
 use axum::extract::FromRequestParts;
 use axum::http::request::Parts;
-use repositories::db::prelude::*;
-use repositories::db::prelude::{EventRole, TeamRole};
 use services::ctx::{ServiceCtx as ServicesCtx, User};
-use std::collections::{HashMap, HashSet};
-use uuid::Uuid;
 
 #[derive(Debug, Clone)]
 pub struct Ctx {

@@ -2,7 +2,7 @@ use chrono::NaiveDateTime;
 use repositories::db::prelude::*;
 use repositories::db::sea_orm_active_enums::EventVisibility;
 use serde::{Deserialize, Serialize};
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use utoipa::ToSchema;
 use uuid::Uuid;
 
