@@ -3,7 +3,7 @@ services:
   db:
     image: postgres:16
     container_name: hackd_db
-    command: postgres # -c 'log_statement=all'
+    command: postgres -c 'log_statement=all'
     env_file:
       - stack.env
     volumes:

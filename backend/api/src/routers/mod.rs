@@ -4,18 +4,17 @@ mod events;
 use crate::api_state::ApiState;
 use crate::mw::{mw_impersonate, mw_map_response, mw_require_auth, mw_resolve_ctx};
 use crate::routers::docs::get_swagger;
-use crate::ApiResult;
+use crate::{ApiError, ApiResult};
 use axum::extract::Request;
 use axum::http::{Method, StatusCode};
 use axum::response::IntoResponse;
 use axum::{middleware, Router};
 use tower_http::cors::{Any, CorsLayer};
 
-async fn handler_404(request: Request) -> impl IntoResponse {
-    (
-        StatusCode::NOT_FOUND,
-        format!("Not Found: {}", request.uri().path()),
-    )
+async fn handler_404(request: Request) -> ApiResult<()> {
+    Err(ApiError::UrlNotFound {
+        url: request.uri().to_string(),
+    })
 }
 
 pub fn get_router(state: &ApiState) -> Router {
@@ -23,7 +22,14 @@ pub fn get_router(state: &ApiState) -> Router {
 }
 
 pub async fn get_api_router(api_state: ApiState) -> ApiResult<Router> {
-    let origins = ["http://localhost:3000".parse()?];
+    let origins = if cfg!(debug_assertions) {
+        vec![
+            "http://localhost:3000".parse()?,
+            "http://localhost:8080".parse()?,
+        ]
+    } else {
+        vec!["https://hack.ethz.ch".parse()?]
+    };
 
     let cors = CorsLayer::new()
         .allow_methods([

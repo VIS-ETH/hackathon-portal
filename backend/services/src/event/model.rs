@@ -1,6 +1,7 @@
 use chrono::NaiveDateTime;
-use repositories::db::prelude::{db_event, EventPhase};
+use repositories::db::prelude::*;
 use serde::{Deserialize, Serialize};
+use std::collections::{HashMap, HashSet};
 use utoipa::ToSchema;
 use uuid::Uuid;
 
@@ -56,6 +57,16 @@ impl From<db_event::Model> for GetEventResponse {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
-pub struct ListEventsResponse {
+pub struct GetEventsResponse {
     pub events: Vec<GetEventResponse>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+pub struct GetEventsRolesResponse {
+    pub roles: HashMap<Uuid, Vec<EventRole>>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+pub struct GetEventRolesResponse {
+    pub roles: Vec<EventRole>,
 }

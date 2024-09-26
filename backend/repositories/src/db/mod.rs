@@ -33,7 +33,7 @@ impl DbRepository {
 
     pub async fn from_url(url: &str) -> RepositoryResult<Self> {
         let result = Self {
-            conn: Database::connect(url).await.unwrap(),
+            conn: Database::connect(url).await?,
         };
 
         Ok(result)

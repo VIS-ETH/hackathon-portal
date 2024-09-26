@@ -5,6 +5,7 @@ use axum::Json;
 use derive_more::From;
 use serde::Serialize;
 use serde_with::{serde_as, DisplayFromStr, TryFromInto};
+use services::ServiceError;
 use std::fmt;
 use std::sync::Arc;
 use utoipa::ToSchema;
@@ -14,6 +15,10 @@ pub type ApiResult<T> = Result<T, ApiError>;
 #[serde_as]
 #[derive(Debug, Serialize, From)]
 pub enum ApiError {
+    UrlNotFound {
+        url: String,
+    },
+
     NoAuthIdInRequest,
     NoCtxInRequest,
 
@@ -56,8 +61,7 @@ impl std::error::Error for ApiError {}
 
 impl IntoResponse for ApiError {
     fn into_response(self) -> Response {
-        // dummy response, will be replaced by the response mapper
-        let mut response = StatusCode::INTERNAL_SERVER_ERROR.into_response();
+        let mut response = PublicError::from(&self).into_response();
         response.extensions_mut().insert(Arc::new(self));
         response
     }
@@ -110,18 +114,44 @@ impl From<ApiError> for PublicError {
 
 impl From<&ApiError> for PublicError {
     fn from(value: &ApiError) -> Self {
+        let ise = (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "Internal server error".to_string(),
+        );
+
         let (status, message) = match value {
-            ApiError::NoAuthIdInRequest => (StatusCode::BAD_REQUEST, "No auth id in request"),
-            ApiError::NoCtxInRequest => (StatusCode::BAD_REQUEST, "No context in request"),
-            ApiError::Service(_)
-            | ApiError::Repositories(_)
+            ApiError::UrlNotFound { url } => {
+                (StatusCode::NOT_FOUND, format!("Url '{}' not found", url))
+            }
+            ApiError::NoAuthIdInRequest | ApiError::NoCtxInRequest => (
+                StatusCode::UNAUTHORIZED,
+                "You must be authenticated to access this resource".to_string(),
+            ),
+            ApiError::Service(e) => match e {
+                ServiceError::RegularUserRequired | ServiceError::ServiceUserRequired => (
+                    StatusCode::FORBIDDEN,
+                    "You do not have permission to access this resource".to_string(),
+                ),
+                ServiceError::NameNotUnique { name } => (
+                    StatusCode::CONFLICT,
+                    format!("Name '{}' is not unique", name),
+                ),
+                ServiceError::SlugNotUnique { slug } => (
+                    StatusCode::CONFLICT,
+                    format!("Slug '{}' is not unique", slug),
+                ),
+                ServiceError::ResourceNotFound { resource, id } => (
+                    StatusCode::NOT_FOUND,
+                    format!("{} '{}' not found", resource, id),
+                ),
+                ServiceError::SeaORM(_) => ise.clone(),
+            },
+            ApiError::Repositories(_)
             | ApiError::Config(_)
             | ApiError::Io(_)
             | ApiError::InvalidHeaderValue(_)
             | ApiError::TracingSetGlobalDefault(_)
-            | ApiError::TracingFilterParse(_) => {
-                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error")
-            }
+            | ApiError::TracingFilterParse(_) => ise.clone(),
         };
 
         Self::new(status, message)

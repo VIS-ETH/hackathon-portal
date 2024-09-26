@@ -19,3 +19,4 @@ sea-orm = { version = "1.0.0", features = [
     "with-json",
 ] }
 serde_with = "3.9.0"
+slug = "0.1.6"

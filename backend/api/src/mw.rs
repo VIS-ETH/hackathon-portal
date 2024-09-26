@@ -7,7 +7,7 @@ use axum::extract::State;
 use axum::http::{HeaderValue, Method, Uri};
 use axum::middleware::Next;
 use axum::response::{IntoResponse, Response};
-use services::ctx::Ctx as ServiceCtx;
+use services::ctx::{Ctx as ServiceCtx, User};
 use std::sync::Arc;
 use tracing::info;
 use uuid::Uuid;
@@ -49,7 +49,7 @@ pub async fn mw_resolve_ctx(
         return next.run(req).await;
     };
 
-    let ctx = Ctx::new(ServiceCtx::from_regular(user));
+    let ctx = Ctx::new(User::Regular(user));
 
     let mut req = req;
     req.extensions_mut().insert(Some(ctx));
@@ -66,11 +66,9 @@ pub async fn mw_map_response(
     let uuid = Uuid::new_v4();
 
     let api_error = res.extensions().get::<Arc<ApiError>>();
-    let public_error = api_error.map(|error| PublicError::from(error.as_ref()));
-    let public_error_response = public_error.map(|error| error.into_response());
 
     info!(
-        user = ?ctx.as_ref().map(|ctx| ctx.user()),
+        ?ctx,
         error = ?api_error,
         uuid = %uuid,
         status = %res.status(),
@@ -79,9 +77,5 @@ pub async fn mw_map_response(
         "Request"
     );
 
-    if let Some(public_error_response) = public_error_response {
-        public_error_response
-    } else {
-        res
-    }
+    res
 }

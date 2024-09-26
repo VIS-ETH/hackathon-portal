@@ -1,13 +1,21 @@
 pub mod model;
 
 use crate::ctx::{Ctx, User};
-use crate::event::model::{CreateEventRequest, CreateEventResponse, ListEventsResponse};
-use sea_orm::prelude::*;
-use sea_orm::{ActiveModelTrait, QueryOrder, Set, TransactionTrait};
-
-use crate::ServiceResult;
+use crate::event::model::{
+    CreateEventRequest, CreateEventResponse, GetEventResponse, GetEventRolesResponse,
+    GetEventsResponse, GetEventsRolesResponse,
+};
+use crate::{ServiceError, ServiceResult};
 use repositories::db::prelude::{db_event, db_event_role_assignment, EventPhase, EventRole};
 use repositories::DbRepository;
+use sea_orm::prelude::*;
+use sea_orm::sea_query::{Asterisk, IntoColumnRef};
+use sea_orm::{
+    ActiveModelTrait, Condition, FromQueryResult, QueryOrder, QuerySelect, SelectColumns, Set,
+    TransactionTrait,
+};
+use slug::slugify;
+use std::collections::HashMap;
 
 #[derive(Clone)]
 pub struct EventService {
@@ -19,64 +27,38 @@ impl EventService {
         Self { db_repo }
     }
 
-    fn can_view_event_with_roles(
-        event: &db_event::Model,
-        roles: &[db_event_role_assignment::Model],
-    ) -> bool {
-        roles
-            .iter()
-            .any(|role| Self::can_view_event_with_role(event, role))
-    }
-
-    fn can_view_event_with_role(
-        event: &db_event::Model,
-        role: &db_event_role_assignment::Model,
-    ) -> bool {
-        let admin_roles = [
-            EventRole::Admin,
-            EventRole::Mentor,
-            EventRole::Stakeholder,
-            EventRole::SidequestMaster,
-        ];
-
-        let regular_roles = [EventRole::Participant];
-
-        if admin_roles.contains(&role.role) {
-            return true;
-        }
-
-        if regular_roles.contains(&role.role) && !event.is_hidden {
-            return true;
-        }
-
-        false
-    }
-
-    pub async fn create(
+    pub async fn create_event(
         &self,
         req: CreateEventRequest,
-        ctx: &Ctx,
+        ctx: &impl Ctx,
     ) -> ServiceResult<CreateEventResponse> {
         if !matches!(ctx.user(), User::Service) {
-            // return Err(Error::Unauthorized);
-            todo!()
+            return Err(ServiceError::ServiceUserRequired);
         }
 
-        let txn = self.db_repo.conn().begin().await.unwrap();
+        let slug = slugify(&req.name);
+        let txn = self.db_repo.conn().begin().await?;
 
         let existing = db_event::Entity::find()
-            .filter(db_event::Column::Name.contains(&req.name))
+            .filter(
+                Condition::any()
+                    .add(db_event::Column::Name.eq(&req.name))
+                    .add(db_event::Column::Slug.eq(&slug)),
+            )
             .one(&txn)
-            .await
-            .unwrap();
+            .await?;
 
-        if existing.is_some() {
-            // return Err(Error::Conflict);
-            todo!()
+        if let Some(existing) = existing {
+            return if existing.slug == slug {
+                Err(ServiceError::SlugNotUnique { slug })
+            } else {
+                Err(ServiceError::NameNotUnique { name: req.name })
+            };
         }
 
         let active_event = db_event::ActiveModel {
             name: Set(req.name),
+            slug: Set(slug),
             start: Set(req.start),
             end: Set(req.end),
             max_team_size: Set(req.max_team_size as i32),
@@ -89,48 +71,132 @@ impl EventService {
 
         let event = db_event::Entity::insert(active_event)
             .exec_with_returning(&txn)
-            .await
-            .unwrap();
+            .await?;
 
-        txn.commit().await.unwrap();
+        txn.commit().await?;
 
         let response = CreateEventResponse { id: event.id };
 
         Ok(response)
     }
 
-    pub async fn list(&self, ctx: &Ctx) -> ServiceResult<ListEventsResponse> {
-        // let User::Regular(user) = ctx.user() else {
+    pub async fn get_events(&self, ctx: &impl Ctx) -> ServiceResult<GetEventsResponse> {
+        let condition = self.get_view_condition(ctx.user());
+
         let events = db_event::Entity::find()
+            .left_join(db_event_role_assignment::Entity)
+            .filter(condition)
+            .distinct_on([
+                db_event::Column::Id.into_column_ref(),
+                db_event::Column::Start.into_column_ref(),
+            ])
             .order_by_asc(db_event::Column::Start)
             .all(self.db_repo.conn())
-            .await
-            .unwrap();
+            .await?;
 
-        let response = ListEventsResponse {
+        let response = GetEventsResponse {
             events: events.into_iter().map(|event| event.into()).collect(),
         };
 
         Ok(response)
-        // };
+    }
 
-        // let events_with_roles: Vec<(db_event::Model, Vec<db_event_role_assignment::Model>)> = db_event::Entity::find()
-        //     .find_with_related(db_event_role_assignment::Relation::)
-        //     .order_by_asc(db_event::Column::Start)
-        //     .all(db_repo.conn())
-        //     .await
-        //     .unwrap();
-        //
-        // let events = events_with_roles.into_iter().filter(|(event, roles)| {
-        //     Self::can_view_event_with_roles(event, roles)
-        // }).map(|(event, _)| event).collect();
+    pub async fn get_event(
+        &self,
+        event_id: Uuid,
+        ctx: &impl Ctx,
+    ) -> ServiceResult<GetEventResponse> {
+        let condition = self.get_view_condition(ctx.user());
 
-        // let events = vec![];
-        //
-        // let response = ListEventsResponse {
-        //     events: events.into_iter().map(|event| event.into()).collect(),
-        // };
-        //
-        // Ok(response)
+        let event = db_event::Entity::find()
+            .left_join(db_event_role_assignment::Entity)
+            .filter(condition)
+            .filter(db_event::Column::Id.eq(event_id))
+            .one(self.db_repo.conn())
+            .await?;
+
+        let Some(event) = event else {
+            return Err(ServiceError::ResourceNotFound {
+                resource: "Event".to_string(),
+                id: event_id.to_string(),
+            });
+        };
+
+        let response = GetEventResponse::from(event);
+
+        Ok(response)
+    }
+
+    pub async fn get_events_roles(&self, ctx: &impl Ctx) -> ServiceResult<GetEventsRolesResponse> {
+        let User::Regular(user) = ctx.user() else {
+            return Err(ServiceError::RegularUserRequired);
+        };
+
+        let assignments = db_event_role_assignment::Entity::find()
+            .filter(db_event_role_assignment::Column::UserId.eq(user.id))
+            .all(self.db_repo.conn())
+            .await?;
+
+        let roles = assignments
+            .into_iter()
+            .fold(HashMap::new(), |mut acc, assignment| {
+                acc.entry(assignment.event_id)
+                    .or_insert_with(Vec::new)
+                    .push(assignment.role);
+
+                acc
+            });
+
+        let response = GetEventsRolesResponse { roles };
+
+        Ok(response)
+    }
+
+    pub async fn get_event_roles(
+        &self,
+        event_id: Uuid,
+        ctx: &impl Ctx,
+    ) -> ServiceResult<GetEventRolesResponse> {
+        let User::Regular(user) = ctx.user() else {
+            return Err(ServiceError::RegularUserRequired);
+        };
+
+        let assignments = db_event_role_assignment::Entity::find()
+            .filter(db_event_role_assignment::Column::EventId.eq(event_id))
+            .filter(db_event_role_assignment::Column::UserId.eq(user.id))
+            .all(self.db_repo.conn())
+            .await?;
+
+        let roles = assignments
+            .into_iter()
+            .map(|assignment| assignment.role)
+            .collect();
+
+        let response = GetEventRolesResponse { roles };
+
+        Ok(response)
+    }
+
+    fn get_view_condition(&self, user: &User) -> Condition {
+        match user {
+            User::Service => Condition::all(),
+            User::Regular(user) => {
+                let participant_and_not_hidden = Condition::all()
+                    .add(db_event::Column::IsHidden.eq(false))
+                    .add(db_event_role_assignment::Column::UserId.eq(user.id))
+                    .add(db_event_role_assignment::Column::Role.eq(EventRole::Participant));
+
+                let staff = Condition::all()
+                    .add(db_event_role_assignment::Column::UserId.eq(user.id))
+                    .add(db_event_role_assignment::Column::Role.is_in(&[
+                        EventRole::Admin.to_value(),
+                        EventRole::Mentor.to_value(),
+                        EventRole::Stakeholder.to_value(),
+                        EventRole::SidequestMaster.to_value(),
+                    ]));
+
+                Condition::any().add(participant_and_not_hidden).add(staff)
+            }
+        }
     }
 }

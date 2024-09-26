@@ -8,12 +8,20 @@ pub type ServiceResult<T> = Result<T, ServiceError>;
 #[serde_as]
 #[derive(Debug, Serialize, From)]
 pub enum ServiceError {
+    RegularUserRequired,
+    ServiceUserRequired,
+
     NameNotUnique {
         name: String,
     },
 
     SlugNotUnique {
         slug: String,
+    },
+
+    ResourceNotFound {
+        resource: String,
+        id: String,
     },
 
     // region: external library errors

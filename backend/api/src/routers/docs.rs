@@ -2,11 +2,11 @@ use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 use utoipauto::utoipauto;
 
-#[utoipauto(paths = "api/src")]
+#[utoipauto(paths = "api/src, services/src from services, repositories/src from repositories")]
 #[derive(OpenApi)]
 #[openapi(
     servers(
-        (url = "http://localhost:8000", description = "Dev server"),
+        (url = "http://localhost:8080", description = "Dev server"),
         (url = "https://hack.ethz.ch", description = "Prod server"),
     ),
     tags(
