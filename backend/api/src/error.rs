@@ -20,6 +20,12 @@ pub enum ApiError {
         url: String,
     },
 
+    Forbidden {
+        resource: String,
+        id: String,
+        action: String,
+    },
+
     NoAuthIdInRequest,
     NoCtxInRequest,
 
@@ -122,6 +128,17 @@ impl From<&ApiError> for PublicError {
             ApiError::UrlNotFound { url } => {
                 (StatusCode::NOT_FOUND, format!("Url '{}' not found", url))
             }
+            ApiError::Forbidden {
+                resource,
+                id,
+                action,
+            } => (
+                StatusCode::FORBIDDEN,
+                format!(
+                    "You do not have permission to {} {} '{}'",
+                    action, resource, id
+                ),
+            ),
             ApiError::NoAuthIdInRequest | ApiError::NoCtxInRequest => (
                 StatusCode::UNAUTHORIZED,
                 "You must be authenticated to access this resource".to_string(),

@@ -1,15 +1,17 @@
+pub mod models;
+
 use crate::api_state::ApiState;
 use crate::ctx::Ctx;
+use crate::routers::events::models::EventDTO;
 use crate::ApiResult;
 use axum::extract::{Path, State};
 use axum::routing::{delete, get, patch, put};
 use axum::{Json, Router};
 use repositories::db::prelude::EventRole;
-use services::ctx::ServiceCtx;
-use services::event::model::{EventResponse, EventForPatch};
+use services::event::model::EventForPatch;
 use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
-use crate::models::AffectedRowsResponse;
+use crate::models::AffectedRowsDTO;
 
 pub fn get_router(state: &ApiState) -> Router {
     Router::new()
@@ -27,15 +29,25 @@ pub fn get_router(state: &ApiState) -> Router {
     get,
     path = "/api/events",
     responses(
-        (status = StatusCode::OK, body = Vec<GetEventResponse>),
+        (status = StatusCode::OK, body = Vec<EventDTO>),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     )
 )]
-pub async fn get_events(
-    ctx: Ctx,
-    State(state): State<ApiState>,
-) -> ApiResult<Json<Vec<EventResponse>>> {
-    let dto = state.event_service.get_events(&ctx).await?;
+pub async fn get_events(ctx: Ctx, State(state): State<ApiState>) -> ApiResult<Json<Vec<EventDTO>>> {
+    let events = state.event_service.get_events().await?;
+
+    let events = events
+        .into_iter()
+        .filter(|event| {
+            state
+                .authorization_service
+                .view_event_guard(ctx.roles(), event.id, event.visibility)
+                .is_ok()
+        })
+        .collect::<Vec<_>>();
+
+    let dto = events.into_iter().map(EventDTO::from).collect();
+
     Ok(Json(dto))
 }
 
@@ -51,8 +63,15 @@ pub async fn get_event(
     ctx: Ctx,
     State(state): State<ApiState>,
     Path(event_id): Path<Uuid>,
-) -> ApiResult<Json<EventResponse>> {
-    let dto = state.event_service.get_event(event_id, &ctx).await?;
+) -> ApiResult<Json<EventDTO>> {
+    let event = state.event_service.get_event(event_id).await?;
+
+    state
+        .authorization_service
+        .view_event_guard(ctx.roles(), event.id, event.visibility)?;
+
+    let dto = EventDTO::from(event);
+
     Ok(Json(dto))
 }
 
@@ -69,11 +88,14 @@ pub async fn patch_event(
     State(state): State<ApiState>,
     Path(event_id): Path<Uuid>,
     Json(body): Json<EventForPatch>,
-) -> ApiResult<Json<EventResponse>> {
-    let dto = state
-        .event_service
-        .patch_event(event_id, &body, &ctx)
-        .await?;
+) -> ApiResult<Json<EventDTO>> {
+    state
+        .authorization_service
+        .edit_event_guard(ctx.roles(), event_id)?;
+
+    let event = state.event_service.patch_event(event_id, &body).await?;
+
+    let dto = EventDTO::from(event);
 
     Ok(Json(dto))
 }
@@ -87,7 +109,7 @@ pub async fn patch_event(
     )
 )]
 pub async fn get_events_roles(ctx: Ctx) -> ApiResult<Json<HashMap<Uuid, HashSet<EventRole>>>> {
-    let dto = ctx.user().events_roles();
+    let dto = ctx.roles().event.clone();
     Ok(Json(dto))
 }
 
@@ -103,7 +125,12 @@ pub async fn get_event_roles(
     ctx: Ctx,
     Path(event_id): Path<Uuid>,
 ) -> ApiResult<Json<HashSet<EventRole>>> {
-    let dto = ctx.user().event_roles(event_id);
+    let dto = ctx
+        .roles()
+        .event
+        .get(&event_id)
+        .cloned()
+        .unwrap_or_default();
     Ok(Json(dto))
 }
 
@@ -111,7 +138,7 @@ pub async fn get_event_roles(
     put,
     path = "/api/events/{event_id}/roles",
     responses(
-        (status = StatusCode::OK, body = AffectedRowsResponse),
+        (status = StatusCode::OK, body = AffectedRowsDTO),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     )
 )]
@@ -120,9 +147,18 @@ pub async fn put_event_roles(
     State(state): State<ApiState>,
     Path(event_id): Path<Uuid>,
     Json(body): Json<HashMap<Uuid, HashSet<EventRole>>>,
-) -> ApiResult<Json<AffectedRowsResponse>> {
-    let affected_rows = state.event_service.add_event_role_assignments(event_id, body, &ctx).await?;
-    let dto = AffectedRowsResponse { affected_rows };
+) -> ApiResult<Json<AffectedRowsDTO>> {
+    state
+        .authorization_service
+        .edit_event_guard(ctx.roles(), event_id)?;
+
+    let affected_rows = state
+        .authorization_service
+        .assign_event_role(event_id, body)
+        .await?;
+
+    let dto = AffectedRowsDTO { affected_rows };
+
     Ok(Json(dto))
 }
 
@@ -130,7 +166,7 @@ pub async fn put_event_roles(
     delete,
     path = "/api/events/{event_id}/roles",
     responses(
-        (status = StatusCode::OK, body = AffectedRowsResponse),
+        (status = StatusCode::OK, body = AffectedRowsDTO),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     )
 )]
@@ -139,8 +175,17 @@ pub async fn delete_event_roles(
     State(state): State<ApiState>,
     Path(event_id): Path<Uuid>,
     Json(body): Json<HashMap<Uuid, HashSet<EventRole>>>,
-) -> ApiResult<Json<AffectedRowsResponse>> {
-    let affected_rows = state.event_service.remove_event_role_assignments(event_id, body, &ctx).await?;
-    let dto = AffectedRowsResponse { affected_rows };
+) -> ApiResult<Json<AffectedRowsDTO>> {
+    state
+        .authorization_service
+        .edit_event_guard(ctx.roles(), event_id)?;
+
+    let affected_rows = state
+        .authorization_service
+        .unassign_event_role(event_id, body)
+        .await?;
+
+    let dto = AffectedRowsDTO { affected_rows };
+
     Ok(Json(dto))
 }

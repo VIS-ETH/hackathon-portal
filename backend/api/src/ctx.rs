@@ -2,22 +2,26 @@ use crate::{ApiError, ApiResult};
 use axum::async_trait;
 use axum::extract::FromRequestParts;
 use axum::http::request::Parts;
-use services::ctx::{ServiceCtx as ServicesCtx, User};
+use repositories::db::prelude::*;
+use services::authorization::model::UserRoles;
 
 #[derive(Debug, Clone)]
 pub struct Ctx {
-    user: User,
+    user: db_user::Model,
+    roles: UserRoles,
 }
 
 impl Ctx {
-    pub fn new(user: User) -> Self {
-        Self { user }
+    pub fn new(user: db_user::Model, roles: UserRoles) -> Self {
+        Self { user, roles }
     }
-}
 
-impl ServicesCtx for Ctx {
-    fn user(&self) -> &User {
+    pub fn user(&self) -> &db_user::Model {
         &self.user
+    }
+
+    pub fn roles(&self) -> &UserRoles {
+        &self.roles
     }
 }
 

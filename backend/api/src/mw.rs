@@ -33,7 +33,7 @@ pub async fn mw_require_auth(ctx: Option<Ctx>, req: Request, next: Next) -> ApiR
 
 pub async fn mw_resolve_ctx(
     State(state): State<ApiState>,
-    req: Request<Body>,
+    mut req: Request<Body>,
     next: Next,
 ) -> Response {
     let Some(auth_id) = req
@@ -44,13 +44,16 @@ pub async fn mw_resolve_ctx(
         return next.run(req).await;
     };
 
-    let Ok(user) = state.user_service.get_or_create_ctx_user(auth_id).await else {
+    let Ok(user) = state.user_service.get_or_create_user(auth_id).await else {
         return next.run(req).await;
     };
 
-    let ctx = Ctx::new(user);
+    let Ok(roles) = state.authorization_service.get_roles(user.id).await else {
+        return next.run(req).await;
+    };
 
-    let mut req = req;
+    let ctx = Ctx::new(user, roles);
+
     req.extensions_mut().insert(Some(ctx));
 
     next.run(req).await

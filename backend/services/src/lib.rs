@@ -1,4 +1,4 @@
-pub mod ctx;
+pub mod authorization;
 pub mod error;
 pub mod event;
 pub mod user;

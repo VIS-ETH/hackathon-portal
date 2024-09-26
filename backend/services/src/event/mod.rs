@@ -1,21 +1,16 @@
 pub mod model;
 
-use crate::ctx::{ServiceCtx, User};
-use crate::event::model::{
-    EventForCreate, EventResponse, EventForPatch,
-};
+use crate::event::model::{EventForCreate, EventForPatch};
 use crate::{ServiceError, ServiceResult};
 use rand::distributions::Alphanumeric;
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
-use repositories::db::prelude::{db_event, db_event_role_assignment, EventPhase, EventRole};
+use repositories::db::prelude::{db_event, EventPhase};
 use repositories::db::sea_orm_active_enums::EventVisibility;
 use repositories::DbRepository;
 use sea_orm::prelude::*;
-use sea_orm::sea_query::OnConflict;
-use sea_orm::{ActiveModelTrait, Condition, IntoActiveModel, QueryOrder, Set, TryInsertResult};
+use sea_orm::{ActiveModelTrait, Condition, IntoActiveModel, QueryOrder, Set};
 use slug::slugify;
-use std::collections::{HashMap, HashSet};
 
 #[derive(Clone)]
 pub struct EventService {
@@ -27,15 +22,7 @@ impl EventService {
         Self { db_repo }
     }
 
-    pub async fn create_event(
-        &self,
-        req: EventForCreate,
-        ctx: &impl ServiceCtx,
-    ) -> ServiceResult<EventResponse> {
-        if !matches!(ctx.user(), User::Service) {
-            return Err(ServiceError::ServiceUserRequired);
-        }
-
+    pub async fn create_event(&self, req: EventForCreate) -> ServiceResult<db_event::Model> {
         self.check_event_name_conflict(&req.name).await?;
 
         let slug = slugify(&req.name);
@@ -58,31 +45,19 @@ impl EventService {
             .exec_with_returning(self.db_repo.conn())
             .await?;
 
-        let response = EventResponse::from(event);
-
-        Ok(response)
+        Ok(event)
     }
 
-    pub async fn get_events(&self, ctx: &impl ServiceCtx) -> ServiceResult<Vec<EventResponse>> {
+    pub async fn get_events(&self) -> ServiceResult<Vec<db_event::Model>> {
         let events = db_event::Entity::find()
             .order_by_asc(db_event::Column::Start)
             .all(self.db_repo.conn())
             .await?;
 
-        let events = events
-            .into_iter()
-            .filter(|event| self.can_view_event(ctx.user(), event))
-            .map(|event| EventResponse::from(event))
-            .collect::<Vec<_>>();
-
         Ok(events)
     }
 
-    pub async fn get_event(
-        &self,
-        event_id: Uuid,
-        ctx: &impl ServiceCtx,
-    ) -> ServiceResult<EventResponse> {
+    pub async fn get_event(&self, event_id: Uuid) -> ServiceResult<db_event::Model> {
         let event = db_event::Entity::find()
             .filter(db_event::Column::Id.eq(event_id))
             .one(self.db_repo.conn())
@@ -92,25 +67,14 @@ impl EventService {
                 id: event_id.to_string(),
             })?;
 
-        if !self.can_view_event(ctx.user(), &event) {
-            return Err(ServiceError::Forbidden {
-                resource: "Event".to_string(),
-                id: event_id.to_string(),
-                action: "view".to_string(),
-            });
-        }
-
-        let response = EventResponse::from(event);
-
-        Ok(response)
+        Ok(event)
     }
 
     pub async fn patch_event(
         &self,
         event_id: Uuid,
         patch: &EventForPatch,
-        ctx: &impl ServiceCtx,
-    ) -> ServiceResult<EventResponse> {
+    ) -> ServiceResult<db_event::Model> {
         let event = db_event::Entity::find()
             .filter(db_event::Column::Id.eq(event_id))
             .one(self.db_repo.conn())
@@ -119,14 +83,6 @@ impl EventService {
                 resource: "Event".to_string(),
                 id: event_id.to_string(),
             })?;
-
-        if !self.can_modify_event(ctx.user(), &event) {
-            return Err(ServiceError::Forbidden {
-                resource: "Event".to_string(),
-                id: event_id.to_string(),
-                action: "modify".to_string(),
-            });
-        }
 
         let mut active_event = event.into_active_model();
 
@@ -162,139 +118,7 @@ impl EventService {
 
         let event = active_event.update(self.db_repo.conn()).await?;
 
-        let response = EventResponse::from(event);
-
-        Ok(response)
-    }
-
-    pub async fn add_event_role_assignments(
-        &self,
-        event_id: Uuid,
-        roles: HashMap<Uuid, HashSet<EventRole>>,
-        ctx: &impl ServiceCtx,
-    ) -> ServiceResult<u64> {
-        let event = db_event::Entity::find()
-            .filter(db_event::Column::Id.eq(event_id))
-            .one(self.db_repo.conn())
-            .await?
-            .ok_or_else(|| ServiceError::ResourceNotFound {
-                resource: "Event".to_string(),
-                id: event_id.to_string(),
-            })?;
-
-        if !self.can_modify_event(ctx.user(), &event) {
-            return Err(ServiceError::Forbidden {
-                resource: "Event".to_string(),
-                id: event_id.to_string(),
-                action: "modify".to_string(),
-            });
-        }
-
-        let mut active_role_assignments = Vec::new();
-
-        for (user_id, roles) in roles {
-            for role in roles {
-                active_role_assignments.push(db_event_role_assignment::ActiveModel {
-                    user_id: Set(user_id),
-                    event_id: Set(event_id),
-                    role: Set(role),
-                });
-            }
-        }
-
-        let result = db_event_role_assignment::Entity::insert_many(active_role_assignments)
-            .on_conflict(
-                OnConflict::columns(vec![
-                    db_event_role_assignment::Column::UserId,
-                    db_event_role_assignment::Column::EventId,
-                    db_event_role_assignment::Column::Role,
-                ])
-                    .do_nothing()
-                    .to_owned(),
-            )
-            .on_empty_do_nothing()
-            .exec_without_returning(self.db_repo.conn())
-            .await?;
-
-        let rows_affected = match result {
-            TryInsertResult::Empty => 0,
-            TryInsertResult::Conflicted => 0,
-            TryInsertResult::Inserted(n) => n,
-        };
-
-        Ok(rows_affected)
-    }
-
-
-    pub async fn remove_event_role_assignments(
-        &self,
-        event_id: Uuid,
-        roles: HashMap<Uuid, HashSet<EventRole>>,
-        ctx: &impl ServiceCtx,
-    ) -> ServiceResult<u64> {
-        let event = db_event::Entity::find()
-            .filter(db_event::Column::Id.eq(event_id))
-            .one(self.db_repo.conn())
-            .await?
-            .ok_or_else(|| ServiceError::ResourceNotFound {
-                resource: "Event".to_string(),
-                id: event_id.to_string(),
-            })?;
-
-        if !self.can_modify_event(ctx.user(), &event) {
-            return Err(ServiceError::Forbidden {
-                resource: "Event".to_string(),
-                id: event_id.to_string(),
-                action: "modify".to_string(),
-            });
-        }
-
-        let mut rows_affected = 0;
-
-        for (user_id, roles) in roles {
-            for role in roles {
-                let result = db_event_role_assignment::Entity::delete_many()
-                    .filter(
-                        Condition::all()
-                            .add(db_event_role_assignment::Column::UserId.eq(user_id))
-                            .add(db_event_role_assignment::Column::EventId.eq(event_id))
-                            .add(db_event_role_assignment::Column::Role.eq(role)),
-                    )
-                    .exec(self.db_repo.conn())
-                    .await?;
-
-                rows_affected += result.rows_affected;
-            }
-        }
-
-        Ok(rows_affected)
-    }
-
-    fn can_view_event(&self, user: &User, event: &db_event::Model) -> bool {
-        match user {
-            User::Service => true,
-            User::Regular { events_roles, .. } => match event.visibility {
-                EventVisibility::Private => events_roles.get(&event.id).is_some_and(|roles| {
-                    roles.contains(&EventRole::Admin)
-                        || roles.contains(&EventRole::Mentor)
-                        || roles.contains(&EventRole::Stakeholder)
-                        || roles.contains(&EventRole::SidequestMaster)
-                }),
-                EventVisibility::Restricted => events_roles
-                    .get(&event.id)
-                    .is_some_and(|roles| !roles.is_empty()),
-                EventVisibility::Public => true,
-            },
-        }
-    }
-
-    fn can_modify_event(&self, user: &User, event: &db_event::Model) -> bool {
-        match user {
-            User::Service => true,
-            User::Regular { events_roles, .. } => events_roles
-                .get(&event.id)
-                .is_some_and(|roles| roles.contains(&EventRole::Admin)),
-        }
+        Ok(event)
     }
 
     fn generate_kdf_secret(&self) -> String {

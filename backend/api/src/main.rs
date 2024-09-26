@@ -3,10 +3,10 @@ mod api_config;
 mod api_state;
 mod ctx;
 mod error;
+mod models;
 mod mw;
 mod routers;
 mod utils;
-mod models;
 
 use crate::api_args::ApiArgs;
 use crate::api_config::ApiConfig;
