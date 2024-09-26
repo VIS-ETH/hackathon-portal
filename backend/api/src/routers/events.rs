@@ -1,5 +1,5 @@
+use std::collections::{HashMap, HashSet};
 use crate::api_state::ApiState;
-use crate::ctx::Ctx;
 use crate::ApiResult;
 use axum::extract::{Path, State};
 use axum::routing::get;
@@ -8,6 +8,9 @@ use services::event::model::{
     GetEventResponse, GetEventRolesResponse, GetEventsResponse, GetEventsRolesResponse,
 };
 use uuid::Uuid;
+use repositories::db::prelude::EventRole;
+use crate::ctx::Ctx;
+use services::ctx::ServiceCtx;
 
 pub fn get_router(state: &ApiState) -> Router {
     Router::new()
@@ -46,8 +49,9 @@ pub async fn get_events_roles(
     ctx: Ctx,
     State(state): State<ApiState>,
 ) -> ApiResult<Json<GetEventsRolesResponse>> {
-    let dto = state.event_service.get_events_roles(&ctx).await?;
-    Ok(Json(dto))
+    todo!()
+    // let dto = state.event_service.get_events_roles(&ctx).await?;
+    // Ok(Json(dto))
 }
 
 #[utoipa::path(
@@ -68,18 +72,33 @@ pub async fn get_event(
 }
 
 #[utoipa::path(
-    get,
-    path = "/api/events/{event_id}/roles",
+    patch,
+    path = "/api/events/{event_id}",
     responses(
         (status = StatusCode::OK, body = GetEventRolesResponse),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     )
 )]
-pub async fn get_event_roles(
+pub async fn patch_event(
     ctx: Ctx,
     State(state): State<ApiState>,
     Path(event_id): Path<Uuid>,
-) -> ApiResult<Json<GetEventRolesResponse>> {
-    let dto = state.event_service.get_event_roles(event_id, &ctx).await?;
+) -> ApiResult<Json<GetEventResponse>> {
+    let dto = state.event_service.get_event(event_id, &ctx).await?;
     Ok(Json(dto))
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/events/{event_id}/roles",
+    responses(
+        (status = StatusCode::OK, body = HashMap<Uuid, HashSet<EventRole>>),
+        (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
+    )
+)]
+pub async fn get_event_roles(
+    ctx: Ctx,
+    Path(event_id): Path<Uuid>,
+) -> ApiResult<Json<HashSet<EventRole>>> {
+    Ok(Json(ctx.event_roles(event_id)))
 }

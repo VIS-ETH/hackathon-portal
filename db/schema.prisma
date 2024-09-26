@@ -3,6 +3,12 @@ datasource db {
   url      = env("POSTGRES_URL")
 }
 
+enum event_visibility {
+  PRIVATE // only visible to admins, mentors, and stakeholders
+  RESTRICTED // only visible to admins, mentors, stakeholders, and participants
+  PUBLIC // visible to everyone
+}
+
 enum event_phase {
   REGISTRATION
   HACKING
@@ -27,14 +33,14 @@ model event {
   id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
 
   // fields
-  name                String      @unique
-  slug                String      @unique
+  name                String           @unique
+  slug                String           @unique
   start               DateTime
   end                 DateTime
   max_team_size       Int
   kdf_secret          String
   is_feedback_visible Boolean
-  is_hidden           Boolean
+  visibility          event_visibility
   phase               event_phase
 
   // related models

@@ -1,9 +1,13 @@
+use std::collections::{HashMap, HashSet};
 use crate::error::PublicResult;
 use crate::{ApiError, ApiResult, PublicError};
 use axum::async_trait;
 use axum::extract::FromRequestParts;
 use axum::http::request::Parts;
-use services::ctx::{Ctx as ServicesCtx, User};
+use uuid::Uuid;
+use repositories::db::prelude::{EventRole, TeamRole};
+use services::ctx::{ServiceCtx as ServicesCtx, User};
+use repositories::db::prelude::*;
 
 #[derive(Debug, Clone)]
 pub struct Ctx {
@@ -12,7 +16,9 @@ pub struct Ctx {
 
 impl Ctx {
     pub fn new(user: User) -> Self {
-        Self { user }
+        Self {
+            user,
+        }
     }
 }
 

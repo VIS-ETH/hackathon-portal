@@ -14,19 +14,8 @@ pub struct CreateEventRequest {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
-pub struct CreateEventResponse {
-    pub id: Uuid,
-}
-
-impl From<db_event::Model> for CreateEventResponse {
-    fn from(event: db_event::Model) -> Self {
-        Self { id: event.id }
-    }
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
-pub struct GetEventRequest {
-    pub id: Uuid,
+pub struct GetEventsResponse {
+    pub events: Vec<GetEventResponse>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
@@ -57,8 +46,14 @@ impl From<db_event::Model> for GetEventResponse {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
-pub struct GetEventsResponse {
-    pub events: Vec<GetEventResponse>,
+pub struct PatchEventRequest {
+    pub name: Option<String>,
+    pub start: Option<NaiveDateTime>,
+    pub end: Option<NaiveDateTime>,
+    pub max_team_size: Option<u32>,
+    pub is_feedback_visible: Option<bool>,
+    pub is_hidden: Option<bool>,
+    pub phase: Option<EventPhase>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]

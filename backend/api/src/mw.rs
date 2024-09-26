@@ -7,7 +7,7 @@ use axum::extract::State;
 use axum::http::{HeaderValue, Method, Uri};
 use axum::middleware::Next;
 use axum::response::{IntoResponse, Response};
-use services::ctx::{Ctx as ServiceCtx, User};
+use services::ctx::{ServiceCtx as ServiceCtx, User};
 use std::sync::Arc;
 use tracing::info;
 use uuid::Uuid;
@@ -45,11 +45,11 @@ pub async fn mw_resolve_ctx(
         return next.run(req).await;
     };
 
-    let Ok(user) = state.user_service.get_or_create(auth_id).await else {
+    let Ok(user) = state.user_service.get_or_create_ctx_user(auth_id).await else {
         return next.run(req).await;
     };
 
-    let ctx = Ctx::new(User::Regular(user));
+    let ctx = Ctx::new(user);
 
     let mut req = req;
     req.extensions_mut().insert(Some(ctx));
