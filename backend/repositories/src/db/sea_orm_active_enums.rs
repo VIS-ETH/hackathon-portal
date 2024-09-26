@@ -63,6 +63,27 @@ pub enum EventRole {
     utoipa::ToSchema,
     Hash,
 )]
+#[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "event_visibility")]
+pub enum EventVisibility {
+    #[sea_orm(string_value = "PRIVATE")]
+    Private,
+    #[sea_orm(string_value = "PUBLIC")]
+    Public,
+    #[sea_orm(string_value = "RESTRICTED")]
+    Restricted,
+}
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Eq,
+    EnumIter,
+    DeriveActiveEnum,
+    Serialize,
+    Deserialize,
+    utoipa::ToSchema,
+    Hash,
+)]
 #[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "team_role")]
 pub enum TeamRole {
     #[sea_orm(string_value = "MEMBER")]
