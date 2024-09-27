@@ -140,11 +140,23 @@ pub async fn post_sidequests_attempts(
         .authorization_service
         .edit_sidequests_attempt_guard(ctx.roles(), event.id)?;
 
-    let res = state.authorization_service.get_event_roles(body.user_id).await?;
-    let roles = res.get(&event.id).ok_or((ApiError::Forbidden{action: "participate".to_string(),resource:"sidequests".to_string(), id: sidequest_id.to_string()}))?;
+    let res = state
+        .authorization_service
+        .get_event_roles(body.user_id)
+        .await?;
+    let roles = res.get(&event.id).ok_or(
+        (ApiError::Forbidden {
+            action: "participate".to_string(),
+            resource: "sidequests".to_string(),
+            id: sidequest_id.to_string(),
+        }),
+    )?;
     if (!roles.contains(&EventRole::Participant)) {
-        return Err((ApiError::Forbidden{action: "participate".to_string()
-        ,resource:"sidequests".to_string(), id: sidequest_id.to_string()}))
+        return Err((ApiError::Forbidden {
+            action: "participate".to_string(),
+            resource: "sidequests".to_string(),
+            id: sidequest_id.to_string(),
+        }));
     }
 
     let _ = state

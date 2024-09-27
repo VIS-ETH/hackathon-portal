@@ -163,7 +163,6 @@ impl SidequestService {
         &self,
         sidequest_id: Uuid,
     ) -> ServiceResult<Vec<SidequestEntryForLeaderboard>> {
-
         let event = self.get_event(sidequest_id).await?;
 
         let sidequest = self.get_sidequest(sidequest_id).await?;
@@ -186,7 +185,11 @@ impl SidequestService {
             .all(self.db_repo.conn())
             .await?;
 
-        let num_participants = (UserService::new(self.db_repo.clone()).get_participants(event.id).await?.len()+1) as i64;
+        let num_participants = (UserService::new(self.db_repo.clone())
+            .get_participants(event.id)
+            .await?
+            .len()
+            + 1) as i64;
 
         let result = leaderboard.into_iter().fold(
             (
@@ -227,9 +230,16 @@ impl SidequestService {
             },
         );
 
-        let (mut result, ties,_, rank) = result;
+        let (mut result, ties, _, rank) = result;
 
-        result.extend(ties.into_iter().map(|mut entry| {entry.points = Some(rank); entry}).collect::<Vec<_>>());
+        result.extend(
+            ties.into_iter()
+                .map(|mut entry| {
+                    entry.points = Some(rank);
+                    entry
+                })
+                .collect::<Vec<_>>(),
+        );
 
         Ok(result)
     }

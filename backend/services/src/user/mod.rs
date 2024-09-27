@@ -78,15 +78,24 @@ impl UserService {
 
         let mut participants = Vec::<db_user::Model>::new();
         for user in users {
-            let roles = user.find_related(db_event_role_assignment::Entity).filter(db_event_role_assignment::Column::EventId.eq(event_id)).all(self.db_repo.conn()).await;
+            let roles = user
+                .find_related(db_event_role_assignment::Entity)
+                .filter(db_event_role_assignment::Column::EventId.eq(event_id))
+                .all(self.db_repo.conn())
+                .await;
             match roles {
                 Err(err) => (),
-                Ok(roles) => if (roles.into_iter().any(|role| {role.role == EventRole::Participant})) {
-                    participants.push(user);
-                },
+                Ok(roles) => {
+                    if (roles
+                        .into_iter()
+                        .any(|role| role.role == EventRole::Participant))
+                    {
+                        participants.push(user);
+                    }
+                }
             }
         }
         dbg!(participants.clone());
         Ok(participants)
-        }
+    }
 }
