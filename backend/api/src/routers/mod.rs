@@ -1,5 +1,6 @@
 mod docs;
 mod events;
+mod sidequests;
 
 use crate::api_state::ApiState;
 use crate::mw::{mw_impersonate, mw_map_response, mw_require_auth, mw_resolve_ctx};
@@ -17,7 +18,9 @@ async fn handler_404(request: Request) -> ApiResult<()> {
 }
 
 pub fn get_router(state: &ApiState) -> Router {
-    Router::new().nest("/events", events::get_router(state))
+    Router::new()
+        .nest("/events", events::get_router(state))
+        .nest("/sidequests", sidequests::get_router(state))
 }
 
 pub async fn get_api_router(api_state: ApiState) -> ApiResult<Router> {
@@ -55,7 +58,7 @@ pub async fn get_api_router(api_state: ApiState) -> ApiResult<Router> {
         .fallback(handler_404)
         .layer(middleware::map_response(mw_map_response))
         .layer(middleware::from_fn_with_state(api_state, mw_resolve_ctx))
-        // .layer(middleware::from_fn(mw_impersonate))
+        .layer(middleware::from_fn(mw_impersonate))
         .layer(cors);
 
     Ok(api_router)

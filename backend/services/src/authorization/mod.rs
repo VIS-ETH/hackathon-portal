@@ -106,8 +106,8 @@ impl AuthorizationService {
                     db_event_role_assignment::Column::EventId,
                     db_event_role_assignment::Column::Role,
                 ])
-                    .do_nothing()
-                    .to_owned(),
+                .do_nothing()
+                .to_owned(),
             )
             .on_empty_do_nothing()
             .exec_without_returning(self.db_repo.conn())
@@ -217,5 +217,43 @@ impl AuthorizationService {
 
     pub fn can_view_team_secrets(&self) -> bool {
         todo!()
+    }
+
+    // Sidequests
+
+    pub fn edit_sidequests_guard(&self, roles: &UserRoles, event_id: Uuid) -> ServiceResult<()> {
+        let event_roles = roles.event.get(&event_id);
+        let pass = event_roles.is_some_and(|roles| roles.contains(&EventRole::Admin));
+
+        if pass {
+            Ok(())
+        } else {
+            Err(ServiceError::Forbidden {
+                resource: "event".to_string(),
+                id: event_id.to_string(),
+                action: "edit sidequests".to_string(),
+            })
+        }
+    }
+
+    pub fn edit_sidequests_attempt_guard(
+        &self,
+        roles: &UserRoles,
+        event_id: Uuid,
+    ) -> ServiceResult<()> {
+        let event_roles = roles.event.get(&event_id);
+        let pass = event_roles.is_some_and(|roles| {
+            roles.contains(&EventRole::Admin) || roles.contains(&EventRole::SidequestMaster)
+        });
+
+        if pass {
+            Ok(())
+        } else {
+            Err(ServiceError::Forbidden {
+                resource: "event".to_string(),
+                id: event_id.to_string(),
+                action: "edit sidequests".to_string(),
+            })
+        }
     }
 }
