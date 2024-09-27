@@ -27,7 +27,7 @@ pub async fn get_api_router(api_state: ApiState) -> ApiResult<Router> {
             "http://localhost:8080".parse()?,
         ]
     } else {
-        vec!["https://hack.ethz.ch".parse()?]
+        vec!["https://hackathon.ethz.ch".parse()?]
     };
 
     let cors = CorsLayer::new()
@@ -55,7 +55,7 @@ pub async fn get_api_router(api_state: ApiState) -> ApiResult<Router> {
         .fallback(handler_404)
         .layer(middleware::map_response(mw_map_response))
         .layer(middleware::from_fn_with_state(api_state, mw_resolve_ctx))
-        .layer(middleware::from_fn(mw_impersonate))
+        // .layer(middleware::from_fn(mw_impersonate))
         .layer(cors);
 
     Ok(api_router)
