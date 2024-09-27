@@ -1,0 +1,16 @@
+[package]
+name = "repositories"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serde = { version = "1.0.204", features = ["derive"] }
+sea-orm = { version = "1.0.1", features = [
+    "sqlx-postgres",
+    "runtime-tokio-native-tls",
+    "macros",
+    "with-json",
+] }
+utoipa = { version = "4.2.3", features = ["axum_extras", "chrono", "uuid"] }
+derive_more = { version = "1.0.0", features = ["full"] }
+serde_with = "3.9.0"
