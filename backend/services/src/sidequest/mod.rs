@@ -1,5 +1,7 @@
 pub mod model;
+use std::collections::HashMap;
 
+use crate::event::EventService;
 use crate::user::model::UserForCreate;
 use crate::user::UserService;
 use crate::utils::try_insert_result_to_int;
@@ -191,6 +193,11 @@ impl SidequestService {
             .len()
             + 1) as i64;
 
+        println!(
+            "number of participants for leaderboard {}",
+            num_participants
+        );
+
         let result = leaderboard.into_iter().fold(
             (
                 Vec::<SidequestEntryForLeaderboard>::new(),
@@ -242,5 +249,51 @@ impl SidequestService {
         );
 
         Ok(result)
+    }
+
+    pub async fn aggregate(&self, event_id: Uuid) -> ServiceResult<()> {
+        let time_now = Utc::now().naive_utc();
+        let event_service = EventService::new(self.db_repo.clone());
+        let user_service = UserService::new(self.db_repo.clone());
+        let event: db_event::Model = event_service.get_event(event_id).await?;
+
+        if (event.phase != EventPhase::Hacking) {
+            return Err(ServiceError::EventPhase {
+                current_phase: (event.phase),
+            });
+        }
+
+        let teams = Vec::<db_team::Model>::new(); // TODO this should come from database
+        let sidequests = self.get_sidequests(event_id).await?;
+
+        let team_mapping = user_service.get_team_mapping(event_id).await?;
+
+        let mut team_points = HashMap::<Uuid, i64>::new();
+        for team in teams {
+            team_points.insert(team.id, 0);
+        }
+        for sidequest in sidequests {
+            let leaderboard = self.get_leaderboard(sidequest.id).await?;
+            for result in leaderboard {
+                let group_id = team_mapping.get(&result.user_id);
+                match group_id {
+                    None => (),
+                    Some(group_id) => {
+                        let previous_points = team_points.get(group_id).copied().unwrap_or(0);
+                        team_points.insert(*group_id, previous_points + result.points.unwrap_or(0));
+                    }
+                }
+            }
+        }
+        for (team, score) in team_points {
+            let record = db_sidequest_score::ActiveModel {
+                score: Set(score.try_into().unwrap()),
+                team_id: Set(team),
+                valid_at: Set(time_now),
+                ..Default::default()
+            };
+            record.insert(self.db_repo.conn()).await?;
+        }
+        Ok(())
     }
 }

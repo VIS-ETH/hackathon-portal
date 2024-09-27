@@ -11,3 +11,9 @@ pub struct UserForCreate {
 pub struct UserForPatch {
     pub name: Option<String>,
 }
+
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+pub struct UserWithGroup {
+    pub user_name: String,
+    pub group_name: String,
+}

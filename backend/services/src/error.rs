@@ -1,8 +1,9 @@
 use chrono::NaiveDateTime;
 use derive_more::From;
+use repositories::db::prelude::EventPhase;
 use serde::Serialize;
 use serde_with::{serde_as, DisplayFromStr};
-use std::fmt;
+use std::{collections::HashSet, fmt};
 
 pub type ServiceResult<T> = Result<T, ServiceError>;
 
@@ -33,6 +34,10 @@ pub enum ServiceError {
 
     SidequestCooldown {
         allowed_at: NaiveDateTime,
+    },
+
+    EventPhase {
+        current_phase: EventPhase,
     },
 
     // region: external library errors

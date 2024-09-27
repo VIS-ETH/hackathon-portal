@@ -1,5 +1,7 @@
 pub mod model;
 
+use std::collections::HashMap;
+
 use crate::user::model::UserForCreate;
 use crate::utils::try_insert_result_to_int;
 use crate::ServiceResult;
@@ -97,5 +99,23 @@ impl UserService {
         }
         dbg!(participants.clone());
         Ok(participants)
+    }
+
+    pub async fn get_team_mapping(&self, event_id: Uuid) -> ServiceResult<HashMap<Uuid, Uuid>> {
+        let participants = self.get_participants(event_id).await?;
+        let mut team_mapping = HashMap::<Uuid, Uuid>::new();
+        for participant in participants {
+            let group: Option<db_team_role_assignment::Model> = participant
+                .find_related(db_team_role_assignment::Entity)
+                .one(self.db_repo.conn())
+                .await?;
+            match group {
+                None => (),
+                Some(group) => {
+                    let _ = team_mapping.insert(participant.id, group.team_id);
+                }
+            }
+        }
+        Ok(team_mapping)
     }
 }
