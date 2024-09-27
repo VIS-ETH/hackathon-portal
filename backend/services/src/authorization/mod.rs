@@ -11,7 +11,7 @@ use repositories::db::sea_orm_active_enums::EventVisibility;
 use repositories::DbRepository;
 use sea_orm::prelude::*;
 use sea_orm::sea_query::OnConflict;
-use sea_orm::{ActiveModelTrait, Condition, Set};
+use sea_orm::{Condition, Set};
 use std::collections::{HashMap, HashSet};
 
 #[derive(Clone)]
@@ -106,8 +106,8 @@ impl AuthorizationService {
                     db_event_role_assignment::Column::EventId,
                     db_event_role_assignment::Column::Role,
                 ])
-                .do_nothing()
-                .to_owned(),
+                    .do_nothing()
+                    .to_owned(),
             )
             .on_empty_do_nothing()
             .exec_without_returning(self.db_repo.conn())

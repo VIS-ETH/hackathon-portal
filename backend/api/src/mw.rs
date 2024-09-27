@@ -13,6 +13,7 @@ use uuid::Uuid;
 
 const AUTH_ID_KEY: &str = "X-Authentik-Email";
 
+#[allow(dead_code)]
 pub async fn mw_impersonate(mut req: Request<Body>, next: Next) -> ApiResult<Response> {
     if !cfg!(debug_assertions) {
         panic!("Impersonation middleware is only available in debug mode.");
