@@ -1,3 +1,4 @@
+use sea_orm::FromQueryResult;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use uuid::Uuid;
@@ -10,6 +11,23 @@ pub struct SidequestForCreate {
     pub is_higher_result_better: bool,
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+pub struct SidequestForPatch {
+    pub event_id: Uuid,
+    pub name: Option<String>,
+    pub description: Option<String>,
+    pub is_higher_result_better: Option<bool>,
+}
 
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+pub struct AttemptForCreate {
+    pub user_id: Uuid,
+    pub result: f64,
+}
 
-
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema, FromQueryResult)]
+pub struct SidequestEntryForLeaderboard {
+    pub user_id: Uuid,
+    pub result: f64,
+    pub points: Option<i64>,
+}

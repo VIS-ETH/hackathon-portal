@@ -1,3 +1,4 @@
+use chrono::NaiveDateTime;
 use derive_more::From;
 use serde::Serialize;
 use serde_with::{serde_as, DisplayFromStr};
@@ -28,6 +29,10 @@ pub enum ServiceError {
         resource: String,
         id: String,
         action: String,
+    },
+
+    SidequestCooldown {
+        allowed_at: NaiveDateTime,
     },
 
     // region: external library errors

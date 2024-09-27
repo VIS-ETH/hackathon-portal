@@ -11,8 +11,11 @@ use axum::{Json, Router};
 use models::CreateSidequestDTO;
 use repositories::db::prelude::EventRole;
 use serde::Deserialize;
+use services::authorization;
 use services::event::model::EventForPatch;
-use services::sidequest::model::SidequestForCreate;
+use services::sidequest::model::{
+    AttemptForCreate, SidequestEntryForLeaderboard, SidequestForCreate, SidequestForPatch,
+};
 use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
 
@@ -22,8 +25,9 @@ pub fn get_router(state: &ApiState) -> Router {
     Router::new()
         .route("/", get(get_sidequests))
         .route("/", post(post_sidequests))
-        // .route("/roles", get(get_events_roles))
-        // .route("/:event_id", get(get_event))
+        .route("/:sidequest_id", patch(patch_sidequests))
+        .route("/:sidequest_id/attempts", post(post_sidequests_attempts))
+        .route("/:sidequest_id/leaderboard", get(get_leaderboard))
         // .route("/:event_id", patch(patch_event))
         // .route("/:event_id/roles", get(get_event_roles))
         // .route("/:event_id/roles", put(put_event_roles))
@@ -31,8 +35,6 @@ pub fn get_router(state: &ApiState) -> Router {
         // .route("/:event_id/invite", post(invite_users))
         .with_state(state.clone())
 }
-
-
 
 #[utoipa::path(
     get,
@@ -52,7 +54,9 @@ pub async fn get_sidequests(
 ) -> ApiResult<Json<Vec<SidequestDTO>>> {
     let event = state.event_service.get_event(query.event_id).await?;
 
-    state.authorization_service.view_event_guard(ctx.roles(), event.id, event.visibility)?;
+    state
+        .authorization_service
+        .view_event_guard(ctx.roles(), event.id, event.visibility)?;
 
     let sidequests = state.sidequest_service.get_sidequests(event.id).await?;
 
@@ -90,6 +94,95 @@ pub async fn post_sidequests(
 
     Ok(Json(num_created))
 }
+
+#[utoipa::path(
+    patch,
+    path = "/api/sidequests/{sidequest_id}",
+    responses(
+        (status = StatusCode::OK, body = SidequestDTO),
+        (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
+    ),
+)]
+pub async fn patch_sidequests(
+    ctx: Ctx,
+    State(state): State<ApiState>,
+    Path(sidequest_id): Path<Uuid>,
+    Json(body): Json<SidequestForPatch>,
+) -> ApiResult<Json<SidequestDTO>> {
+    state
+        .authorization_service
+        .edit_sidequests_guard(ctx.roles(), body.event_id)?;
+
+    let result = state
+        .sidequest_service
+        .patch_sidequest(sidequest_id, body)
+        .await?;
+
+    Ok(Json(result.into()))
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/sidequests/{sidequest_id}/attempts",
+    responses(
+        (status = StatusCode::OK, body = u64),
+        (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
+    ),
+)]
+pub async fn post_sidequests_attempts(
+    ctx: Ctx,
+    State(state): State<ApiState>,
+    Path(sidequest_id): Path<Uuid>,
+    Json(body): Json<AttemptForCreate>,
+) -> ApiResult<Json<u64>> {
+    let event = state.sidequest_service.get_event(sidequest_id).await?;
+    let _ = state
+        .authorization_service
+        .edit_sidequests_attempt_guard(ctx.roles(), event.id)?;
+
+    let res = state.authorization_service.get_event_roles(body.user_id).await?;
+    let roles = res.get(&event.id).ok_or((ApiError::Forbidden{action: "participate".to_string(),resource:"sidequests".to_string(), id: sidequest_id.to_string()}))?;
+    if (!roles.contains(&EventRole::Participant)) {
+        return Err((ApiError::Forbidden{action: "participate".to_string()
+        ,resource:"sidequests".to_string(), id: sidequest_id.to_string()}))
+    }
+
+    let _ = state
+        .authorization_service
+        .allowed_attempt(body.user_id, event.id)
+        .await?;
+    let result = state
+        .sidequest_service
+        .add_attempt(sidequest_id, body)
+        .await?;
+    Ok(Json(result))
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/sidequests/{sidequest_id}/leaderboard",
+    responses(
+        (status = StatusCode::OK, body = Vec<SidequestEntryForLeaderboard>),
+        (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
+    ),
+)]
+pub async fn get_leaderboard(
+    ctx: Ctx,
+    State(state): State<ApiState>,
+    Path(sidequest_id): Path<Uuid>,
+) -> ApiResult<Json<Vec<SidequestEntryForLeaderboard>>> {
+    let event = state.sidequest_service.get_event(sidequest_id).await?;
+    let _ =
+        state
+            .authorization_service
+            .view_event_guard(ctx.roles(), event.id, event.visibility)?;
+    let leaderboard: Vec<SidequestEntryForLeaderboard> = state
+        .sidequest_service
+        .get_leaderboard(sidequest_id)
+        .await?;
+    Ok(Json(leaderboard))
+}
+
 // #[utoipa::path(
 //     post,
 //     path = "/api/events/{event_id}/invite",

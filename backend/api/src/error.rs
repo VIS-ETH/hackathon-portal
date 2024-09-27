@@ -171,6 +171,10 @@ impl From<&ApiError> for PublicError {
                         action, resource, id
                     ),
                 ),
+                ServiceError::SidequestCooldown { allowed_at } => (
+                    StatusCode::FORBIDDEN,
+                    format!("You must wait until {}", allowed_at),
+                ),
                 ServiceError::SeaORM(_) => ise.clone(),
             },
             ApiError::Repositories(_)

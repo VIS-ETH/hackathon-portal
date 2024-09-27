@@ -72,4 +72,21 @@ impl UserService {
     pub fn get_default_name(&self, auth_id: &str) -> String {
         auth_id.split('@').next().unwrap_or(auth_id).to_string()
     }
+
+    pub async fn get_participants(&self, event_id: Uuid) -> ServiceResult<Vec<db_user::Model>> {
+        let users = db_user::Entity::find().all(self.db_repo.conn()).await?;
+
+        let mut participants = Vec::<db_user::Model>::new();
+        for user in users {
+            let roles = user.find_related(db_event_role_assignment::Entity).filter(db_event_role_assignment::Column::EventId.eq(event_id)).all(self.db_repo.conn()).await;
+            match roles {
+                Err(err) => (),
+                Ok(roles) => if (roles.into_iter().any(|role| {role.role == EventRole::Participant})) {
+                    participants.push(user);
+                },
+            }
+        }
+        dbg!(participants.clone());
+        Ok(participants)
+        }
 }

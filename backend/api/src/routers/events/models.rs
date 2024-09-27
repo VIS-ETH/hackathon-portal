@@ -41,7 +41,6 @@ pub struct InviteUsersDTO {
     pub default_roles: Vec<EventRole>,
 }
 
-
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
 pub struct EventIdQuery {
     pub event_id: Uuid,
