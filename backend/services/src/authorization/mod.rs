@@ -10,7 +10,7 @@ use repositories::db::prelude::{
 use repositories::db::sea_orm_active_enums::EventVisibility;
 use repositories::DbRepository;
 use sea_orm::sea_query::OnConflict;
-use sea_orm::{prelude::*, QueryOrder, QuerySelect, SelectColumns};
+use sea_orm::{prelude::*, QueryOrder, QuerySelect};
 use sea_orm::{Condition, Set};
 use std::collections::{HashMap, HashSet};
 

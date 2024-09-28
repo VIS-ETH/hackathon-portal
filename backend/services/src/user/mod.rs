@@ -114,9 +114,9 @@ impl UserService {
             match roles {
                 Err(err) => (),
                 Ok(roles) => {
-                    if (roles
+                    if roles
                         .into_iter()
-                        .any(|role| role.role == EventRole::Participant))
+                        .any(|role| role.role == EventRole::Participant)
                     {
                         participants.push(user);
                     }

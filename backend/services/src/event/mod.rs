@@ -2,9 +2,6 @@ pub mod model;
 
 use crate::event::model::{EventForCreate, EventForPatch};
 use crate::{ServiceError, ServiceResult};
-use rand::distributions::Alphanumeric;
-use rand::rngs::StdRng;
-use rand::{Rng, SeedableRng};
 use repositories::db::prelude::{db_event, EventPhase};
 use repositories::db::sea_orm_active_enums::EventVisibility;
 use repositories::DbRepository;
@@ -26,7 +23,6 @@ impl EventService {
         self.check_event_name_conflict(&req.name).await?;
 
         let slug = slugify(&req.name);
-        let kdf_secret = self.generate_kdf_secret();
 
         let active_event = db_event::ActiveModel {
             name: Set(req.name),
@@ -34,7 +30,7 @@ impl EventService {
             start: Set(req.start),
             end: Set(req.end),
             max_team_size: Set(req.max_team_size as i32),
-            kdf_secret: Set(kdf_secret),
+            is_read_only: Set(false),
             is_feedback_visible: Set(false),
             visibility: Set(EventVisibility::Private),
             phase: Set(EventPhase::Registration),
@@ -113,20 +109,12 @@ impl EventService {
         }
 
         if let Some(phase) = &patch.phase {
-            active_event.phase = Set(phase.clone());
+            active_event.phase = Set(*phase);
         }
 
         let event = active_event.update(self.db_repo.conn()).await?;
 
         Ok(event)
-    }
-
-    fn generate_kdf_secret(&self) -> String {
-        let rng = StdRng::from_entropy();
-        rng.sample_iter(&Alphanumeric)
-            .take(32)
-            .map(char::from)
-            .collect::<String>()
     }
 
     async fn check_event_name_conflict(&self, name: &str) -> ServiceResult<()> {

@@ -1,6 +1,5 @@
 use crate::api_config::ApiConfig;
 use crate::ApiResult;
-use repositories::db::sidequest;
 use repositories::DbRepository;
 use services::authorization::AuthorizationService;
 use services::event::EventService;

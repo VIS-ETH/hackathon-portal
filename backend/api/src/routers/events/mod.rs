@@ -8,10 +8,8 @@ use crate::{ApiError, ApiResult};
 use axum::extract::{Path, Query, State};
 use axum::routing::{delete, get, patch, post, put};
 use axum::{Json, Router};
-use chrono::NaiveDateTime;
 use models::{AggregateActionQuery, AggregationAction};
 use repositories::db::prelude::EventRole;
-use services::event::model::EventForCreate;
 use services::event::model::EventForPatch;
 use services::sidequest::model::AggregatorStatus;
 use std::collections::{HashMap, HashSet};
@@ -293,7 +291,7 @@ pub async fn aggregate_action(
             Ok(Json(()))
         }
         AggregationAction::Stop => {
-            let res = state.sidequest_service.aggregate_stop(event_id).await?;
+            state.sidequest_service.aggregate_stop(event_id).await?;
             Ok(Json(()))
         }
     }
