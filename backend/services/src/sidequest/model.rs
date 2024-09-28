@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use sea_orm::FromQueryResult;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
@@ -66,4 +68,12 @@ pub struct FullInfoSidequestEntryForLeaderboard {
 pub struct AggregatorStatus {
     pub event_id: Uuid,
     pub status: LoopStatus,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+pub struct TimelineData {
+    pub event_id: Uuid,
+    pub start: Option<chrono::NaiveDateTime>,
+    pub end: Option<chrono::NaiveDateTime>,
+    pub scores: HashMap<String, Vec<(chrono::NaiveDateTime, i64)>>,
 }

@@ -16,12 +16,12 @@ use services::event::model::EventForPatch;
 use services::sidequest::model::{
     AggregatorStatus, AttemptForCreate, FullInfoSidequestEntryForLeaderboard,
     FullInfoTeamEntryForLeaderboard, SidequestEntryForLeaderboard, SidequestForCreate,
-    SidequestForPatch,
+    SidequestForPatch, TimelineData,
 };
 use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
 
-use super::events::models::EventIdQuery;
+use super::events::models::{EventIdQuery, EventLeaderboardTimelineQuery};
 
 pub fn get_router(state: &ApiState) -> Router {
     Router::new()
@@ -31,6 +31,7 @@ pub fn get_router(state: &ApiState) -> Router {
         .route("/:sidequest_id/attempts", post(post_sidequests_attempts))
         .route("/:sidequest_id/leaderboard", get(get_leaderboard))
         .route("/leaderboard", get(get_team_leaderboard))
+        .route("/leaderboard/timeline", get(get_leaderboard_timeline))
         // .route("/:event_id/roles", get(get_event_roles))
         // .route("/:event_id/roles", put(put_event_roles))
         // .route("/:event_id/roles", delete(delete_event_roles))
@@ -221,6 +222,36 @@ pub async fn get_team_leaderboard(
     let leaderboard = state
         .sidequest_service
         .get_team_leaderboard(event.id)
+        .await?;
+    Ok(Json(leaderboard))
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/sidequests/leaderboard/timeline",
+    responses(
+        (status = StatusCode::OK, body = TimelineData),
+        (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
+    ),
+    params (
+        ("event_id" = Uuid, Query, description = "The Event ID to get the leaderboard for"),
+        ("before" = Option<NaiveDateTime>, Query, description = "Only return entries before this time"),
+        ("after" = Option<NaiveDateTime>, Query, description = "Only return entries after this time"),
+    )
+)]
+pub async fn get_leaderboard_timeline(
+    ctx: Ctx,
+    State(state): State<ApiState>,
+    Query(query): Query<EventLeaderboardTimelineQuery>,
+) -> ApiResult<Json<TimelineData>> {
+    let event = state.event_service.get_event(query.event_id).await?;
+    let _ =
+        state
+            .authorization_service
+            .view_event_guard(ctx.roles(), event.id, event.visibility)?;
+    let leaderboard = state
+        .sidequest_service
+        .get_timeline(event.id, query.before, query.after)
         .await?;
     Ok(Json(leaderboard))
 }

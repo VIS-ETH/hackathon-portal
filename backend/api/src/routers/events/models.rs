@@ -53,6 +53,13 @@ pub struct EventIdQuery {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+pub struct EventLeaderboardTimelineQuery {
+    pub event_id: Uuid,
+    pub after: Option<NaiveDateTime>,
+    pub before: Option<NaiveDateTime>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
 pub struct AggregateActionQuery {
     pub aggregate_action: AggregationAction,
 }

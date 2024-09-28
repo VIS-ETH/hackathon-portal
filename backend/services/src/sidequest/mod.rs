@@ -9,12 +9,13 @@ use derive_more::derive::DerefMut;
 use model::{
     AggregatorStatus, AttemptForCreate, FullInfoSidequestEntryForLeaderboard,
     FullInfoTeamEntryForLeaderboard, LoopStatus, SidequestEntryForLeaderboard, SidequestForCreate,
-    SidequestForPatch, TeamEntryForLeaderboard,
+    SidequestForPatch, TeamEntryForLeaderboard, TimelineData,
 };
 use repositories::db::prelude::*;
 use repositories::DbRepository;
 use sea_orm::sea_query::OnConflict;
 use std::collections::HashMap;
+use std::hash::Hash;
 use std::ops::DerefMut;
 use std::time::Duration;
 use tokio::{net::TcpListener, task, time};
@@ -179,7 +180,6 @@ impl SidequestService {
             .cloned()
             .map(|team| team.id)
             .collect::<Vec<_>>();
-        println!("team_ids: {:?}", team_ids);
 
         let latest = db_sidequest_score::Entity::find()
             .filter(db_sidequest_score::Column::TeamId.is_in(team_ids.clone()))
@@ -188,12 +188,9 @@ impl SidequestService {
             .await?;
 
         if latest.is_none() {
-            println!("No latest score found");
             return Ok(Vec::new());
         }
         let latest_date = latest.unwrap().valid_at;
-
-        println!("latest_date: {:?}", latest_date);
 
         let team_scores: Vec<db_sidequest_score::Model> = db_sidequest_score::Entity::find()
             .filter(db_sidequest_score::Column::TeamId.is_in(team_ids))
@@ -208,8 +205,6 @@ impl SidequestService {
             points_rank_mapping.insert(team.score as i64, rank);
             rank += 1;
         }
-
-        println!("points_rank_mapping: {:?}", points_rank_mapping);
 
         let mut result = Vec::<FullInfoTeamEntryForLeaderboard>::new();
         for team_score in team_scores {
@@ -232,6 +227,60 @@ impl SidequestService {
             });
         }
 
+        Ok(result)
+    }
+
+    pub async fn get_timeline(
+        &self,
+        event_id: Uuid,
+        before: Option<NaiveDateTime>,
+        after: Option<NaiveDateTime>,
+    ) -> ServiceResult<TimelineData> {
+        let user_service = UserService::new(self.db_repo.clone());
+        let user_team_mapping: HashMap<Uuid, db_team::Model> =
+            user_service.get_team_mapping(event_id).await?;
+
+        let team_ids = user_team_mapping
+            .values()
+            .cloned()
+            .map(|team| team.id)
+            .collect::<Vec<_>>();
+
+        let mut team_names = HashMap::<Uuid, String>::new();
+        for team_id in team_ids.clone() {
+            db_team::Entity::find_by_id(team_id)
+                .one(self.db_repo.conn())
+                .await?
+                .map(|team| team_names.insert(team_id, team.slug));
+        }
+
+        let scores_query = db_sidequest_score::Entity::find()
+            .filter(db_sidequest_score::Column::TeamId.is_in(team_ids.clone()))
+            .order_by(db_sidequest_score::Column::ValidAt, Order::Asc)
+            .all(self.db_repo.conn())
+            .await?;
+
+        // This map will map valid_at -> team_id -> score
+        let mut scores = HashMap::<String, Vec<(NaiveDateTime, i64)>>::new();
+
+        for score in scores_query {
+            let team_id = score.team_id;
+            let valid_at = score.valid_at;
+            let score = score.score;
+            let team_name = team_names
+                .get(&team_id)
+                .unwrap_or(&"Unknown".to_string())
+                .clone();
+            let list = scores.entry(team_name).or_insert(Vec::new());
+            list.push((valid_at, score as i64));
+        }
+
+        let result = TimelineData {
+            event_id: event_id,
+            start: after,
+            end: before,
+            scores: scores,
+        };
         Ok(result)
     }
 
