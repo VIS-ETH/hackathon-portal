@@ -6,7 +6,7 @@ use repositories::db::prelude::{db_event, EventPhase};
 use repositories::db::sea_orm_active_enums::EventVisibility;
 use repositories::DbRepository;
 use sea_orm::prelude::*;
-use sea_orm::{ActiveModelTrait, Condition, IntoActiveModel, QueryOrder, Set};
+use sea_orm::{ActiveModelTrait, IntoActiveModel, QueryOrder, Set};
 use slug::slugify;
 
 #[derive(Clone)]
@@ -20,9 +20,7 @@ impl EventService {
     }
 
     pub async fn create_event(&self, req: EventForCreate) -> ServiceResult<db_event::Model> {
-        self.check_event_name_conflict(&req.name).await?;
-
-        let slug = slugify(&req.name);
+        let slug = self.generate_slug(&req.name).await?;
 
         let active_event = db_event::ActiveModel {
             name: Set(req.name),
@@ -83,9 +81,9 @@ impl EventService {
         let mut active_event = event.into_active_model();
 
         if let Some(name) = &patch.name {
-            self.check_event_name_conflict(name).await?;
+            let slug = self.generate_slug(name).await?;
             active_event.name = Set(name.clone());
-            active_event.slug = Set(slugify(name));
+            active_event.slug = Set(slug);
         }
 
         if let Some(start) = patch.start {
@@ -117,28 +115,18 @@ impl EventService {
         Ok(event)
     }
 
-    async fn check_event_name_conflict(&self, name: &str) -> ServiceResult<()> {
+    async fn generate_slug(&self, name: &str) -> ServiceResult<String> {
         let slug = slugify(name);
 
         let existing = db_event::Entity::find()
-            .filter(
-                Condition::any()
-                    .add(db_event::Column::Name.eq(name))
-                    .add(db_event::Column::Slug.eq(&slug)),
-            )
+            .filter(db_event::Column::Slug.eq(&slug))
             .one(self.db_repo.conn())
             .await?;
 
-        if let Some(existing) = existing {
-            return if existing.slug == slug {
-                Err(ServiceError::SlugNotUnique { slug })
-            } else {
-                Err(ServiceError::NameNotUnique {
-                    name: name.to_string(),
-                })
-            };
+        if existing.is_some() {
+            Err(ServiceError::SlugNotUnique { slug })
+        } else {
+            Ok(slug)
         }
-
-        Ok(())
     }
 }

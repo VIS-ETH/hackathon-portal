@@ -32,9 +32,8 @@ impl AppointmentService {
         };
 
         let appointment = active_appointment.insert(self.db_repo.conn()).await?;
-        let appointment = Appointment::from(appointment);
 
-        Ok(appointment)
+        Ok(appointment.into())
     }
 
     pub async fn get_appointments(&self, event_id: Uuid) -> ServiceResult<Vec<Appointment>> {
@@ -51,9 +50,7 @@ impl AppointmentService {
 
     pub async fn get_appointment(&self, appointment_id: Uuid) -> ServiceResult<Appointment> {
         let appointment = self.get_db_appointment(appointment_id).await?;
-        let appointment = Appointment::from(appointment);
-
-        Ok(appointment)
+        Ok(appointment.into())
     }
 
     pub async fn update_appointment(
@@ -99,14 +96,12 @@ impl AppointmentService {
         }
 
         let appointment = active_appointment.update(self.db_repo.conn()).await?;
-        let appointment = Appointment::from(appointment);
 
-        Ok(appointment)
+        Ok(appointment.into())
     }
 
     pub async fn delete_appointment(&self, appointment_id: Uuid) -> ServiceResult<()> {
         let appointment = self.get_db_appointment(appointment_id).await?;
-
         appointment.delete(self.db_repo.conn()).await?;
 
         Ok(())

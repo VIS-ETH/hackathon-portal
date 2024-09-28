@@ -1,6 +1,7 @@
 mod appointments;
 mod docs;
 mod events;
+mod projects;
 mod sidequests;
 
 use crate::api_state::ApiState;
@@ -21,6 +22,7 @@ async fn handler_404(request: Request) -> ApiResult<()> {
 pub fn get_router(state: &ApiState) -> Router {
     Router::new()
         .nest("/events", events::get_router(state))
+        .nest("/projects", projects::get_router(state))
         .nest("/sidequests", sidequests::get_router(state))
         .nest("/appointments", appointments::get_router(state))
 }
