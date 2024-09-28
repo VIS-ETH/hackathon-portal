@@ -72,4 +72,3 @@ Sihlfeldstrasse 58
 - [LinkedIn](https://www.linkedin.com/company/d-one-ai)
 - [Twitter](https://twitter.com/DataDrivenValue)
 - [Medium](https://medium.com/d-one)
-

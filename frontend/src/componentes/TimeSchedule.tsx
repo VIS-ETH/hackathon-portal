@@ -1,18 +1,18 @@
-import { Timeline, Text, Modal, Button } from "@mantine/core";
+import { Button, Modal, Text, Timeline } from "@mantine/core";
+
 import { useListState } from "@mantine/hooks";
 
 interface TimeLineItem {
   title: string;
   shortDescription: string;
   longDescription?: string;
-  at: Date
-  until?: Date
+  at: Date;
+  until?: Date;
 }
 
 type Props = {
-  items: TimeLineItem[]
-}
-
+  items: TimeLineItem[];
+};
 
 export default function TimeSchedule({ items }: Readonly<Props>) {
   const [isOpen, setIsOpen] = useListState(items.map(() => false));
@@ -28,17 +28,32 @@ export default function TimeSchedule({ items }: Readonly<Props>) {
     <Timeline active={activeIndex} bulletSize={24} lineWidth={4}>
       {items.map((item, index) => (
         <Timeline.Item key={index} title={item.title}>
-          <Text c="dimmed" size="sm">{item.shortDescription}</Text>
-          <Text size="xs" mt={4}>{item.at.toLocaleString()} {item.until && " - " + item.until.toLocaleString()}</Text>
+          <Text c="dimmed" size="sm">
+            {item.shortDescription}
+          </Text>
+          <Text size="xs" mt={4}>
+            {item.at.toLocaleString()}{" "}
+            {item.until && " - " + item.until.toLocaleString()}
+          </Text>
           {item.longDescription && (
             <>
-              <Button variant="outline" size="xs" onClick={() => setIsOpen.setItem(index,true)}>MORE</Button>
-              <Modal size="auto" title={"Event: " + item.title} opened={isOpen[index]} onClose={() => setIsOpen.setItem(index, false)}>
+              <Button
+                variant="outline"
+                size="xs"
+                onClick={() => setIsOpen.setItem(index, true)}
+              >
+                MORE
+              </Button>
+              <Modal
+                size="auto"
+                title={"Event: " + item.title}
+                opened={isOpen[index]}
+                onClose={() => setIsOpen.setItem(index, false)}
+              >
                 <Text>{item.longDescription}</Text>
               </Modal>
             </>
           )}
-
         </Timeline.Item>
       ))}
     </Timeline>

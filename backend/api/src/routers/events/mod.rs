@@ -98,7 +98,7 @@ pub async fn invite_users(
     get,
     path = "/api/events/{event_id}",
     responses(
-        (status = StatusCode::OK, body = GetEventResponse),
+        (status = StatusCode::OK, body = EventDTO),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     )
 )]
@@ -122,7 +122,7 @@ pub async fn get_event(
     patch,
     path = "/api/events/{event_id}",
     responses(
-        (status = StatusCode::OK, body = GetEventResponse),
+        (status = StatusCode::OK, body = EventDTO),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     )
 )]

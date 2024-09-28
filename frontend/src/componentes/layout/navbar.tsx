@@ -12,6 +12,7 @@ import { useEffect, useState } from "react";
 
 import {
   Avatar,
+  Badge,
   Burger,
   Container,
   Divider,
@@ -23,7 +24,7 @@ import {
   Tabs,
   Text,
   UnstyledButton,
-  rem, Badge
+  rem,
 } from "@mantine/core";
 
 import { useDisclosure } from "@mantine/hooks";
@@ -44,12 +45,14 @@ export default function Navbar({
   headerItems: headerItemsRaw,
   section,
   user,
-  baseUrl
+  baseUrl,
 }: Readonly<NavbarProps>) {
   const pathname = usePathname();
 
-  const headerItems: AppLayoutLink[] = headerItemsRaw.map((item) => ({...item, path: baseUrl + item.path}));
-
+  const headerItems: AppLayoutLink[] = headerItemsRaw.map((item) => ({
+    ...item,
+    path: baseUrl + item.path,
+  }));
 
   const [drawerOpen, { toggle: toggleDrawer, close: closeDrawer }] =
     useDisclosure(false);
@@ -74,7 +77,9 @@ export default function Navbar({
           <Text fw={700} size="lg">
             HACKATHON
           </Text>
-          <Badge variant="default" size="md" radius="sm">{section}</Badge>
+          <Badge variant="default" size="md" radius="sm">
+            {section}
+          </Badge>
         </Group>
       </Group>
     </Link>

@@ -37,6 +37,7 @@ Bern, Zurich, Vienna, Frankfurt, Munich, Hamburg, Hanover, Stuttgart, Manchester
 > 1,900 globally.
 
 ### Vacancies:
+
 > [Find your job | Zühlke](https://www.zuehlke.com/en/careers/find-your-job?locations%5b102%5d=102).
 
 ### Does your company offer internships?
@@ -59,4 +60,3 @@ Bern, Zurich, Vienna, Frankfurt, Munich, Hamburg, Hanover, Stuttgart, Manchester
 
 - [Zühlke - Empowering Ideas](https://www.zuehlke.com/en)
 - [LinkedIn](https://www.linkedin.com/company/zuehlkegroup/) | [Kununu](https://www.kununu.com/ch/zuehlke-technology-group-zuehlke-engineering) | [Facebook](https://www.facebook.com/zuehlke.group/) | [Twitter](https://twitter.com/zuehlke_group) | [Instagram](https://www.instagram.com/zuehlkegroup/?hl=en)
-

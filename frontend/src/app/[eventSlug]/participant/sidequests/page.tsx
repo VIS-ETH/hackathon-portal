@@ -1,10 +1,11 @@
 "use client";
 
-export default function Page() {
+import ScoreChart from "@/componentes/ScoreChart";
 
+export default function Page() {
   return (
     <>
-      <p>Here are some sidequests</p>
+      <ScoreChart />
     </>
   );
 }
