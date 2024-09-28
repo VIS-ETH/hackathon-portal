@@ -3,6 +3,7 @@ use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use axum::Json;
 use derive_more::From;
+use repositories::db::prelude::EventPhase;
 use repositories::RepositoryError;
 use serde::Serialize;
 use serde_with::{serde_as, DisplayFromStr, TryFromInto};
@@ -170,6 +171,14 @@ impl From<&ApiError> for PublicError {
                         "You do not have permission to {} {} '{}'",
                         action, resource, id
                     ),
+                ),
+                ServiceError::SidequestCooldown { allowed_at } => (
+                    StatusCode::FORBIDDEN,
+                    format!("You must wait until {}", allowed_at),
+                ),
+                ServiceError::EventPhase { current_phase } => (
+                    StatusCode::FORBIDDEN,
+                    format!("This action is not allowed in the phase {}", current_phase),
                 ),
                 ServiceError::SeaORM(_) => ise.clone(),
             },

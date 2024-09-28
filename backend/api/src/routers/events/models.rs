@@ -7,6 +7,12 @@ use utoipa::ToSchema;
 use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+pub enum AggregationAction {
+    Start,
+    Stop,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
 pub struct EventDTO {
     pub id: Uuid,
     pub name: String,
@@ -39,4 +45,21 @@ impl From<db_event::Model> for EventDTO {
 pub struct InviteUsersDTO {
     pub users: Vec<UserForCreate>,
     pub default_roles: Vec<EventRole>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+pub struct EventIdQuery {
+    pub event_id: Uuid,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+pub struct EventLeaderboardTimelineQuery {
+    pub event_id: Uuid,
+    pub after: Option<NaiveDateTime>,
+    pub before: Option<NaiveDateTime>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+pub struct AggregateActionQuery {
+    pub aggregate_action: AggregationAction,
 }

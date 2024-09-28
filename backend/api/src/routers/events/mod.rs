@@ -5,11 +5,15 @@ use crate::ctx::Ctx;
 use crate::models::AffectedRowsDTO;
 use crate::routers::events::models::{EventDTO, InviteUsersDTO};
 use crate::{ApiError, ApiResult};
-use axum::extract::{Path, State};
+use axum::extract::{Path, Query, State};
 use axum::routing::{delete, get, patch, post, put};
 use axum::{Json, Router};
+use chrono::NaiveDateTime;
+use models::{AggregateActionQuery, AggregationAction};
 use repositories::db::prelude::EventRole;
+use services::event::model::EventForCreate;
 use services::event::model::EventForPatch;
+use services::sidequest::model::AggregatorStatus;
 use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
 
@@ -23,6 +27,8 @@ pub fn get_router(state: &ApiState) -> Router {
         .route("/:event_id/roles", put(put_event_roles))
         .route("/:event_id/roles", delete(delete_event_roles))
         .route("/:event_id/invite", post(invite_users))
+        .route("/:event_id/aggregate", get(get_aggregate_status))
+        .route("/:event_id/aggregate", post(aggregate_action))
         .with_state(state.clone())
 }
 
@@ -237,4 +243,58 @@ pub async fn delete_event_roles(
     let dto = AffectedRowsDTO { affected_rows };
 
     Ok(Json(dto))
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/events/{event_id}/aggregate",
+    responses(
+        (status = StatusCode::OK, body = AggregatorStatus),
+        (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
+    )
+)]
+pub async fn get_aggregate_status(
+    ctx: Ctx,
+    State(state): State<ApiState>,
+    Path(event_id): Path<Uuid>,
+) -> ApiResult<Json<AggregatorStatus>> {
+    state
+        .authorization_service
+        .edit_event_guard(ctx.roles(), event_id)?;
+
+    let res = state.sidequest_service.aggregate_status(event_id).await?;
+    Ok(Json(res))
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/events/{event_id}/aggregate",
+    responses(
+        (status = StatusCode::OK, body = AggregatorStatus),
+        (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
+    ),
+    params (
+        ("aggregate_action"=  AggregationAction, Query, description="Action to perform on the aggregator for this event"),
+    )
+)]
+pub async fn aggregate_action(
+    ctx: Ctx,
+    State(state): State<ApiState>,
+    Path(event_id): Path<Uuid>,
+    Query(query): Query<AggregateActionQuery>,
+) -> ApiResult<Json<()>> {
+    state
+        .authorization_service
+        .edit_event_guard(ctx.roles(), event_id)?;
+
+    match query.aggregate_action {
+        AggregationAction::Start => {
+            let res = state.sidequest_service.aggregate_start(event_id).await;
+            Ok(Json(()))
+        }
+        AggregationAction::Stop => {
+            let res = state.sidequest_service.aggregate_stop(event_id).await?;
+            Ok(Json(()))
+        }
+    }
 }

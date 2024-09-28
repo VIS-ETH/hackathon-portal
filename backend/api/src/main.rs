@@ -14,8 +14,9 @@ use crate::api_state::ApiState;
 use crate::routers::get_api_router;
 use crate::utils::setup_logging;
 use clap::Parser;
-use std::net::SocketAddr;
-use tokio::net::TcpListener;
+use repositories::db::prelude::EventPhase;
+use std::{net::SocketAddr, time::Duration};
+use tokio::{net::TcpListener, task, time};
 use tracing::info;
 
 pub use error::{ApiError, ApiResult, PublicError};
@@ -39,6 +40,5 @@ async fn main() -> ApiResult<()> {
     );
 
     axum::serve(listener, api_router).await?;
-
     Ok(())
 }

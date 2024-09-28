@@ -9,8 +9,8 @@ use repositories::db::prelude::{
 };
 use repositories::db::sea_orm_active_enums::EventVisibility;
 use repositories::DbRepository;
-use sea_orm::prelude::*;
 use sea_orm::sea_query::OnConflict;
+use sea_orm::{prelude::*, QueryOrder, QuerySelect, SelectColumns};
 use sea_orm::{Condition, Set};
 use std::collections::{HashMap, HashSet};
 
@@ -106,8 +106,8 @@ impl AuthorizationService {
                     db_event_role_assignment::Column::EventId,
                     db_event_role_assignment::Column::Role,
                 ])
-                    .do_nothing()
-                    .to_owned(),
+                .do_nothing()
+                .to_owned(),
             )
             .on_empty_do_nothing()
             .exec_without_returning(self.db_repo.conn())
@@ -217,5 +217,80 @@ impl AuthorizationService {
 
     pub fn can_view_team_secrets(&self) -> bool {
         todo!()
+    }
+
+    // Sidequests
+
+    pub fn edit_sidequests_guard(&self, roles: &UserRoles, event_id: Uuid) -> ServiceResult<()> {
+        let event_roles = roles.event.get(&event_id);
+        let pass = event_roles.is_some_and(|roles| roles.contains(&EventRole::Admin));
+
+        if pass {
+            Ok(())
+        } else {
+            Err(ServiceError::Forbidden {
+                resource: "event".to_string(),
+                id: event_id.to_string(),
+                action: "edit sidequests".to_string(),
+            })
+        }
+    }
+
+    pub fn edit_sidequests_attempt_guard(
+        &self,
+        roles: &UserRoles,
+        event_id: Uuid,
+    ) -> ServiceResult<()> {
+        let event_roles = roles.event.get(&event_id);
+        let pass = event_roles.is_some_and(|roles| {
+            roles.contains(&EventRole::Admin) || roles.contains(&EventRole::SidequestMaster)
+        });
+
+        if pass {
+            Ok(())
+        } else {
+            Err(ServiceError::Forbidden {
+                resource: "event".to_string(),
+                id: event_id.to_string(),
+                action: "edit sidequests".to_string(),
+            })
+        }
+    }
+
+    pub async fn allowed_attempt(&self, user_id: Uuid, event_id: Uuid) -> ServiceResult<()> {
+        let all_sidequests = db_sidequest::Entity::find()
+            .filter(db_sidequest::Column::EventId.eq(event_id))
+            .all(self.db_repo.conn())
+            .await?;
+
+        let ids = all_sidequests
+            .iter()
+            .map(|sidequest| sidequest.id)
+            .collect::<Vec<Uuid>>();
+
+        // get the maximum
+        let last_attempt = db_sidequest_attempt::Entity::find()
+            .filter(db_sidequest_attempt::Column::UserId.eq(user_id))
+            .filter(db_sidequest_attempt::Column::SidequestId.is_in(ids))
+            .order_by_desc(db_sidequest_attempt::Column::AttemptedAt)
+            .one(self.db_repo.conn())
+            .await?;
+
+        match last_attempt {
+            None => Ok(()),
+            Some(attempt) => {
+                let now = chrono::Utc::now().naive_utc();
+                let last_attempt = attempt.attempted_at;
+                let diff = now - last_attempt;
+                if diff.num_minutes() > 60 {
+                    Ok(())
+                } else {
+                    let allowed_next = last_attempt + chrono::Duration::minutes(60);
+                    Err(ServiceError::SidequestCooldown {
+                        allowed_at: (allowed_next),
+                    })
+                }
+            }
+        }
     }
 }
