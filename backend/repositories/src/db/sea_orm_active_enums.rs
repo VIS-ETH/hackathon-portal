@@ -21,10 +21,10 @@ pub enum EventPhase {
     Grading,
     #[sea_orm(string_value = "HACKING")]
     Hacking,
-    #[sea_orm(string_value = "READONLY")]
-    Readonly,
     #[sea_orm(string_value = "REGISTRATION")]
     Registration,
+    #[sea_orm(string_value = "FINISHED")]
+    Finished,
 }
 #[derive(
     Debug,
@@ -37,7 +37,6 @@ pub enum EventPhase {
     Deserialize,
     utoipa::ToSchema,
     Hash,
-    Copy,
 )]
 #[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "event_role")]
 pub enum EventRole {
@@ -63,7 +62,6 @@ pub enum EventRole {
     Deserialize,
     utoipa::ToSchema,
     Hash,
-    Copy,
 )]
 #[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "event_visibility")]
 pub enum EventVisibility {

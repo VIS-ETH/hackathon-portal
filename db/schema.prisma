@@ -13,7 +13,7 @@ enum event_phase {
   REGISTRATION
   HACKING
   GRADING
-  READONLY
+  FINISHED
 }
 
 enum event_role {
@@ -38,7 +38,7 @@ model event {
   start               DateTime
   end                 DateTime
   max_team_size       Int
-  kdf_secret          String
+  is_read_only        Boolean
   is_feedback_visible Boolean
   visibility          event_visibility
   phase               event_phase
@@ -57,9 +57,10 @@ model team {
   project_id String? @db.Uuid
 
   // fields
-  name  String
-  slug  String
-  index Int
+  name     String
+  slug     String
+  index    Int
+  password String?
 
   // relations
   event   event    @relation(fields: [event_id], references: [id])
@@ -69,6 +70,7 @@ model team {
   team_role_assignment team_role_assignment[]
   project_preference   project_preference[]
   sidequest_score      sidequest_score[]
+  sidequest_attempt    sidequest_attempt[]
 
   // meta
   @@unique([event_id, name])
@@ -173,6 +175,7 @@ model sidequest {
 model sidequest_attempt {
   id           String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   sidequest_id String @db.Uuid
+  team_id      String @db.Uuid
   user_id      String @db.Uuid
 
   // fields
@@ -181,6 +184,7 @@ model sidequest_attempt {
 
   // relations
   sidequest sidequest @relation(fields: [sidequest_id], references: [id])
+  team      team      @relation(fields: [team_id], references: [id])
   user      user      @relation(fields: [user_id], references: [id])
 }
 

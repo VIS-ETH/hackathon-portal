@@ -9,6 +9,7 @@ pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: Uuid,
     pub sidequest_id: Uuid,
+    pub team_id: Uuid,
     pub user_id: Uuid,
     #[sea_orm(column_type = "Double")]
     pub result: f64,
@@ -26,6 +27,14 @@ pub enum Relation {
     )]
     Sidequest,
     #[sea_orm(
+        belongs_to = "super::team::Entity",
+        from = "Column::TeamId",
+        to = "super::team::Column::Id",
+        on_update = "Cascade",
+        on_delete = "Restrict"
+    )]
+    Team,
+    #[sea_orm(
         belongs_to = "super::user::Entity",
         from = "Column::UserId",
         to = "super::user::Column::Id",
@@ -38,6 +47,12 @@ pub enum Relation {
 impl Related<super::sidequest::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Sidequest.def()
+    }
+}
+
+impl Related<super::team::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::Team.def()
     }
 }
 
