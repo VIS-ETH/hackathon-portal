@@ -56,7 +56,7 @@ export function usePutEventRoles(
         data,
         ...clientOptions,
       });
-      return res.data;
+      return res;
     },
     ...mutationOptions,
   });

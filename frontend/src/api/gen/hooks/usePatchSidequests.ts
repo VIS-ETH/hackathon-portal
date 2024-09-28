@@ -56,7 +56,7 @@ export function usePatchSidequests(
         data,
         ...clientOptions,
       });
-      return res.data;
+      return res;
     },
     ...mutationOptions,
   });

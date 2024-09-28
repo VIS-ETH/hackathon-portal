@@ -27,6 +27,7 @@ pub fn get_router(state: &ApiState) -> Router {
     Router::new()
         .route("/", get(get_sidequests))
         .route("/", post(post_sidequests))
+        .route("/:sidequest_id", get(get_sidequest))
         .route("/:sidequest_id", patch(patch_sidequests))
         .route("/:sidequest_id/attempts", post(post_sidequests_attempts))
         .route("/:sidequest_id/leaderboard", get(get_leaderboard))
@@ -66,6 +67,29 @@ pub async fn get_sidequests(
     let dto = sidequests.into_iter().map(SidequestDTO::from).collect();
 
     Ok(Json(dto))
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/sidequests/{sidequest_id}",
+    responses(
+        (status = StatusCode::OK, body = SidequestDTO),
+        (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
+    )
+)]
+pub async fn get_sidequest(
+    ctx: Ctx,
+    State(state): State<ApiState>,
+    Path(sidequest_id): Path<Uuid>,
+) -> ApiResult<Json<SidequestDTO>> {
+    let event = state.sidequest_service.get_event(sidequest_id).await?;
+
+    state
+        .authorization_service
+        .view_event_guard(ctx.roles(), event.id, event.visibility)?;
+
+    let sidequest = state.sidequest_service.get_sidequest(sidequest_id).await?;
+    Ok(Json(sidequest.into()))
 }
 
 #[utoipa::path(

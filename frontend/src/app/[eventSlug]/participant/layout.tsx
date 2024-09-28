@@ -1,8 +1,9 @@
 "use client";
 
+import AppLayout from "@/componentes/layout/app-layout";
+
 import { PropsWithChildren } from "react";
 
-// import AppLayout from "@/componentes/layout/app-layout";
 import { useParams } from "next/navigation";
 
 const tabs = [
@@ -24,9 +25,14 @@ export default function Layout({ children }: Readonly<PropsWithChildren>) {
 
   return (
     <>
-      {/* <AppLayout headerItems={tabs} section="PARTICIPANT" user={user} pathBaseUrl={`/${slug}`}> */}
-      {children}
-      {/* </AppLayout> */}
+      <AppLayout
+        headerItems={tabs}
+        section="PARTICIPANT"
+        user={user}
+        pathBaseUrl={`/${slug}`}
+      >
+        {children}
+      </AppLayout>
     </>
   );
 }

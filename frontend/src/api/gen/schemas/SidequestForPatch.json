@@ -1,0 +1,11 @@
+{
+  "type": "object",
+  "properties": {
+    "description": { "type": "string", "nullable": true },
+    "event_id": { "type": "string", "format": "uuid" },
+    "is_higher_result_better": { "type": "boolean", "nullable": true },
+    "name": { "type": "string", "nullable": true }
+  },
+  "required": ["event_id"],
+  "x-readme-ref-name": "SidequestForPatch"
+}

@@ -56,7 +56,7 @@ export function usePatchEvent(
         data,
         ...clientOptions,
       });
-      return res.data;
+      return res;
     },
     ...mutationOptions,
   });

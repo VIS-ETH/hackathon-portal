@@ -56,7 +56,7 @@ export function useInviteUsers(
         data,
         ...clientOptions,
       });
-      return res.data;
+      return res;
     },
     ...mutationOptions,
   });

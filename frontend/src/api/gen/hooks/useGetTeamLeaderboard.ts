@@ -64,7 +64,7 @@ export function getTeamLeaderboardQueryOptions(
         params,
         ...options,
       });
-      return res.data;
+      return res;
     },
   });
 }
@@ -134,7 +134,7 @@ export function getTeamLeaderboardSuspenseQueryOptions(
         params,
         ...options,
       });
-      return res.data;
+      return res;
     },
   });
 }

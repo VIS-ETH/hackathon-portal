@@ -64,7 +64,7 @@ export function getLeaderboardTimelineQueryOptions(
         params,
         ...options,
       });
-      return res.data;
+      return res;
     },
   });
 }
@@ -135,7 +135,7 @@ export function getLeaderboardTimelineSuspenseQueryOptions(
         params,
         ...options,
       });
-      return res.data;
+      return res;
     },
   });
 }

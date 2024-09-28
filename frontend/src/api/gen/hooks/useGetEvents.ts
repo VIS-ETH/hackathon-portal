@@ -47,7 +47,7 @@ export function getEventsQueryOptions(
         url: `/api/events`,
         ...options,
       });
-      return res.data;
+      return res;
     },
   });
 }
@@ -105,7 +105,7 @@ export function getEventsSuspenseQueryOptions(
         url: `/api/events`,
         ...options,
       });
-      return res.data;
+      return res;
     },
   });
 }

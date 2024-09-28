@@ -1,0 +1,36 @@
+{
+  "type": "object",
+  "properties": {
+    "end": { "type": "string", "format": "date-time", "nullable": true },
+    "is_feedback_visible": { "type": "boolean", "nullable": true },
+    "max_team_size": {
+      "type": "integer",
+      "format": "int32",
+      "minimum": 0,
+      "nullable": true
+    },
+    "name": { "type": "string", "nullable": true },
+    "phase": {
+      "allOf": [
+        {
+          "type": "string",
+          "enum": ["Grading", "Hacking", "Readonly", "Registration"],
+          "x-readme-ref-name": "EventPhase"
+        }
+      ],
+      "nullable": true
+    },
+    "start": { "type": "string", "format": "date-time", "nullable": true },
+    "visibility": {
+      "allOf": [
+        {
+          "type": "string",
+          "enum": ["Private", "Public", "Restricted"],
+          "x-readme-ref-name": "EventVisibility"
+        }
+      ],
+      "nullable": true
+    }
+  },
+  "x-readme-ref-name": "EventForPatch"
+}

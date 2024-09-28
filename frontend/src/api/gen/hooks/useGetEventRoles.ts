@@ -57,7 +57,7 @@ export function getEventRolesQueryOptions(
         url: `/api/events/${eventId}/roles`,
         ...options,
       });
-      return res.data;
+      return res;
     },
   });
 }
@@ -122,7 +122,7 @@ export function getEventRolesSuspenseQueryOptions(
         url: `/api/events/${eventId}/roles`,
         ...options,
       });
-      return res.data;
+      return res;
     },
   });
 }

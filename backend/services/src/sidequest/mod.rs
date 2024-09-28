@@ -9,11 +9,11 @@ use derive_more::derive::DerefMut;
 use model::{
     AggregatorStatus, AttemptForCreate, FullInfoSidequestEntryForLeaderboard,
     FullInfoTeamEntryForLeaderboard, LoopStatus, SidequestEntryForLeaderboard, SidequestForCreate,
-    SidequestForPatch, TeamEntryForLeaderboard, TimelineData,
+    SidequestForPatch, TeamEntryForLeaderboard, TeamLatestResult, TimelineData,
 };
 use repositories::db::prelude::*;
 use repositories::DbRepository;
-use sea_orm::sea_query::OnConflict;
+use sea_orm::sea_query::{OnConflict, Query};
 use std::collections::HashMap;
 use std::hash::Hash;
 use std::ops::DerefMut;
@@ -21,7 +21,9 @@ use std::time::Duration;
 use tokio::{net::TcpListener, task, time};
 use tokio_tasks::RunToken;
 
-use sea_orm::{prelude::*, IntoActiveModel, QueryOrder, QuerySelect};
+use sea_orm::{
+    prelude::*, DbBackend, EntityOrSelect, IntoActiveModel, QueryOrder, QuerySelect, QueryTrait,
+};
 use sea_orm::{Order, Set};
 use slug::slugify;
 
@@ -182,22 +184,40 @@ impl SidequestService {
             .collect::<Vec<_>>();
 
         let latest = db_sidequest_score::Entity::find()
-            .filter(db_sidequest_score::Column::TeamId.is_in(team_ids.clone()))
-            .order_by(db_sidequest_score::Column::ValidAt, Order::Desc)
-            .one(self.db_repo.conn())
-            .await?;
-
-        if latest.is_none() {
-            return Ok(Vec::new());
-        }
-        let latest_date = latest.unwrap().valid_at;
-
-        let team_scores: Vec<db_sidequest_score::Model> = db_sidequest_score::Entity::find()
-            .filter(db_sidequest_score::Column::TeamId.is_in(team_ids))
-            .filter(db_sidequest_score::Column::ValidAt.eq(latest_date))
-            .order_by_desc(db_sidequest_score::Column::Score)
+            .select_only()
+            .column_as(db_sidequest_score::Column::ValidAt.max(), "valid_at_max")
+            .column(db_sidequest_score::Column::TeamId)
+            .group_by(db_sidequest_score::Column::TeamId)
+            .into_model::<TeamLatestResult>()
             .all(self.db_repo.conn())
             .await?;
+
+        // let latest = db_sidequest_score::Entity::find()
+        //     .filter(db_sidequest_score::Column::TeamId.is_in(team_ids.clone()))
+        //     .order_by(db_sidequest_score::Column::ValidAt, Order::Desc)
+        //     .one(self.db_repo.conn())
+        //     .await?;
+
+        // if latest.is_none() {
+        //     return Ok(Vec::new());
+        // }
+        // let latest_date = latest.unwrap().valid_at;
+        let mut team_scores = Vec::<db_sidequest_score::Model>::new();
+        for newest in latest {
+            let team_id = newest.team_id;
+            if (newest.valid_at_max.is_none()) {
+                continue;
+            }
+            let valid_at_max = newest.valid_at_max.unwrap();
+            let score = db_sidequest_score::Entity::find()
+                .filter(db_sidequest_score::Column::TeamId.eq(team_id))
+                .filter(db_sidequest_score::Column::ValidAt.eq(valid_at_max))
+                .one(self.db_repo.conn())
+                .await?;
+            if let Some(score) = score {
+                team_scores.push(score);
+            }
+        }
 
         let mut points_rank_mapping = HashMap::<i64, i64>::new();
         let mut rank = 1;

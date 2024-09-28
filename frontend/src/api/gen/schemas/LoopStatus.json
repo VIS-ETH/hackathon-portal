@@ -1,0 +1,5 @@
+{
+  "type": "string",
+  "enum": ["NonExisting", "Running", "Exited"],
+  "x-readme-ref-name": "LoopStatus"
+}

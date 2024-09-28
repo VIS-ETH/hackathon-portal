@@ -1,0 +1,20 @@
+{
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "event_id": { "type": "string", "format": "uuid" },
+    "id": { "type": "string", "format": "uuid" },
+    "is_higher_result_better": { "type": "boolean" },
+    "name": { "type": "string" },
+    "slug": { "type": "string" }
+  },
+  "required": [
+    "id",
+    "event_id",
+    "name",
+    "slug",
+    "description",
+    "is_higher_result_better"
+  ],
+  "x-readme-ref-name": "SidequestDTO"
+}

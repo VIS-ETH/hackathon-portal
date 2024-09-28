@@ -62,7 +62,7 @@ export function getAggregateStatusQueryOptions(
         url: `/api/events/${eventId}/aggregate`,
         ...options,
       });
-      return res.data;
+      return res;
     },
   });
 }
@@ -131,7 +131,7 @@ export function getAggregateStatusSuspenseQueryOptions(
         url: `/api/events/${eventId}/aggregate`,
         ...options,
       });
-      return res.data;
+      return res;
     },
   });
 }

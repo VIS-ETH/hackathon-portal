@@ -53,7 +53,7 @@ export function getEventsRolesQueryOptions(
           ...options,
         },
       );
-      return res.data;
+      return res;
     },
   });
 }
@@ -113,7 +113,7 @@ export function getEventsRolesSuspenseQueryOptions(
           ...options,
         },
       );
-      return res.data;
+      return res;
     },
   });
 }

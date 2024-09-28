@@ -1,0 +1,5 @@
+{
+  "type": "string",
+  "enum": ["Grading", "Hacking", "Readonly", "Registration"],
+  "x-readme-ref-name": "EventPhase"
+}

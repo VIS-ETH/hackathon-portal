@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use chrono::NaiveDateTime;
 use sea_orm::FromQueryResult;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
@@ -76,4 +77,10 @@ pub struct TimelineData {
     pub start: Option<chrono::NaiveDateTime>,
     pub end: Option<chrono::NaiveDateTime>,
     pub scores: HashMap<String, Vec<(chrono::NaiveDateTime, i64)>>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema, FromQueryResult)]
+pub struct TeamLatestResult {
+    pub team_id: Uuid,
+    pub valid_at_max: Option<NaiveDateTime>,
 }

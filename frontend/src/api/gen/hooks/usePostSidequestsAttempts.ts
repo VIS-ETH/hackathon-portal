@@ -56,7 +56,7 @@ export function usePostSidequestsAttempts(
         data,
         ...clientOptions,
       });
-      return res.data;
+      return res;
     },
     ...mutationOptions,
   });

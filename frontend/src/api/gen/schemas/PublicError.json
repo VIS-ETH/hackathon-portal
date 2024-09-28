@@ -1,0 +1,9 @@
+{
+  "type": "object",
+  "properties": {
+    "message": { "type": "string" },
+    "status": { "type": "integer", "format": "int32", "minimum": 0 }
+  },
+  "required": ["status", "message"],
+  "x-readme-ref-name": "PublicError"
+}

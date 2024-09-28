@@ -54,7 +54,7 @@ export function getSidequestsQueryOptions(
         params,
         ...options,
       });
-      return res.data;
+      return res;
     },
   });
 }
@@ -117,7 +117,7 @@ export function getSidequestsSuspenseQueryOptions(
         params,
         ...options,
       });
-      return res.data;
+      return res;
     },
   });
 }

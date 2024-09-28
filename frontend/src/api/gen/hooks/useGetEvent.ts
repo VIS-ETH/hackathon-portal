@@ -49,7 +49,7 @@ export function getEventQueryOptions(
         url: `/api/events/${eventId}`,
         ...options,
       });
-      return res.data;
+      return res;
     },
   });
 }
@@ -111,7 +111,7 @@ export function getEventSuspenseQueryOptions(
         url: `/api/events/${eventId}`,
         ...options,
       });
-      return res.data;
+      return res;
     },
   });
 }

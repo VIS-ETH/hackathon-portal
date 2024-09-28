@@ -62,7 +62,7 @@ export function getLeaderboardQueryOptions(
           ...options,
         },
       );
-      return res.data;
+      return res;
     },
   });
 }
@@ -133,7 +133,7 @@ export function getLeaderboardSuspenseQueryOptions(
           ...options,
         },
       );
-      return res.data;
+      return res;
     },
   });
 }

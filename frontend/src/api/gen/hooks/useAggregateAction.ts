@@ -57,7 +57,7 @@ export function useAggregateAction(
         params,
         ...clientOptions,
       });
-      return res.data;
+      return res;
     },
     ...mutationOptions,
   });

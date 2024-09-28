@@ -648,6 +648,43 @@
       }
     },
     "/api/sidequests/{sidequest_id}": {
+      "get": {
+        "tags": ["crate::routers::sidequests"],
+        "operationId": "get_sidequest",
+        "parameters": [
+          {
+            "name": "sidequest_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SidequestDTO"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
+              }
+            }
+          }
+        }
+      },
       "patch": {
         "tags": ["crate::routers::sidequests"],
         "operationId": "patch_sidequests",
@@ -1294,10 +1331,24 @@
         "required": ["event", "team"],
         "properties": {
           "event": {
-            "$ref": "#/components/schemas/EventRolesMap"
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/EventRole"
+              },
+              "uniqueItems": true
+            }
           },
           "team": {
-            "$ref": "#/components/schemas/TeamRolesMap"
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/TeamRole"
+              },
+              "uniqueItems": true
+            }
           }
         }
       },
