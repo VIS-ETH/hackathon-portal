@@ -1,3 +1,4 @@
+mod appointments;
 mod docs;
 mod events;
 mod sidequests;
@@ -21,6 +22,7 @@ pub fn get_router(state: &ApiState) -> Router {
     Router::new()
         .nest("/events", events::get_router(state))
         .nest("/sidequests", sidequests::get_router(state))
+        .nest("/appointments", appointments::get_router(state))
 }
 
 pub async fn get_api_router(api_state: ApiState) -> ApiResult<Router> {

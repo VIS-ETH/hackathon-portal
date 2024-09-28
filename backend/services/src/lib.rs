@@ -1,3 +1,4 @@
+pub mod appointment;
 pub mod authorization;
 pub mod error;
 pub mod event;
