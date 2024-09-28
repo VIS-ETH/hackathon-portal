@@ -14,7 +14,8 @@ use serde::Deserialize;
 use services::authorization;
 use services::event::model::EventForPatch;
 use services::sidequest::model::{
-    AggregatorStatus, AttemptForCreate, SidequestEntryForLeaderboard, SidequestForCreate,
+    AggregatorStatus, AttemptForCreate, FullInfoSidequestEntryForLeaderboard,
+    FullInfoTeamEntryForLeaderboard, SidequestEntryForLeaderboard, SidequestForCreate,
     SidequestForPatch,
 };
 use std::collections::{HashMap, HashSet};
@@ -29,6 +30,7 @@ pub fn get_router(state: &ApiState) -> Router {
         .route("/:sidequest_id", patch(patch_sidequests))
         .route("/:sidequest_id/attempts", post(post_sidequests_attempts))
         .route("/:sidequest_id/leaderboard", get(get_leaderboard))
+        .route("/leaderboard", get(get_team_leaderboard))
         // .route("/:event_id/roles", get(get_event_roles))
         // .route("/:event_id/roles", put(put_event_roles))
         // .route("/:event_id/roles", delete(delete_event_roles))
@@ -174,7 +176,7 @@ pub async fn post_sidequests_attempts(
     get,
     path = "/api/sidequests/{sidequest_id}/leaderboard",
     responses(
-        (status = StatusCode::OK, body = Vec<SidequestEntryForLeaderboard>),
+        (status = StatusCode::OK, body = Vec<FullInfoSidequestEntryForLeaderboard>),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
 )]
@@ -182,202 +184,43 @@ pub async fn get_leaderboard(
     ctx: Ctx,
     State(state): State<ApiState>,
     Path(sidequest_id): Path<Uuid>,
-) -> ApiResult<Json<Vec<SidequestEntryForLeaderboard>>> {
+) -> ApiResult<Json<Vec<FullInfoSidequestEntryForLeaderboard>>> {
     let event = state.sidequest_service.get_event(sidequest_id).await?;
     let _ =
         state
             .authorization_service
             .view_event_guard(ctx.roles(), event.id, event.visibility)?;
-    let leaderboard: Vec<SidequestEntryForLeaderboard> = state
+    let leaderboard = state
         .sidequest_service
-        .get_leaderboard(sidequest_id)
+        .get_full_leaderboard(sidequest_id)
         .await?;
     Ok(Json(leaderboard))
 }
 
-// #[utoipa::path(
-//     post,
-//     path = "/api/events/{event_id}/invite",
-//     responses(
-//         (status = StatusCode::OK, body = AffectedRowsDTO),
-//         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
-//     )
-// )]
-// pub async fn invite_users(
-//     ctx: Ctx,
-//     State(state): State<ApiState>,
-//     Path(event_id): Path<Uuid>,
-//     Json(body): Json<InviteUsersDTO>,
-// ) -> ApiResult<Json<AffectedRowsDTO>> {
-//     state
-//         .authorization_service
-//         .edit_event_guard(ctx.roles(), event_id)?;
-
-//     let auth_ids = body
-//         .users
-//         .iter()
-//         .map(|user| user.auth_id.clone())
-//         .collect::<Vec<_>>();
-//     let roles = body.default_roles.iter().cloned().collect::<HashSet<_>>();
-
-//     let affected_rows = state.user_service.create_users(body.users).await?;
-//     let _ = state
-//         .authorization_service
-//         .assign_default_event_roles(event_id, auth_ids, roles)
-//         .await?;
-
-//     let dto = AffectedRowsDTO { affected_rows };
-
-//     Ok(Json(dto))
-// }
-
-// #[utoipa::path(
-//     get,
-//     path = "/api/events/{event_id}",
-//     responses(
-//         (status = StatusCode::OK, body = GetEventResponse),
-//         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
-//     )
-// )]
-// pub async fn get_event(
-//     ctx: Ctx,
-//     State(state): State<ApiState>,
-//     Path(event_id): Path<Uuid>,
-// ) -> ApiResult<Json<EventDTO>> {
-//     let event = state.event_service.get_event(event_id).await?;
-
-//     state
-//         .authorization_service
-//         .view_event_guard(ctx.roles(), event.id, event.visibility)?;
-
-//     let dto = EventDTO::from(event);
-
-//     Ok(Json(dto))
-// }
-
-// #[utoipa::path(
-//     patch,
-//     path = "/api/events/{event_id}",
-//     responses(
-//         (status = StatusCode::OK, body = GetEventResponse),
-//         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
-//     )
-// )]
-// pub async fn patch_event(
-//     ctx: Ctx,
-//     State(state): State<ApiState>,
-//     Path(event_id): Path<Uuid>,
-//     Json(body): Json<EventForPatch>,
-// ) -> ApiResult<Json<EventDTO>> {
-//     state
-//         .authorization_service
-//         .edit_event_guard(ctx.roles(), event_id)?;
-
-//     let event = state.event_service.patch_event(event_id, &body).await?;
-
-//     let dto = EventDTO::from(event);
-
-//     Ok(Json(dto))
-// }
-
-// #[utoipa::path(
-//     get,
-//     path = "/api/events/roles",
-//     responses(
-//         (status = StatusCode::OK, body = HashMap<Uuid, HashSet<EventRole>>),
-//         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
-//     )
-// )]
-// pub async fn get_events_roles(ctx: Ctx) -> ApiResult<Json<HashMap<Uuid, HashSet<EventRole>>>> {
-//     let dto = ctx.roles().event.clone();
-//     Ok(Json(dto))
-// }
-
-// #[utoipa::path(
-//     get,
-//     path = "/api/events/{event_id}/roles",
-//     responses(
-//         (status = StatusCode::OK, body = HashSet<EventRole>),
-//         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
-//     )
-// )]
-// pub async fn get_event_roles(
-//     ctx: Ctx,
-//     Path(event_id): Path<Uuid>,
-// ) -> ApiResult<Json<HashSet<EventRole>>> {
-//     let dto = ctx
-//         .roles()
-//         .event
-//         .get(&event_id)
-//         .cloned()
-//         .unwrap_or_default();
-//     Ok(Json(dto))
-// }
-
-// #[utoipa::path(
-//     put,
-//     path = "/api/events/{event_id}/roles",
-//     responses(
-//         (status = StatusCode::OK, body = AffectedRowsDTO),
-//         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
-//     )
-// )]
-// pub async fn put_event_roles(
-//     ctx: Ctx,
-//     State(state): State<ApiState>,
-//     Path(event_id): Path<Uuid>,
-//     Json(body): Json<HashMap<Uuid, HashSet<EventRole>>>,
-// ) -> ApiResult<Json<AffectedRowsDTO>> {
-//     state
-//         .authorization_service
-//         .edit_event_guard(ctx.roles(), event_id)?;
-
-//     let affected_rows = state
-//         .authorization_service
-//         .assign_event_roles(event_id, body)
-//         .await?;
-
-//     let dto = AffectedRowsDTO { affected_rows };
-
-//     Ok(Json(dto))
-// }
-
-// #[utoipa::path(
-//     delete,
-//     path = "/api/events/{event_id}/roles",
-//     responses(
-//         (status = StatusCode::OK, body = AffectedRowsDTO),
-//         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
-//     )
-// )]
-// pub async fn delete_event_roles(
-//     ctx: Ctx,
-//     State(state): State<ApiState>,
-//     Path(event_id): Path<Uuid>,
-//     Json(body): Json<HashMap<Uuid, HashSet<EventRole>>>,
-// ) -> ApiResult<Json<AffectedRowsDTO>> {
-//     state
-//         .authorization_service
-//         .edit_event_guard(ctx.roles(), event_id)?;
-
-//     // Prevent admins from unassigning themselves
-//     if body
-//         .get(&ctx.user().id)
-//         .is_some_and(|roles| roles.contains(&EventRole::Admin))
-//     {
-//         return Err(ApiError::Forbidden {
-//             resource: "event".to_string(),
-//             id: event_id.to_string(),
-//             action: "unassign self".to_string(),
-//         });
-//     }
-
-//     let affected_rows = state
-//         .authorization_service
-//         .unassign_event_roles(event_id, body)
-//         .await?;
-
-//     let dto = AffectedRowsDTO { affected_rows };
-
-//     Ok(Json(dto))
-// }
+#[utoipa::path(
+    get,
+    path = "/api/sidequests/leaderboard",
+    responses(
+        (status = StatusCode::OK, body = Vec<FullInfoTeamEntryForLeaderboard>),
+        (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
+    ),
+    params (
+        ("event_id" = Uuid, Query, description = "The Event ID to get the leaderboard for"),
+    )
+)]
+pub async fn get_team_leaderboard(
+    ctx: Ctx,
+    State(state): State<ApiState>,
+    Query(query): Query<EventIdQuery>,
+) -> ApiResult<Json<Vec<FullInfoTeamEntryForLeaderboard>>> {
+    let event = state.event_service.get_event(query.event_id).await?;
+    let _ =
+        state
+            .authorization_service
+            .view_event_guard(ctx.roles(), event.id, event.visibility)?;
+    let leaderboard = state
+        .sidequest_service
+        .get_team_leaderboard(event.id)
+        .await?;
+    Ok(Json(leaderboard))
+}

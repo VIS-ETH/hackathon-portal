@@ -39,6 +39,29 @@ pub struct SidequestEntryForLeaderboard {
     pub points: Option<i64>,
 }
 
+pub struct TeamEntryForLeaderboard {
+    pub group_id: Uuid,
+    pub result: f64,
+    pub rank: Option<i64>,
+}
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema, FromQueryResult)]
+pub struct FullInfoTeamEntryForLeaderboard {
+    pub group_name: String,
+    pub group_id: Uuid,
+    pub result: f64,
+    pub rank: i64,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema, FromQueryResult)]
+pub struct FullInfoSidequestEntryForLeaderboard {
+    pub user_name: String,
+    pub user_id: Uuid,
+    pub group_name: String,
+    pub group_id: Uuid,
+    pub result: f64,
+    pub points: i64,
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
 pub struct AggregatorStatus {
     pub event_id: Uuid,

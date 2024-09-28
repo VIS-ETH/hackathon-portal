@@ -7,8 +7,9 @@ use crate::{sidequest, ServiceError, ServiceResult};
 use chrono::{NaiveDateTime, Utc};
 use derive_more::derive::DerefMut;
 use model::{
-    AggregatorStatus, AttemptForCreate, LoopStatus, SidequestEntryForLeaderboard,
-    SidequestForCreate, SidequestForPatch,
+    AggregatorStatus, AttemptForCreate, FullInfoSidequestEntryForLeaderboard,
+    FullInfoTeamEntryForLeaderboard, LoopStatus, SidequestEntryForLeaderboard, SidequestForCreate,
+    SidequestForPatch, TeamEntryForLeaderboard,
 };
 use repositories::db::prelude::*;
 use repositories::DbRepository;
@@ -19,19 +20,17 @@ use std::time::Duration;
 use tokio::{net::TcpListener, task, time};
 use tokio_tasks::RunToken;
 
-use sea_orm::Set;
 use sea_orm::{prelude::*, IntoActiveModel, QueryOrder, QuerySelect};
+use sea_orm::{Order, Set};
 use slug::slugify;
 
 pub struct SidequestService {
-    db_repo: DbRepository
+    db_repo: DbRepository,
 }
 
 impl SidequestService {
     pub fn new(db_repo: DbRepository) -> Self {
-        Self {
-            db_repo
-        }
+        Self { db_repo }
     }
 
     pub async fn create_sidequest(&self, sidequest: SidequestForCreate) -> ServiceResult<u64> {
@@ -167,6 +166,117 @@ impl SidequestService {
         Ok(event)
     }
 
+    pub async fn get_team_leaderboard(
+        &self,
+        event_id: Uuid,
+    ) -> ServiceResult<Vec<FullInfoTeamEntryForLeaderboard>> {
+        let user_service = UserService::new(self.db_repo.clone());
+        let team_mapping: HashMap<Uuid, db_team::Model> =
+            user_service.get_team_mapping(event_id).await?;
+
+        let team_ids = team_mapping
+            .values()
+            .cloned()
+            .map(|team| team.id)
+            .collect::<Vec<_>>();
+        println!("team_ids: {:?}", team_ids);
+
+        let latest = db_sidequest_score::Entity::find()
+            .filter(db_sidequest_score::Column::TeamId.is_in(team_ids.clone()))
+            .order_by(db_sidequest_score::Column::ValidAt, Order::Desc)
+            .one(self.db_repo.conn())
+            .await?;
+
+        if latest.is_none() {
+            println!("No latest score found");
+            return Ok(Vec::new());
+        }
+        let latest_date = latest.unwrap().valid_at;
+
+        println!("latest_date: {:?}", latest_date);
+
+        let team_scores: Vec<db_sidequest_score::Model> = db_sidequest_score::Entity::find()
+            .filter(db_sidequest_score::Column::TeamId.is_in(team_ids))
+            .filter(db_sidequest_score::Column::ValidAt.eq(latest_date))
+            .order_by_desc(db_sidequest_score::Column::Score)
+            .all(self.db_repo.conn())
+            .await?;
+
+        let mut points_rank_mapping = HashMap::<i64, i64>::new();
+        let mut rank = 1;
+        for team in &team_scores {
+            points_rank_mapping.insert(team.score as i64, rank);
+            rank += 1;
+        }
+
+        println!("points_rank_mapping: {:?}", points_rank_mapping);
+
+        let mut result = Vec::<FullInfoTeamEntryForLeaderboard>::new();
+        for team_score in team_scores {
+            // let team = team_mapping.get(&team_score.team_id);
+            let team = team_score
+                .find_related(db_team::Entity)
+                .one(self.db_repo.conn())
+                .await?;
+            let rank = points_rank_mapping.get(&(team_score.score as i64));
+
+            if team.is_none() || rank.is_none() {
+                continue;
+            }
+
+            result.push(FullInfoTeamEntryForLeaderboard {
+                group_name: team.unwrap().name.clone(),
+                group_id: team_score.team_id,
+                result: team_score.score as f64,
+                rank: *rank.unwrap(),
+            });
+        }
+
+        Ok(result)
+    }
+
+    pub async fn get_full_leaderboard(
+        &self,
+        sidequest_id: Uuid,
+    ) -> ServiceResult<Vec<FullInfoSidequestEntryForLeaderboard>> {
+        let event = self.get_event(sidequest_id).await?;
+        let leaderboard = self.get_leaderboard(sidequest_id).await?;
+
+        let user_service = UserService::new(self.db_repo.clone());
+        let team_mapping = user_service.get_team_mapping(event.id).await?;
+        let user_mapping = user_service.get_participants_mapping(event.id).await?;
+
+        let result = leaderboard
+            .into_iter()
+            .map(|entry| {
+                let team = team_mapping.get(&entry.user_id);
+                let user = user_mapping.get(&entry.user_id);
+                if (team.is_none() || user.is_none()) {
+                    return FullInfoSidequestEntryForLeaderboard {
+                        user_name: "Unknown".to_string(),
+                        user_id: entry.user_id,
+                        group_name: "Unknown".to_string(),
+                        group_id: Uuid::nil(),
+                        result: entry.result,
+                        points: entry.points.unwrap_or(0),
+                    };
+                } else {
+                    let team = team.unwrap();
+                    let user = user.unwrap();
+                    return FullInfoSidequestEntryForLeaderboard {
+                        user_name: user.name.clone(),
+                        user_id: entry.user_id,
+                        group_name: team.name.clone(),
+                        group_id: team.id,
+                        result: entry.result,
+                        points: entry.points.unwrap_or(0),
+                    };
+                }
+            })
+            .collect::<Vec<_>>();
+        Ok(result)
+    }
+
     pub async fn get_leaderboard(
         &self,
         sidequest_id: Uuid,
@@ -198,11 +308,6 @@ impl SidequestService {
             .await?
             .len()
             + 1) as i64;
-
-        println!(
-            "number of participants for leaderboard {}",
-            num_participants
-        );
 
         let result = leaderboard.into_iter().fold(
             (
@@ -281,12 +386,12 @@ impl SidequestService {
         for sidequest in sidequests {
             let leaderboard = self.get_leaderboard(sidequest.id).await?;
             for result in leaderboard {
-                let group_id = team_mapping.get(&result.user_id);
-                match group_id {
+                let team = team_mapping.get(&result.user_id);
+                match team {
                     None => (),
-                    Some(group_id) => {
-                        let previous_points = team_points.get(group_id).copied().unwrap_or(0);
-                        team_points.insert(*group_id, previous_points + result.points.unwrap_or(0));
+                    Some(team) => {
+                        let previous_points = team_points.get(&team.id).copied().unwrap_or(0);
+                        team_points.insert(team.id, previous_points + result.points.unwrap_or(0));
                     }
                 }
             }
@@ -305,7 +410,6 @@ impl SidequestService {
 
     pub async fn aggregate_infinite_loop(&self, event_id: Uuid, run_token: RunToken) -> () {
         let db_repo = DbRepository::new(self.db_repo.conn.clone());
-        let event_service = EventService::new(db_repo.clone());
         let mut interval = time::interval(Duration::from_secs(5));
         let sidequest_service = SidequestService::new(db_repo.clone());
         loop {

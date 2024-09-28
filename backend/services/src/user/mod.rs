@@ -4,7 +4,7 @@ use std::collections::HashMap;
 
 use crate::user::model::UserForCreate;
 use crate::utils::try_insert_result_to_int;
-use crate::ServiceResult;
+use crate::{ServiceError, ServiceResult};
 use repositories::db::prelude::*;
 use repositories::DbRepository;
 use sea_orm::prelude::*;
@@ -71,6 +71,32 @@ impl UserService {
         Ok(user)
     }
 
+    pub async fn get_user(&self, user_id: Uuid) -> ServiceResult<db_user::Model> {
+        let user = db_user::Entity::find_by_id(user_id)
+            .one(self.db_repo.conn())
+            .await?;
+
+        match user {
+            None => Err(ServiceError::ResourceNotFound {
+                resource: ("user".to_string()),
+                id: (user_id.to_string()),
+            }),
+            Some(user) => Ok(user),
+        }
+    }
+
+    pub async fn get_participants_mapping(
+        &self,
+        event_id: Uuid,
+    ) -> ServiceResult<HashMap<Uuid, db_user::Model>> {
+        let participants = self.get_participants(event_id).await?;
+        let mut user_mapping = HashMap::<Uuid, db_user::Model>::new();
+        for participant in participants {
+            user_mapping.insert(participant.id, participant);
+        }
+        Ok(user_mapping)
+    }
+
     pub fn get_default_name(&self, auth_id: &str) -> String {
         auth_id.split('@').next().unwrap_or(auth_id).to_string()
     }
@@ -101,19 +127,37 @@ impl UserService {
         Ok(participants)
     }
 
-    pub async fn get_team_mapping(&self, event_id: Uuid) -> ServiceResult<HashMap<Uuid, Uuid>> {
+    /// Retrieves a mapping of participants to their respective teams for a given event.
+    ///
+    /// # Arguments
+    ///
+    /// * `event_id` - The unique identifier of the event.
+    ///
+    /// # Returns
+    ///
+    /// A `ServiceResult` containing a `HashMap` where the keys are participant `Uuid`s and the values are `db_team::Model` instances representing the teams.
+    ///
+    /// # Errors
+    ///
+    /// Returns a `ServiceError` if there is an issue retrieving participants or their associated teams from the database.
+    /// ```
+    pub async fn get_team_mapping(
+        &self,
+        event_id: Uuid,
+    ) -> ServiceResult<HashMap<Uuid, db_team::Model>> {
         let participants = self.get_participants(event_id).await?;
-        let mut team_mapping = HashMap::<Uuid, Uuid>::new();
+        let mut team_mapping = HashMap::<Uuid, db_team::Model>::new();
         for participant in participants {
-            let group: Option<db_team_role_assignment::Model> = participant
+            let group = participant
                 .find_related(db_team_role_assignment::Entity)
+                .find_also_related(db_team::Entity)
                 .one(self.db_repo.conn())
                 .await?;
             match group {
-                None => (),
-                Some(group) => {
-                    let _ = team_mapping.insert(participant.id, group.team_id);
+                Some((_, Some(team))) => {
+                    team_mapping.insert(participant.id, team);
                 }
+                _ => (),
             }
         }
         Ok(team_mapping)
