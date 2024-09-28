@@ -7,6 +7,12 @@ use utoipa::ToSchema;
 use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+pub enum AggregationAction {
+    Start,
+    Stop,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
 pub struct EventDTO {
     pub id: Uuid,
     pub name: String,
@@ -44,4 +50,9 @@ pub struct InviteUsersDTO {
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
 pub struct EventIdQuery {
     pub event_id: Uuid,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+pub struct AggregateActionQuery {
+    pub aggregate_action: AggregationAction,
 }

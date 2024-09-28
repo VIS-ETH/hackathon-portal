@@ -5,6 +5,7 @@ use crate::user::UserService;
 use crate::utils::try_insert_result_to_int;
 use crate::{sidequest, ServiceError, ServiceResult};
 use chrono::{NaiveDateTime, Utc};
+use derive_more::derive::DerefMut;
 use model::{
     AggregatorStatus, AttemptForCreate, LoopStatus, SidequestEntryForLeaderboard,
     SidequestForCreate, SidequestForPatch,
@@ -13,24 +14,23 @@ use repositories::db::prelude::*;
 use repositories::DbRepository;
 use sea_orm::sea_query::OnConflict;
 use std::collections::HashMap;
+use std::ops::DerefMut;
 use std::time::Duration;
 use tokio::{net::TcpListener, task, time};
+use tokio_tasks::RunToken;
 
 use sea_orm::Set;
 use sea_orm::{prelude::*, IntoActiveModel, QueryOrder, QuerySelect};
 use slug::slugify;
 
-// #[derive(Clone)]
 pub struct SidequestService {
-    db_repo: DbRepository,
-    aggregation_tasks: HashMap<Uuid, task::JoinHandle<()>>,
+    db_repo: DbRepository
 }
 
 impl SidequestService {
     pub fn new(db_repo: DbRepository) -> Self {
         Self {
-            db_repo,
-            aggregation_tasks: HashMap::new(),
+            db_repo
         }
     }
 
@@ -303,12 +303,16 @@ impl SidequestService {
         Ok(())
     }
 
-    pub async fn aggregate_infinite_loop(&self, event_id: Uuid) -> () {
+    pub async fn aggregate_infinite_loop(&self, event_id: Uuid, run_token: RunToken) -> () {
         let db_repo = DbRepository::new(self.db_repo.conn.clone());
         let event_service = EventService::new(db_repo.clone());
         let mut interval = time::interval(Duration::from_secs(5));
         let sidequest_service = SidequestService::new(db_repo.clone());
         loop {
+            if run_token.is_cancelled() {
+                println!("Aggregation (event : {}) stopped", event_id);
+                break;
+            }
             interval.tick().await;
             let res = sidequest_service.aggregate(event_id).await;
             match res {
@@ -323,17 +327,23 @@ impl SidequestService {
         }
     }
 
-    pub async fn aggregate_start(&mut self, event_id: Uuid) -> () {
+    pub async fn aggregate_start(&self, event_id: Uuid) -> () {
         let sidequest_service = SidequestService::new(self.db_repo.clone());
-        let forever = task::spawn(async move {
-            sidequest_service.aggregate_infinite_loop(event_id).await;
-        });
-        self.aggregation_tasks.insert(event_id, forever);
+        let _ =
+            tokio_tasks::TaskBuilder::new(event_id.to_string()).create(|run_token| async move {
+                sidequest_service
+                    .aggregate_infinite_loop(event_id, run_token)
+                    .await;
+                Result::<(), ()>::Ok(())
+            });
         ()
     }
 
-    pub async fn aggregate_stop(&mut self, event_id: Uuid) -> ServiceResult<()> {
-        let task = self.aggregation_tasks.get(&event_id);
+    pub async fn aggregate_stop(&self, event_id: Uuid) -> ServiceResult<()> {
+        let tasks = tokio_tasks::list_tasks();
+        let task = tasks
+            .into_iter()
+            .find(|task| task.name() == event_id.to_string());
         match task {
             None => {
                 return Err(ServiceError::ResourceNotFound {
@@ -342,41 +352,27 @@ impl SidequestService {
                 });
             }
             Some(task) => {
-                task.abort();
+                let res = task.cancel().await;
                 Ok(())
             }
         }
     }
 
-    pub async fn aggreagte_status(&self) -> ServiceResult<Vec<AggregatorStatus>> {
-        let mut result = Vec::<AggregatorStatus>::new();
-        let events = EventService::new(self.db_repo.clone()).get_events().await?;
-        for event in events {
-            let event_id = event.id;
-            let task = self.aggregation_tasks.get(&event_id);
-            match task {
-                None => {
-                    result.push(AggregatorStatus {
-                        event_id: event_id,
-                        status: LoopStatus::NonExisting,
-                    });
-                }
-                Some(task) => {
-                    if task.is_finished() {
-                        result.push(AggregatorStatus {
-                            event_id: event_id,
-                            status: LoopStatus::Exited,
-                        });
-                    } else {
-                        result.push(AggregatorStatus {
-                            event_id: event_id,
-                            status: LoopStatus::Running,
-                        });
-                    }
-                }
-            }
+    pub async fn aggregate_status(&self, event_id: Uuid) -> ServiceResult<AggregatorStatus> {
+        let tasks = tokio_tasks::list_tasks();
+        let task = tasks
+            .into_iter()
+            .find(|task| task.name() == event_id.to_string());
+        match task {
+            None => Ok(AggregatorStatus {
+                event_id: event_id,
+                status: LoopStatus::NonExisting,
+            }),
+            Some(_) => Ok(AggregatorStatus {
+                event_id: event_id,
+                status: LoopStatus::Running,
+            }),
         }
-        Ok(result)
     }
 
     pub async fn aggregate_start_all(&mut self) -> ServiceResult<()> {

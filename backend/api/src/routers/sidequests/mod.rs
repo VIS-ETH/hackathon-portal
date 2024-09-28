@@ -14,7 +14,8 @@ use serde::Deserialize;
 use services::authorization;
 use services::event::model::EventForPatch;
 use services::sidequest::model::{
-    AttemptForCreate, SidequestEntryForLeaderboard, SidequestForCreate, SidequestForPatch,
+    AggregatorStatus, AttemptForCreate, SidequestEntryForLeaderboard, SidequestForCreate,
+    SidequestForPatch,
 };
 use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
@@ -28,7 +29,6 @@ pub fn get_router(state: &ApiState) -> Router {
         .route("/:sidequest_id", patch(patch_sidequests))
         .route("/:sidequest_id/attempts", post(post_sidequests_attempts))
         .route("/:sidequest_id/leaderboard", get(get_leaderboard))
-        .route("/aggregate", get(aggregate))
         // .route("/:event_id/roles", get(get_event_roles))
         // .route("/:event_id/roles", put(put_event_roles))
         // .route("/:event_id/roles", delete(delete_event_roles))
@@ -193,27 +193,6 @@ pub async fn get_leaderboard(
         .get_leaderboard(sidequest_id)
         .await?;
     Ok(Json(leaderboard))
-}
-
-#[utoipa::path(
-    get,
-    path = "/api/sidequests/aggregate",
-    responses(
-        (status = StatusCode::OK, body = ()),
-        (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
-    ),
-    params(
-        ("event_id"= Uuid, Query, description= "The ID of the event to get sidequests for"),
-    )
-)]
-pub async fn aggregate(
-    ctx: Ctx,
-    State(state): State<ApiState>,
-    Query(query): Query<EventIdQuery>,
-) -> ApiResult<()> {
-    let res = state.sidequest_service.aggregate(query.event_id).await?;
-
-    Ok(())
 }
 
 // #[utoipa::path(
