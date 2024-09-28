@@ -1,6 +1,4 @@
 pub mod model;
-use std::collections::HashMap;
-
 use crate::event::EventService;
 use crate::user::model::UserForCreate;
 use crate::user::UserService;
@@ -8,24 +6,32 @@ use crate::utils::try_insert_result_to_int;
 use crate::{sidequest, ServiceError, ServiceResult};
 use chrono::{NaiveDateTime, Utc};
 use model::{
-    AttemptForCreate, SidequestEntryForLeaderboard, SidequestForCreate, SidequestForPatch,
+    AggregatorStatus, AttemptForCreate, LoopStatus, SidequestEntryForLeaderboard,
+    SidequestForCreate, SidequestForPatch,
 };
 use repositories::db::prelude::*;
 use repositories::DbRepository;
 use sea_orm::sea_query::OnConflict;
-use sea_orm::sqlx::types::time;
+use std::collections::HashMap;
+use std::time::Duration;
+use tokio::{net::TcpListener, task, time};
+
 use sea_orm::Set;
 use sea_orm::{prelude::*, IntoActiveModel, QueryOrder, QuerySelect};
 use slug::slugify;
 
-#[derive(Clone)]
+// #[derive(Clone)]
 pub struct SidequestService {
     db_repo: DbRepository,
+    aggregation_tasks: HashMap<Uuid, task::JoinHandle<()>>,
 }
 
 impl SidequestService {
     pub fn new(db_repo: DbRepository) -> Self {
-        Self { db_repo }
+        Self {
+            db_repo,
+            aggregation_tasks: HashMap::new(),
+        }
     }
 
     pub async fn create_sidequest(&self, sidequest: SidequestForCreate) -> ServiceResult<u64> {
@@ -293,6 +299,102 @@ impl SidequestService {
                 ..Default::default()
             };
             record.insert(self.db_repo.conn()).await?;
+        }
+        Ok(())
+    }
+
+    pub async fn aggregate_infinite_loop(&self, event_id: Uuid) -> () {
+        let db_repo = DbRepository::new(self.db_repo.conn.clone());
+        let event_service = EventService::new(db_repo.clone());
+        let mut interval = time::interval(Duration::from_secs(5));
+        let sidequest_service = SidequestService::new(db_repo.clone());
+        loop {
+            interval.tick().await;
+            let res = sidequest_service.aggregate(event_id).await;
+            match res {
+                Err(err) => {
+                    eprint!(
+                        "Aggregation (event : {}) failed with error: {:?}",
+                        event_id, err
+                    );
+                }
+                Ok(_) => (),
+            }
+        }
+    }
+
+    pub async fn aggregate_start(&mut self, event_id: Uuid) -> () {
+        let sidequest_service = SidequestService::new(self.db_repo.clone());
+        let forever = task::spawn(async move {
+            sidequest_service.aggregate_infinite_loop(event_id).await;
+        });
+        self.aggregation_tasks.insert(event_id, forever);
+        ()
+    }
+
+    pub async fn aggregate_stop(&mut self, event_id: Uuid) -> ServiceResult<()> {
+        let task = self.aggregation_tasks.get(&event_id);
+        match task {
+            None => {
+                return Err(ServiceError::ResourceNotFound {
+                    resource: ("aggregation task".to_string()),
+                    id: (event_id.to_string()),
+                });
+            }
+            Some(task) => {
+                task.abort();
+                Ok(())
+            }
+        }
+    }
+
+    pub async fn aggreagte_status(&self) -> ServiceResult<Vec<AggregatorStatus>> {
+        let mut result = Vec::<AggregatorStatus>::new();
+        let events = EventService::new(self.db_repo.clone()).get_events().await?;
+        for event in events {
+            let event_id = event.id;
+            let task = self.aggregation_tasks.get(&event_id);
+            match task {
+                None => {
+                    result.push(AggregatorStatus {
+                        event_id: event_id,
+                        status: LoopStatus::NonExisting,
+                    });
+                }
+                Some(task) => {
+                    if task.is_finished() {
+                        result.push(AggregatorStatus {
+                            event_id: event_id,
+                            status: LoopStatus::Exited,
+                        });
+                    } else {
+                        result.push(AggregatorStatus {
+                            event_id: event_id,
+                            status: LoopStatus::Running,
+                        });
+                    }
+                }
+            }
+        }
+        Ok(result)
+    }
+
+    pub async fn aggregate_start_all(&mut self) -> ServiceResult<()> {
+        let event_service = EventService::new(self.db_repo.clone());
+        let events = event_service.get_events().await?;
+        for event in events {
+            let event_id = event.id;
+            self.aggregate_start(event_id).await;
+        }
+        Ok(())
+    }
+
+    pub async fn aggregate_stop_all(&mut self) -> ServiceResult<()> {
+        let event_service = EventService::new(self.db_repo.clone());
+        let events = event_service.get_events().await?;
+        for event in events {
+            let event_id = event.id;
+            self.aggregate_stop(event_id).await?;
         }
         Ok(())
     }

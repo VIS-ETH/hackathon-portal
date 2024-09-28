@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 repositories = { path = "../repositories" }
-
+tokio = { version = "1.39.2", features = ["full"] }
 derive_more = { version = "1.0.0", features = ["full"] }
 serde = { version = "1.0.204", features = ["derive"] }
 chrono = "0.4.38"

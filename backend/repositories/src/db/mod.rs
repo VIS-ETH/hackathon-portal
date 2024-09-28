@@ -23,7 +23,7 @@ pub use sea_orm::DbErr;
 
 #[derive(Clone)]
 pub struct DbRepository {
-    conn: DbConn,
+    pub conn: DbConn,
 }
 
 impl DbRepository {

@@ -4,6 +4,13 @@ use utoipa::ToSchema;
 use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+pub enum LoopStatus {
+    NonExisting,
+    Running,
+    Exited,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
 pub struct SidequestForCreate {
     pub event_id: Uuid,
     pub name: String,
@@ -30,4 +37,10 @@ pub struct SidequestEntryForLeaderboard {
     pub user_id: Uuid,
     pub result: f64,
     pub points: Option<i64>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+pub struct AggregatorStatus {
+    pub event_id: Uuid,
+    pub status: LoopStatus,
 }
