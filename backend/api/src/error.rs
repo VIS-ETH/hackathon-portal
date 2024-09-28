@@ -160,6 +160,10 @@ impl From<&ApiError> for PublicError {
                     StatusCode::NOT_FOUND,
                     format!("{} '{}' not found", resource, id),
                 ),
+                ServiceError::ResourceStillInUse { resource, id } => (
+                    StatusCode::CONFLICT,
+                    format!("{} '{}' is still in use", resource, id),
+                ),
                 ServiceError::Forbidden {
                     resource,
                     id,

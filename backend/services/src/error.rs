@@ -26,6 +26,11 @@ pub enum ServiceError {
         id: String,
     },
 
+    ResourceStillInUse {
+        resource: String,
+        id: String,
+    },
+
     Forbidden {
         resource: String,
         id: String,
