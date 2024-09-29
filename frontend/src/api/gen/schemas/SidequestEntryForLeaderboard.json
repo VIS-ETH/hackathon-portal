@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "properties": {
+    "points": { "type": "integer", "format": "int64", "nullable": true },
+    "result": { "type": "number", "format": "double" },
+    "user_id": { "type": "string", "format": "uuid" }
+  },
+  "required": ["user_id", "result"],
+  "x-readme-ref-name": "SidequestEntryForLeaderboard"
+}

@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "properties": {
+    "end": { "type": "string", "format": "date-time", "nullable": true },
+    "event_id": { "type": "string", "format": "uuid" },
+    "scores": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "array",
+          "items": {
+            "allOf": [
+              { "type": "string", "format": "date-time" },
+              { "type": "integer", "format": "int64" }
+            ]
+          }
+        }
+      }
+    },
+    "start": { "type": "string", "format": "date-time", "nullable": true }
+  },
+  "required": ["event_id", "scores"],
+  "x-readme-ref-name": "TimelineData"
+}

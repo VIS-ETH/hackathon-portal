@@ -1,0 +1,13 @@
+{
+  "type": "object",
+  "properties": {
+    "event_id": { "type": "string", "format": "uuid" },
+    "status": {
+      "type": "string",
+      "enum": ["NonExisting", "Running", "Exited"],
+      "x-readme-ref-name": "LoopStatus"
+    }
+  },
+  "required": ["event_id", "status"],
+  "x-readme-ref-name": "AggregatorStatus"
+}

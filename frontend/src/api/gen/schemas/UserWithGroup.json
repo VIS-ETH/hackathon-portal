@@ -1,0 +1,9 @@
+{
+  "type": "object",
+  "properties": {
+    "group_name": { "type": "string" },
+    "user_name": { "type": "string" }
+  },
+  "required": ["user_name", "group_name"],
+  "x-readme-ref-name": "UserWithGroup"
+}

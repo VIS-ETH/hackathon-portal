@@ -5,7 +5,7 @@
 ## Who are you and what do you do?
 
 Ergon is a Swiss leader in leveraging digitalisation to create unique client
-benefits – from the initial idea right through to market success. 
+benefits – from the initial idea right through to market success.
 
 Our highly-qualified experts develop user-friendly, custom software as well as
 proven, off-the-shelf products that are deployed worldwide by clients in
@@ -40,7 +40,7 @@ the opportunity to achieve these goals.
 We had the privilege of supporting the VIScon event over the past years as one
 of the event’s main sponsors. We are convinced that it provides significant
 added value as well as in-depth insight into a wide range of topics and
-practical techniques. 
+practical techniques.
 
 Ergon has committed to shaping a successful tomorrow for the next generation
 – and that’s exactly what we are doing. We are keen to share our experience
@@ -72,15 +72,15 @@ supporting future generations and our core business of software development. In
 
 > I can be creative, I have a lot of exchange with colleagues and I can develop my skills.
 
-*Sandro Ibig, Head of Testing*
+_Sandro Ibig, Head of Testing_
 
 > We have salary transparency, the employees are highly valued and there are almost no hierarchies.
 
-*Katja Sonderegger, Software Engineer*
+_Katja Sonderegger, Software Engineer_
 
 > My colleagues – because they are not satisfied with the first best solution. Instead, they question it and accept that there are also other opinions.
 
-*Daniel Neubig, Head of AR*
+_Daniel Neubig, Head of AR_
 
 ## Where are your offices?
 
@@ -94,8 +94,7 @@ We have three offices in the heart of Zurich (close to Stadelhofen)
 
 ### Vacancies
 
-> Check our website :-) <br>
-> [www.ergon.ch/careers](https://www.ergon.ch/careers), [www.ergon.ch/jobs](https://www.ergon.ch/jobs)
+> Check our website :-) <br> > [www.ergon.ch/careers](https://www.ergon.ch/careers), [www.ergon.ch/jobs](https://www.ergon.ch/jobs)
 
 ### Does your company offer internships?
 

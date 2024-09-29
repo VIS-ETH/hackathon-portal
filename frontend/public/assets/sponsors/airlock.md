@@ -84,11 +84,11 @@ the third time, having previously received the accolade in 2012 and 2018.
 
 > We motivate each other to become better and better, and to expand our knowledge.
 
-*Marco Fritschi, Team Lead Airlock Solution Engineering*
+_Marco Fritschi, Team Lead Airlock Solution Engineering_
 
 > The open culture, the dynamic and flexible environment, and because together we create something that makes a difference.
 
-*Friedrich Oesch, Head of Professional Service*
+_Friedrich Oesch, Head of Professional Service_
 
 ## Where is your office?
 

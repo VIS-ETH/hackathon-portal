@@ -23,7 +23,10 @@ export default function Sponsors({
             direction="row"
             wrap="wrap"
           >
-            <a target="_blank" href="https://viscon.ethz.ch/2024/sponsors/ergon">
+            <a
+              target="_blank"
+              href="https://viscon.ethz.ch/2024/sponsors/ergon"
+            >
               <Image
                 m={32}
                 mb={8}
@@ -33,7 +36,10 @@ export default function Sponsors({
                 alt="Logo of main sponsor ERGON"
               />
             </a>
-            <a target="_blank" href="https://viscon.ethz.ch/2024/sponsors/airlock">
+            <a
+              target="_blank"
+              href="https://viscon.ethz.ch/2024/sponsors/airlock"
+            >
               <Image
                 m={32}
                 h={112}
@@ -77,7 +83,10 @@ export default function Sponsors({
             direction="row"
             wrap="wrap"
           >
-            <a target="_blank" href="https://viscon.ethz.ch/2024/sponsors/zuehlke">
+            <a
+              target="_blank"
+              href="https://viscon.ethz.ch/2024/sponsors/zuehlke"
+            >
               <Image
                 m={32}
                 h={96}
@@ -86,7 +95,10 @@ export default function Sponsors({
                 alt="Main sponsor ZüHLKE"
               />
             </a>
-            <a target="_blank" href="https://viscon.ethz.ch/2024/sponsors/leica">
+            <a
+              target="_blank"
+              href="https://viscon.ethz.ch/2024/sponsors/leica"
+            >
               <Image
                 m={32}
                 h={64}
@@ -95,7 +107,10 @@ export default function Sponsors({
                 alt="Main sponsor LEICA"
               />
             </a>
-            <a target="_blank" href="https://viscon.ethz.ch/2024/sponsors/ubique">
+            <a
+              target="_blank"
+              href="https://viscon.ethz.ch/2024/sponsors/ubique"
+            >
               <Image
                 m={32}
                 h={48}
@@ -104,7 +119,10 @@ export default function Sponsors({
                 alt="Main sponsor UBIQUE"
               />
             </a>
-            <a target="_blank" href="https://viscon.ethz.ch/2024/sponsors/varian">
+            <a
+              target="_blank"
+              href="https://viscon.ethz.ch/2024/sponsors/varian"
+            >
               <Image
                 m={32}
                 h={48}

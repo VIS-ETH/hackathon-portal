@@ -12,6 +12,7 @@ use models::{AggregateActionQuery, AggregationAction};
 use repositories::db::prelude::EventRole;
 use services::event::model::EventForPatch;
 use services::sidequest::model::AggregatorStatus;
+use services::user::model::UserWithGroup;
 use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
 
@@ -96,7 +97,7 @@ pub async fn invite_users(
     get,
     path = "/api/events/{event_id}",
     responses(
-        (status = StatusCode::OK, body = GetEventResponse),
+        (status = StatusCode::OK, body = EventDTO),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     )
 )]
@@ -120,7 +121,7 @@ pub async fn get_event(
     patch,
     path = "/api/events/{event_id}",
     responses(
-        (status = StatusCode::OK, body = GetEventResponse),
+        (status = StatusCode::OK, body = EventDTO),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     )
 )]

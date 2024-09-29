@@ -43,7 +43,12 @@ export default function AppLayout({
   return (
     <>
       <header>
-        <Navbar user={user} headerItems={headerItems} section={section} baseUrl={pathBaseUrl}/>
+        <Navbar
+          user={user}
+          headerItems={headerItems}
+          section={section}
+          baseUrl={pathBaseUrl}
+        />
       </header>
       <main className={classes.main}>
         <Container>{children}</Container>

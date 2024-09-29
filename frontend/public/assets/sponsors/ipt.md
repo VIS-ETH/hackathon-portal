@@ -17,7 +17,7 @@ Here are three things that we are striving for together:
 2. In the future, we will keep cultivating innovation from within. Our experts do tech scouting, pick up new trends and develop ipt strategically. We're investing time specifically on this.
 
 3. We will also differentiate ourselves in the future through the quality of our solutions. For this we need top employees, which we encourage in their development and support them on the projects.
-Why do you support VIScon?
+   Why do you support VIScon?
 
 We are very enthusiastic about VIScon as we have a lot in common: We love adventurous and innovative missions and we believe that with strong teamwork and a positive mindset you will face every challenge in this hackathon. The opportunity to share, interact, and connect within a community is exactly what we aspire at ipt! At every VIScon we have a lot of fun and many highlights with you. We love to see your great results of the hackathon and to talk with you about hot topics from the IT industry during the Symposium. Like every year, our people, who were also university grads, will be on-site to have two workshops with you about leading-edge technologies and topics from the industry. Weili Gao, Florian Stelzer and Matthias Geel are looking forward to meeting you and to share their expertise with you. See you there!
 

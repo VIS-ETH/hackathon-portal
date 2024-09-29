@@ -10,8 +10,9 @@ use axum::{Json, Router};
 use models::CreateSidequestDTO;
 use repositories::db::prelude::EventRole;
 use services::sidequest::model::{
-    AttemptForCreate, FullInfoSidequestEntryForLeaderboard, FullInfoTeamEntryForLeaderboard,
-    SidequestForCreate, SidequestForPatch, TimelineData,
+    AggregatorStatus, AttemptForCreate, FullInfoSidequestEntryForLeaderboard,
+    FullInfoTeamEntryForLeaderboard, SidequestEntryForLeaderboard, SidequestForCreate,
+    SidequestForPatch, TimelineData, UserWithSidequestInfo,
 };
 use uuid::Uuid;
 
@@ -21,11 +22,14 @@ pub fn get_router(state: &ApiState) -> Router {
     Router::new()
         .route("/", get(get_sidequests))
         .route("/", post(post_sidequests))
+        .route("/:sidequest_id", get(get_sidequest))
         .route("/:sidequest_id", patch(patch_sidequests))
         .route("/:sidequest_id/attempts", post(post_sidequests_attempts))
         .route("/:sidequest_id/leaderboard", get(get_leaderboard))
         .route("/leaderboard", get(get_team_leaderboard))
         .route("/leaderboard/timeline", get(get_leaderboard_timeline))
+        .route("/participants", get(get_participants_with_sidequest_info))
+        .route("/participants/me", get(get_participant_with_sidequest_info))
         // .route("/:event_id/roles", get(get_event_roles))
         // .route("/:event_id/roles", put(put_event_roles))
         // .route("/:event_id/roles", delete(delete_event_roles))
@@ -60,6 +64,29 @@ pub async fn get_sidequests(
     let dto = sidequests.into_iter().map(SidequestDTO::from).collect();
 
     Ok(Json(dto))
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/sidequests/{sidequest_id}",
+    responses(
+        (status = StatusCode::OK, body = SidequestDTO),
+        (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
+    )
+)]
+pub async fn get_sidequest(
+    ctx: Ctx,
+    State(state): State<ApiState>,
+    Path(sidequest_id): Path<Uuid>,
+) -> ApiResult<Json<SidequestDTO>> {
+    let event = state.sidequest_service.get_event(sidequest_id).await?;
+
+    state
+        .authorization_service
+        .view_event_guard(ctx.roles(), event.id, event.visibility)?;
+
+    let sidequest = state.sidequest_service.get_sidequest(sidequest_id).await?;
+    Ok(Json(sidequest.into()))
 }
 
 #[utoipa::path(
@@ -243,4 +270,55 @@ pub async fn get_leaderboard_timeline(
         .get_timeline(event.id, query.before, query.after)
         .await?;
     Ok(Json(leaderboard))
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/sidequests/participants",
+    responses(
+        (status = StatusCode::OK, body = Vec<UserWithSidequestInfo>),
+        (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
+    ),
+    params (
+        ("event_id" = Uuid, Query, description = "The Event ID to get the leaderboard for"),
+    )
+)]
+
+pub async fn get_participants_with_sidequest_info(
+    ctx: Ctx,
+    State(state): State<ApiState>,
+    Query(query): Query<EventLeaderboardTimelineQuery>,
+) -> ApiResult<Json<Vec<UserWithSidequestInfo>>> {
+    let event = state.event_service.get_event(query.event_id).await?;
+    let _ =
+        state
+            .authorization_service
+            .view_event_guard(ctx.roles(), event.id, event.visibility)?;
+    let _ = state
+        .authorization_service
+        .edit_sidequests_attempt_guard(ctx.roles(), event.id)?;
+
+    let participants = state
+        .sidequest_service
+        .get_participants_with_sidequest_info(query.event_id)
+        .await?;
+    Ok(Json(participants))
+}
+
+pub async fn get_participant_with_sidequest_info(
+    ctx: Ctx,
+    State(state): State<ApiState>,
+    Query(query): Query<EventLeaderboardTimelineQuery>,
+) -> ApiResult<Json<UserWithSidequestInfo>> {
+    let event = state.event_service.get_event(query.event_id).await?;
+    let _ =
+        state
+            .authorization_service
+            .view_event_guard(ctx.roles(), event.id, event.visibility)?;
+
+    let participants = state
+        .sidequest_service
+        .get_participant_with_sidequest_info_by_id(query.event_id, ctx.user().id)
+        .await?;
+    Ok(Json(participants))
 }
