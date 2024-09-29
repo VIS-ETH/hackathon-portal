@@ -37,6 +37,13 @@ pub enum ServiceError {
         action: String,
     },
 
+    ProjectPreferenceDuplicate,
+
+    ProjectPreferenceWrongCount {
+        expected: usize,
+        actual: usize,
+    },
+
     SidequestCooldown {
         allowed_at: NaiveDateTime,
     },

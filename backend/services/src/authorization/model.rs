@@ -1,4 +1,5 @@
 use repositories::db::prelude::{EventRole, TeamRole};
+use sea_orm::{FromQueryResult, TryGetable};
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 use utoipa::ToSchema;
@@ -16,4 +17,18 @@ pub type TeamRolesMap = ResourceRolesMap<TeamRole>;
 pub struct UserRoles {
     pub event: HashMap<Uuid, HashSet<EventRole>>,
     pub team: HashMap<Uuid, HashSet<TeamRole>>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema, FromQueryResult)]
+pub struct AffiliateRow<R: TryGetable> {
+    pub id: Uuid,
+    pub name: String,
+    pub role: R,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+pub struct TeamAffiliate {
+    pub id: Uuid,
+    pub name: String,
+    pub roles: Vec<TeamRole>,
 }
