@@ -4,7 +4,7 @@ import { useGetTeamLeaderboard } from "@/api/gen";
 import { useGetLeaderboard } from "@/api/gen/hooks/useGetLeaderboard";
 import { useGetSidequests } from "@/api/gen/hooks/useGetSidequests";
 
-import { Group, Table } from "@mantine/core";
+import { Group, Table, ThemeIcon } from "@mantine/core";
 
 import { IconTrophy } from "@tabler/icons-react";
 import { UUID } from "crypto";
@@ -21,13 +21,29 @@ export default function SidequestTeamLeaderboard({ eventId }: Props) {
   const get_icon = (rank: number) => {
     switch (rank) {
       case 1:
-        return <IconTrophy color="gold" />;
+        return (
+          <ThemeIcon color="gold">
+            <IconTrophy color="black" />
+          </ThemeIcon>
+        );
       case 2:
-        return <IconTrophy color="silver" />;
+        return (
+          <ThemeIcon color="silver">
+            <IconTrophy color="black" />
+          </ThemeIcon>
+        );
       case 3:
-        return <IconTrophy color="bronze" />;
+        return (
+          <ThemeIcon color="#FF5733">
+            <IconTrophy color="black" />
+          </ThemeIcon>
+        );
       default:
-        return null;
+        return (
+          <ThemeIcon color="#FF5733" hidden>
+            <IconTrophy color="black" />
+          </ThemeIcon>
+        );
     }
   };
 
@@ -36,6 +52,7 @@ export default function SidequestTeamLeaderboard({ eventId }: Props) {
       <Table>
         <Table.Thead>
           <Table.Tr>
+            <Table.Th>Rank</Table.Th>
             <Table.Th>Points</Table.Th>
             <Table.Th>Team</Table.Th>
           </Table.Tr>
@@ -46,8 +63,11 @@ export default function SidequestTeamLeaderboard({ eventId }: Props) {
               <Table.Td>
                 <Group>
                   {get_icon(item.rank)}
-                  {item.result}
+                  {item.rank}
                 </Group>
+              </Table.Td>
+              <Table.Td>
+                <Group>{item.result}</Group>
               </Table.Td>
               <Table.Td>{item.group_name}</Table.Td>
             </Table.Tr>

@@ -84,3 +84,12 @@ pub struct TeamLatestResult {
     pub team_id: Uuid,
     pub valid_at_max: Option<NaiveDateTime>,
 }
+
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+pub struct UserWithSidequestInfo {
+    pub user_id: Uuid,
+    pub user_name: String,
+    pub last_quest: Option<NaiveDateTime>,
+    pub allowed: bool,
+    pub allowed_at: Option<NaiveDateTime>,
+}

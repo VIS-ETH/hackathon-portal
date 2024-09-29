@@ -647,6 +647,49 @@
         }
       }
     },
+    "/api/sidequests/participants": {
+      "get": {
+        "tags": ["crate::routers::sidequests"],
+        "operationId": "get_participants_with_sidequest_info",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "query",
+            "description": "The Event ID to get the leaderboard for",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserWithSidequestInfo"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/sidequests/{sidequest_id}": {
       "get": {
         "tags": ["crate::routers::sidequests"],
@@ -1259,6 +1302,21 @@
           }
         }
       },
+      "TeamLatestResult": {
+        "type": "object",
+        "required": ["team_id"],
+        "properties": {
+          "team_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "valid_at_max": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
       "TeamRole": {
         "type": "string",
         "enum": ["Member", "Mentor"]
@@ -1358,6 +1416,32 @@
         "properties": {
           "group_name": {
             "type": "string"
+          },
+          "user_name": {
+            "type": "string"
+          }
+        }
+      },
+      "UserWithSidequestInfo": {
+        "type": "object",
+        "required": ["user_id", "user_name", "allowed"],
+        "properties": {
+          "allowed": {
+            "type": "boolean"
+          },
+          "allowed_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "last_quest": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid"
           },
           "user_name": {
             "type": "string"

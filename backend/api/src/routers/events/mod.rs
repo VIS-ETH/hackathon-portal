@@ -14,6 +14,7 @@ use repositories::db::prelude::EventRole;
 use services::event::model::EventForCreate;
 use services::event::model::EventForPatch;
 use services::sidequest::model::AggregatorStatus;
+use services::user::model::UserWithGroup;
 use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
 

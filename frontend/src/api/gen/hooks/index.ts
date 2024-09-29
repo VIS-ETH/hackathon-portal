@@ -7,6 +7,7 @@ export * from "./useGetEvents";
 export * from "./useGetEventsRoles";
 export * from "./useGetLeaderboard";
 export * from "./useGetLeaderboardTimeline";
+export * from "./useGetParticipantsWithSidequestInfo";
 export * from "./useGetSidequest";
 export * from "./useGetSidequests";
 export * from "./useGetTeamLeaderboard";

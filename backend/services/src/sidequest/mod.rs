@@ -10,6 +10,7 @@ use model::{
     AggregatorStatus, AttemptForCreate, FullInfoSidequestEntryForLeaderboard,
     FullInfoTeamEntryForLeaderboard, LoopStatus, SidequestEntryForLeaderboard, SidequestForCreate,
     SidequestForPatch, TeamEntryForLeaderboard, TeamLatestResult, TimelineData,
+    UserWithSidequestInfo,
 };
 use repositories::db::prelude::*;
 use repositories::DbRepository;
@@ -192,16 +193,6 @@ impl SidequestService {
             .all(self.db_repo.conn())
             .await?;
 
-        // let latest = db_sidequest_score::Entity::find()
-        //     .filter(db_sidequest_score::Column::TeamId.is_in(team_ids.clone()))
-        //     .order_by(db_sidequest_score::Column::ValidAt, Order::Desc)
-        //     .one(self.db_repo.conn())
-        //     .await?;
-
-        // if latest.is_none() {
-        //     return Ok(Vec::new());
-        // }
-        // let latest_date = latest.unwrap().valid_at;
         let mut team_scores = Vec::<db_sidequest_score::Model>::new();
         for newest in latest {
             let team_id = newest.team_id;
@@ -246,6 +237,8 @@ impl SidequestService {
                 rank: *rank.unwrap(),
             });
         }
+
+        result.sort_by(|a, b| a.rank.cmp(&b.rank));
 
         Ok(result)
     }
@@ -320,27 +313,24 @@ impl SidequestService {
             .map(|entry| {
                 let team = team_mapping.get(&entry.user_id);
                 let user = user_mapping.get(&entry.user_id);
-                if (team.is_none() || user.is_none()) {
-                    return FullInfoSidequestEntryForLeaderboard {
-                        user_name: "Unknown".to_string(),
-                        user_id: entry.user_id,
-                        group_name: "Unknown".to_string(),
-                        group_id: Uuid::nil(),
-                        result: entry.result,
-                        points: entry.points.unwrap_or(0),
-                    };
-                } else {
-                    let team = team.unwrap();
-                    let user = user.unwrap();
-                    return FullInfoSidequestEntryForLeaderboard {
-                        user_name: user.name.clone(),
-                        user_id: entry.user_id,
-                        group_name: team.name.clone(),
-                        group_id: team.id,
-                        result: entry.result,
-                        points: entry.points.unwrap_or(0),
-                    };
-                }
+
+                let (user_id, user_name) = match user {
+                    None => (entry.user_id, "Unknown".to_string()),
+                    Some(user) => (user.id, user.name.clone()),
+                };
+                let (group_id, group_name) = match team {
+                    None => (Uuid::nil(), "Unknown".to_string()),
+                    Some(team) => (team.id, team.name.clone()),
+                };
+
+                return FullInfoSidequestEntryForLeaderboard {
+                    user_name: user_name,
+                    user_id: user_id,
+                    group_name: group_name,
+                    group_id: group_id,
+                    result: entry.result,
+                    points: entry.points.unwrap_or(0),
+                };
             })
             .collect::<Vec<_>>();
         Ok(result)
@@ -378,55 +368,29 @@ impl SidequestService {
             .len()
             + 1) as i64;
 
-        let result = leaderboard.into_iter().fold(
-            (
-                Vec::<SidequestEntryForLeaderboard>::new(),
-                Vec::<SidequestEntryForLeaderboard>::new(),
-                None::<f64>,
-                num_participants,
-            ),
-            |(mut list, mut same_score, best_score, mut rank), mut entry| {
-                if let Some(best_score) = best_score {
-                    if entry.result == best_score {
-                        // There is a tie
-                        rank -= 1;
-                        same_score.push(entry);
-                        (list, same_score, Some(best_score), rank)
-                    } else {
-                        let mut same_score = same_score
-                            .into_iter()
-                            .map(|mut entry| {
-                                entry.points = Some(rank);
-                                entry
-                            })
-                            .collect::<Vec<_>>();
-                        rank -= 1;
-                        list.extend(same_score.clone());
-                        same_score.clear();
-                        entry.points = Some(rank);
-                        list.push(entry.clone());
-                        (list, same_score, Some(entry.result), rank)
-                    }
-                } else {
-                    // The first Element in list.
-                    rank -= 1;
-                    entry.points = Some(rank);
-                    same_score.push(entry.clone());
-                    (list, same_score, Some(entry.result), rank)
-                }
-            },
-        );
+        let mut points_to_rank = HashMap::<i64, i64>::new();
+        let mut rank = 0;
 
-        let (mut result, ties, _, rank) = result;
+        for entry in &leaderboard {
+            points_to_rank.insert(entry.result as i64, rank);
+            rank += 1;
+        }
 
-        result.extend(
-            ties.into_iter()
-                .map(|mut entry| {
-                    entry.points = Some(rank);
-                    entry
-                })
-                .collect::<Vec<_>>(),
-        );
+        let mut result = leaderboard
+            .into_iter()
+            .map(|mut entry| {
+                entry.points = Some(
+                    num_participants
+                        - points_to_rank
+                            .get(&(entry.result as i64))
+                            .copied()
+                            .unwrap_or(num_participants),
+                );
+                entry
+            })
+            .collect::<Vec<_>>();
+
+        result.sort_by(|a, b| b.points.unwrap_or(0).cmp(&a.points.unwrap_or(0)));
 
         Ok(result)
     }
@@ -566,5 +530,74 @@ impl SidequestService {
             self.aggregate_stop(event_id).await?;
         }
         Ok(())
+    }
+
+    pub async fn get_participant_with_sidequest_info_by_id(
+        &self,
+        event_id: Uuid,
+        user_id: Uuid,
+    ) -> ServiceResult<UserWithSidequestInfo> {
+        let user_service = UserService::new(self.db_repo.clone());
+        let participant = user_service.get_user(user_id).await?;
+        self.get_participant_with_sidequest_info(event_id, participant)
+            .await
+    }
+
+    pub async fn get_participant_with_sidequest_info(
+        &self,
+        event_id: Uuid,
+        participant: db_user::Model,
+    ) -> ServiceResult<UserWithSidequestInfo> {
+        let event_service = EventService::new(self.db_repo.clone());
+        let event = event_service.get_event(event_id).await?;
+        let last_quest = db_sidequest_attempt::Entity::find()
+            .filter(db_sidequest_attempt::Column::UserId.eq(participant.id))
+            .order_by_desc(db_sidequest_attempt::Column::AttemptedAt)
+            .one(self.db_repo.conn())
+            .await?;
+
+        let now = Utc::now().naive_utc();
+        match last_quest {
+            None => Ok(UserWithSidequestInfo {
+                user_id: participant.id,
+                user_name: participant.name,
+                last_quest: None,
+                allowed: true && event.phase == EventPhase::Hacking,
+                allowed_at: Some(now),
+            }),
+            Some(last_quest) => {
+                let allowed_time = last_quest.attempted_at + chrono::Duration::minutes(60); // TODO this should come from database
+                let allowed = now > allowed_time && event.phase == EventPhase::Hacking;
+                Ok(UserWithSidequestInfo {
+                    user_id: participant.id,
+                    user_name: participant.name,
+                    last_quest: Some(last_quest.attempted_at),
+                    allowed: allowed,
+                    allowed_at: if event.phase == EventPhase::Hacking {
+                        Some(allowed_time)
+                    } else {
+                        None
+                    },
+                })
+            }
+        }
+    }
+
+    pub async fn get_participants_with_sidequest_info(
+        &self,
+        event_id: Uuid,
+    ) -> ServiceResult<Vec<UserWithSidequestInfo>> {
+        let user_service = UserService::new(self.db_repo.clone());
+        let participants: Vec<db_user::Model> = user_service.get_participants(event_id).await?;
+        let mut result = Vec::<UserWithSidequestInfo>::new();
+
+        for participant in participants {
+            result.push(
+                self.get_participant_with_sidequest_info(event_id, participant)
+                    .await?,
+            );
+        }
+
+        Ok(result)
     }
 }

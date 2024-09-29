@@ -16,7 +16,7 @@ use services::event::model::EventForPatch;
 use services::sidequest::model::{
     AggregatorStatus, AttemptForCreate, FullInfoSidequestEntryForLeaderboard,
     FullInfoTeamEntryForLeaderboard, SidequestEntryForLeaderboard, SidequestForCreate,
-    SidequestForPatch, TimelineData,
+    SidequestForPatch, TimelineData, UserWithSidequestInfo,
 };
 use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
@@ -33,6 +33,8 @@ pub fn get_router(state: &ApiState) -> Router {
         .route("/:sidequest_id/leaderboard", get(get_leaderboard))
         .route("/leaderboard", get(get_team_leaderboard))
         .route("/leaderboard/timeline", get(get_leaderboard_timeline))
+        .route("/participants", get(get_participants_with_sidequest_info))
+        .route("/participants/me", get(get_participant_with_sidequest_info))
         // .route("/:event_id/roles", get(get_event_roles))
         // .route("/:event_id/roles", put(put_event_roles))
         // .route("/:event_id/roles", delete(delete_event_roles))
@@ -278,4 +280,55 @@ pub async fn get_leaderboard_timeline(
         .get_timeline(event.id, query.before, query.after)
         .await?;
     Ok(Json(leaderboard))
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/sidequests/participants",
+    responses(
+        (status = StatusCode::OK, body = Vec<UserWithSidequestInfo>),
+        (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
+    ),
+    params (
+        ("event_id" = Uuid, Query, description = "The Event ID to get the leaderboard for"),
+    )
+)]
+
+pub async fn get_participants_with_sidequest_info(
+    ctx: Ctx,
+    State(state): State<ApiState>,
+    Query(query): Query<EventLeaderboardTimelineQuery>,
+) -> ApiResult<Json<Vec<UserWithSidequestInfo>>> {
+    let event = state.event_service.get_event(query.event_id).await?;
+    let _ =
+        state
+            .authorization_service
+            .view_event_guard(ctx.roles(), event.id, event.visibility)?;
+    let _ = state
+        .authorization_service
+        .edit_sidequests_attempt_guard(ctx.roles(), event.id)?;
+
+    let participants = state
+        .sidequest_service
+        .get_participants_with_sidequest_info(query.event_id)
+        .await?;
+    Ok(Json(participants))
+}
+
+pub async fn get_participant_with_sidequest_info(
+    ctx: Ctx,
+    State(state): State<ApiState>,
+    Query(query): Query<EventLeaderboardTimelineQuery>,
+) -> ApiResult<Json<UserWithSidequestInfo>> {
+    let event = state.event_service.get_event(query.event_id).await?;
+    let _ =
+        state
+            .authorization_service
+            .view_event_guard(ctx.roles(), event.id, event.visibility)?;
+
+    let participants = state
+        .sidequest_service
+        .get_participant_with_sidequest_info_by_id(query.event_id, ctx.user().id)
+        .await?;
+    Ok(Json(participants))
 }
