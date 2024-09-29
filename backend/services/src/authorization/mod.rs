@@ -1,6 +1,8 @@
 pub mod model;
 
-use crate::authorization::model::{EventRolesMap, TeamRolesMap, UserRoles};
+use crate::authorization::model::{
+    AffiliateRow, EventRolesMap, TeamAffiliate, TeamRolesMap, UserRoles,
+};
 use crate::utils::try_insert_result_to_int;
 use crate::{ServiceError, ServiceResult};
 use repositories::db::prelude::*;
@@ -10,7 +12,7 @@ use repositories::db::prelude::{
 use repositories::db::sea_orm_active_enums::EventVisibility;
 use repositories::DbRepository;
 use sea_orm::sea_query::OnConflict;
-use sea_orm::{prelude::*, QueryOrder, QuerySelect};
+use sea_orm::{prelude::*, QueryOrder, QuerySelect, QueryTrait, SelectColumns};
 use sea_orm::{Condition, Set};
 use std::collections::{HashMap, HashSet};
 
@@ -159,6 +161,119 @@ impl AuthorizationService {
         }
 
         Ok(rows_affected)
+    }
+
+    pub async fn assign_team_roles(
+        &self,
+        team_id: Uuid,
+        roles: TeamRolesMap,
+    ) -> ServiceResult<u64> {
+        db_team::Entity::find()
+            .filter(db_team::Column::Id.eq(team_id))
+            .one(self.db_repo.conn())
+            .await?
+            .ok_or_else(|| ServiceError::ResourceNotFound {
+                resource: "team".to_string(),
+                id: team_id.to_string(),
+            })?;
+
+        let mut active_role_assignments = Vec::new();
+
+        for (user_id, roles) in roles {
+            for role in roles {
+                active_role_assignments.push(db_team_role_assignment::ActiveModel {
+                    user_id: Set(user_id),
+                    team_id: Set(team_id),
+                    role: Set(role),
+                });
+            }
+        }
+
+        let result = db_team_role_assignment::Entity::insert_many(active_role_assignments)
+            .on_conflict(
+                OnConflict::columns(vec![
+                    db_team_role_assignment::Column::UserId,
+                    db_team_role_assignment::Column::TeamId,
+                    db_team_role_assignment::Column::Role,
+                ])
+                .do_nothing()
+                .to_owned(),
+            )
+            .on_empty_do_nothing()
+            .exec_without_returning(self.db_repo.conn())
+            .await?;
+
+        Ok(try_insert_result_to_int(result))
+    }
+
+    pub async fn unassign_team_roles(
+        &self,
+        team_id: Uuid,
+        roles: TeamRolesMap,
+    ) -> ServiceResult<u64> {
+        let mut rows_affected = 0;
+
+        for (user_id, roles) in roles {
+            for role in roles {
+                let result = db_team_role_assignment::Entity::delete_many()
+                    .filter(
+                        Condition::all()
+                            .add(db_team_role_assignment::Column::UserId.eq(user_id))
+                            .add(db_team_role_assignment::Column::TeamId.eq(team_id))
+                            .add(db_team_role_assignment::Column::Role.eq(role)),
+                    )
+                    .exec(self.db_repo.conn())
+                    .await?;
+
+                rows_affected += result.rows_affected;
+            }
+        }
+
+        Ok(rows_affected)
+    }
+
+    pub async fn get_team_affiliates(
+        &self,
+        team_id: Uuid,
+        role: Option<TeamRole>,
+    ) -> ServiceResult<Vec<TeamAffiliate>> {
+        let affiliate_rows = db_user::Entity::find()
+            .inner_join(db_team_role_assignment::Entity)
+            .filter(db_team_role_assignment::Column::TeamId.eq(team_id))
+            .apply_if(role, |q, v| {
+                q.filter(db_team_role_assignment::Column::Role.eq(v))
+            })
+            .select_only()
+            .select_column(db_user::Column::Id)
+            .select_column(db_user::Column::Name)
+            .select_column(db_team_role_assignment::Column::Role)
+            .into_model::<AffiliateRow<TeamRole>>()
+            .all(self.db_repo.conn())
+            .await?;
+
+        let mut affiliates = affiliate_rows
+            .into_iter()
+            .fold(
+                HashMap::new(),
+                |mut acc: HashMap<Uuid, TeamAffiliate>, row| {
+                    let affiliate = acc.entry(row.id).or_insert(TeamAffiliate {
+                        id: row.id,
+                        name: row.name,
+                        roles: Vec::new(),
+                    });
+
+                    affiliate.roles.push(row.role);
+
+                    acc
+                },
+            )
+            .values()
+            .cloned()
+            .collect::<Vec<_>>();
+
+        affiliates.sort_by(|a, b| a.name.cmp(&b.name));
+
+        Ok(affiliates)
     }
 
     pub fn view_event_guard(

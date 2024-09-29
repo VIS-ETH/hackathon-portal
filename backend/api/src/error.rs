@@ -175,6 +175,17 @@ impl From<&ApiError> for PublicError {
                         action, resource, id
                     ),
                 ),
+                ServiceError::ProjectPreferenceDuplicate => (
+                    StatusCode::BAD_REQUEST,
+                    "Project preferences must be unique".to_string(),
+                ),
+                ServiceError::ProjectPreferenceWrongCount { expected, actual } => (
+                    StatusCode::BAD_REQUEST,
+                    format!(
+                        "Wrong number of project preferences, expected {}, got {}",
+                        expected, actual
+                    ),
+                ),
                 ServiceError::SidequestCooldown { allowed_at } => (
                     StatusCode::FORBIDDEN,
                     format!("You must wait until {}", allowed_at),

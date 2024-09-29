@@ -12,6 +12,7 @@ use models::{AggregateActionQuery, AggregationAction};
 use repositories::db::prelude::EventRole;
 use services::event::model::EventForPatch;
 use services::sidequest::model::AggregatorStatus;
+use services::team::model::Team;
 use services::user::model::UserWithGroup;
 use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
@@ -26,6 +27,7 @@ pub fn get_router(state: &ApiState) -> Router {
         .route("/:event_id/roles", put(put_event_roles))
         .route("/:event_id/roles", delete(delete_event_roles))
         .route("/:event_id/invite", post(invite_users))
+        .route("/:event_id/teams/index", post(update_teams_index))
         .route("/:event_id/aggregate", get(get_aggregate_status))
         .route("/:event_id/aggregate", post(aggregate_action))
         .with_state(state.clone())
@@ -167,13 +169,14 @@ pub async fn get_event_roles(
     ctx: Ctx,
     Path(event_id): Path<Uuid>,
 ) -> ApiResult<Json<HashSet<EventRole>>> {
-    let dto = ctx
+    let roles = ctx
         .roles()
         .event
         .get(&event_id)
         .cloned()
         .unwrap_or_default();
-    Ok(Json(dto))
+
+    Ok(Json(roles))
 }
 
 #[utoipa::path(
@@ -245,6 +248,25 @@ pub async fn delete_event_roles(
 }
 
 #[utoipa::path(
+    post,
+    path = "/api/events/{event_id}/teams/index",
+    responses(
+        (status = StatusCode::OK, body = AggregatorStatus),
+        (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
+    )
+)]
+pub async fn update_teams_index(
+    ctx: Ctx,
+    State(state): State<ApiState>,
+    Path(event_id): Path<Uuid>,
+) -> ApiResult<Json<Vec<Team>>> {
+    // TODO: authorization
+
+    let res = state.team_service.reindex_teams(event_id).await?;
+    Ok(Json(res))
+}
+
+#[utoipa::path(
     get,
     path = "/api/events/{event_id}/aggregate",
     responses(
@@ -272,7 +294,7 @@ pub async fn get_aggregate_status(
         (status = StatusCode::OK, body = AggregatorStatus),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
-    params (
+    params(
         ("aggregate_action"=  AggregationAction, Query, description="Action to perform on the aggregator for this event"),
     )
 )]
