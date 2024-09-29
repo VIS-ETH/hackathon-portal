@@ -3,7 +3,7 @@ use derive_more::From;
 use repositories::db::prelude::EventPhase;
 use serde::Serialize;
 use serde_with::{serde_as, DisplayFromStr};
-use std::{collections::HashSet, fmt};
+use std::fmt;
 
 pub type ServiceResult<T> = Result<T, ServiceError>;
 
@@ -22,6 +22,11 @@ pub enum ServiceError {
     },
 
     ResourceNotFound {
+        resource: String,
+        id: String,
+    },
+
+    ResourceStillInUse {
         resource: String,
         id: String,
     },

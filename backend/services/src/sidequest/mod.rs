@@ -1,11 +1,8 @@
 pub mod model;
 use crate::event::EventService;
-use crate::user::model::UserForCreate;
 use crate::user::UserService;
-use crate::utils::try_insert_result_to_int;
-use crate::{sidequest, ServiceError, ServiceResult};
+use crate::{ServiceError, ServiceResult};
 use chrono::{NaiveDateTime, Utc};
-use derive_more::derive::DerefMut;
 use model::{
     AggregatorStatus, AttemptForCreate, FullInfoSidequestEntryForLeaderboard,
     FullInfoTeamEntryForLeaderboard, LoopStatus, SidequestEntryForLeaderboard, SidequestForCreate,
@@ -16,10 +13,8 @@ use repositories::db::prelude::*;
 use repositories::DbRepository;
 use sea_orm::sea_query::{OnConflict, Query};
 use std::collections::HashMap;
-use std::hash::Hash;
-use std::ops::DerefMut;
 use std::time::Duration;
-use tokio::{net::TcpListener, task, time};
+use tokio::time;
 use tokio_tasks::RunToken;
 
 use sea_orm::{
@@ -284,15 +279,15 @@ impl SidequestService {
                 .get(&team_id)
                 .unwrap_or(&"Unknown".to_string())
                 .clone();
-            let list = scores.entry(team_name).or_insert(Vec::new());
+            let list = scores.entry(team_name).or_default();
             list.push((valid_at, score as i64));
         }
 
         let result = TimelineData {
-            event_id: event_id,
+            event_id,
             start: after,
             end: before,
-            scores: scores,
+            scores,
         };
         Ok(result)
     }
@@ -401,7 +396,7 @@ impl SidequestService {
         let user_service = UserService::new(self.db_repo.clone());
         let event: db_event::Model = event_service.get_event(event_id).await?;
 
-        if (event.phase != EventPhase::Hacking) {
+        if event.phase != EventPhase::Hacking {
             return Err(ServiceError::EventPhase {
                 current_phase: (event.phase),
             });
@@ -441,7 +436,7 @@ impl SidequestService {
         Ok(())
     }
 
-    pub async fn aggregate_infinite_loop(&self, event_id: Uuid, run_token: RunToken) -> () {
+    pub async fn aggregate_infinite_loop(&self, event_id: Uuid, run_token: RunToken) {
         let db_repo = DbRepository::new(self.db_repo.conn.clone());
         let mut interval = time::interval(Duration::from_secs(5));
         let sidequest_service = SidequestService::new(db_repo.clone());
@@ -464,7 +459,7 @@ impl SidequestService {
         }
     }
 
-    pub async fn aggregate_start(&self, event_id: Uuid) -> () {
+    pub async fn aggregate_start(&self, event_id: Uuid) {
         let sidequest_service = SidequestService::new(self.db_repo.clone());
         let _ =
             tokio_tasks::TaskBuilder::new(event_id.to_string()).create(|run_token| async move {
@@ -473,7 +468,6 @@ impl SidequestService {
                     .await;
                 Result::<(), ()>::Ok(())
             });
-        ()
     }
 
     pub async fn aggregate_stop(&self, event_id: Uuid) -> ServiceResult<()> {
@@ -482,12 +476,10 @@ impl SidequestService {
             .into_iter()
             .find(|task| task.name() == event_id.to_string());
         match task {
-            None => {
-                return Err(ServiceError::ResourceNotFound {
-                    resource: ("aggregation task".to_string()),
-                    id: (event_id.to_string()),
-                });
-            }
+            None => Err(ServiceError::ResourceNotFound {
+                resource: ("aggregation task".to_string()),
+                id: (event_id.to_string()),
+            }),
             Some(task) => {
                 let res = task.cancel().await;
                 Ok(())
@@ -502,11 +494,11 @@ impl SidequestService {
             .find(|task| task.name() == event_id.to_string());
         match task {
             None => Ok(AggregatorStatus {
-                event_id: event_id,
+                event_id,
                 status: LoopStatus::NonExisting,
             }),
             Some(_) => Ok(AggregatorStatus {
-                event_id: event_id,
+                event_id,
                 status: LoopStatus::Running,
             }),
         }

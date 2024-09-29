@@ -15,6 +15,8 @@ pub struct Model {
     #[sea_orm(column_type = "Text")]
     pub slug: String,
     pub index: i32,
+    #[sea_orm(column_type = "Text", nullable)]
+    pub password: Option<String>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
@@ -37,6 +39,8 @@ pub enum Relation {
     Project,
     #[sea_orm(has_many = "super::project_preference::Entity")]
     ProjectPreference,
+    #[sea_orm(has_many = "super::sidequest_attempt::Entity")]
+    SidequestAttempt,
     #[sea_orm(has_many = "super::sidequest_score::Entity")]
     SidequestScore,
     #[sea_orm(has_many = "super::team_role_assignment::Entity")]
@@ -52,6 +56,12 @@ impl Related<super::event::Entity> for Entity {
 impl Related<super::project_preference::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::ProjectPreference.def()
+    }
+}
+
+impl Related<super::sidequest_attempt::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::SidequestAttempt.def()
     }
 }
 

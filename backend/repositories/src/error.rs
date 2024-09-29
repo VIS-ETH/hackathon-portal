@@ -1,9 +1,7 @@
 use derive_more::From;
 use serde::Serialize;
 use serde_with::{serde_as, DisplayFromStr};
-use std::fmt::{self, write};
-
-use crate::db::prelude::EventPhase;
+use std::fmt::{self};
 
 pub type RepositoryResult<T> = Result<T, RepositoryError>;
 
@@ -19,18 +17,6 @@ pub enum RepositoryError {
 impl fmt::Display for RepositoryError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{:?}", self)
-    }
-}
-
-impl fmt::Display for EventPhase {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let string = match self {
-            EventPhase::Grading => "Grading",
-            EventPhase::Hacking => "Hacking",
-            EventPhase::Registration => "Registration",
-            EventPhase::Readonly => "Readonly",
-        };
-        write!(f, "{:?}", string)
     }
 }
 

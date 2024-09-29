@@ -14,6 +14,8 @@ use serde::{Deserialize, Serialize};
     Deserialize,
     utoipa::ToSchema,
     Hash,
+    Copy,
+    strum::Display,
 )]
 #[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "event_phase")]
 pub enum EventPhase {
@@ -21,10 +23,10 @@ pub enum EventPhase {
     Grading,
     #[sea_orm(string_value = "HACKING")]
     Hacking,
-    #[sea_orm(string_value = "READONLY")]
-    Readonly,
     #[sea_orm(string_value = "REGISTRATION")]
     Registration,
+    #[sea_orm(string_value = "FINISHED")]
+    Finished,
 }
 #[derive(
     Debug,
@@ -38,6 +40,7 @@ pub enum EventPhase {
     utoipa::ToSchema,
     Hash,
     Copy,
+    strum::Display,
 )]
 #[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "event_role")]
 pub enum EventRole {
@@ -64,6 +67,7 @@ pub enum EventRole {
     utoipa::ToSchema,
     Hash,
     Copy,
+    strum::Display,
 )]
 #[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "event_visibility")]
 pub enum EventVisibility {
@@ -85,6 +89,8 @@ pub enum EventVisibility {
     Deserialize,
     utoipa::ToSchema,
     Hash,
+    Copy,
+    strum::Display,
 )]
 #[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "team_role")]
 pub enum TeamRole {

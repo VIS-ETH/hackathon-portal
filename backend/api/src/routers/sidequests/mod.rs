@@ -2,23 +2,18 @@ pub mod models;
 
 use crate::api_state::ApiState;
 use crate::ctx::Ctx;
-use crate::models::AffectedRowsDTO;
 use crate::routers::sidequests::models::SidequestDTO;
 use crate::{ApiError, ApiResult};
 use axum::extract::{Path, Query, State};
-use axum::routing::{delete, get, patch, post, put};
+use axum::routing::{get, patch, post};
 use axum::{Json, Router};
 use models::CreateSidequestDTO;
 use repositories::db::prelude::EventRole;
-use serde::Deserialize;
-use services::authorization;
-use services::event::model::EventForPatch;
 use services::sidequest::model::{
     AggregatorStatus, AttemptForCreate, FullInfoSidequestEntryForLeaderboard,
     FullInfoTeamEntryForLeaderboard, SidequestEntryForLeaderboard, SidequestForCreate,
     SidequestForPatch, TimelineData, UserWithSidequestInfo,
 };
-use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
 
 use super::events::models::{EventIdQuery, EventLeaderboardTimelineQuery};
@@ -165,7 +160,7 @@ pub async fn post_sidequests_attempts(
     Json(body): Json<AttemptForCreate>,
 ) -> ApiResult<Json<u64>> {
     let event = state.sidequest_service.get_event(sidequest_id).await?;
-    let _ = state
+    state
         .authorization_service
         .edit_sidequests_attempt_guard(ctx.roles(), event.id)?;
 
@@ -173,22 +168,20 @@ pub async fn post_sidequests_attempts(
         .authorization_service
         .get_event_roles(body.user_id)
         .await?;
-    let roles = res.get(&event.id).ok_or(
-        (ApiError::Forbidden {
+    let roles = res.get(&event.id).ok_or(ApiError::Forbidden {
+        action: "participate".to_string(),
+        resource: "sidequests".to_string(),
+        id: sidequest_id.to_string(),
+    })?;
+    if !roles.contains(&EventRole::Participant) {
+        return Err(ApiError::Forbidden {
             action: "participate".to_string(),
             resource: "sidequests".to_string(),
             id: sidequest_id.to_string(),
-        }),
-    )?;
-    if (!roles.contains(&EventRole::Participant)) {
-        return Err((ApiError::Forbidden {
-            action: "participate".to_string(),
-            resource: "sidequests".to_string(),
-            id: sidequest_id.to_string(),
-        }));
+        });
     }
 
-    let _ = state
+    state
         .authorization_service
         .allowed_attempt(body.user_id, event.id)
         .await?;
@@ -213,10 +206,9 @@ pub async fn get_leaderboard(
     Path(sidequest_id): Path<Uuid>,
 ) -> ApiResult<Json<Vec<FullInfoSidequestEntryForLeaderboard>>> {
     let event = state.sidequest_service.get_event(sidequest_id).await?;
-    let _ =
-        state
-            .authorization_service
-            .view_event_guard(ctx.roles(), event.id, event.visibility)?;
+    state
+        .authorization_service
+        .view_event_guard(ctx.roles(), event.id, event.visibility)?;
     let leaderboard = state
         .sidequest_service
         .get_full_leaderboard(sidequest_id)
@@ -241,10 +233,9 @@ pub async fn get_team_leaderboard(
     Query(query): Query<EventIdQuery>,
 ) -> ApiResult<Json<Vec<FullInfoTeamEntryForLeaderboard>>> {
     let event = state.event_service.get_event(query.event_id).await?;
-    let _ =
-        state
-            .authorization_service
-            .view_event_guard(ctx.roles(), event.id, event.visibility)?;
+    state
+        .authorization_service
+        .view_event_guard(ctx.roles(), event.id, event.visibility)?;
     let leaderboard = state
         .sidequest_service
         .get_team_leaderboard(event.id)
@@ -271,10 +262,9 @@ pub async fn get_leaderboard_timeline(
     Query(query): Query<EventLeaderboardTimelineQuery>,
 ) -> ApiResult<Json<TimelineData>> {
     let event = state.event_service.get_event(query.event_id).await?;
-    let _ =
-        state
-            .authorization_service
-            .view_event_guard(ctx.roles(), event.id, event.visibility)?;
+    state
+        .authorization_service
+        .view_event_guard(ctx.roles(), event.id, event.visibility)?;
     let leaderboard = state
         .sidequest_service
         .get_timeline(event.id, query.before, query.after)

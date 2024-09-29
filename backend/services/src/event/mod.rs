@@ -2,14 +2,11 @@ pub mod model;
 
 use crate::event::model::{EventForCreate, EventForPatch};
 use crate::{ServiceError, ServiceResult};
-use rand::distributions::Alphanumeric;
-use rand::rngs::StdRng;
-use rand::{Rng, SeedableRng};
 use repositories::db::prelude::{db_event, EventPhase};
 use repositories::db::sea_orm_active_enums::EventVisibility;
 use repositories::DbRepository;
 use sea_orm::prelude::*;
-use sea_orm::{ActiveModelTrait, Condition, IntoActiveModel, QueryOrder, Set};
+use sea_orm::{ActiveModelTrait, IntoActiveModel, QueryOrder, Set};
 use slug::slugify;
 
 #[derive(Clone)]
@@ -23,10 +20,7 @@ impl EventService {
     }
 
     pub async fn create_event(&self, req: EventForCreate) -> ServiceResult<db_event::Model> {
-        self.check_event_name_conflict(&req.name).await?;
-
-        let slug = slugify(&req.name);
-        let kdf_secret = self.generate_kdf_secret();
+        let slug = self.generate_slug(&req.name).await?;
 
         let active_event = db_event::ActiveModel {
             name: Set(req.name),
@@ -34,7 +28,7 @@ impl EventService {
             start: Set(req.start),
             end: Set(req.end),
             max_team_size: Set(req.max_team_size as i32),
-            kdf_secret: Set(kdf_secret),
+            is_read_only: Set(false),
             is_feedback_visible: Set(false),
             visibility: Set(EventVisibility::Private),
             phase: Set(EventPhase::Registration),
@@ -87,9 +81,9 @@ impl EventService {
         let mut active_event = event.into_active_model();
 
         if let Some(name) = &patch.name {
-            self.check_event_name_conflict(name).await?;
+            let slug = self.generate_slug(name).await?;
             active_event.name = Set(name.clone());
-            active_event.slug = Set(slugify(name));
+            active_event.slug = Set(slug);
         }
 
         if let Some(start) = patch.start {
@@ -113,7 +107,7 @@ impl EventService {
         }
 
         if let Some(phase) = &patch.phase {
-            active_event.phase = Set(phase.clone());
+            active_event.phase = Set(*phase);
         }
 
         let event = active_event.update(self.db_repo.conn()).await?;
@@ -121,36 +115,18 @@ impl EventService {
         Ok(event)
     }
 
-    fn generate_kdf_secret(&self) -> String {
-        let rng = StdRng::from_entropy();
-        rng.sample_iter(&Alphanumeric)
-            .take(32)
-            .map(char::from)
-            .collect::<String>()
-    }
-
-    async fn check_event_name_conflict(&self, name: &str) -> ServiceResult<()> {
+    async fn generate_slug(&self, name: &str) -> ServiceResult<String> {
         let slug = slugify(name);
 
         let existing = db_event::Entity::find()
-            .filter(
-                Condition::any()
-                    .add(db_event::Column::Name.eq(name))
-                    .add(db_event::Column::Slug.eq(&slug)),
-            )
+            .filter(db_event::Column::Slug.eq(&slug))
             .one(self.db_repo.conn())
             .await?;
 
-        if let Some(existing) = existing {
-            return if existing.slug == slug {
-                Err(ServiceError::SlugNotUnique { slug })
-            } else {
-                Err(ServiceError::NameNotUnique {
-                    name: name.to_string(),
-                })
-            };
+        if existing.is_some() {
+            Err(ServiceError::SlugNotUnique { slug })
+        } else {
+            Ok(slug)
         }
-
-        Ok(())
     }
 }

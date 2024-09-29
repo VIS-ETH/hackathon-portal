@@ -14,9 +14,8 @@ use crate::api_state::ApiState;
 use crate::routers::get_api_router;
 use crate::utils::setup_logging;
 use clap::Parser;
-use repositories::db::prelude::EventPhase;
-use std::{net::SocketAddr, time::Duration};
-use tokio::{net::TcpListener, task, time};
+use std::net::SocketAddr;
+use tokio::net::TcpListener;
 use tracing::info;
 
 pub use error::{ApiError, ApiResult, PublicError};

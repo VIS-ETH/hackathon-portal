@@ -17,8 +17,7 @@ pub struct Model {
     pub start: DateTime,
     pub end: DateTime,
     pub max_team_size: i32,
-    #[sea_orm(column_type = "Text")]
-    pub kdf_secret: String,
+    pub is_read_only: bool,
     pub is_feedback_visible: bool,
     pub visibility: EventVisibility,
     pub phase: EventPhase,

@@ -92,6 +92,7 @@ export default function Navbar({
       })}
       key={t.path}
       href={t.path}
+      onClick={closeDrawer}
     >
       {t.label}
     </Link>

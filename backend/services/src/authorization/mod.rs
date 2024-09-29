@@ -10,7 +10,7 @@ use repositories::db::prelude::{
 use repositories::db::sea_orm_active_enums::EventVisibility;
 use repositories::DbRepository;
 use sea_orm::sea_query::OnConflict;
-use sea_orm::{prelude::*, QueryOrder, QuerySelect, SelectColumns};
+use sea_orm::{prelude::*, QueryOrder, QuerySelect};
 use sea_orm::{Condition, Set};
 use std::collections::{HashMap, HashSet};
 
@@ -206,17 +206,21 @@ impl AuthorizationService {
         }
     }
 
-    pub fn can_view_team_reduced(
-        &self,
-        _roles: &UserRoles,
-        _event: &db_event::Model,
-        _team_id: Uuid,
-    ) -> bool {
-        todo!()
-    }
+    pub fn write_project_guard(&self, roles: &UserRoles, event_id: Uuid) -> ServiceResult<()> {
+        let event_roles = roles.event.get(&event_id);
+        let pass = event_roles.is_some_and(|roles| {
+            roles.contains(&EventRole::Admin) || roles.contains(&EventRole::Stakeholder)
+        });
 
-    pub fn can_view_team_secrets(&self) -> bool {
-        todo!()
+        if pass {
+            Ok(())
+        } else {
+            Err(ServiceError::Forbidden {
+                resource: "event".to_string(),
+                id: event_id.to_string(),
+                action: "write project".to_string(),
+            })
+        }
     }
 
     // Sidequests
