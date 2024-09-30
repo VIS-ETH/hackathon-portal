@@ -1,7 +1,7 @@
 export const eventPhase = {
   Grading: "Grading",
   Hacking: "Hacking",
-  Readonly: "Readonly",
   Registration: "Registration",
+  Finished: "Finished",
 } as const;
 export type EventPhase = (typeof eventPhase)[keyof typeof eventPhase];

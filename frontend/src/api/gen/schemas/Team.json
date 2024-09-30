@@ -1,0 +1,13 @@
+{
+  "type": "object",
+  "properties": {
+    "event_id": { "type": "string", "format": "uuid" },
+    "id": { "type": "string", "format": "uuid" },
+    "index": { "type": "integer", "format": "int32" },
+    "name": { "type": "string" },
+    "project_id": { "type": "string", "format": "uuid", "nullable": true },
+    "slug": { "type": "string" }
+  },
+  "required": ["id", "event_id", "name", "slug", "index"],
+  "x-readme-ref-name": "Team"
+}

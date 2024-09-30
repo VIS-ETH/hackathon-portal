@@ -1,0 +1,12 @@
+{
+  "type": "object",
+  "properties": {
+    "content": { "type": "string" },
+    "event_id": { "type": "string", "format": "uuid" },
+    "id": { "type": "string", "format": "uuid" },
+    "name": { "type": "string" },
+    "slug": { "type": "string" }
+  },
+  "required": ["id", "event_id", "name", "slug", "content"],
+  "x-readme-ref-name": "Project"
+}

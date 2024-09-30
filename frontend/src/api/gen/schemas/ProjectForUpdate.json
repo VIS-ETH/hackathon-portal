@@ -1,0 +1,8 @@
+{
+  "type": "object",
+  "properties": {
+    "content": { "nullable": true, "type": "string" },
+    "name": { "type": "string", "nullable": true }
+  },
+  "x-readme-ref-name": "ProjectForUpdate"
+}

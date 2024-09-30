@@ -1,0 +1,13 @@
+{
+  "type": "object",
+  "properties": {
+    "content": { "nullable": true, "type": "string" },
+    "description": { "type": "string", "nullable": true },
+    "end": { "type": "string", "format": "date-time", "nullable": true },
+    "event_id": { "type": "string", "format": "uuid" },
+    "start": { "type": "string", "format": "date-time" },
+    "title": { "type": "string" }
+  },
+  "required": ["event_id", "title", "start"],
+  "x-readme-ref-name": "AppointmentForCreate"
+}
