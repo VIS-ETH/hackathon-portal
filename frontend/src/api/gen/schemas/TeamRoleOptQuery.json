@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "properties": {
+    "role": {
+      "allOf": [
+        {
+          "type": "string",
+          "enum": ["Member", "Mentor"],
+          "x-readme-ref-name": "TeamRole"
+        }
+      ],
+      "nullable": true
+    }
+  },
+  "x-readme-ref-name": "TeamRoleOptQuery"
+}

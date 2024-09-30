@@ -1,0 +1,11 @@
+{
+  "type": "object",
+  "properties": {
+    "content": { "nullable": true, "type": "string" },
+    "description": { "type": "string", "nullable": true },
+    "end": { "type": "string", "format": "date-time", "nullable": true },
+    "start": { "type": "string", "format": "date-time", "nullable": true },
+    "title": { "type": "string", "nullable": true }
+  },
+  "x-readme-ref-name": "AppointmentForUpdate"
+}

@@ -8,7 +8,7 @@
     "name": { "type": "string" },
     "phase": {
       "type": "string",
-      "enum": ["Grading", "Hacking", "Readonly", "Registration"],
+      "enum": ["Grading", "Hacking", "Registration", "Finished"],
       "x-readme-ref-name": "EventPhase"
     },
     "slug": { "type": "string" },
