@@ -1,32 +1,64 @@
 "use client";
 
-import TimeSchedule from "@/componentes/TimeSchedule";
+import { Appointment, useGetAppointments, useGetEventRoles } from "@/api/gen";
+import CreateAppointment from "@/componentes/TimelineCreate";
+import TimeSchedule from "@/componentes/TimelineEntry";
+import TimelineEntry from "@/componentes/TimelineEntry";
+
+import { useEffect, useState } from "react";
+
+import { Button, Flex, Modal, Stack, Text, Timeline } from "@mantine/core";
+
+import { useListState } from "@mantine/hooks";
+
+import Link from "next/link";
+import { useParams } from "next/navigation";
 
 export default function Page() {
+  const { eventSlug } = useParams<{ eventSlug: string }>();
+  const event_id = "fae4d7ff-ee08-4e16-8802-a1b1797145d5";
+
+  const { data: appointments, refetch } = useGetAppointments({
+    event_id: event_id,
+  });
+  const { data: roles } = useGetEventRoles(event_id);
+
+  const [active, setActive] = useState(-1);
+
+  const update_timeline = () => {
+    if (appointments) {
+      const now = new Date();
+      const before = appointments.filter(
+        (item) => new Date(item.start) < now
+      ).length;
+      setActive(before);
+    }
+
+  }
+
+  useEffect(() => {
+    update_timeline();
+  }, [appointments]);
+
+
   return (
-    <>
-      <TimeSchedule
-        items={[
-          {
-            title: "Official Start",
-            at: new Date("2024-08-01"),
-            shortDescription: "The event starts",
-            longDescription:
-              "This is the official start of the event. It will be a great day",
-          },
-          {
-            title: "Lunch",
-            at: new Date("2024-08-21"),
-            shortDescription: "Food arrives",
-          },
-          {
-            title: "Official End",
-            at: new Date("2024-09-30 23:00"),
-            until: new Date("2024-09-30 23:13"),
-            shortDescription: "The event ends",
-          },
-        ]}
-      />
-    </>
+    <Stack>
+      <Flex justify={"end"}>
+        <CreateAppointment event_id={event_id} refetch={refetch} />
+      </Flex>
+      <Timeline active={active} bulletSize={24} lineWidth={4}>
+        {appointments?.map((item, index) => (
+          <Timeline.Item>
+            <TimelineEntry
+              index={index}
+              key={index}
+              item={item}
+              edit
+              refetch={refetch}
+            />
+          </Timeline.Item>
+        ))}
+      </Timeline>
+    </Stack>
   );
 }
