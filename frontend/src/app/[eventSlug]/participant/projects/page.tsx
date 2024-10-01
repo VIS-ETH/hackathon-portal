@@ -21,12 +21,11 @@ import {
   TypographyStylesProvider,
 } from "@mantine/core";
 
+import { UUID } from "crypto";
+import Link from "next/link";
 import { useParams } from "next/navigation";
 import remarkGfm from "remark-gfm";
 import { styleText } from "util";
-import { UUID } from "crypto";
-import Link from "next/link";
-
 
 export default function Page() {
   const { eventSlug } = useParams<{ eventSlug: string }>();
@@ -34,12 +33,11 @@ export default function Page() {
 
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
 
-  const { data: roles} = useGetEventRoles(event_id);
+  const { data: roles } = useGetEventRoles(event_id);
 
   const { data: projects } = useGetProjects({ event_id: event_id });
 
   const [currentProject, setCurrentProject] = useState<Project | null>(null);
-
 
   useEffect(() => {
     if (projects) {
@@ -52,7 +50,7 @@ export default function Page() {
       const project = projects?.find((item) => item.slug == selectedProject);
       setCurrentProject(project || null);
     }
-  })
+  });
 
   return (
     <Stack>
@@ -61,20 +59,22 @@ export default function Page() {
         <Group>
           {roles?.includes("Admin") && (
             <>
-            <Link href={`/${eventSlug}/participant/projects/${currentProject?.slug}`}>
-            <Button>Edit</Button>
-            </Link>
-            <Link href={`/${eventSlug}/participant/projects/create`}>
-            <Button>Create</Button>
-            </Link>
+              <Link
+                href={`/${eventSlug}/participant/projects/${currentProject?.slug}`}
+              >
+                <Button>Edit</Button>
+              </Link>
+              <Link href={`/${eventSlug}/participant/projects/create`}>
+                <Button>Create</Button>
+              </Link>
             </>
           )}
-        <Select
-          data={projects?.map((item) => item.slug) || []}
-          value={selectedProject}
-          onChange={(value) => setSelectedProject(value)}
+          <Select
+            data={projects?.map((item) => item.slug) || []}
+            value={selectedProject}
+            onChange={(value) => setSelectedProject(value)}
           />
-          </Group>
+        </Group>
       </Flex>
       {currentProject && (
         <Card withBorder>
