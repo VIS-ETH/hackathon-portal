@@ -3,6 +3,7 @@
 import { useGetEventRoles, useGetProjects } from "@/api/gen";
 import type { Project } from "@/api/gen";
 import style from "@/app/markdown-styles.module.css";
+import ProjectNavigator from "@/componentes/ProjectNavigation";
 
 import { useEffect, useState } from "react";
 import React from "react";
@@ -54,29 +55,12 @@ export default function Page() {
 
   return (
     <Stack>
-      <Flex justify={"space-between"} gap={"md"}>
-        <Title order={2}>Projects</Title>
-        <Group>
-          {roles?.includes("Admin") && (
-            <>
-              <Link
-                href={`/${eventSlug}/participant/projects/${currentProject?.slug}`}
-              >
-                <Button>Edit</Button>
-              </Link>
-              <Link href={`/${eventSlug}/participant/projects/create`}>
-                <Button>Create</Button>
-              </Link>
-            </>
-          )}
-          <Select
-            data={projects?.map((item) => item.slug) || []}
-            value={selectedProject}
-            onChange={(value) => setSelectedProject(value)}
-          />
-        </Group>
-      </Flex>
-      {currentProject && (
+      <ProjectNavigator
+        projects={projects || []}
+        event_id={event_id}
+        current_project={null}
+      />
+      {/* {currentProject && (
         <Card withBorder>
           <Stack m={"xl"}>
             <Title order={3}>{currentProject.name}</Title>
@@ -84,8 +68,8 @@ export default function Page() {
               <Markdown>{currentProject.content}</Markdown>
             </Container>
           </Stack>
-        </Card>
-      )}
+        </Card> */}
+      {/* )} */}
     </Stack>
   );
 }

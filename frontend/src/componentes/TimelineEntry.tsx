@@ -13,6 +13,7 @@ import {
   Accordion,
   ActionIcon,
   Button,
+  Collapse,
   Flex,
   Group,
   Modal,
@@ -75,11 +76,11 @@ export default function TimelineEntry({
       </Text>
       {item.content && (
         <>
-          {open && (
+          <Collapse in={open}>
             <Text c="dimmed" size="sm">
               {item.content}
             </Text>
-          )}
+          </Collapse>
         </>
       )}
     </Stack>
