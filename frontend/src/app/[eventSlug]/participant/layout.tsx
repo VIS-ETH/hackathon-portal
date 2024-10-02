@@ -8,6 +8,7 @@ import { useParams } from "next/navigation";
 
 const tabs = [
   { label: "Home", path: "/participant" },
+  { label: "Teams", path: "/participant/team" },
   { label: "Time Schedule", path: "/participant/schedule" },
   { label: "Projects", path: "/participant/projects" },
   { label: "Documentation", path: "/participant/docs" },

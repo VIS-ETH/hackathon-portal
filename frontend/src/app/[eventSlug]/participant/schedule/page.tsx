@@ -29,17 +29,15 @@ export default function Page() {
     if (appointments) {
       const now = new Date();
       const before = appointments.filter(
-        (item) => new Date(item.start) < now
+        (item) => new Date(item.start) < now,
       ).length;
       setActive(before);
     }
-
-  }
+  };
 
   useEffect(() => {
     update_timeline();
   }, [appointments]);
-
 
   return (
     <Stack>

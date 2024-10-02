@@ -85,7 +85,7 @@ const UpdateAppointment = ({ appointment, refetch }: TimelineEntryProps) => {
         alert(error);
       },
     });
-  }
+  };
 
   return (
     <>
@@ -145,8 +145,7 @@ const UpdateAppointment = ({ appointment, refetch }: TimelineEntryProps) => {
             </Grid>
 
             <Flex justify={"space-between"} align={"center"}>
-              <Box>
-              </Box>
+              <Box></Box>
               <ButtonGroup>
                 <Button onClick={close} color="gray">
                   Cancel
