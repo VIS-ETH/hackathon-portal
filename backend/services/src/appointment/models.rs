@@ -16,15 +16,15 @@ pub struct Appointment {
 }
 
 impl From<db_appointment::Model> for Appointment {
-    fn from(event: db_appointment::Model) -> Self {
+    fn from(value: db_appointment::Model) -> Self {
         Self {
-            id: event.id,
-            event_id: event.event_id,
-            title: event.title,
-            description: event.description,
-            content: event.content,
-            start: event.start,
-            end: event.end,
+            id: value.id,
+            event_id: value.event_id,
+            title: value.title,
+            description: value.description,
+            content: value.content,
+            start: value.start,
+            end: value.end,
         }
     }
 }

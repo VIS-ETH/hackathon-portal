@@ -1,36 +1,60 @@
-pub mod model;
+pub mod models;
 
-use crate::event::model::{EventForCreate, EventForPatch};
-use crate::{ServiceError, ServiceResult};
-use repositories::db::prelude::{db_event, EventPhase};
+use crate::authorization::AuthorizationService;
+use crate::event::models::{Event, EventForCreate, EventForUpdate};
+use crate::user::models::{ReducedUser, UserForCreate};
+use crate::user::UserService;
+use crate::ServiceResult;
+use repositories::db::prelude::{db_event, EventPhase, EventRole};
 use repositories::db::sea_orm_active_enums::EventVisibility;
 use repositories::DbRepository;
 use sea_orm::prelude::*;
-use sea_orm::{ActiveModelTrait, IntoActiveModel, QueryOrder, Set};
-use slug::slugify;
+use sea_orm::{ActiveModelTrait, IntoActiveModel, Set};
+use std::collections::{HashMap, HashSet};
+use std::sync::Arc;
 
 #[derive(Clone)]
 pub struct EventService {
+    authorization_service: Arc<AuthorizationService>,
+    user_service: Arc<UserService>,
     db_repo: DbRepository,
 }
 
 impl EventService {
-    pub fn new(db_repo: DbRepository) -> Self {
-        Self { db_repo }
+    #[must_use]
+    pub fn new(
+        authorization_service: Arc<AuthorizationService>,
+        user_service: Arc<UserService>,
+        db_repo: DbRepository,
+    ) -> Self {
+        Self {
+            authorization_service,
+            user_service,
+            db_repo,
+        }
     }
 
-    pub async fn create_event(&self, req: EventForCreate) -> ServiceResult<db_event::Model> {
-        let slug = self.generate_slug(&req.name).await?;
+    pub async fn create_event(
+        &self,
+        creator: Uuid,
+        event_fc: EventForCreate,
+    ) -> ServiceResult<Event> {
+        // Generate slug and check for naming conflicts
+        let slug = self
+            .db_repo
+            .generate_slug(&event_fc.name, None, db_event::Entity)
+            .await?;
 
         let active_event = db_event::ActiveModel {
-            name: Set(req.name),
+            name: Set(event_fc.name),
             slug: Set(slug),
-            start: Set(req.start),
-            end: Set(req.end),
-            max_team_size: Set(req.max_team_size as i32),
+            start: Set(event_fc.start),
+            end: Set(event_fc.end),
+            max_team_size: Set(event_fc.max_team_size as i32),
+            sidequest_cooldown: Set(event_fc.sidequest_cooldown as i32),
             is_read_only: Set(false),
             is_feedback_visible: Set(false),
-            visibility: Set(EventVisibility::Private),
+            visibility: Set(EventVisibility::Hidden),
             phase: Set(EventPhase::Registration),
             ..Default::default()
         };
@@ -39,94 +63,124 @@ impl EventService {
             .exec_with_returning(self.db_repo.conn())
             .await?;
 
-        Ok(event)
+        // Assign creator as event admin
+        self.authorization_service
+            .assign_event_roles(
+                event.id,
+                HashMap::from([(creator, HashSet::from([EventRole::Admin]))]),
+            )
+            .await?;
+
+        Ok(event.into())
     }
 
-    pub async fn get_events(&self) -> ServiceResult<Vec<db_event::Model>> {
-        let events = db_event::Entity::find()
-            .order_by_asc(db_event::Column::Start)
-            .all(self.db_repo.conn())
-            .await?;
+    pub async fn get_events(&self) -> ServiceResult<Vec<Event>> {
+        let events = self.db_repo.get_events().await?;
+        let events = events.into_iter().map(Event::from).collect();
 
         Ok(events)
     }
 
-    pub async fn get_event(&self, event_id: Uuid) -> ServiceResult<db_event::Model> {
-        let event = db_event::Entity::find()
-            .filter(db_event::Column::Id.eq(event_id))
-            .one(self.db_repo.conn())
-            .await?
-            .ok_or_else(|| ServiceError::ResourceNotFound {
-                resource: "Event".to_string(),
-                id: event_id.to_string(),
-            })?;
-
-        Ok(event)
+    pub async fn get_event(&self, event_id: Uuid) -> ServiceResult<Event> {
+        let event = self.db_repo.get_event(event_id).await?;
+        Ok(event.into())
     }
 
-    pub async fn patch_event(
+    pub async fn get_event_by_slug(&self, event_slug: &str) -> ServiceResult<Event> {
+        let event = self.db_repo.get_event_by_slug(event_slug).await?;
+        Ok(event.into())
+    }
+
+    pub async fn update_event(
         &self,
         event_id: Uuid,
-        patch: &EventForPatch,
-    ) -> ServiceResult<db_event::Model> {
-        let event = db_event::Entity::find()
-            .filter(db_event::Column::Id.eq(event_id))
-            .one(self.db_repo.conn())
-            .await?
-            .ok_or_else(|| ServiceError::ResourceNotFound {
-                resource: "Event".to_string(),
-                id: event_id.to_string(),
-            })?;
-
+        event_fu: EventForUpdate,
+    ) -> ServiceResult<Event> {
+        let event = self.db_repo.get_event(event_id).await?;
         let mut active_event = event.into_active_model();
 
-        if let Some(name) = &patch.name {
-            let slug = self.generate_slug(name).await?;
+        if let Some(name) = &event_fu.name {
+            // Generate slug and check for naming conflicts
+            let slug = self
+                .db_repo
+                .generate_slug(name, None, db_event::Entity)
+                .await?;
+
             active_event.name = Set(name.clone());
             active_event.slug = Set(slug);
         }
 
-        if let Some(start) = patch.start {
+        if let Some(start) = event_fu.start {
             active_event.start = Set(start);
         }
 
-        if let Some(end) = patch.end {
+        if let Some(end) = event_fu.end {
             active_event.end = Set(end);
         }
 
-        if let Some(max_team_size) = patch.max_team_size {
+        if let Some(welcome_content) = event_fu.welcome_content {
+            if !welcome_content.is_empty() {
+                active_event.welcome_content = Set(Some(welcome_content));
+            }
+        }
+
+        if let Some(documentation_content) = event_fu.documentation_content {
+            if !documentation_content.is_empty() {
+                active_event.documentation_content = Set(Some(documentation_content));
+            }
+        }
+
+        if let Some(max_team_size) = event_fu.max_team_size {
             active_event.max_team_size = Set(max_team_size as i32);
         }
 
-        if let Some(is_feedback_visible) = patch.is_feedback_visible {
+        if let Some(sidequest_cooldown) = event_fu.sidequest_cooldown {
+            active_event.sidequest_cooldown = Set(sidequest_cooldown as i32);
+        }
+
+        if let Some(is_feedback_visible) = event_fu.is_feedback_visible {
             active_event.is_feedback_visible = Set(is_feedback_visible);
         }
 
-        if let Some(visibility) = &patch.visibility {
-            active_event.visibility = Set(*visibility);
+        if let Some(visibility) = event_fu.visibility {
+            active_event.visibility = Set(visibility);
         }
 
-        if let Some(phase) = &patch.phase {
-            active_event.phase = Set(*phase);
+        if let Some(phase) = event_fu.phase {
+            active_event.phase = Set(phase);
         }
 
         let event = active_event.update(self.db_repo.conn()).await?;
 
-        Ok(event)
+        Ok(event.into())
     }
 
-    async fn generate_slug(&self, name: &str) -> ServiceResult<String> {
-        let slug = slugify(name);
+    pub async fn invite_users(
+        &self,
+        event_id: Uuid,
+        users: Vec<UserForCreate>,
+        roles: HashSet<EventRole>,
+    ) -> ServiceResult<Vec<ReducedUser>> {
+        // Ensure event exists
+        self.get_event(event_id).await?;
 
-        let existing = db_event::Entity::find()
-            .filter(db_event::Column::Slug.eq(&slug))
-            .one(self.db_repo.conn())
+        let new_users = self
+            .user_service
+            .create_users(users)
+            .await?
+            .into_iter()
+            .map(ReducedUser::from)
+            .collect::<Vec<_>>();
+
+        let roles = new_users
+            .iter()
+            .map(|user| (user.id, roles.clone()))
+            .collect::<HashMap<_, _>>();
+
+        self.authorization_service
+            .assign_event_roles(event_id, roles)
             .await?;
 
-        if existing.is_some() {
-            Err(ServiceError::SlugNotUnique { slug })
-        } else {
-            Ok(slug)
-        }
+        Ok(new_users)
     }
 }

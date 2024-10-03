@@ -21,6 +21,11 @@ pub struct Model {
     pub is_feedback_visible: bool,
     pub visibility: EventVisibility,
     pub phase: EventPhase,
+    pub sidequest_cooldown: i32,
+    #[sea_orm(column_type = "Text", nullable)]
+    pub documentation_content: Option<String>,
+    #[sea_orm(column_type = "Text", nullable)]
+    pub welcome_content: Option<String>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

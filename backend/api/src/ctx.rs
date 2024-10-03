@@ -2,21 +2,21 @@ use crate::{ApiError, ApiResult};
 use axum::async_trait;
 use axum::extract::FromRequestParts;
 use axum::http::request::Parts;
-use repositories::db::prelude::*;
-use services::authorization::model::UserRoles;
+use services::authorization::models::UserRoles;
+use services::user::models::User;
 
 #[derive(Debug, Clone)]
 pub struct Ctx {
-    user: db_user::Model,
+    user: User,
     roles: UserRoles,
 }
 
 impl Ctx {
-    pub fn new(user: db_user::Model, roles: UserRoles) -> Self {
+    pub fn new(user: User, roles: UserRoles) -> Self {
         Self { user, roles }
     }
 
-    pub fn user(&self) -> &db_user::Model {
+    pub fn user(&self) -> &User {
         &self.user
     }
 
@@ -35,7 +35,7 @@ where
     async fn from_request_parts(parts: &mut Parts, _: &S) -> ApiResult<Self> {
         let ctx = parts
             .extensions
-            .get::<Option<Ctx>>()
+            .get::<Option<Self>>()
             .ok_or_else(|| ApiError::NoCtxInRequest)?
             .as_ref()
             .ok_or_else(|| ApiError::NoCtxInRequest)?

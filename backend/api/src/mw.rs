@@ -12,17 +12,22 @@ use tracing::info;
 use uuid::Uuid;
 
 const AUTH_ID_KEY: &str = "X-Authentik-Email";
+const NAME_KEY: &str = "X-Authentik-Name";
 
 #[allow(dead_code)]
 pub async fn mw_impersonate(mut req: Request<Body>, next: Next) -> ApiResult<Response> {
-    if !cfg!(debug_assertions) {
-        panic!("Impersonation middleware is only available in debug mode.");
-    }
+    assert!(
+        cfg!(debug_assertions),
+        "Impersonation middleware is only available in debug mode."
+    );
 
     let target_auth_id = "hannes.eberhard@hotmail.com";
+    let target_name = "Hannes Eberhard";
 
     req.headers_mut()
         .insert(AUTH_ID_KEY, HeaderValue::from_str(target_auth_id)?);
+    req.headers_mut()
+        .insert(NAME_KEY, HeaderValue::from_str(target_name)?);
 
     Ok(next.run(req).await)
 }
@@ -45,7 +50,19 @@ pub async fn mw_resolve_ctx(
         return next.run(req).await;
     };
 
-    let Ok(user) = state.user_service.get_or_create_user(auth_id).await else {
+    let Some(name) = req
+        .headers()
+        .get(NAME_KEY)
+        .and_then(|value| value.to_str().ok())
+    else {
+        return next.run(req).await;
+    };
+
+    let Ok(user) = state
+        .user_service
+        .create_or_get_user(auth_id, Some(name))
+        .await
+    else {
         return next.run(req).await;
     };
 

@@ -15,3 +15,4 @@ utoipa = { version = "4.2.3", features = ["axum_extras", "chrono", "uuid"] }
 derive_more = { version = "1.0.0", features = ["full"] }
 serde_with = "3.9.0"
 strum = { version = "0.26.3", features = ["derive"] }
+slug = "0.1.6"

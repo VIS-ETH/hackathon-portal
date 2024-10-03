@@ -47,14 +47,24 @@ impl ApiState {
 
         let authorization_service = Arc::new(AuthorizationService::new(db_repo.clone()));
         let user_service = Arc::new(UserService::new(db_repo.clone()));
-        let event_service = Arc::new(EventService::new(db_repo.clone()));
+
+        let event_service = Arc::new(EventService::new(
+            authorization_service.clone(),
+            user_service.clone(),
+            db_repo.clone(),
+        ));
+
         let team_service = Arc::new(TeamService::new(
             authorization_service.clone(),
             db_repo.clone(),
         ));
+
         let project_service = Arc::new(ProjectService::new(db_repo.clone()));
-        let sidequest_service = Arc::new(SidequestService::new(db_repo.clone()));
-        let appointment_service = Arc::new(AppointmentService::new(db_repo.clone()));
+        let sidequest_service = Arc::new(SidequestService::new(
+            authorization_service.clone(),
+            db_repo.clone(),
+        ));
+        let appointment_service = Arc::new(AppointmentService::new(db_repo));
 
         let state = Self::new(
             authorization_service,
