@@ -1,6 +1,7 @@
 "use client"
 import { useGetEvent } from "@/api/gen";
 import EventForm from "@/componentes/EventForm";
+import ProjectAssignment from "@/componentes/ProjectAssignment";
 import { Stack, Title, Text, Tabs } from "@mantine/core";
 import { IconCalendarEvent, IconListDetails, IconMessageCircle, IconPhoto, IconSettings, IconUsers } from "@tabler/icons-react";
 import { useParams } from "next/navigation";
@@ -33,12 +34,12 @@ export default function Page () {
       {event && <EventForm  event={event}/>}
       </Tabs.Panel>
 
-      <Tabs.Panel value="messages">
+      <Tabs.Panel value="messages" my={"md"}>
         Messages tab content
       </Tabs.Panel>
 
-      <Tabs.Panel value="settings">
-        Settings tab content
+      <Tabs.Panel value="settings" my={"md"}>
+        <ProjectAssignment />
       </Tabs.Panel>
     </Tabs>
       
