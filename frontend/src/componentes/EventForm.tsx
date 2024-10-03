@@ -68,6 +68,8 @@ const EventForm = ({ event }: EventFormProps) => {
           draft.visibility = null;
         }
 
+
+
         return draft;
       }),
   });
@@ -170,28 +172,10 @@ const EventForm = ({ event }: EventFormProps) => {
           </Stack>
         </Group>
 
-        <Textarea label="Welcome Page" autosize minRows={8} />
-        {/* <Group grow>
-          <Switch
-            {...primaryButtonProps}
-            type="submit"
-            leftSection={<IconSend />}
-            loading={updateWorkerMutation.isPending}
-            disabled={!form.isValid()}
-          >
-            Update
-          </Button>
-          <Button
-            {...primaryButtonProps}
-            type="button"
-            color="red"
-            leftSection={<IconTrash />}
-            onClick={deleteWorker}
-            loading={deleteWorkerMutation.isPending}
-          >
-            Delete
-          </Button>
-        </Group> */}
+{/* TODO */}
+        <Textarea label="Welcome Page" autosize minRows={8} {...form.getInputProps("welcome_page")}/>
+        <Textarea label="Documentation" autosize minRows={8} {...form.getInputProps("welcome_page")}/>
+       
       </Stack>
     </form>
   );

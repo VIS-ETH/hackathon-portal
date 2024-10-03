@@ -26,7 +26,7 @@ import { useListState } from "@mantine/hooks";
 import { IconDeviceFloppy, IconPlus, IconTrash } from "@tabler/icons-react";
 
 const ManageUser = ({ event_id }: { event_id: string }) => {
-  return <Text>Manage User</Text>;
+  return <Title order={3}>Manage User</Title>;
 };
 
 const InviteUser = ({ event_id }: { event_id: string }) => {
@@ -81,6 +81,7 @@ const InviteUser = ({ event_id }: { event_id: string }) => {
           These people will be Invited
         </Text>
         <Grid>
+            {form.values.users.length == 0 && <Text>Add your first user</Text>}
           {form.values.users.map((user, index) => {
             return (
               <>
