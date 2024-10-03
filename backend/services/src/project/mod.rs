@@ -118,7 +118,7 @@ impl ProjectService {
             });
         }
 
-        project.delete(self.db_repo.conn()).await?;
+        project.delete(&txn).await?;
         txn.commit().await?;
 
         Ok(())
