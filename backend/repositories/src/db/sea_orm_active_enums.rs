@@ -19,14 +19,14 @@ use serde::{Deserialize, Serialize};
 )]
 #[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "event_phase")]
 pub enum EventPhase {
+    #[sea_orm(string_value = "FINISHED")]
+    Finished,
     #[sea_orm(string_value = "GRADING")]
     Grading,
     #[sea_orm(string_value = "HACKING")]
     Hacking,
     #[sea_orm(string_value = "REGISTRATION")]
     Registration,
-    #[sea_orm(string_value = "FINISHED")]
-    Finished,
 }
 #[derive(
     Debug,
@@ -71,12 +71,12 @@ pub enum EventRole {
 )]
 #[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "event_visibility")]
 pub enum EventVisibility {
-    #[sea_orm(string_value = "PRIVATE")]
-    Private,
+    #[sea_orm(string_value = "HIDDEN")]
+    Hidden,
+    #[sea_orm(string_value = "INTERNAL")]
+    Internal,
     #[sea_orm(string_value = "PUBLIC")]
     Public,
-    #[sea_orm(string_value = "RESTRICTED")]
-    Restricted,
 }
 #[derive(
     Debug,

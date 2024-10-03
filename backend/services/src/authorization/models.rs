@@ -15,15 +15,40 @@ pub type TeamRolesMap = ResourceRolesMap<TeamRole>;
 
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
 pub struct UserRoles {
-    pub event: HashMap<Uuid, HashSet<EventRole>>,
-    pub team: HashMap<Uuid, HashSet<TeamRole>>,
+    pub event: EventRolesMap,
+    pub team: TeamRolesMap,
+}
+
+impl UserRoles {
+    #[must_use]
+    pub const fn new(event: EventRolesMap, team: TeamRolesMap) -> Self {
+        Self { event, team }
+    }
+
+    #[must_use]
+    pub fn get_event_roles(&self, event_id: &Uuid) -> EventRoles {
+        self.event.get(event_id).cloned().unwrap_or_default()
+    }
+
+    #[must_use]
+    pub fn get_team_roles(&self, team_id: &Uuid) -> TeamRoles {
+        self.team.get(team_id).cloned().unwrap_or_default()
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema, FromQueryResult)]
 pub struct AffiliateRow<R: TryGetable> {
     pub id: Uuid,
     pub name: String,
+    pub index: i32,
     pub role: R,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+pub struct EventAffiliate {
+    pub id: Uuid,
+    pub name: String,
+    pub roles: Vec<EventRole>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]

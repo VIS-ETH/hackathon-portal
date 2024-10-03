@@ -4,8 +4,8 @@ datasource db {
 }
 
 enum event_visibility {
-  PRIVATE // only visible to admins, mentors, and stakeholders
-  RESTRICTED // only visible to admins, mentors, stakeholders, and participants
+  HIDDEN // only visible to event staff
+  INTERNAL // only visible to event affiliates
   PUBLIC // visible to everyone
 }
 
@@ -33,15 +33,18 @@ model event {
   id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
 
   // fields
-  name                String           @unique
-  slug                String           @unique
-  start               DateTime
-  end                 DateTime
-  max_team_size       Int
-  is_read_only        Boolean
-  is_feedback_visible Boolean
-  visibility          event_visibility
-  phase               event_phase
+  name                  String           @unique
+  slug                  String           @unique
+  start                 DateTime
+  end                   DateTime
+  welcome_content       String?
+  documentation_content String?
+  max_team_size         Int
+  sidequest_cooldown    Int // in minutes
+  is_read_only          Boolean
+  is_feedback_visible   Boolean
+  visibility            event_visibility
+  phase                 event_phase
 
   // related models
   team                  team[]
@@ -70,7 +73,6 @@ model team {
   team_role_assignment team_role_assignment[]
   project_preference   project_preference[]
   sidequest_score      sidequest_score[]
-  sidequest_attempt    sidequest_attempt[]
 
   // meta
   @@unique([event_id, name])
@@ -83,11 +85,15 @@ model user {
   // fields
   auth_id String @unique
   name    String
+  index   Int // used to differentiate users with the same name
 
   // related models
   event_role_assignment event_role_assignment[]
   team_role_assignment  team_role_assignment[]
   sidequest_attempt     sidequest_attempt[]
+
+  // meta
+  @@unique([name, index])
 }
 
 model event_role_assignment {
@@ -175,7 +181,6 @@ model sidequest {
 model sidequest_attempt {
   id           String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   sidequest_id String @db.Uuid
-  team_id      String @db.Uuid
   user_id      String @db.Uuid
 
   // fields
@@ -184,7 +189,6 @@ model sidequest_attempt {
 
   // relations
   sidequest sidequest @relation(fields: [sidequest_id], references: [id])
-  team      team      @relation(fields: [team_id], references: [id])
   user      user      @relation(fields: [user_id], references: [id])
 }
 
@@ -193,7 +197,7 @@ model sidequest_score {
   team_id String @db.Uuid
 
   // fields
-  score    Int
+  score    Float
   valid_at DateTime
 
   // relations

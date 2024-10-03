@@ -1,6 +1,7 @@
 use chrono::NaiveDateTime;
 use derive_more::From;
 use repositories::db::prelude::EventPhase;
+use repositories::RepositoryError;
 use serde::Serialize;
 use serde_with::{serde_as, DisplayFromStr};
 use std::fmt;
@@ -10,23 +11,16 @@ pub type ServiceResult<T> = Result<T, ServiceError>;
 #[serde_as]
 #[derive(Debug, Serialize, From)]
 pub enum ServiceError {
-    RegularUserRequired,
-    ServiceUserRequired,
-
-    NameNotUnique {
-        name: String,
-    },
-
-    SlugNotUnique {
-        slug: String,
-    },
-
-    ResourceNotFound {
+    ResourceStillInUse {
         resource: String,
         id: String,
     },
 
-    ResourceStillInUse {
+    UserIsAlreadyMemberOfAnotherTeam {
+        name: String,
+    },
+
+    CannotUnassignAllAdmins {
         resource: String,
         id: String,
     },
@@ -45,12 +39,17 @@ pub enum ServiceError {
     },
 
     SidequestCooldown {
-        allowed_at: NaiveDateTime,
+        expires_at: NaiveDateTime,
     },
 
     EventPhase {
         current_phase: EventPhase,
     },
+
+    // region: external library errors
+    #[from]
+    Repository(RepositoryError),
+    // endregion
 
     // region: external library errors
     #[from]
@@ -60,7 +59,7 @@ pub enum ServiceError {
 
 impl fmt::Display for ServiceError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:?}", self)
+        write!(f, "{self:?}")
     }
 }
 

@@ -1,11 +1,11 @@
-pub mod model;
+pub mod models;
 
-use crate::appointment::model::{Appointment, AppointmentForCreate, AppointmentForUpdate};
-use crate::{ServiceError, ServiceResult};
+use crate::appointment::models::{Appointment, AppointmentForCreate, AppointmentForUpdate};
+use crate::ServiceResult;
 use repositories::db::prelude::*;
 use repositories::DbRepository;
 use sea_orm::prelude::*;
-use sea_orm::{ActiveModelTrait, IntoActiveModel, QueryOrder, Set};
+use sea_orm::{ActiveModelTrait, IntoActiveModel, Set};
 
 #[derive(Clone)]
 pub struct AppointmentService {
@@ -13,7 +13,8 @@ pub struct AppointmentService {
 }
 
 impl AppointmentService {
-    pub fn new(db_repo: DbRepository) -> Self {
+    #[must_use]
+    pub const fn new(db_repo: DbRepository) -> Self {
         Self { db_repo }
     }
 
@@ -37,19 +38,14 @@ impl AppointmentService {
     }
 
     pub async fn get_appointments(&self, event_id: Uuid) -> ServiceResult<Vec<Appointment>> {
-        let appointments = db_appointment::Entity::find()
-            .filter(db_appointment::Column::EventId.eq(event_id))
-            .order_by_asc(db_appointment::Column::Start)
-            .all(self.db_repo.conn())
-            .await?;
-
+        let appointments = self.db_repo.get_appointments(event_id).await?;
         let appointments = appointments.into_iter().map(Appointment::from).collect();
 
         Ok(appointments)
     }
 
     pub async fn get_appointment(&self, appointment_id: Uuid) -> ServiceResult<Appointment> {
-        let appointment = self.get_db_appointment(appointment_id).await?;
+        let appointment = self.db_repo.get_appointment(appointment_id).await?;
         Ok(appointment.into())
     }
 
@@ -58,10 +54,8 @@ impl AppointmentService {
         appointment_id: Uuid,
         appointment_fu: AppointmentForUpdate,
     ) -> ServiceResult<Appointment> {
-        let mut active_appointment = self
-            .get_db_appointment(appointment_id)
-            .await?
-            .into_active_model();
+        let appointment = self.db_repo.get_appointment(appointment_id).await?;
+        let mut active_appointment = appointment.into_active_model();
 
         if let Some(title) = appointment_fu.title {
             active_appointment.title = Set(title);
@@ -88,7 +82,7 @@ impl AppointmentService {
         }
 
         if let Some(end) = appointment_fu.end {
-            if end.timestamp() == 0 {
+            if end.and_utc().timestamp() == 0 {
                 active_appointment.end = Set(None);
             } else {
                 active_appointment.end = Set(Some(end));
@@ -101,25 +95,9 @@ impl AppointmentService {
     }
 
     pub async fn delete_appointment(&self, appointment_id: Uuid) -> ServiceResult<()> {
-        let appointment = self.get_db_appointment(appointment_id).await?;
+        let appointment = self.db_repo.get_appointment(appointment_id).await?;
         appointment.delete(self.db_repo.conn()).await?;
 
         Ok(())
-    }
-
-    async fn get_db_appointment(
-        &self,
-        appointment_id: Uuid,
-    ) -> ServiceResult<db_appointment::Model> {
-        let appointment = db_appointment::Entity::find()
-            .filter(db_appointment::Column::Id.eq(appointment_id))
-            .one(self.db_repo.conn())
-            .await?
-            .ok_or_else(|| ServiceError::ResourceNotFound {
-                resource: "Appointment".to_string(),
-                id: appointment_id.to_string(),
-            })?;
-
-        Ok(appointment)
     }
 }

@@ -1,13 +1,12 @@
-pub mod model;
+pub mod models;
 
 use crate::authorization::AuthorizationService;
-use crate::team::model::{ProjectPreferences, Team, TeamForCreate, TeamForUpdate};
+use crate::team::models::{ProjectPreferences, Team, TeamForCreate, TeamForUpdate};
 use crate::{ServiceError, ServiceResult};
 use repositories::db::prelude::*;
 use repositories::DbRepository;
 use sea_orm::prelude::*;
-use sea_orm::{ActiveModelTrait, IntoActiveModel, QueryOrder, Set, TransactionTrait};
-use slug::slugify;
+use sea_orm::{ActiveModelTrait, IntoActiveModel, Set, TransactionTrait};
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 
@@ -18,6 +17,7 @@ pub struct TeamService {
 }
 
 impl TeamService {
+    #[must_use]
     pub fn new(authorization_service: Arc<AuthorizationService>, db_repo: DbRepository) -> Self {
         Self {
             authorization_service,
@@ -26,7 +26,11 @@ impl TeamService {
     }
 
     pub async fn create_team(&self, creator: Uuid, team_fc: TeamForCreate) -> ServiceResult<Team> {
-        let slug = self.generate_slug(&team_fc.name, team_fc.event_id).await?;
+        // Generate slug and check for naming conflicts
+        let slug = self
+            .db_repo
+            .generate_slug(&team_fc.name, Some(team_fc.event_id), db_team::Entity)
+            .await?;
 
         let active_team = db_team::ActiveModel {
             event_id: Set(team_fc.event_id),
@@ -38,40 +42,56 @@ impl TeamService {
 
         let team = active_team.insert(self.db_repo.conn()).await?;
 
-        self.authorization_service
+        // Assign creator as team member
+        let auth_result = self
+            .authorization_service
             .assign_team_roles(
                 team.id,
                 HashMap::from([(creator, HashSet::from([TeamRole::Member]))]),
             )
-            .await?;
+            .await;
+
+        if let Err(err) = auth_result {
+            // Rollback team creation
+            team.delete(self.db_repo.conn()).await?;
+            return Err(err);
+        }
 
         Ok(team.into())
     }
 
     pub async fn get_teams(&self, event_id: Uuid) -> ServiceResult<Vec<Team>> {
-        let teams = self.get_db_teams(event_id).await?;
+        let teams = self.db_repo.get_teams(event_id).await?;
         let teams = teams.into_iter().map(Team::from).collect();
 
         Ok(teams)
     }
 
     pub async fn get_team(&self, team_id: Uuid) -> ServiceResult<Team> {
-        let team = self.get_db_team(team_id).await?;
+        let team = self.db_repo.get_team(team_id).await?;
         Ok(team.into())
     }
 
     pub async fn get_team_by_slug(&self, event_slug: &str, team_slug: &str) -> ServiceResult<Team> {
-        let team = self.get_db_team_by_slug(event_slug, team_slug).await?;
+        let team = self.db_repo.get_team_by_slug(event_slug, team_slug).await?;
         Ok(team.into())
     }
 
-    pub async fn update_team(&self, team_id: Uuid, team_fc: TeamForUpdate) -> ServiceResult<Team> {
-        let team = self.get_db_team(team_id).await?;
+    pub async fn update_team(&self, team_id: Uuid, team_fu: TeamForUpdate) -> ServiceResult<Team> {
+        let team = self.db_repo.get_team(team_id).await?;
+
+        // Store for later use
         let event_id = team.event_id;
+
         let mut active_team = team.into_active_model();
 
-        if let Some(name) = &team_fc.name {
-            let slug = self.generate_slug(name, event_id).await?;
+        if let Some(name) = &team_fu.name {
+            // Generate slug and check for naming conflicts
+            let slug = self
+                .db_repo
+                .generate_slug(name, Some(event_id), db_team::Entity)
+                .await?;
+
             active_team.name = Set(name.clone());
             active_team.slug = Set(slug);
         }
@@ -81,9 +101,11 @@ impl TeamService {
         Ok(team.into())
     }
 
-    /// Cascade deletes all team role assignments and fails on any other remaining dependencies.
+    /// Cascade deletes team role assignments and project preferences.
+    /// Fails on any other related resources.
     pub async fn delete_team(&self, team_id: Uuid) -> ServiceResult<()> {
-        let team = self.get_db_team(team_id).await?;
+        let team = self.db_repo.get_team(team_id).await?;
+
         let txn = self.db_repo.conn().begin().await?;
 
         db_team_role_assignment::Entity::delete_many()
@@ -91,14 +113,9 @@ impl TeamService {
             .exec(&txn)
             .await?;
 
-        let project_preferences = team
-            .find_related(db_project_preference::Entity)
-            .count(&txn)
-            .await?;
-
-        let sidequest_attempts = team
-            .find_related(db_sidequest_attempt::Entity)
-            .count(&txn)
+        db_project_preference::Entity::delete_many()
+            .filter(db_project_preference::Column::TeamId.eq(team_id))
+            .exec(&txn)
             .await?;
 
         let sidequest_scores = team
@@ -106,7 +123,7 @@ impl TeamService {
             .count(&txn)
             .await?;
 
-        if project_preferences + sidequest_attempts + sidequest_scores > 0 {
+        if sidequest_scores > 0 {
             return Err(ServiceError::ResourceStillInUse {
                 resource: "Team".to_string(),
                 id: team_id.to_string(),
@@ -119,8 +136,10 @@ impl TeamService {
         Ok(())
     }
 
-    pub async fn reindex_teams(&self, event_id: Uuid) -> ServiceResult<Vec<Team>> {
-        let teams = self.get_db_teams(event_id).await?;
+    /// (Re)assigns the team indices (1-based) based on the ascending ordering of the team ids.
+    /// Warning: This must only be called if the event has never left the REGISTRATION phase (e.g. since the VM domain depends on the team indices).
+    pub async fn index_teams(&self, event_id: Uuid) -> ServiceResult<Vec<Team>> {
+        let teams = self.db_repo.get_teams(event_id).await?;
         let mut new_teams = Vec::new();
 
         let txn = self.db_repo.conn().begin().await?;
@@ -145,7 +164,7 @@ impl TeamService {
         team_id: Uuid,
         project_id: Option<Uuid>,
     ) -> ServiceResult<Team> {
-        let team = self.get_db_team(team_id).await?;
+        let team = self.db_repo.get_team(team_id).await?;
         let mut active_team = team.into_active_model();
         active_team.project_id = Set(project_id);
 
@@ -158,14 +177,12 @@ impl TeamService {
         &self,
         team_id: Uuid,
     ) -> ServiceResult<ProjectPreferences> {
-        let pps = db_project_preference::Entity::find()
-            .filter(db_project_preference::Column::TeamId.eq(team_id))
-            .order_by_asc(db_project_preference::Column::Score)
-            .all(self.db_repo.conn())
-            .await?;
+        let pps = self.db_repo.get_project_preferences(team_id).await?;
+
+        let pps = pps.into_iter().map(|pp| pp.project_id).collect();
 
         let pps = ProjectPreferences {
-            project_preferences: pps.into_iter().map(|pp| pp.project_id).collect(),
+            project_preferences: pps,
         };
 
         Ok(pps)
@@ -176,11 +193,7 @@ impl TeamService {
         team_id: Uuid,
         pps: ProjectPreferences,
     ) -> ServiceResult<ProjectPreferences> {
-        let set = pps
-            .project_preferences
-            .iter()
-            .collect::<std::collections::HashSet<_>>();
-        let mut new_pps = Vec::new();
+        let set = pps.project_preferences.iter().collect::<HashSet<_>>();
 
         if set.len() != pps.project_preferences.len() {
             return Err(ServiceError::ProjectPreferenceDuplicate);
@@ -193,6 +206,7 @@ impl TeamService {
             });
         }
 
+        let mut new_pps = Vec::new();
         let txn = self.db_repo.conn().begin().await?;
 
         db_project_preference::Entity::delete_many()
@@ -205,7 +219,6 @@ impl TeamService {
                 team_id: Set(team_id),
                 project_id: Set(*project_id),
                 score: Set(index as i32),
-                ..Default::default()
             };
 
             let pp = active_pp.insert(&txn).await?;
@@ -214,15 +227,17 @@ impl TeamService {
 
         txn.commit().await?;
 
+        let pps = new_pps.into_iter().map(|pp| pp.project_id).collect();
+
         let pps = ProjectPreferences {
-            project_preferences: new_pps.into_iter().map(|pp| pp.project_id).collect(),
+            project_preferences: pps,
         };
 
         Ok(pps)
     }
 
     pub async fn get_team_password(&self, team_id: Uuid) -> ServiceResult<Option<String>> {
-        let team = self.get_db_team(team_id).await?;
+        let team = self.db_repo.get_team(team_id).await?;
         Ok(team.password)
     }
 
@@ -231,71 +246,12 @@ impl TeamService {
         team_id: Uuid,
         password: Option<String>,
     ) -> ServiceResult<Team> {
-        let team = self.get_db_team(team_id).await?;
+        let team = self.db_repo.get_team(team_id).await?;
         let mut active_team = team.into_active_model();
         active_team.password = Set(password);
 
         let team = active_team.update(self.db_repo.conn()).await?;
 
         Ok(team.into())
-    }
-
-    async fn get_db_teams(&self, event_id: Uuid) -> ServiceResult<Vec<db_team::Model>> {
-        let teams = db_team::Entity::find()
-            .filter(db_team::Column::EventId.eq(event_id))
-            .order_by_asc(db_team::Column::Index)
-            .order_by_asc(db_team::Column::Id)
-            .all(self.db_repo.conn())
-            .await?;
-
-        Ok(teams)
-    }
-
-    async fn get_db_team(&self, team_id: Uuid) -> ServiceResult<db_team::Model> {
-        let team = db_team::Entity::find()
-            .filter(db_team::Column::Id.eq(team_id))
-            .one(self.db_repo.conn())
-            .await?
-            .ok_or_else(|| ServiceError::ResourceNotFound {
-                resource: "Team".to_string(),
-                id: team_id.to_string(),
-            })?;
-
-        Ok(team)
-    }
-
-    async fn get_db_team_by_slug(
-        &self,
-        event_slug: &str,
-        team_slug: &str,
-    ) -> ServiceResult<db_team::Model> {
-        let team = db_team::Entity::find()
-            .inner_join(db_event::Entity)
-            .filter(db_event::Column::Slug.eq(event_slug))
-            .filter(db_team::Column::Slug.eq(team_slug))
-            .one(self.db_repo.conn())
-            .await?
-            .ok_or_else(|| ServiceError::ResourceNotFound {
-                resource: "Team".to_string(),
-                id: format!("{}/{}", event_slug, team_slug),
-            })?;
-
-        Ok(team)
-    }
-
-    async fn generate_slug(&self, name: &str, event_id: Uuid) -> ServiceResult<String> {
-        let slug = slugify(name);
-
-        let existing = db_team::Entity::find()
-            .filter(db_team::Column::EventId.eq(event_id))
-            .filter(db_team::Column::Slug.eq(slug.clone()))
-            .one(self.db_repo.conn())
-            .await?;
-
-        if existing.is_some() {
-            Err(ServiceError::SlugNotUnique { slug })
-        } else {
-            Ok(slug)
-        }
     }
 }

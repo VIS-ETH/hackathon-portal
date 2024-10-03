@@ -3,13 +3,14 @@
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
 #[sea_orm(table_name = "sidequest_score")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: Uuid,
     pub team_id: Uuid,
-    pub score: i32,
+    #[sea_orm(column_type = "Double")]
+    pub score: f64,
     pub valid_at: DateTime,
 }
 

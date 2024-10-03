@@ -2,6 +2,8 @@ use axum::http::header::InvalidHeaderValue;
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use axum::Json;
+use chrono::TimeZone;
+use chrono_tz::Europe::Zurich;
 use derive_more::From;
 use repositories::RepositoryError;
 use serde::Serialize;
@@ -12,6 +14,8 @@ use std::sync::Arc;
 use utoipa::ToSchema;
 
 pub type ApiResult<T> = Result<T, ApiError>;
+pub type ApiJson<T> = ApiResult<Json<T>>;
+pub type ApiJsonVec<T> = ApiResult<Json<Vec<T>>>;
 
 #[serde_as]
 #[derive(Debug, Serialize, From)]
@@ -20,22 +24,23 @@ pub enum ApiError {
         url: String,
     },
 
+    BadRequest {
+        reason: String,
+    },
+
     Forbidden {
-        resource: String,
-        id: String,
         action: String,
     },
 
     NoAuthIdInRequest,
     NoCtxInRequest,
 
-    // region: external library errors
+    // region: internal library errors
     #[from]
     Service(ServiceError),
 
     #[from]
-    Repositories(RepositoryError),
-
+    Repository(RepositoryError),
     // endregion
 
     // region: external library errors
@@ -60,7 +65,7 @@ pub enum ApiError {
 
 impl fmt::Display for ApiError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:?}", self)
+        write!(f, "{self:?}")
     }
 }
 
@@ -94,7 +99,7 @@ impl PublicError {
 
 impl fmt::Display for PublicError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:?}", self)
+        write!(f, "{self:?}")
     }
 }
 
@@ -113,7 +118,86 @@ impl IntoResponse for PublicError {
 
 impl From<ApiError> for PublicError {
     fn from(value: ApiError) -> Self {
-        PublicError::from(&value)
+        Self::from(&value)
+    }
+}
+
+impl From<&RepositoryError> for PublicError {
+    fn from(value: &RepositoryError) -> Self {
+        let ise = (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "Internal server error".to_string(),
+        );
+
+        let (status, message) = match value {
+            RepositoryError::ResourceNotFound { resource, id } => (
+                StatusCode::NOT_FOUND,
+                format!("{resource} '{id}' not found"),
+            ),
+            RepositoryError::SlugNotUnique { slug } => {
+                (StatusCode::CONFLICT, format!("Slug '{slug}' is not unique"))
+            }
+            RepositoryError::SeaORM(_) => ise,
+        };
+
+        Self::new(status, message)
+    }
+}
+
+impl From<&ServiceError> for PublicError {
+    fn from(value: &ServiceError) -> Self {
+        let ise = (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "Internal server error".to_string(),
+        );
+
+        let (status, message) = match value {
+            ServiceError::ResourceStillInUse { resource, id } => (
+                StatusCode::CONFLICT,
+                format!("{resource} '{id}' is still in use"),
+            ),
+            ServiceError::UserIsAlreadyMemberOfAnotherTeam { name } => (
+                StatusCode::BAD_REQUEST,
+                format!("User '{name}' is already a member of another team"),
+            ),
+            ServiceError::CannotUnassignAllAdmins { resource, id } => (
+                StatusCode::BAD_REQUEST,
+                format!("Cannot unassign all admins from {resource} '{id}'"),
+            ),
+            ServiceError::Forbidden {
+                resource,
+                id,
+                action,
+            } => (
+                StatusCode::FORBIDDEN,
+                format!("You do not have permission to {action} {resource} '{id}'"),
+            ),
+            ServiceError::ProjectPreferenceDuplicate => (
+                StatusCode::BAD_REQUEST,
+                "Project preferences must be unique".to_string(),
+            ),
+            ServiceError::ProjectPreferenceWrongCount { expected, actual } => (
+                StatusCode::BAD_REQUEST,
+                format!("Wrong number of project preferences, expected {expected}, got {actual}"),
+            ),
+            ServiceError::SidequestCooldown { expires_at } => {
+                let expires_at_local = Zurich.from_utc_datetime(expires_at);
+                let expires_at_str = expires_at_local.format("%H:%M");
+
+                (
+                    StatusCode::FORBIDDEN,
+                    format!("Wait until {expires_at_str} before attempting another sidequest"),
+                )
+            }
+            ServiceError::EventPhase { current_phase } => (
+                StatusCode::FORBIDDEN,
+                format!("This action is not allowed in the phase {current_phase}"),
+            ),
+            ServiceError::Repository(e) => return e.into(),
+            ServiceError::SeaORM(_) => ise,
+        };
+
+        Self::new(status, message)
     }
 }
 
@@ -126,82 +210,24 @@ impl From<&ApiError> for PublicError {
 
         let (status, message) = match value {
             ApiError::UrlNotFound { url } => {
-                (StatusCode::NOT_FOUND, format!("Url '{}' not found", url))
+                (StatusCode::NOT_FOUND, format!("Url '{url}' not found"))
             }
-            ApiError::Forbidden {
-                resource,
-                id,
-                action,
-            } => (
+            ApiError::BadRequest { reason } => (StatusCode::BAD_REQUEST, reason.clone()),
+            ApiError::Forbidden { action } => (
                 StatusCode::FORBIDDEN,
-                format!(
-                    "You do not have permission to {} {} '{}'",
-                    action, resource, id
-                ),
+                format!("You do not have the permissions to {action}"),
             ),
             ApiError::NoAuthIdInRequest | ApiError::NoCtxInRequest => (
                 StatusCode::UNAUTHORIZED,
                 "You must be authenticated to access this resource".to_string(),
             ),
-            ApiError::Service(e) => match e {
-                ServiceError::RegularUserRequired | ServiceError::ServiceUserRequired => (
-                    StatusCode::FORBIDDEN,
-                    "You do not have permission to access this resource".to_string(),
-                ),
-                ServiceError::NameNotUnique { name } => (
-                    StatusCode::CONFLICT,
-                    format!("Name '{}' is not unique", name),
-                ),
-                ServiceError::SlugNotUnique { slug } => (
-                    StatusCode::CONFLICT,
-                    format!("Slug '{}' is not unique", slug),
-                ),
-                ServiceError::ResourceNotFound { resource, id } => (
-                    StatusCode::NOT_FOUND,
-                    format!("{} '{}' not found", resource, id),
-                ),
-                ServiceError::ResourceStillInUse { resource, id } => (
-                    StatusCode::CONFLICT,
-                    format!("{} '{}' is still in use", resource, id),
-                ),
-                ServiceError::Forbidden {
-                    resource,
-                    id,
-                    action,
-                } => (
-                    StatusCode::FORBIDDEN,
-                    format!(
-                        "You do not have permission to {} {} '{}'",
-                        action, resource, id
-                    ),
-                ),
-                ServiceError::ProjectPreferenceDuplicate => (
-                    StatusCode::BAD_REQUEST,
-                    "Project preferences must be unique".to_string(),
-                ),
-                ServiceError::ProjectPreferenceWrongCount { expected, actual } => (
-                    StatusCode::BAD_REQUEST,
-                    format!(
-                        "Wrong number of project preferences, expected {}, got {}",
-                        expected, actual
-                    ),
-                ),
-                ServiceError::SidequestCooldown { allowed_at } => (
-                    StatusCode::FORBIDDEN,
-                    format!("You must wait until {}", allowed_at),
-                ),
-                ServiceError::EventPhase { current_phase } => (
-                    StatusCode::FORBIDDEN,
-                    format!("This action is not allowed in the phase {}", current_phase),
-                ),
-                ServiceError::SeaORM(_) => ise.clone(),
-            },
-            ApiError::Repositories(_)
-            | ApiError::Config(_)
+            ApiError::Service(e) => return e.into(),
+            ApiError::Repository(e) => return e.into(),
+            ApiError::Config(_)
             | ApiError::Io(_)
             | ApiError::InvalidHeaderValue(_)
             | ApiError::TracingSetGlobalDefault(_)
-            | ApiError::TracingFilterParse(_) => ise.clone(),
+            | ApiError::TracingFilterParse(_) => ise,
         };
 
         Self::new(status, message)
