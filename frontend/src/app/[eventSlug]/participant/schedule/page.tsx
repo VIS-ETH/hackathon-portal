@@ -41,9 +41,6 @@ export default function Page() {
 
   return (
     <Stack>
-      <Flex justify={"end"}>
-        <CreateAppointment event_id={event_id} refetch={refetch} />
-      </Flex>
       <Timeline active={active} bulletSize={24} lineWidth={4}>
         {appointments?.map((item, index) => (
           <Timeline.Item>

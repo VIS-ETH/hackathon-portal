@@ -1,4 +1,3 @@
-import UpdateAppointment from "./TimelineEntryEdit";
 
 import { Appointment } from "@/api/gen";
 
@@ -54,9 +53,6 @@ export default function TimelineEntry({
           >
             {open ? "Close" : "Details"}
           </Button>
-        )}
-        {edit && refetch && (
-          <UpdateAppointment appointment={item} refetch={refetch} />
         )}
       </Flex>
       <Text c="dimmed" size="sm">
