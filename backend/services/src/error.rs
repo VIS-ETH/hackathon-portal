@@ -46,6 +46,11 @@ pub enum ServiceError {
         current_phase: EventPhase,
     },
 
+    Matching {
+        message: String,
+    },
+
+
     // region: external library errors
     #[from]
     Repository(RepositoryError),

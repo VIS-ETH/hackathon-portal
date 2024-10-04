@@ -194,6 +194,7 @@ impl From<&ServiceError> for PublicError {
                 format!("This action is not allowed in the phase {current_phase}"),
             ),
             ServiceError::Repository(e) => return e.into(),
+            ServiceError::Matching { message } => (StatusCode::BAD_REQUEST, message.clone()),
             ServiceError::SeaORM(_) => ise,
         };
 
