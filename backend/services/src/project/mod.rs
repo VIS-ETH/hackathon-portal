@@ -1,7 +1,8 @@
 pub mod models;
-
+mod matching;
 use crate::project::models::{Project, ProjectForCreate, ProjectForUpdate};
 use crate::{ServiceError, ServiceResult};
+use matching::GroupAssignment;
 use repositories::db::prelude::*;
 use repositories::DbRepository;
 use sea_orm::prelude::*;
@@ -124,9 +125,36 @@ impl ProjectService {
         Ok(())
     }
 
-    #[allow(unreachable_code, unused_variables)]
     pub async fn get_matching(&self, event_id: Uuid) -> ServiceResult<HashMap<Uuid, Uuid>> {
-        let matching = todo!("Map from team_id to project_id");
-        Ok(matching)
+
+        let projects = self.db_repo.get_projects(event_id).await?;
+        let project_ids = projects.into_iter().map(|p|{p.id}).collect::<Vec<_>>();
+
+        let teams = self.db_repo.get_teams(event_id).await?;
+        let team_ids = teams.iter().map(|t|{t.id}).collect::<Vec<_>>();
+
+        // Mapping from team_id -> project_id -> preference
+        let mut preference = HashMap::<Uuid, HashMap<Uuid, i32>>::new();
+        for team in teams{
+            let team_pref = self.db_repo.get_project_preferences(team.id).await?;
+            let team_pref = team_pref.into_iter().fold(HashMap::<Uuid, i32>::new(), |mut acc, pref| {
+                acc.insert(pref.project_id, pref.score);
+                acc
+            });
+            preference.insert(team.id, team_pref);
+        }
+
+        let matching_problem = GroupAssignment::new(team_ids, project_ids, 3, preference);
+        let mut matching = match matching_problem {
+            Some(matching) => matching,
+            None => return Err(ServiceError::Matching { message: ("failed to instantiate the problem.".to_string()) }),
+        };
+        let solution = matching.solve();
+
+        match solution {
+            Ok(solution) => return Ok(solution),
+            Err(minilp::Error::Infeasible) => return Err(ServiceError::Matching { message: ("no feasible solution found.".to_string()) }),
+            Err(minilp::Error::Unbounded) => return Err(ServiceError::Matching { message: ("problem is unbounded.".to_string()) }),
+        }
     }
 }
