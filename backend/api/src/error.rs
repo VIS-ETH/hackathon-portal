@@ -160,6 +160,10 @@ impl From<&ServiceError> for PublicError {
                 StatusCode::BAD_REQUEST,
                 format!("User '{name}' is already a member of another team"),
             ),
+            ServiceError::TeamSizeExceeded { expected, actual } => (
+                StatusCode::BAD_REQUEST,
+                format!("Team size is {actual} which exceeds the limit of {expected}"),
+            ),
             ServiceError::CannotUnassignAllAdmins { resource, id } => (
                 StatusCode::BAD_REQUEST,
                 format!("Cannot unassign all admins from {resource} '{id}'"),

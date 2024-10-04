@@ -36,6 +36,7 @@ impl AuthorizationService {
         roles: TeamRolesMap,
     ) -> ServiceResult<u64> {
         let team = self.db_repo.get_team(team_id).await?;
+        let event = self.db_repo.get_event(team.event_id).await?;
 
         let mut active_role_assignments = Vec::new();
 
@@ -58,8 +59,8 @@ impl AuthorizationService {
                     db_team_role_assignment::Column::TeamId,
                     db_team_role_assignment::Column::Role,
                 ])
-                .do_nothing()
-                .to_owned(),
+                    .do_nothing()
+                    .to_owned(),
             )
             .on_empty_do_nothing()
             .exec_without_returning(&txn)
@@ -86,6 +87,20 @@ impl AuthorizationService {
             txn.rollback().await?;
             return Err(ServiceError::UserIsAlreadyMemberOfAnotherTeam {
                 name: conflicting_user.name,
+            });
+        }
+
+        // Ensure that max_team_size is not exceeded
+        let team_size = db_team_role_assignment::Entity::find()
+            .filter(db_team_role_assignment::Column::TeamId.eq(team_id))
+            .filter(db_team_role_assignment::Column::Role.eq(TeamRole::Member))
+            .count(&txn)
+            .await?;
+
+        if team_size > event.max_team_size as u64 {
+            return Err(ServiceError::TeamSizeExceeded {
+                expected: event.max_team_size as usize,
+                actual: team_size as usize,
             });
         }
 

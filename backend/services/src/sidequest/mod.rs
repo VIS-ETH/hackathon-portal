@@ -330,7 +330,7 @@ impl SidequestService {
         for result in &results {
             // WARN: to_string() is a big hack since f64 doesn't implement Eq
             result_to_score.insert(result.best_result.to_string(), current_score);
-            current_score -= 1;
+            current_score = current_score.saturating_sub(1); // Clamp to 0, avoid overflow
         }
 
         let mut user_scores = HashMap::new();

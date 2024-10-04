@@ -20,6 +20,11 @@ pub enum ServiceError {
         name: String,
     },
 
+    TeamSizeExceeded {
+        expected: usize,
+        actual: usize,
+    },
+
     CannotUnassignAllAdmins {
         resource: String,
         id: String,
