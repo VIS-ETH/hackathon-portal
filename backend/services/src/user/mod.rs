@@ -25,6 +25,11 @@ impl UserService {
     ) -> ServiceResult<User> {
         let user = self.db_repo.get_user_by_auth_id(auth_id).await.ok();
 
+        let name = match name {
+            None | Some("") => None,
+            Some(name) => Some(name),
+        };
+
         if let Some(user) = user {
             if let Some(name) = name {
                 if user.name != name {
