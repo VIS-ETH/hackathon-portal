@@ -2,79 +2,79 @@ version: "3"
 services:
   db:
     image: postgres:16
-    container_name: hackd_db
-    command: postgres -c 'log_statement=all'
+    container_name: portal_db
+    command: postgres # -c 'log_statement=all'
     env_file:
-      - stack.env
+      - .env
     volumes:
-      - hackd_db:/var/lib/postgresql/data
+      - portal_db:/var/lib/postgresql/data
     networks:
-      - hackd_private
-    ports:
-      - 5432:5432 # TODO: remove this in production
+      - portal_private
+    ports: # remove in prod
+      - 5432:5432 # remove in prod
     restart: unless-stopped
 
-  # backend:
-  #   container_name: hackd_backend
-  #   build:
-  #     context: backend
-  #     dockerfile: Dockerfile
-  #   env_file:
-  #     - stack.env
-  #   networks:
-  #     - hackd_public
-  #     - hackd_private
-  #   ports:
-  #     - 8000:8000
-  #   labels:
-  #     traefik.enable: true
-  #     traefik.docker.network: hackd_public
-  #
-  #     traefik.http.routers.hackd_backend.rule: PathPrefix(`/api`)
-  #     traefik.http.services.hackd_backend.loadbalancer.server.port: 8000
-  #   depends_on:
-  #     - db
-  #   restart: unless-stopped
+  backend:
+    container_name: portal_backend
+    build:
+      context: backend
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    networks:
+      - portal_public
+      - portal_private
+    expose:
+      - 8080
+    labels:
+      traefik.enable: true
+      traefik.docker.network: portal_public
+
+      traefik.http.routers.portal_backend.rule: PathPrefix(`/api`)
+      traefik.http.services.portal_backend.loadbalancer.server.port: 8080
+    depends_on:
+      - db
+    restart: unless-stopped
 
   frontend:
-    container_name: hackd_frontend
+    container_name: portal_frontend
     build:
       context: frontend
       dockerfile: Dockerfile
     networks:
-      - hackd_public
-    ports:
-      - 3000:3000
+      - portal_public
+    expose:
+      - 3000
     labels:
       traefik.enable: true
-      traefik.http.routers.hackd_frontend.rule: PathPrefix(`/`)
-      traefik.http.services.hackd_frontend.loadbalancer.server.port: 3000
-    # depends_on:
-    #   - backend
+      traefik.http.routers.portal_frontend.rule: PathPrefix(`/`)
+      traefik.http.services.portal_frontend.loadbalancer.server.port: 3000
+    depends_on:
+      - backend
     restart: unless-stopped
 
   traefik:
-    container_name: hackd_traefik
+    container_name: portal_traefik
     image: traefik
     command:
       - --api.insecure=true
       - --providers.docker=true
       - --entrypoints.web.address=:80
     networks:
-      - hackd_public
+      - portal_public
     ports:
       - 80:80
-      - 8080:8080 # TODO: remove this in production
+      - 8080:8080 # remove in prod
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     restart: unless-stopped
 
 volumes:
-  hackd_db:
+  portal_db:
     external: true
 
 networks:
-  hackd_public:
+  portal_public:
     external: true
-  hackd_private:
+  portal_private:
     external: true

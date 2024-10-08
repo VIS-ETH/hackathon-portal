@@ -1,0 +1,29 @@
+FROM rust:slim-bookworm as builder
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y \
+    libssl-dev \
+    pkg-config \
+    curl \
+    ca-certificates
+
+COPY . .
+
+RUN cargo build --package api --release
+
+#############################
+
+FROM debian:bookworm-slim as runtime
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y \
+    libssl-dev \
+    pkg-config \
+    curl \
+    ca-certificates
+
+COPY --from=builder /app/target/release/api /app/api
+
+CMD ["/app/api"]
