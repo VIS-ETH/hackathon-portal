@@ -289,11 +289,11 @@ impl SidequestService {
         Ok(cooldown)
     }
 
-    /// `sidequest_id` -> (`user_id` -> `score`)
+    /// `sidequest_id` -> (`user_id` -> (`score`, `result`))
     async fn aggregate_sidequest_scores_by_user(
         &self,
         sidequest: &Sidequest,
-    ) -> ServiceResult<HashMap<Uuid, u64>> {
+    ) -> ServiceResult<HashMap<Uuid, (u64, f64)>> {
         #[derive(FromQueryResult)]
         struct UserResult {
             user_id: Uuid,
@@ -338,7 +338,7 @@ impl SidequestService {
         for result in results {
             user_scores.insert(
                 result.user_id,
-                result_to_score[&result.best_result.to_string()],
+                (result_to_score[&result.best_result.to_string()], result.best_result),
             );
         }
 
@@ -362,7 +362,7 @@ impl SidequestService {
                 .await?;
 
             for member in &members {
-                if let Some(score) = user_scores.get(&member.id) {
+                if let Some((score, _)) = user_scores.get(&member.id) {
                     *team_scores.entry(team.id).or_insert(0.0) += *score as f64;
                 }
             }
@@ -505,13 +505,14 @@ impl SidequestService {
 
         let mut entries = scores
             .into_iter()
-            .filter_map(|(user_id, score)| {
+            .filter_map(|(user_id, (score, result))| {
                 let user = user_mapping.get(&user_id)?;
 
                 Some(UserLeaderboardEntry {
                     user_id,
                     user_name: user.name.clone(),
                     score,
+                    result,
                 })
             })
             .collect::<Vec<_>>();
