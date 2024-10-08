@@ -1,3 +1,4 @@
+import NoEntriesTr from "../NoEntriesTr";
 import AttemptsTableRow from "./AttemptsTableRow";
 import CooldownText from "./CooldownText";
 
@@ -76,14 +77,18 @@ const AttemptsTableForParticipant = ({
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
-                {attempts.map((attempt) => (
-                  <AttemptsTableRow
-                    key={objectHash(attempt)}
-                    eventId={eventId}
-                    attempt={attempt}
-                    refetch={refetchAttempts}
-                  />
-                ))}
+                {attempts.length ? (
+                  attempts.map((attempt) => (
+                    <AttemptsTableRow
+                      key={objectHash(attempt)}
+                      eventId={eventId}
+                      attempt={attempt}
+                      refetch={refetchAttempts}
+                    />
+                  ))
+                ) : (
+                  <NoEntriesTr colSpan={4} />
+                )}
               </Table.Tbody>
             </Table>
           </Table.ScrollContainer>

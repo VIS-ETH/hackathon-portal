@@ -1,30 +1,17 @@
+import EventAffiliateSelect from "../select/EventAffiliateSelect";
+
 import {
   useDeleteTeam,
   useDeleteTeamRoles,
-  useGetEventAffiliates,
   useGetTeamAffiliates,
   usePutTeamRoles,
 } from "@/api/gen";
-import { EventRole, Team, TeamRole } from "@/api/gen/schemas";
-import {
-  cardProps,
-  iconProps,
-  inputProps,
-  secondaryButtonProps,
-} from "@/styles/common";
+import { EventAffiliate, EventRole, Team, TeamRole } from "@/api/gen/schemas";
+import { cardProps, iconProps, secondaryButtonProps } from "@/styles/common";
 
 import { useState } from "react";
 
-import {
-  Button,
-  Card,
-  Group,
-  Select,
-  SelectProps,
-  Stack,
-  Text,
-  Title,
-} from "@mantine/core";
+import { Button, Card, Group, Stack, Text, Title } from "@mantine/core";
 
 import { IconPlus, IconX } from "@tabler/icons-react";
 
@@ -34,13 +21,11 @@ type TeamMembersInputProps = {
 };
 
 const TeamMembersInput = ({ team, refetch }: TeamMembersInputProps) => {
-  const [selectedUserId, setSelectedUserId] = useState<string | null>();
+  const [selectedParticipant, setSelectedParticipant] = useState<
+    EventAffiliate | undefined
+  >();
 
-  const { data: participants } = useGetEventAffiliates(team.event_id, {
-    role: EventRole.Participant,
-  });
-
-  const { data: members, refetch: refetchMembers } = useGetTeamAffiliates(
+  const { data: members = [], refetch: refetchMembers } = useGetTeamAffiliates(
     team.id,
     {
       role: TeamRole.Member,
@@ -52,7 +37,7 @@ const TeamMembersInput = ({ team, refetch }: TeamMembersInputProps) => {
   const deleteTeamMutation = useDeleteTeam();
 
   const handleAdd = async () => {
-    const userId = selectedUserId;
+    const userId = selectedParticipant?.id;
 
     if (!userId) {
       return;
@@ -65,7 +50,7 @@ const TeamMembersInput = ({ team, refetch }: TeamMembersInputProps) => {
       },
     });
 
-    setSelectedUserId(null);
+    setSelectedParticipant(undefined);
     refetchMembers();
     refetch?.();
   };
@@ -93,27 +78,23 @@ const TeamMembersInput = ({ team, refetch }: TeamMembersInputProps) => {
       <Title order={3}>Team Members</Title>
       <Card {...cardProps} style={{ borderStyle: "dashed" }}>
         <Group justify="space-between">
-          <Select
-            {...(inputProps as SelectProps)}
-            data={participants?.map((participant) => ({
-              value: participant.id,
-              label: participant.name,
-            }))}
-            value={selectedUserId}
-            onChange={(value) => setSelectedUserId(value)}
-            placeholder="Select a participant"
-            searchable
+          <EventAffiliateSelect
+            eventId={team.event_id}
+            role={EventRole.Participant}
+            affiliateId={selectedParticipant?.id}
+            setAffiliate={setSelectedParticipant}
           />
           <Button
             {...secondaryButtonProps}
             leftSection={<IconPlus {...iconProps} />}
+            disabled={!selectedParticipant}
             onClick={handleAdd}
           >
             Add
           </Button>
         </Group>
       </Card>
-      {members?.map((member) => (
+      {members.map((member) => (
         <Card key={member.id} {...cardProps}>
           <Group justify="space-between">
             <Text fw={600}>{member.name}</Text>

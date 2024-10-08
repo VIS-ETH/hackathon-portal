@@ -1,4 +1,5 @@
 import IconTextGroup from "../IconTextGroup";
+import NoEntriesTr from "../NoEntriesTr";
 import EventAffiliatesTableRow from "./EventAffiliatesTableRow";
 
 import { useGetEventAffiliates } from "@/api/gen";
@@ -20,7 +21,7 @@ import {
   Group,
   SegmentedControl,
   Table,
-  Text
+  Text,
 } from "@mantine/core";
 
 import { IconAlertTriangle, IconRefresh } from "@tabler/icons-react";
@@ -104,15 +105,19 @@ const EventAffiliatesTable = ({ event }: EventAffiliatesTableProps) => {
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-              {filteredAffiliates.map((affiliate) => (
-                <EventAffiliatesTableRow
-                  key={objectHash(affiliate)}
-                  event={event}
-                  affiliate={affiliate}
-                  unsafe={unsafe}
-                  refetch={refetchAffiliates}
-                />
-              ))}
+              {filteredAffiliates.length ? (
+                filteredAffiliates.map((affiliate) => (
+                  <EventAffiliatesTableRow
+                    key={objectHash(affiliate)}
+                    event={event}
+                    affiliate={affiliate}
+                    unsafe={unsafe}
+                    refetch={refetchAffiliates}
+                  />
+                ))
+              ) : (
+                <NoEntriesTr colSpan={Object.values(EventRole).length + 1} />
+              )}
             </Table.Tbody>
           </Table>
         </Table.ScrollContainer>

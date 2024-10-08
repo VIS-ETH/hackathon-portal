@@ -1,5 +1,6 @@
 import BadgeArray from "../BadgeArray";
-import MentorSelect from "./MentorSelect";
+import EventAffiliateSelect from "../select/EventAffiliateSelect";
+import ProjectSelect from "../select/ProjectSelect";
 
 import {
   useDeleteTeam,
@@ -23,13 +24,10 @@ import {
 import { iconProps, inputProps, secondaryButtonProps } from "@/styles/common";
 import { resizeArray } from "@/utils";
 
-
 import {
   Button,
   PasswordInput,
   PasswordInputProps,
-  Select,
-  SelectProps,
   Table,
   Text,
   TextInput,
@@ -51,7 +49,7 @@ const TeamsTableRow = ({
   proposedProjectId,
   refetch,
 }: TeamsTableRowProps) => {
-  const { data: projects } = useGetProjects({
+  const { data: projects = [] } = useGetProjects({
     event_id: event.id,
   });
 
@@ -71,7 +69,7 @@ const TeamsTableRow = ({
 
   const ppsArray = pps?.project_preferences.map((pp) => ({
     id: pp,
-    name: projects?.find((p) => p.id === pp)?.name ?? "",
+    name: projects.find((p) => p.id === pp)?.name ?? "Unknown",
   }));
 
   const members = affiliates.filter((affiliate) =>
@@ -164,31 +162,26 @@ const TeamsTableRow = ({
   );
 
   const projectTd = (
-    <Select
-      {...(inputProps as SelectProps)}
-      size="xs"
-      data={projects?.map((project) => ({
-        label: project.name,
-        value: project.id,
-      }))}
-      clearable
-      value={team.project_id}
-      onChange={async (value) => {
-        await updateTeamProjectMutation.mutateAsync({
+    <ProjectSelect
+      eventId={event.id}
+      projectId={team.project_id ?? undefined}
+      setProject={(project) => {
+        updateTeamProjectMutation.mutate({
           teamId: team.id,
           data: {
-            project_id: value,
+            project_id: project?.id,
           },
         });
 
         refetch?.();
       }}
+      size="xs"
     />
   );
 
   const proposedProjectTd = (
     <Text>
-      {projects?.find((project) => project.id === proposedProjectId)?.name}
+      {projects.find((project) => project.id === proposedProjectId)?.name}
     </Text>
   );
 
@@ -252,12 +245,14 @@ const TeamsTableRow = ({
       </Table.Td>
       {mentors.map((mentor, index) => (
         <Table.Td key={`${mentor?.id} ${index}`}>
-          <MentorSelect
-            team={team}
-            mentor={mentor}
-            setMentorId={(mentorId) => {
-              handleUpdateMentors(mentorId, index);
+          <EventAffiliateSelect
+            eventId={event.id}
+            affiliateId={mentor?.id}
+            setAffiliate={(mentor) => {
+              handleUpdateMentors(mentor?.id, index);
             }}
+            role={TeamRole.Mentor}
+            size="xs"
           />
         </Table.Td>
       ))}

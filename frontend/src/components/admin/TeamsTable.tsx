@@ -1,4 +1,5 @@
 import IconTextGroup from "../IconTextGroup";
+import NoEntriesTr from "../NoEntriesTr";
 import TeamsTableRow from "./TeamsTableRow";
 
 import { useGetProjectsMatching, useGetTeams, useIndexTeams } from "@/api/gen";
@@ -18,7 +19,7 @@ import {
   IconAlertTriangle,
   IconLine,
   IconListNumbers,
-  IconRefresh
+  IconRefresh,
 } from "@tabler/icons-react";
 
 type TeamsTableProps = {
@@ -28,7 +29,7 @@ type TeamsTableProps = {
 const TeamsTable = ({ event }: TeamsTableProps) => {
   const [getMatchingEnabled, setGetMatchingEnabled] = useState(false);
 
-  const { data: teams, refetch: refetchTeams } = useGetTeams({
+  const { data: teams = [], refetch: refetchTeams } = useGetTeams({
     event_id: event.id,
   });
 
@@ -122,15 +123,19 @@ const TeamsTable = ({ event }: TeamsTableProps) => {
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
-                {teams?.map((team) => (
-                  <TeamsTableRow
-                    key={team.id}
-                    event={event}
-                    team={team}
-                    proposedProjectId={projectsMatching?.[team.id]}
-                    refetch={refetchTeams}
-                  />
-                ))}
+                {teams.length ? (
+                  teams.map((team) => (
+                    <TeamsTableRow
+                      key={team.id}
+                      event={event}
+                      team={team}
+                      proposedProjectId={projectsMatching?.[team.id]}
+                      refetch={refetchTeams}
+                    />
+                  ))
+                ) : (
+                  <NoEntriesTr colSpan={9} />
+                )}
               </Table.Tbody>
             </Table>
           </Table.ScrollContainer>

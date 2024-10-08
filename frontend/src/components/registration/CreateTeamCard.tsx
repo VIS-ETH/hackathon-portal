@@ -34,8 +34,8 @@ const CreateTeamCard = ({ eventId, refetch }: CreateTeamProps) => {
         <Center>
           <Stack gap="lg">
             <Text>
-              You don&apos;t seem to be part of any team yet. If you already have a
-              group, you can ask your partners to invite you.
+              You don&apos;t seem to be part of any team yet. If you already
+              have a group, you can ask your partners to invite you.
             </Text>
             <Text>Otherwise, you can create a new team.</Text>
           </Stack>

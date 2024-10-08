@@ -26,7 +26,7 @@ const HistoryChart = ({ eventId }: HistoryChartProps) => {
     return {
       name: teams.find((team) => team.id === teamId)?.name ?? "Unknown",
       data: entries.map((entry) => {
-        return { x: `${entry.date}Z`, y: entry.score };
+        return { x: `${entry.date}Z`, y: Math.round(entry.score * 10) / 10 };
       }),
     };
   });

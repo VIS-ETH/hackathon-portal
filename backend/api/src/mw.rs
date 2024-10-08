@@ -22,11 +22,16 @@ pub async fn mw_impersonate(mut req: Request<Body>, next: Next) -> ApiResult<Res
         "Impersonation middleware is only available in debug mode."
     );
 
-    let target_auth_id = "hannes.eberhard@hotmail.com";
+    let target_auth_id = "heberhard@ethz.ch";
+    let target_username = "heberhard";
     let target_name = "Hannes Eberhard";
 
     req.headers_mut()
         .insert(AUTH_ID_KEY, HeaderValue::from_str(target_auth_id)?);
+
+    req.headers_mut()
+        .insert(USERNAME_KEY, HeaderValue::from_str(target_username)?);
+
     req.headers_mut()
         .insert(NAME_KEY, HeaderValue::from_str(target_name)?);
 
@@ -103,6 +108,10 @@ fn extract_header(headers: &HeaderMap, key: &str) -> Option<String> {
         .map(String::from)
 }
 
+
+/// Ensures that all ETH email addresses are normalized to the following format:
+/// `username@ethz.ch` (in contrast to e.g. `username@student.ethz.ch`, `first.last@inf.ethz.ch` etc.)
+/// Assumes that the ETH usernames are unique and stable.
 fn normalize_auth_id(auth_id: &str, username: &str) -> String {
     let auth_id = auth_id.to_lowercase();
     let username = username.to_lowercase();

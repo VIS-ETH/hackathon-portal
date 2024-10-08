@@ -1,7 +1,9 @@
+import NoEntriesTr from "../NoEntriesTr";
+
 import { useGetSidequestsOverviewLeaderboard } from "@/api/gen";
 import { cardProps } from "@/styles/common";
 
-import { Card, Table, Text } from "@mantine/core";
+import { Card, Table } from "@mantine/core";
 
 type OverviewLeaderboardTableProps = {
   eventId: string;
@@ -33,13 +35,7 @@ const OverviewLeaderboardTable = ({
                   </Table.Tr>
                 ))
               ) : (
-                <Table.Tr>
-                  <Table.Td colSpan={2}>
-                    <Text ta="center" size="sm" c="dimmed">
-                      No entries yet
-                    </Text>
-                  </Table.Td>
-                </Table.Tr>
+                <NoEntriesTr colSpan={2} />
               )}
             </Table.Tbody>
           </Table>

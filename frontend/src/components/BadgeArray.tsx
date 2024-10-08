@@ -1,8 +1,6 @@
 import BadgeArrayItem, { IdName } from "./BadgeArrayItem";
 
-
 import { Stack } from "@mantine/core";
-
 
 type BadgeArrayProps = {
   data?: IdName[];

@@ -1,4 +1,3 @@
-
 import ReactMarkdown from "react-markdown";
 
 import { Box } from "@mantine/core";

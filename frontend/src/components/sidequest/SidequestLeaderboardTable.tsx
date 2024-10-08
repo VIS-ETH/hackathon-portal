@@ -1,8 +1,10 @@
+import NoEntriesTr from "../NoEntriesTr";
+
 import { useGetSidequestsUserLeaderboard } from "@/api/gen";
 import { Sidequest } from "@/api/gen/schemas";
 import { cardProps } from "@/styles/common";
 
-import { Card, Table, Text } from "@mantine/core";
+import { Card, Table } from "@mantine/core";
 
 type SidequestLeaderboardTableProps = {
   sidequest: Sidequest;
@@ -40,13 +42,7 @@ const SidequestLeaderboardTable = ({
                   </Table.Tr>
                 ))
               ) : (
-                <Table.Tr>
-                  <Table.Td colSpan={3}>
-                    <Text ta="center" size="sm" c="dimmed">
-                      No entries yet
-                    </Text>
-                  </Table.Td>
-                </Table.Tr>
+                <NoEntriesTr colSpan={3} />
               )}
             </Table.Tbody>
           </Table>

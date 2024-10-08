@@ -1,32 +1,22 @@
+import NoEntriesTr from "../NoEntriesTr";
+import EventAffiliateSelect from "../select/EventAffiliateSelect";
+import SidequestSelect from "../select/SidequestSelect";
+import TeamSelect from "../select/TeamSelect";
 import AttemptsTableRow from "./AttemptsTableRow";
 import CreateAttemptDrawer from "./CreateAttemptDrawer";
 
-import {
-  useGetEventAffiliates,
-  useGetSidequestAttempts,
-  useGetSidequests,
-  useGetTeams,
-} from "@/api/gen";
-import { EventRole } from "@/api/gen/schemas";
+import { useGetSidequestAttempts } from "@/api/gen";
+import { EventAffiliate, EventRole, Sidequest, Team } from "@/api/gen/schemas";
 import {
   cardProps,
   cardSectionProps,
   iconProps,
-  inputProps,
   secondaryButtonProps,
 } from "@/styles/common";
 
 import { useState } from "react";
 
-import {
-  Button,
-  Card,
-  Group,
-  Select,
-  SelectProps,
-  Stack,
-  Table,
-} from "@mantine/core";
+import { Button, Card, Group, Stack, Table } from "@mantine/core";
 
 import { useDisclosure } from "@mantine/hooks";
 
@@ -41,28 +31,19 @@ const AttemptsTableForSidequestMaster = ({
   eventId,
 }: AttemptsTableForSidequestMasterProps) => {
   const [createAttemptOpened, createAttemptHandles] = useDisclosure();
-  const [sidequestFilter, setSidequestFilter] = useState<string | null>(null);
-  const [teamFilter, setTeamFilter] = useState<string | null>(null);
-  const [userFilter, setUserFilter] = useState<string | null>(null);
 
-  const { data: sidequests = [] } = useGetSidequests({
-    event_id: eventId,
-  });
-
-  const { data: teams = [] } = useGetTeams({
-    event_id: eventId,
-  });
-
-  const { data: participants = [] } = useGetEventAffiliates(eventId, {
-    role: EventRole.Participant,
-  });
+  const [sidequestFilter, setSidequestFilter] = useState<
+    Sidequest | undefined
+  >();
+  const [teamFilter, setTeamFilter] = useState<Team | undefined>();
+  const [userFilter, setUserFilter] = useState<EventAffiliate | undefined>();
 
   const { data: attempts = [], refetch: refetchAttempts } =
     useGetSidequestAttempts({
       event_id: eventId,
-      sidequest_id: sidequestFilter,
-      team_id: teamFilter,
-      user_id: userFilter,
+      sidequest_id: sidequestFilter?.id,
+      team_id: teamFilter?.id,
+      user_id: userFilter?.id,
     });
 
   return (
@@ -89,56 +70,36 @@ const AttemptsTableForSidequestMaster = ({
             >
               Refresh
             </Button>
-            <Select
-              {...(inputProps as SelectProps)}
-              size="sm"
-              data={sidequests.map((sidequest) => ({
-                label: sidequest.name,
-                value: sidequest.id,
-              }))}
-              value={sidequestFilter}
-              onChange={(value) => {
-                setSidequestFilter(value);
-                setTeamFilter(null);
-                setUserFilter(null);
+            <SidequestSelect
+              eventId={eventId}
+              sidequestId={sidequestFilter?.id}
+              setSidequest={(sidequest) => {
+                setSidequestFilter(sidequest);
+                setTeamFilter(undefined);
+                setUserFilter(undefined);
               }}
-              placeholder="Filter by sidequest"
-              searchable
-              clearable
+              size="sm"
             />
-            <Select
-              {...(inputProps as SelectProps)}
-              size="sm"
-              data={teams.map((team) => ({
-                label: team.name,
-                value: team.id,
-              }))}
-              value={teamFilter}
-              onChange={(value) => {
-                setSidequestFilter(null);
-                setTeamFilter(value);
-                setUserFilter(null);
+            <TeamSelect
+              eventId={eventId}
+              teamId={teamFilter?.id}
+              setTeam={(team) => {
+                setSidequestFilter(undefined);
+                setTeamFilter(team);
+                setUserFilter(undefined);
               }}
-              placeholder="Filter by team"
-              searchable
-              clearable
+              size="sm"
             />
-            <Select
-              {...(inputProps as SelectProps)}
-              size="sm"
-              data={participants.map((participant) => ({
-                label: participant.name,
-                value: participant.id,
-              }))}
-              value={userFilter}
-              onChange={(value) => {
-                setSidequestFilter(null);
-                setTeamFilter(null);
-                setUserFilter(value);
+            <EventAffiliateSelect
+              eventId={eventId}
+              affiliateId={userFilter?.id}
+              setAffiliate={(affiliate) => {
+                setSidequestFilter(undefined);
+                setTeamFilter(undefined);
+                setUserFilter(affiliate);
               }}
-              placeholder="Filter by user"
-              searchable
-              clearable
+              role={EventRole.Participant}
+              size="sm"
             />
           </Group>
         </Card.Section>
@@ -156,16 +117,20 @@ const AttemptsTableForSidequestMaster = ({
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
-                {attempts.map((attempt) => (
-                  <AttemptsTableRow
-                    key={objectHash(attempt)}
-                    eventId={eventId}
-                    attempt={attempt}
-                    withUserName
-                    manage
-                    refetch={refetchAttempts}
-                  />
-                ))}
+                {attempts.length ? (
+                  attempts.map((attempt) => (
+                    <AttemptsTableRow
+                      key={objectHash(attempt)}
+                      eventId={eventId}
+                      attempt={attempt}
+                      withUserName
+                      manage
+                      refetch={refetchAttempts}
+                    />
+                  ))
+                ) : (
+                  <NoEntriesTr colSpan={6} />
+                )}
               </Table.Tbody>
             </Table>
           </Table.ScrollContainer>

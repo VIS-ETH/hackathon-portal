@@ -1,8 +1,5 @@
 import { Event } from "@/api/gen/schemas";
-import {
-  cardProps,
-  iconProps
-} from "@/styles/common";
+import { cardProps, iconProps } from "@/styles/common";
 
 import { Card, Group, Text } from "@mantine/core";
 

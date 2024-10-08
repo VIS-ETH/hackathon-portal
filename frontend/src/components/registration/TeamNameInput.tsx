@@ -1,11 +1,6 @@
-import {
-  useUpdateTeam
-} from "@/api/gen";
+import { useUpdateTeam } from "@/api/gen";
 import { Team } from "@/api/gen/schemas";
-import {
-  inputProps,
-  primaryButtonProps
-} from "@/styles/common";
+import { inputProps, primaryButtonProps } from "@/styles/common";
 
 import { useEffect, useState } from "react";
 
@@ -15,9 +10,8 @@ import {
   Stack,
   TextInput,
   TextInputProps,
-  Title
+  Title,
 } from "@mantine/core";
-
 
 type TeamNameInputProps = {
   team: Team;

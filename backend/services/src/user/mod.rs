@@ -78,6 +78,8 @@ impl UserService {
         Ok(user.into())
     }
 
+    /// This updates the user's name (not username).
+    /// If the name is already taken, the index will be set accordingly.
     pub async fn update_user_name(&self, user_id: Uuid, name: &str) -> ServiceResult<User> {
         let user = self.db_repo.get_user(user_id).await?;
         let txn = self.db_repo.conn().begin().await?;
