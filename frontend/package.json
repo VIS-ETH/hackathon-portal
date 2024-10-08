@@ -48,7 +48,6 @@
     "yaml": "^2.5.1"
   },
   "devDependencies": {
-    "@tanstack/react-query": "^5.56.2",
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
     "@types/node": "^20",
     "@types/react": "^18",
