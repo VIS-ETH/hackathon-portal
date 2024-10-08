@@ -94,6 +94,7 @@ pub struct UserLeaderboardEntry {
     pub user_id: Uuid,
     pub user_name: String,
     pub score: u64,
+    pub result: f64,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]

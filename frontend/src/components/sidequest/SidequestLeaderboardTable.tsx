@@ -26,6 +26,7 @@ const SidequestLeaderboardTable = ({
             <Table.Thead>
               <Table.Tr>
                 <Table.Th>User</Table.Th>
+                <Table.Th>Result</Table.Th>
                 <Table.Th>Score</Table.Th>
               </Table.Tr>
             </Table.Thead>
@@ -34,12 +35,13 @@ const SidequestLeaderboardTable = ({
                 leaderboard.map((entry) => (
                   <Table.Tr key={entry.user_id}>
                     <Table.Td>{entry.user_name}</Table.Td>
+                    <Table.Td>{entry.result}</Table.Td>
                     <Table.Td>{entry.score}</Table.Td>
                   </Table.Tr>
                 ))
               ) : (
                 <Table.Tr>
-                  <Table.Td colSpan={2}>
+                  <Table.Td colSpan={3}>
                     <Text ta="center" size="sm" c="dimmed">
                       No entries yet
                     </Text>
