@@ -13,7 +13,7 @@ pub type EventRolesMap = ResourceRolesMap<EventRole>;
 pub type TeamRoles = ResourceRoles<TeamRole>;
 pub type TeamRolesMap = ResourceRolesMap<TeamRole>;
 
-#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct UserRoles {
     pub event: EventRolesMap,
     pub team: TeamRolesMap,

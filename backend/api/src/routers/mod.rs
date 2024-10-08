@@ -37,8 +37,10 @@ pub async fn get_api_router(api_state: ApiState) -> ApiResult<Router> {
     let origins = if cfg!(debug_assertions) {
         vec![
             "http://127.0.0.1:3000".parse()?,
+            "http://127.0.0.1:3001".parse()?,
             "http://127.0.0.1:8080".parse()?,
             "http://localhost:3000".parse()?,
+            "http://localhost:3001".parse()?,
             "http://localhost:8080".parse()?,
         ]
     } else {

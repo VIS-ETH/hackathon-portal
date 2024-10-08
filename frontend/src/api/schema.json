@@ -3,20 +3,12 @@
   "info": {
     "title": "api",
     "description": "",
-    "license": {
-      "name": ""
-    },
+    "license": { "name": "" },
     "version": "0.1.0"
   },
   "servers": [
-    {
-      "url": "http://localhost:8080",
-      "description": "Dev server"
-    },
-    {
-      "url": "https://hack.ethz.ch",
-      "description": "Prod server"
-    }
+    { "url": "http://localhost:8080", "description": "Dev server" },
+    { "url": "https://hack.ethz.ch", "description": "Prod server" }
   ],
   "paths": {
     "/api/appointments": {
@@ -29,10 +21,7 @@
             "in": "query",
             "description": "Filter by event id",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
@@ -42,9 +31,7 @@
               "application/json": {
                 "schema": {
                   "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Appointment"
-                  }
+                  "items": { "$ref": "#/components/schemas/Appointment" }
                 }
               }
             }
@@ -53,9 +40,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicError"
-                }
+                "schema": { "$ref": "#/components/schemas/PublicError" }
               }
             }
           }
@@ -68,9 +53,7 @@
           "description": "",
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AppointmentForCreate"
-              }
+              "schema": { "$ref": "#/components/schemas/AppointmentForCreate" }
             }
           },
           "required": true
@@ -80,9 +63,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Appointment"
-                }
+                "schema": { "$ref": "#/components/schemas/Appointment" }
               }
             }
           },
@@ -90,9 +71,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicError"
-                }
+                "schema": { "$ref": "#/components/schemas/PublicError" }
               }
             }
           }
@@ -108,10 +87,7 @@
             "name": "appointment_id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
@@ -119,9 +95,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Appointment"
-                }
+                "schema": { "$ref": "#/components/schemas/Appointment" }
               }
             }
           },
@@ -129,9 +103,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicError"
-                }
+                "schema": { "$ref": "#/components/schemas/PublicError" }
               }
             }
           }
@@ -145,10 +117,7 @@
             "name": "appointment_id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
@@ -156,9 +125,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Appointment"
-                }
+                "schema": { "$ref": "#/components/schemas/Appointment" }
               }
             }
           },
@@ -166,9 +133,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicError"
-                }
+                "schema": { "$ref": "#/components/schemas/PublicError" }
               }
             }
           }
@@ -182,19 +147,14 @@
             "name": "appointment_id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "requestBody": {
           "description": "",
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AppointmentForUpdate"
-              }
+              "schema": { "$ref": "#/components/schemas/AppointmentForUpdate" }
             }
           },
           "required": true
@@ -204,9 +164,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Appointment"
-                }
+                "schema": { "$ref": "#/components/schemas/Appointment" }
               }
             }
           },
@@ -214,9 +172,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicError"
-                }
+                "schema": { "$ref": "#/components/schemas/PublicError" }
               }
             }
           }
@@ -234,9 +190,7 @@
               "application/json": {
                 "schema": {
                   "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/EventDTO"
-                  }
+                  "items": { "$ref": "#/components/schemas/Event" }
                 }
               }
             }
@@ -245,9 +199,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicError"
-                }
+                "schema": { "$ref": "#/components/schemas/PublicError" }
               }
             }
           }
@@ -267,9 +219,7 @@
                   "type": "object",
                   "additionalProperties": {
                     "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/EventRole"
-                    },
+                    "items": { "$ref": "#/components/schemas/EventRole" },
                     "uniqueItems": true
                   }
                 }
@@ -280,9 +230,39 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicError"
-                }
+                "schema": { "$ref": "#/components/schemas/PublicError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/events/slug/{event_slug}": {
+      "get": {
+        "tags": ["crate::routers::events"],
+        "operationId": "get_event_by_slug",
+        "parameters": [
+          {
+            "name": "event_slug",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Event" }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
               }
             }
           }
@@ -298,10 +278,7 @@
             "name": "event_id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
@@ -309,9 +286,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EventDTO"
-                }
+                "schema": { "$ref": "#/components/schemas/Event" }
               }
             }
           },
@@ -319,9 +294,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicError"
-                }
+                "schema": { "$ref": "#/components/schemas/PublicError" }
               }
             }
           }
@@ -329,25 +302,20 @@
       },
       "patch": {
         "tags": ["crate::routers::events"],
-        "operationId": "patch_event",
+        "operationId": "update_event",
         "parameters": [
           {
             "name": "event_id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "requestBody": {
           "description": "",
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/EventForPatch"
-              }
+              "schema": { "$ref": "#/components/schemas/EventForUpdate" }
             }
           },
           "required": true
@@ -357,9 +325,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EventDTO"
-                }
+                "schema": { "$ref": "#/components/schemas/Event" }
               }
             }
           },
@@ -367,74 +333,33 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicError"
-                }
+                "schema": { "$ref": "#/components/schemas/PublicError" }
               }
             }
           }
         }
       }
     },
-    "/api/events/{event_id}/aggregate": {
+    "/api/events/{event_id}/affiliates": {
       "get": {
         "tags": ["crate::routers::events"],
-        "operationId": "get_aggregate_status",
+        "operationId": "get_event_affiliates",
         "parameters": [
           {
-            "name": "event_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AggregatorStatus"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": ["crate::routers::events"],
-        "operationId": "aggregate_action",
-        "parameters": [
-          {
-            "name": "aggregate_action",
+            "name": "role",
             "in": "query",
-            "description": "Action to perform on the aggregator for this event",
-            "required": true,
+            "description": "Filter by event role",
+            "required": false,
             "schema": {
-              "$ref": "#/components/schemas/AggregationAction"
+              "allOf": [{ "$ref": "#/components/schemas/EventRole" }],
+              "nullable": true
             }
           },
           {
             "name": "event_id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
@@ -443,7 +368,8 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AggregatorStatus"
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/EventAffiliate" }
                 }
               }
             }
@@ -452,9 +378,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicError"
-                }
+                "schema": { "$ref": "#/components/schemas/PublicError" }
               }
             }
           }
@@ -470,19 +394,14 @@
             "name": "event_id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "requestBody": {
           "description": "",
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/InviteUsersDTO"
-              }
+              "schema": { "$ref": "#/components/schemas/InviteUsersDTO" }
             }
           },
           "required": true
@@ -493,7 +412,8 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AffectedRowsDTO"
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/ReducedUser" }
                 }
               }
             }
@@ -502,9 +422,42 @@
             "description": "",
             "content": {
               "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/events/{event_id}/projects/matching": {
+      "get": {
+        "tags": ["crate::routers::events"],
+        "operationId": "get_projects_matching",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PublicError"
+                  "type": "object",
+                  "additionalProperties": { "type": "string", "format": "uuid" }
                 }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
               }
             }
           }
@@ -520,10 +473,7 @@
             "name": "event_id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
@@ -533,9 +483,7 @@
               "application/json": {
                 "schema": {
                   "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/EventRole"
-                  },
+                  "items": { "$ref": "#/components/schemas/EventRole" },
                   "uniqueItems": true
                 }
               }
@@ -545,9 +493,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicError"
-                }
+                "schema": { "$ref": "#/components/schemas/PublicError" }
               }
             }
           }
@@ -561,10 +507,7 @@
             "name": "event_id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "requestBody": {
@@ -575,9 +518,7 @@
                 "type": "object",
                 "additionalProperties": {
                   "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/EventRole"
-                  },
+                  "items": { "$ref": "#/components/schemas/EventRole" },
                   "uniqueItems": true
                 }
               }
@@ -590,9 +531,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AffectedRowsDTO"
-                }
+                "schema": { "$ref": "#/components/schemas/AffectedRows" }
               }
             }
           },
@@ -600,9 +539,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicError"
-                }
+                "schema": { "$ref": "#/components/schemas/PublicError" }
               }
             }
           }
@@ -616,10 +553,7 @@
             "name": "event_id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "requestBody": {
@@ -630,9 +564,7 @@
                 "type": "object",
                 "additionalProperties": {
                   "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/EventRole"
-                  },
+                  "items": { "$ref": "#/components/schemas/EventRole" },
                   "uniqueItems": true
                 }
               }
@@ -645,8 +577,66 @@
             "description": "",
             "content": {
               "application/json": {
+                "schema": { "$ref": "#/components/schemas/AffectedRows" }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/events/{event_id}/sidequests/history": {
+      "get": {
+        "tags": ["crate::routers::events"],
+        "operationId": "get_sidequests_history",
+        "parameters": [
+          {
+            "name": "after",
+            "in": "query",
+            "description": "Filter by after date",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            }
+          },
+          {
+            "name": "before",
+            "in": "query",
+            "description": "Filter by before date",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            }
+          },
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AffectedRowsDTO"
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "array",
+                    "items": { "$ref": "#/components/schemas/HistoryEntry" }
+                  }
                 }
               }
             }
@@ -655,9 +645,132 @@
             "description": "",
             "content": {
               "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/events/{event_id}/sidequests/leaderboard": {
+      "get": {
+        "tags": ["crate::routers::events"],
+        "operationId": "get_sidequests_overview_leaderboard",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PublicError"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TeamLeaderboardEntry"
+                  }
                 }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/events/{event_id}/sidequests/team-leaderboard": {
+      "get": {
+        "tags": ["crate::routers::events"],
+        "operationId": "get_sidequests_team_leaderboard",
+        "parameters": [
+          {
+            "name": "sidequest_id",
+            "in": "query",
+            "description": "Filter by sidequest id",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TeamLeaderboardEntry"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/events/{event_id}/sidequests/user-leaderboard": {
+      "get": {
+        "tags": ["crate::routers::events"],
+        "operationId": "get_sidequests_user_leaderboard",
+        "parameters": [
+          {
+            "name": "sidequest_id",
+            "in": "query",
+            "description": "Filter by sidequest id",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserLeaderboardEntry"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
               }
             }
           }
@@ -667,16 +780,13 @@
     "/api/events/{event_id}/teams/index": {
       "post": {
         "tags": ["crate::routers::events"],
-        "operationId": "update_teams_index",
+        "operationId": "index_teams",
         "parameters": [
           {
             "name": "event_id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
@@ -685,7 +795,8 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AggregatorStatus"
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Team" }
                 }
               }
             }
@@ -694,9 +805,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicError"
-                }
+                "schema": { "$ref": "#/components/schemas/PublicError" }
               }
             }
           }
@@ -713,10 +822,7 @@
             "in": "query",
             "description": "Filter by event id",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
@@ -726,9 +832,7 @@
               "application/json": {
                 "schema": {
                   "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Project"
-                  }
+                  "items": { "$ref": "#/components/schemas/Project" }
                 }
               }
             }
@@ -737,9 +841,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicError"
-                }
+                "schema": { "$ref": "#/components/schemas/PublicError" }
               }
             }
           }
@@ -752,9 +854,7 @@
           "description": "",
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ProjectForCreate"
-              }
+              "schema": { "$ref": "#/components/schemas/ProjectForCreate" }
             }
           },
           "required": true
@@ -764,9 +864,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Project"
-                }
+                "schema": { "$ref": "#/components/schemas/Project" }
               }
             }
           },
@@ -774,16 +872,14 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicError"
-                }
+                "schema": { "$ref": "#/components/schemas/PublicError" }
               }
             }
           }
         }
       }
     },
-    "/api/projects/{event_slug}/{project_slug}": {
+    "/api/projects/slug/{event_slug}/{project_slug}": {
       "get": {
         "tags": ["crate::routers::projects"],
         "operationId": "get_project_by_slug",
@@ -792,17 +888,13 @@
             "name": "event_slug",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string"
-            }
+            "schema": { "type": "string" }
           },
           {
             "name": "project_slug",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string"
-            }
+            "schema": { "type": "string" }
           }
         ],
         "responses": {
@@ -810,9 +902,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Project"
-                }
+                "schema": { "$ref": "#/components/schemas/Project" }
               }
             }
           },
@@ -820,9 +910,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicError"
-                }
+                "schema": { "$ref": "#/components/schemas/PublicError" }
               }
             }
           }
@@ -838,10 +926,7 @@
             "name": "project_id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
@@ -849,9 +934,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Project"
-                }
+                "schema": { "$ref": "#/components/schemas/Project" }
               }
             }
           },
@@ -859,9 +942,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicError"
-                }
+                "schema": { "$ref": "#/components/schemas/PublicError" }
               }
             }
           }
@@ -875,10 +956,7 @@
             "name": "project_id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
@@ -886,9 +964,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Project"
-                }
+                "schema": { "$ref": "#/components/schemas/Project" }
               }
             }
           },
@@ -896,9 +972,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicError"
-                }
+                "schema": { "$ref": "#/components/schemas/PublicError" }
               }
             }
           }
@@ -912,19 +986,14 @@
             "name": "project_id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "requestBody": {
           "description": "",
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ProjectForUpdate"
-              }
+              "schema": { "$ref": "#/components/schemas/ProjectForUpdate" }
             }
           },
           "required": true
@@ -934,8 +1003,85 @@
             "description": "",
             "content": {
               "application/json": {
+                "schema": { "$ref": "#/components/schemas/Appointment" }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sidequest-attempts": {
+      "get": {
+        "tags": ["crate::routers::sidequest_attempts"],
+        "operationId": "get_sidequest_attempts",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "query",
+            "description": "Filter by event ID",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "sidequest_id",
+            "in": "query",
+            "description": "Filter by sidequest ID",
+            "required": false,
+            "schema": { "type": "string", "format": "uuid", "nullable": true }
+          },
+          {
+            "name": "team_id",
+            "in": "query",
+            "description": "Filter by team ID",
+            "required": false,
+            "schema": { "type": "string", "format": "uuid", "nullable": true }
+          },
+          {
+            "name": "user_id",
+            "in": "query",
+            "description": "Filter by user ID",
+            "required": false,
+            "schema": { "type": "string", "format": "uuid", "nullable": true }
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "description": "Filter by attempts after this time",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            }
+          },
+          {
+            "name": "before",
+            "in": "query",
+            "description": "Filter by attempts before this time",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Project"
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Attempt" }
                 }
               }
             }
@@ -944,9 +1090,179 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicError"
-                }
+                "schema": { "$ref": "#/components/schemas/PublicError" }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["crate::routers::sidequest_attempts"],
+        "operationId": "create_sidequest_attempt",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AttemptForCreate" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Attempt" }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sidequest-attempts/cooldown": {
+      "get": {
+        "tags": ["crate::routers::sidequest_attempts"],
+        "operationId": "get_sidequest_attempt_cooldown",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "query",
+            "description": "Filter by event ID",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "user_id",
+            "in": "query",
+            "description": "Filter by user ID. Leave empty to use the current user.",
+            "required": false,
+            "schema": { "type": "string", "format": "uuid", "nullable": true }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Cooldown" }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sidequest-attempts/{sidequest_attempt_id}": {
+      "get": {
+        "tags": ["crate::routers::sidequest_attempts"],
+        "operationId": "get_sidequest_attempt",
+        "parameters": [
+          {
+            "name": "sidequest_attempt_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Attempt" }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["crate::routers::sidequest_attempts"],
+        "operationId": "delete_sidequest_attempt",
+        "parameters": [
+          {
+            "name": "sidequest_attempt_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "default": null, "nullable": true }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["crate::routers::sidequest_attempts"],
+        "operationId": "update_sidequest_attempt",
+        "parameters": [
+          {
+            "name": "sidequest_attempt_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AttemptForUpdate" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Attempt" }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
               }
             }
           }
@@ -961,12 +1277,9 @@
           {
             "name": "event_id",
             "in": "query",
-            "description": "The ID of the event to get sidequests for",
+            "description": "Filter by event ID",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
@@ -976,9 +1289,7 @@
               "application/json": {
                 "schema": {
                   "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SidequestDTO"
-                  }
+                  "items": { "$ref": "#/components/schemas/Sidequest" }
                 }
               }
             }
@@ -987,9 +1298,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicError"
-                }
+                "schema": { "$ref": "#/components/schemas/PublicError" }
               }
             }
           }
@@ -997,14 +1306,12 @@
       },
       "post": {
         "tags": ["crate::routers::sidequests"],
-        "operationId": "post_sidequests",
+        "operationId": "create_sidequest",
         "requestBody": {
           "description": "",
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateSidequestDTO"
-              }
+              "schema": { "$ref": "#/components/schemas/SidequestForCreate" }
             }
           },
           "required": true
@@ -1013,12 +1320,8 @@
           "200": {
             "description": "",
             "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "integer",
-                  "format": "int64",
-                  "minimum": 0
-                }
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SidequestForCreate" }
               }
             }
           },
@@ -1026,29 +1329,29 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicError"
-                }
+                "schema": { "$ref": "#/components/schemas/PublicError" }
               }
             }
           }
         }
       }
     },
-    "/api/sidequests/leaderboard": {
+    "/api/sidequests/slug/{event_slug}/{sidequest_slug}": {
       "get": {
         "tags": ["crate::routers::sidequests"],
-        "operationId": "get_team_leaderboard",
+        "operationId": "get_sidequest_by_slug",
         "parameters": [
           {
-            "name": "event_id",
-            "in": "query",
-            "description": "The Event ID to get the leaderboard for",
+            "name": "event_slug",
+            "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "sidequest_slug",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
           }
         ],
         "responses": {
@@ -1056,12 +1359,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/FullInfoTeamEntryForLeaderboard"
-                  }
-                }
+                "schema": { "$ref": "#/components/schemas/Sidequest" }
               }
             }
           },
@@ -1069,114 +1367,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/sidequests/leaderboard/timeline": {
-      "get": {
-        "tags": ["crate::routers::sidequests"],
-        "operationId": "get_leaderboard_timeline",
-        "parameters": [
-          {
-            "name": "event_id",
-            "in": "query",
-            "description": "The Event ID to get the leaderboard for",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "before",
-            "in": "query",
-            "description": "Only return entries before this time",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date-time",
-              "nullable": true
-            }
-          },
-          {
-            "name": "after",
-            "in": "query",
-            "description": "Only return entries after this time",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date-time",
-              "nullable": true
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TimelineData"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/sidequests/participants": {
-      "get": {
-        "tags": ["crate::routers::sidequests"],
-        "operationId": "get_participants_with_sidequest_info",
-        "parameters": [
-          {
-            "name": "event_id",
-            "in": "query",
-            "description": "The Event ID to get the leaderboard for",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/UserWithSidequestInfo"
-                  }
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicError"
-                }
+                "schema": { "$ref": "#/components/schemas/PublicError" }
               }
             }
           }
@@ -1192,10 +1383,7 @@
             "name": "sidequest_id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
@@ -1203,9 +1391,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SidequestDTO"
-                }
+                "schema": { "$ref": "#/components/schemas/Sidequest" }
               }
             }
           },
@@ -1213,9 +1399,37 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicError"
-                }
+                "schema": { "$ref": "#/components/schemas/PublicError" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["crate::routers::sidequests"],
+        "operationId": "delete_sidequest",
+        "parameters": [
+          {
+            "name": "sidequest_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "default": null, "nullable": true }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
               }
             }
           }
@@ -1223,25 +1437,20 @@
       },
       "patch": {
         "tags": ["crate::routers::sidequests"],
-        "operationId": "patch_sidequests",
+        "operationId": "update_sidequest",
         "parameters": [
           {
             "name": "sidequest_id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "requestBody": {
           "description": "",
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SidequestForPatch"
-              }
+              "schema": { "$ref": "#/components/schemas/SidequestForUpdate" }
             }
           },
           "required": true
@@ -1251,9 +1460,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SidequestDTO"
-                }
+                "schema": { "$ref": "#/components/schemas/Sidequest" }
               }
             }
           },
@@ -1261,103 +1468,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/sidequests/{sidequest_id}/attempts": {
-      "post": {
-        "tags": ["crate::routers::sidequests"],
-        "operationId": "post_sidequests_attempts",
-        "parameters": [
-          {
-            "name": "sidequest_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "description": "",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AttemptForCreate"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "integer",
-                  "format": "int64",
-                  "minimum": 0
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/sidequests/{sidequest_id}/leaderboard": {
-      "get": {
-        "tags": ["crate::routers::sidequests"],
-        "operationId": "get_leaderboard",
-        "parameters": [
-          {
-            "name": "sidequest_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/FullInfoSidequestEntryForLeaderboard"
-                  }
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicError"
-                }
+                "schema": { "$ref": "#/components/schemas/PublicError" }
               }
             }
           }
@@ -1374,10 +1485,7 @@
             "in": "query",
             "description": "Filter by event id",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
@@ -1387,9 +1495,7 @@
               "application/json": {
                 "schema": {
                   "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Team"
-                  }
+                  "items": { "$ref": "#/components/schemas/Team" }
                 }
               }
             }
@@ -1398,9 +1504,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicError"
-                }
+                "schema": { "$ref": "#/components/schemas/PublicError" }
               }
             }
           }
@@ -1413,9 +1517,7 @@
           "description": "",
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TeamForCreate"
-              }
+              "schema": { "$ref": "#/components/schemas/TeamForCreate" }
             }
           },
           "required": true
@@ -1425,9 +1527,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Team"
-                }
+                "schema": { "$ref": "#/components/schemas/Team" }
               }
             }
           },
@@ -1435,35 +1535,24 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicError"
-                }
+                "schema": { "$ref": "#/components/schemas/PublicError" }
               }
             }
           }
         }
       }
     },
-    "/api/teams/{event_slug}/{team_slug}": {
+    "/api/teams/roles": {
       "get": {
         "tags": ["crate::routers::teams"],
-        "operationId": "get_team_by_slug",
+        "operationId": "get_teams_roles",
         "parameters": [
           {
-            "name": "event_slug",
-            "in": "path",
+            "name": "event_id",
+            "in": "query",
+            "description": "Filter by event id",
             "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "team_slug",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
@@ -1472,7 +1561,12 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Team"
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "array",
+                    "items": { "$ref": "#/components/schemas/TeamRole" },
+                    "uniqueItems": true
+                  }
                 }
               }
             }
@@ -1481,9 +1575,45 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicError"
-                }
+                "schema": { "$ref": "#/components/schemas/PublicError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/teams/slug/{event_slug}/{team_slug}": {
+      "get": {
+        "tags": ["crate::routers::teams"],
+        "operationId": "get_team_by_slug",
+        "parameters": [
+          {
+            "name": "event_slug",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "team_slug",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Team" }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
               }
             }
           }
@@ -1499,10 +1629,7 @@
             "name": "team_id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
@@ -1510,9 +1637,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Team"
-                }
+                "schema": { "$ref": "#/components/schemas/Team" }
               }
             }
           },
@@ -1520,9 +1645,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicError"
-                }
+                "schema": { "$ref": "#/components/schemas/PublicError" }
               }
             }
           }
@@ -1536,10 +1659,7 @@
             "name": "team_id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
@@ -1547,9 +1667,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Team"
-                }
+                "schema": { "$ref": "#/components/schemas/Team" }
               }
             }
           },
@@ -1557,9 +1675,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicError"
-                }
+                "schema": { "$ref": "#/components/schemas/PublicError" }
               }
             }
           }
@@ -1573,19 +1689,14 @@
             "name": "team_id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "requestBody": {
           "description": "",
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TeamForUpdate"
-              }
+              "schema": { "$ref": "#/components/schemas/TeamForUpdate" }
             }
           },
           "required": true
@@ -1595,9 +1706,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Appointment"
-                }
+                "schema": { "$ref": "#/components/schemas/Appointment" }
               }
             }
           },
@@ -1605,9 +1714,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicError"
-                }
+                "schema": { "$ref": "#/components/schemas/PublicError" }
               }
             }
           }
@@ -1625,11 +1732,7 @@
             "description": "Filter by team role",
             "required": false,
             "schema": {
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/TeamRole"
-                }
-              ],
+              "allOf": [{ "$ref": "#/components/schemas/TeamRole" }],
               "nullable": true
             }
           },
@@ -1637,10 +1740,7 @@
             "name": "team_id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
@@ -1650,9 +1750,7 @@
               "application/json": {
                 "schema": {
                   "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/TeamAffiliate"
-                  }
+                  "items": { "$ref": "#/components/schemas/TeamAffiliate" }
                 }
               }
             }
@@ -1661,9 +1759,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicError"
-                }
+                "schema": { "$ref": "#/components/schemas/PublicError" }
               }
             }
           }
@@ -1679,10 +1775,7 @@
             "name": "team_id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
@@ -1690,9 +1783,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TeamPasswordDTO"
-                }
+                "schema": { "$ref": "#/components/schemas/PasswordDTO" }
               }
             }
           },
@@ -1700,9 +1791,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicError"
-                }
+                "schema": { "$ref": "#/components/schemas/PublicError" }
               }
             }
           }
@@ -1716,19 +1805,14 @@
             "name": "team_id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "requestBody": {
           "description": "",
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TeamPasswordDTO"
-              }
+              "schema": { "$ref": "#/components/schemas/PasswordDTO" }
             }
           },
           "required": true
@@ -1738,9 +1822,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Team"
-                }
+                "schema": { "$ref": "#/components/schemas/Team" }
               }
             }
           },
@@ -1748,9 +1830,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicError"
-                }
+                "schema": { "$ref": "#/components/schemas/PublicError" }
               }
             }
           }
@@ -1766,19 +1846,14 @@
             "name": "team_id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "requestBody": {
           "description": "",
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TeamProjectDTO"
-              }
+              "schema": { "$ref": "#/components/schemas/ProjectIdDTO" }
             }
           },
           "required": true
@@ -1788,9 +1863,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Team"
-                }
+                "schema": { "$ref": "#/components/schemas/Team" }
               }
             }
           },
@@ -1798,9 +1871,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicError"
-                }
+                "schema": { "$ref": "#/components/schemas/PublicError" }
               }
             }
           }
@@ -1816,10 +1887,7 @@
             "name": "team_id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
@@ -1827,9 +1895,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProjectPreferences"
-                }
+                "schema": { "$ref": "#/components/schemas/ProjectPreferences" }
               }
             }
           },
@@ -1837,9 +1903,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicError"
-                }
+                "schema": { "$ref": "#/components/schemas/PublicError" }
               }
             }
           }
@@ -1853,19 +1917,14 @@
             "name": "team_id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "requestBody": {
           "description": "",
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ProjectPreferences"
-              }
+              "schema": { "$ref": "#/components/schemas/ProjectPreferences" }
             }
           },
           "required": true
@@ -1875,9 +1934,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProjectPreferences"
-                }
+                "schema": { "$ref": "#/components/schemas/ProjectPreferences" }
               }
             }
           },
@@ -1885,9 +1942,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicError"
-                }
+                "schema": { "$ref": "#/components/schemas/PublicError" }
               }
             }
           }
@@ -1903,10 +1958,7 @@
             "name": "team_id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
@@ -1916,9 +1968,7 @@
               "application/json": {
                 "schema": {
                   "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/TeamRole"
-                  },
+                  "items": { "$ref": "#/components/schemas/TeamRole" },
                   "uniqueItems": true
                 }
               }
@@ -1928,9 +1978,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicError"
-                }
+                "schema": { "$ref": "#/components/schemas/PublicError" }
               }
             }
           }
@@ -1944,10 +1992,7 @@
             "name": "team_id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "requestBody": {
@@ -1958,9 +2003,7 @@
                 "type": "object",
                 "additionalProperties": {
                   "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/TeamRole"
-                  },
+                  "items": { "$ref": "#/components/schemas/TeamRole" },
                   "uniqueItems": true
                 }
               }
@@ -1973,9 +2016,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AffectedRowsDTO"
-                }
+                "schema": { "$ref": "#/components/schemas/AffectedRows" }
               }
             }
           },
@@ -1983,9 +2024,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicError"
-                }
+                "schema": { "$ref": "#/components/schemas/PublicError" }
               }
             }
           }
@@ -1999,10 +2038,7 @@
             "name": "team_id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "requestBody": {
@@ -2013,9 +2049,7 @@
                 "type": "object",
                 "additionalProperties": {
                   "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/TeamRole"
-                  },
+                  "items": { "$ref": "#/components/schemas/TeamRole" },
                   "uniqueItems": true
                 }
               }
@@ -2028,9 +2062,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AffectedRowsDTO"
-                }
+                "schema": { "$ref": "#/components/schemas/AffectedRows" }
               }
             }
           },
@@ -2038,9 +2070,102 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicError"
-                }
+                "schema": { "$ref": "#/components/schemas/PublicError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/me": {
+      "get": {
+        "tags": ["crate::routers::users"],
+        "operationId": "get_me",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/User" }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["crate::routers::users"],
+        "operationId": "update_me",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UserForUpdate" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/User" }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/me/policies": {
+      "get": {
+        "tags": ["crate::routers::users"],
+        "operationId": "get_my_policies",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "query",
+            "description": "Get policies for this event",
+            "required": false,
+            "schema": { "type": "string", "format": "uuid", "nullable": true }
+          },
+          {
+            "name": "team_id",
+            "in": "query",
+            "description": "Get policies for this team",
+            "required": false,
+            "schema": { "type": "string", "format": "uuid", "nullable": true }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Policies" }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
               }
             }
           }
@@ -2050,7 +2175,7 @@
   },
   "components": {
     "schemas": {
-      "AffectedRowsDTO": {
+      "AffectedRows": {
         "type": "object",
         "required": ["affected_rows"],
         "properties": {
@@ -2061,162 +2186,89 @@
           }
         }
       },
-      "AggregateActionQuery": {
-        "type": "object",
-        "required": ["aggregate_action"],
-        "properties": {
-          "aggregate_action": {
-            "$ref": "#/components/schemas/AggregationAction"
-          }
-        }
-      },
-      "AggregationAction": {
-        "type": "string",
-        "enum": ["Start", "Stop"]
-      },
-      "AggregatorStatus": {
-        "type": "object",
-        "required": ["event_id", "status"],
-        "properties": {
-          "event_id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "status": {
-            "$ref": "#/components/schemas/LoopStatus"
-          }
-        }
-      },
       "Appointment": {
         "type": "object",
         "required": ["id", "event_id", "title", "start"],
         "properties": {
-          "content": {
-            "type": "string",
-            "nullable": true
-          },
-          "description": {
-            "type": "string",
-            "nullable": true
-          },
-          "end": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "event_id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "start": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "title": {
-            "type": "string"
-          }
+          "content": { "type": "string", "nullable": true },
+          "description": { "type": "string", "nullable": true },
+          "end": { "type": "string", "format": "date-time", "nullable": true },
+          "event_id": { "type": "string", "format": "uuid" },
+          "id": { "type": "string", "format": "uuid" },
+          "start": { "type": "string", "format": "date-time" },
+          "title": { "type": "string" }
         }
       },
       "AppointmentForCreate": {
         "type": "object",
         "required": ["event_id", "title", "start"],
         "properties": {
-          "content": {
-            "type": "string",
-            "nullable": true
-          },
-          "description": {
-            "type": "string",
-            "nullable": true
-          },
-          "end": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "event_id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "start": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "title": {
-            "type": "string"
-          }
+          "content": { "type": "string", "nullable": true },
+          "description": { "type": "string", "nullable": true },
+          "end": { "type": "string", "format": "date-time", "nullable": true },
+          "event_id": { "type": "string", "format": "uuid" },
+          "start": { "type": "string", "format": "date-time" },
+          "title": { "type": "string" }
         }
       },
       "AppointmentForUpdate": {
         "type": "object",
         "properties": {
-          "content": {
-            "type": "string",
-            "nullable": true
-          },
-          "description": {
-            "type": "string",
-            "nullable": true
-          },
-          "end": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
+          "content": { "type": "string", "nullable": true },
+          "description": { "type": "string", "nullable": true },
+          "end": { "type": "string", "format": "date-time", "nullable": true },
           "start": {
             "type": "string",
             "format": "date-time",
             "nullable": true
           },
-          "title": {
-            "type": "string",
-            "nullable": true
-          }
+          "title": { "type": "string", "nullable": true }
+        }
+      },
+      "Attempt": {
+        "type": "object",
+        "required": ["id", "sidequest_id", "user_id", "result", "attempted_at"],
+        "properties": {
+          "attempted_at": { "type": "string", "format": "date-time" },
+          "id": { "type": "string", "format": "uuid" },
+          "result": { "type": "number", "format": "double" },
+          "sidequest_id": { "type": "string", "format": "uuid" },
+          "user_id": { "type": "string", "format": "uuid" }
         }
       },
       "AttemptForCreate": {
         "type": "object",
-        "required": ["user_id", "result"],
+        "required": ["sidequest_id", "user_id", "result"],
         "properties": {
-          "result": {
-            "type": "number",
-            "format": "double"
-          },
-          "user_id": {
-            "type": "string",
-            "format": "uuid"
-          }
+          "result": { "type": "number", "format": "double" },
+          "sidequest_id": { "type": "string", "format": "uuid" },
+          "user_id": { "type": "string", "format": "uuid" }
         }
       },
-      "CreateSidequestDTO": {
+      "AttemptForUpdate": {
         "type": "object",
-        "required": [
-          "event_id",
-          "name",
-          "description",
-          "is_higher_result_better"
-        ],
         "properties": {
-          "description": {
-            "type": "string"
-          },
-          "event_id": {
+          "result": { "type": "number", "format": "double", "nullable": true }
+        }
+      },
+      "Cooldown": {
+        "type": "object",
+        "required": ["duration"],
+        "properties": {
+          "duration": { "type": "integer", "format": "int32", "minimum": 0 },
+          "last_attempt": {
             "type": "string",
-            "format": "uuid"
+            "format": "date-time",
+            "nullable": true
           },
-          "is_higher_result_better": {
-            "type": "boolean"
-          },
-          "name": {
-            "type": "string"
+          "next_attempt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
           }
         }
       },
-      "EventDTO": {
+      "Event": {
         "type": "object",
         "required": [
           "id",
@@ -2225,96 +2277,96 @@
           "start",
           "end",
           "max_team_size",
+          "sidequest_cooldown",
+          "is_read_only",
           "is_feedback_visible",
           "visibility",
           "phase"
         ],
         "properties": {
-          "end": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "is_feedback_visible": {
-            "type": "boolean"
-          },
+          "documentation_content": { "type": "string", "nullable": true },
+          "end": { "type": "string", "format": "date-time" },
+          "id": { "type": "string", "format": "uuid" },
+          "is_feedback_visible": { "type": "boolean" },
+          "is_read_only": { "type": "boolean" },
           "max_team_size": {
             "type": "integer",
             "format": "int32",
             "minimum": 0
           },
-          "name": {
-            "type": "string"
+          "name": { "type": "string" },
+          "phase": { "$ref": "#/components/schemas/EventPhase" },
+          "sidequest_cooldown": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
           },
-          "phase": {
-            "$ref": "#/components/schemas/EventPhase"
-          },
-          "slug": {
-            "type": "string"
-          },
-          "start": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "visibility": {
-            "$ref": "#/components/schemas/EventVisibility"
+          "slug": { "type": "string" },
+          "start": { "type": "string", "format": "date-time" },
+          "visibility": { "$ref": "#/components/schemas/EventVisibility" },
+          "welcome_content": { "type": "string", "nullable": true }
+        }
+      },
+      "EventAffiliate": {
+        "type": "object",
+        "required": ["id", "name", "roles"],
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "name": { "type": "string" },
+          "roles": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/EventRole" }
           }
         }
       },
       "EventForCreate": {
         "type": "object",
-        "required": ["name", "start", "end", "max_team_size"],
+        "required": [
+          "name",
+          "start",
+          "end",
+          "max_team_size",
+          "sidequest_cooldown"
+        ],
         "properties": {
-          "end": {
-            "type": "string",
-            "format": "date-time"
-          },
+          "end": { "type": "string", "format": "date-time" },
           "max_team_size": {
             "type": "integer",
             "format": "int32",
             "minimum": 0
           },
-          "name": {
-            "type": "string"
+          "name": { "type": "string" },
+          "sidequest_cooldown": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
           },
-          "start": {
-            "type": "string",
-            "format": "date-time"
-          }
+          "start": { "type": "string", "format": "date-time" }
         }
       },
-      "EventForPatch": {
+      "EventForUpdate": {
         "type": "object",
         "properties": {
-          "end": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "is_feedback_visible": {
-            "type": "boolean",
-            "nullable": true
-          },
+          "documentation_content": { "type": "string", "nullable": true },
+          "end": { "type": "string", "format": "date-time", "nullable": true },
+          "is_feedback_visible": { "type": "boolean", "nullable": true },
+          "is_read_only": { "type": "boolean", "nullable": true },
           "max_team_size": {
             "type": "integer",
             "format": "int32",
             "nullable": true,
             "minimum": 0
           },
-          "name": {
-            "type": "string",
+          "name": { "type": "string", "nullable": true },
+          "phase": {
+            "allOf": [{ "$ref": "#/components/schemas/EventPhase" }],
             "nullable": true
           },
-          "phase": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/EventPhase"
-              }
-            ],
-            "nullable": true
+          "sidequest_cooldown": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true,
+            "minimum": 0
           },
           "start": {
             "type": "string",
@@ -2322,48 +2374,20 @@
             "nullable": true
           },
           "visibility": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/EventVisibility"
-              }
-            ],
+            "allOf": [{ "$ref": "#/components/schemas/EventVisibility" }],
             "nullable": true
-          }
+          },
+          "welcome_content": { "type": "string", "nullable": true }
         }
       },
       "EventIdQuery": {
         "type": "object",
         "required": ["event_id"],
-        "properties": {
-          "event_id": {
-            "type": "string",
-            "format": "uuid"
-          }
-        }
-      },
-      "EventLeaderboardTimelineQuery": {
-        "type": "object",
-        "required": ["event_id"],
-        "properties": {
-          "after": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "before": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "event_id": {
-            "type": "string",
-            "format": "uuid"
-          }
-        }
+        "properties": { "event_id": { "type": "string", "format": "uuid" } }
       },
       "EventPhase": {
         "type": "string",
-        "enum": ["Grading", "Hacking", "Registration", "Finished"]
+        "enum": ["Finished", "Grading", "Hacking", "Registration"]
       },
       "EventRole": {
         "type": "string",
@@ -2379,147 +2403,134 @@
         "type": "object",
         "properties": {
           "role": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/EventRole"
-              }
-            ],
+            "allOf": [{ "$ref": "#/components/schemas/EventRole" }],
             "nullable": true
           }
         }
       },
       "EventVisibility": {
         "type": "string",
-        "enum": ["Private", "Public", "Restricted"]
+        "enum": ["Hidden", "Internal", "Public"]
       },
-      "FullInfoSidequestEntryForLeaderboard": {
+      "Group": {
+        "type": "string",
+        "description": "A group is a power set of roles and has a partial order relation defined on it.\nThis allows for easy permissions testing, e.g. to ensure that a resource is only accessed\nby a user that either is an event admin, event mentor, event sidequest master, or event stakeholder,\nwe can simply write `user_groups >= Group::EventStaff`.\n\nHere is the corresponding Hasse diagram for the group:\n\n```graphviz\ngraph {\n  layout = dot\n  rankdir = TB\n  node [ shape=\"none\" ]\n\n    EventAdmin [label=\"EventAdmin\"]\n    EventMentor [label=\"EventMentor\"]\n    EventParticipant [label=\"EventParticipant\"]\n    EventSidequestMaster [label=\"EventSidequestMaster\"]\n    EventStakeholder [label=\"EventStakeholder\"]\n    TeamMember [label=\"TeamMember\"]\n    TeamMentor [label=\"TeamMentor\"]\n    EventStaff [label=\"EventStaff\"]\n    TeamAffiliate [label=\"TeamAffiliate\"]\n    EventAffiliate [label=\"EventAffiliate\"]\n    EventGuest [label=\"EventGuest\"]\n\n    { rank=same; EventSidequestMaster, EventStakeholder, EventMentor }\n\n    EventAdmin -- {TeamMember, TeamMentor, EventSidequestMaster, EventStakeholder}\n    {TeamMember, TeamMentor} -- TeamAffiliate\n    TeamMentor -- EventMentor\n    {EventMentor, EventStakeholder, EventSidequestMaster} -- EventStaff\n    TeamAffiliate -- EventAffiliate\n    {EventParticipant, EventStaff} -- EventAffiliate\n    TeamMember -- EventParticipant\n    EventAffiliate -- EventGuest\n}\n```\n*",
+        "enum": [
+          "EventAdmin",
+          "EventMentor",
+          "EventParticipant",
+          "EventSidequestMaster",
+          "EventStakeholder",
+          "TeamMember",
+          "TeamMentor",
+          "EventStaff",
+          "TeamAffiliate",
+          "EventAffiliate",
+          "EventGuest"
+        ]
+      },
+      "Groups": {
         "type": "object",
-        "required": [
-          "user_name",
-          "user_id",
-          "group_name",
-          "group_id",
-          "result",
-          "points"
-        ],
+        "required": ["groups"],
         "properties": {
-          "group_id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "group_name": {
-            "type": "string"
-          },
-          "points": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "result": {
-            "type": "number",
-            "format": "double"
-          },
-          "user_id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "user_name": {
-            "type": "string"
+          "groups": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Group" }
           }
         }
       },
-      "FullInfoTeamEntryForLeaderboard": {
+      "HistoryEntry": {
         "type": "object",
-        "required": ["group_name", "group_id", "result", "rank"],
+        "required": ["date", "score"],
         "properties": {
-          "group_id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "group_name": {
-            "type": "string"
-          },
-          "rank": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "result": {
-            "type": "number",
-            "format": "double"
-          }
+          "date": { "type": "string", "format": "date-time" },
+          "score": { "type": "number", "format": "double" }
         }
       },
       "InviteUsersDTO": {
         "type": "object",
-        "required": ["users", "default_roles"],
+        "required": ["users", "roles"],
         "properties": {
-          "default_roles": {
+          "roles": {
             "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/EventRole"
-            }
+            "items": { "$ref": "#/components/schemas/EventRole" },
+            "uniqueItems": true
           },
           "users": {
             "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/UserForCreate"
-            }
+            "items": { "$ref": "#/components/schemas/UserForCreate" }
           }
         }
       },
-      "LoopStatus": {
-        "type": "string",
-        "enum": ["NonExisting", "Running", "Exited"]
+      "PasswordDTO": {
+        "type": "object",
+        "properties": { "password": { "type": "string", "nullable": true } }
+      },
+      "Policies": {
+        "type": "object",
+        "required": [
+          "can_view_event",
+          "can_view_event_internal",
+          "can_manage_event",
+          "can_create_team",
+          "can_view_team_confidential",
+          "can_manage_team",
+          "can_manage_project",
+          "can_manage_sidequest",
+          "can_view_sidequest_attempt",
+          "can_manage_sidequest_attempt"
+        ],
+        "properties": {
+          "can_create_team": { "type": "boolean" },
+          "can_manage_event": { "type": "boolean" },
+          "can_manage_project": { "type": "boolean" },
+          "can_manage_sidequest": { "type": "boolean" },
+          "can_manage_sidequest_attempt": { "type": "boolean" },
+          "can_manage_team": { "type": "boolean" },
+          "can_view_event": { "type": "boolean" },
+          "can_view_event_internal": { "type": "boolean" },
+          "can_view_sidequest_attempt": { "type": "boolean" },
+          "can_view_team_confidential": { "type": "boolean" }
+        }
+      },
+      "PoliciesQuery": {
+        "type": "object",
+        "properties": {
+          "event_id": { "type": "string", "format": "uuid", "nullable": true },
+          "team_id": { "type": "string", "format": "uuid", "nullable": true }
+        }
       },
       "Project": {
         "type": "object",
         "required": ["id", "event_id", "name", "slug", "content"],
         "properties": {
-          "content": {
-            "type": "string"
-          },
-          "event_id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "name": {
-            "type": "string"
-          },
-          "slug": {
-            "type": "string"
-          }
+          "content": { "type": "string" },
+          "event_id": { "type": "string", "format": "uuid" },
+          "id": { "type": "string", "format": "uuid" },
+          "name": { "type": "string" },
+          "slug": { "type": "string" }
         }
       },
       "ProjectForCreate": {
         "type": "object",
         "required": ["event_id", "name", "content"],
         "properties": {
-          "content": {
-            "type": "string"
-          },
-          "event_id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "name": {
-            "type": "string"
-          }
+          "content": { "type": "string" },
+          "event_id": { "type": "string", "format": "uuid" },
+          "name": { "type": "string" }
         }
       },
       "ProjectForUpdate": {
         "type": "object",
         "properties": {
-          "content": {
-            "type": "string",
-            "nullable": true
-          },
-          "name": {
-            "type": "string",
-            "nullable": true
-          }
+          "content": { "type": "string", "nullable": true },
+          "name": { "type": "string", "nullable": true }
+        }
+      },
+      "ProjectIdDTO": {
+        "type": "object",
+        "properties": {
+          "project_id": { "type": "string", "format": "uuid", "nullable": true }
         }
       },
       "ProjectPreferences": {
@@ -2528,10 +2539,7 @@
         "properties": {
           "project_preferences": {
             "type": "array",
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "items": { "type": "string", "format": "uuid" }
           }
         }
       },
@@ -2539,17 +2547,19 @@
         "type": "object",
         "required": ["status", "message"],
         "properties": {
-          "message": {
-            "type": "string"
-          },
-          "status": {
-            "type": "integer",
-            "format": "int32",
-            "minimum": 0
-          }
+          "message": { "type": "string" },
+          "status": { "type": "integer", "format": "int32", "minimum": 0 }
         }
       },
-      "SidequestDTO": {
+      "ReducedUser": {
+        "type": "object",
+        "required": ["id", "name"],
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "name": { "type": "string" }
+        }
+      },
+      "Sidequest": {
         "type": "object",
         "required": [
           "id",
@@ -2560,45 +2570,44 @@
           "is_higher_result_better"
         ],
         "properties": {
-          "description": {
-            "type": "string"
-          },
-          "event_id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "is_higher_result_better": {
-            "type": "boolean"
-          },
-          "name": {
-            "type": "string"
-          },
-          "slug": {
-            "type": "string"
-          }
+          "description": { "type": "string" },
+          "event_id": { "type": "string", "format": "uuid" },
+          "id": { "type": "string", "format": "uuid" },
+          "is_higher_result_better": { "type": "boolean" },
+          "name": { "type": "string" },
+          "slug": { "type": "string" }
         }
       },
-      "SidequestEntryForLeaderboard": {
+      "SidequestAttemptsCooldownQuery": {
         "type": "object",
-        "required": ["user_id", "result"],
+        "required": ["event_id"],
         "properties": {
-          "points": {
-            "type": "integer",
-            "format": "int64",
+          "event_id": { "type": "string", "format": "uuid" },
+          "user_id": { "type": "string", "format": "uuid", "nullable": true }
+        }
+      },
+      "SidequestAttemptsQuery": {
+        "type": "object",
+        "required": ["event_id"],
+        "properties": {
+          "after": {
+            "type": "string",
+            "format": "date-time",
             "nullable": true
           },
-          "result": {
-            "type": "number",
-            "format": "double"
-          },
-          "user_id": {
+          "before": {
             "type": "string",
-            "format": "uuid"
-          }
+            "format": "date-time",
+            "nullable": true
+          },
+          "event_id": { "type": "string", "format": "uuid" },
+          "sidequest_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "team_id": { "type": "string", "format": "uuid", "nullable": true },
+          "user_id": { "type": "string", "format": "uuid", "nullable": true }
         }
       },
       "SidequestForCreate": {
@@ -2610,39 +2619,36 @@
           "is_higher_result_better"
         ],
         "properties": {
-          "description": {
-            "type": "string"
-          },
-          "event_id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "is_higher_result_better": {
-            "type": "boolean"
-          },
-          "name": {
-            "type": "string"
-          }
+          "description": { "type": "string" },
+          "event_id": { "type": "string", "format": "uuid" },
+          "is_higher_result_better": { "type": "boolean" },
+          "name": { "type": "string" }
         }
       },
-      "SidequestForPatch": {
+      "SidequestForUpdate": {
         "type": "object",
-        "required": ["event_id"],
         "properties": {
-          "description": {
+          "description": { "type": "string", "nullable": true },
+          "is_higher_result_better": { "type": "boolean", "nullable": true },
+          "name": { "type": "string", "nullable": true }
+        }
+      },
+      "SidequestIdQuery": {
+        "type": "object",
+        "required": ["sidequest_id"],
+        "properties": { "sidequest_id": { "type": "string", "format": "uuid" } }
+      },
+      "SidequestsHistoryQuery": {
+        "type": "object",
+        "properties": {
+          "after": {
             "type": "string",
+            "format": "date-time",
             "nullable": true
           },
-          "event_id": {
+          "before": {
             "type": "string",
-            "format": "uuid"
-          },
-          "is_higher_result_better": {
-            "type": "boolean",
-            "nullable": true
-          },
-          "name": {
-            "type": "string",
+            "format": "date-time",
             "nullable": true
           }
         }
@@ -2651,47 +2657,27 @@
         "type": "object",
         "required": ["id", "event_id", "name", "slug", "index"],
         "properties": {
-          "event_id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "index": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "name": {
-            "type": "string"
-          },
+          "event_id": { "type": "string", "format": "uuid" },
+          "id": { "type": "string", "format": "uuid" },
+          "index": { "type": "integer", "format": "int32" },
+          "name": { "type": "string" },
           "project_id": {
             "type": "string",
             "format": "uuid",
             "nullable": true
           },
-          "slug": {
-            "type": "string"
-          }
+          "slug": { "type": "string" }
         }
       },
       "TeamAffiliate": {
         "type": "object",
         "required": ["id", "name", "roles"],
         "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "name": {
-            "type": "string"
-          },
+          "id": { "type": "string", "format": "uuid" },
+          "name": { "type": "string" },
           "roles": {
             "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/TeamRole"
-            }
+            "items": { "$ref": "#/components/schemas/TeamRole" }
           }
         }
       },
@@ -2699,200 +2685,58 @@
         "type": "object",
         "required": ["event_id", "name"],
         "properties": {
-          "event_id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "name": {
-            "type": "string"
-          }
+          "event_id": { "type": "string", "format": "uuid" },
+          "name": { "type": "string" }
         }
       },
       "TeamForUpdate": {
         "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "nullable": true
-          }
-        }
+        "properties": { "name": { "type": "string", "nullable": true } }
       },
-      "TeamLatestResult": {
+      "TeamLeaderboardEntry": {
         "type": "object",
-        "required": ["team_id"],
+        "required": ["team_id", "team_name", "score"],
         "properties": {
-          "team_id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "valid_at_max": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          }
+          "score": { "type": "number", "format": "double" },
+          "team_id": { "type": "string", "format": "uuid" },
+          "team_name": { "type": "string" }
         }
       },
-      "TeamPasswordDTO": {
-        "type": "object",
-        "properties": {
-          "password": {
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "TeamProjectDTO": {
-        "type": "object",
-        "properties": {
-          "project_id": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          }
-        }
-      },
-      "TeamRole": {
-        "type": "string",
-        "enum": ["Member", "Mentor"]
-      },
+      "TeamRole": { "type": "string", "enum": ["Member", "Mentor"] },
       "TeamRoleOptQuery": {
         "type": "object",
         "properties": {
           "role": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/TeamRole"
-              }
-            ],
+            "allOf": [{ "$ref": "#/components/schemas/TeamRole" }],
             "nullable": true
           }
         }
       },
-      "TimelineData": {
+      "User": {
         "type": "object",
-        "required": ["event_id", "scores"],
+        "required": ["id", "auth_id", "name"],
         "properties": {
-          "end": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "event_id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "scores": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "array",
-              "items": {
-                "type": "array",
-                "items": {
-                  "allOf": [
-                    {
-                      "type": "string",
-                      "format": "date-time"
-                    },
-                    {
-                      "type": "integer",
-                      "format": "int64"
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "start": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          }
+          "auth_id": { "type": "string" },
+          "id": { "type": "string", "format": "uuid" },
+          "name": { "type": "string" }
         }
       },
       "UserForCreate": {
         "type": "object",
         "required": ["auth_id"],
         "properties": {
-          "auth_id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string",
-            "nullable": true
-          }
+          "auth_id": { "type": "string" },
+          "name": { "type": "string", "nullable": true }
         }
       },
-      "UserForPatch": {
+      "UserForUpdate": { "type": "object" },
+      "UserLeaderboardEntry": {
         "type": "object",
+        "required": ["user_id", "user_name", "score"],
         "properties": {
-          "name": {
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "UserRoles": {
-        "type": "object",
-        "required": ["event", "team"],
-        "properties": {
-          "event": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/EventRole"
-              },
-              "uniqueItems": true
-            }
-          },
-          "team": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/TeamRole"
-              },
-              "uniqueItems": true
-            }
-          }
-        }
-      },
-      "UserWithGroup": {
-        "type": "object",
-        "required": ["user_name", "group_name"],
-        "properties": {
-          "group_name": {
-            "type": "string"
-          },
-          "user_name": {
-            "type": "string"
-          }
-        }
-      },
-      "UserWithSidequestInfo": {
-        "type": "object",
-        "required": ["user_id", "user_name", "allowed"],
-        "properties": {
-          "allowed": {
-            "type": "boolean"
-          },
-          "allowed_at": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "last_quest": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "user_id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "user_name": {
-            "type": "string"
-          }
+          "score": { "type": "integer", "format": "int64", "minimum": 0 },
+          "user_id": { "type": "string", "format": "uuid" },
+          "user_name": { "type": "string" }
         }
       }
     }

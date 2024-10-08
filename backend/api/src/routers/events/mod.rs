@@ -34,7 +34,7 @@ pub fn get_router(state: &ApiState) -> Router {
         .route("/:event_id/invite", post(invite_users))
         .route("/:event_id/affiliates", get(get_event_affiliates))
         .route("/:event_id/teams/index", post(index_teams))
-        .route("/:event_id/projects/matching", post(get_projects_matching))
+        .route("/:event_id/projects/matching", get(get_projects_matching))
         .route(
             "/:event_id/sidequests/leaderboard",
             get(get_sidequests_overview_leaderboard),
@@ -333,7 +333,7 @@ pub async fn index_teams(
 }
 
 #[utoipa::path(
-    post,
+    get,
     path = "/api/events/{event_id}/projects/matching",
     responses(
         (status = StatusCode::OK, body = HashMap<Uuid, Uuid>),

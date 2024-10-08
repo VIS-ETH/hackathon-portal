@@ -138,6 +138,10 @@ impl EventService {
             active_event.sidequest_cooldown = Set(sidequest_cooldown as i32);
         }
 
+        if let Some(is_read_only) = event_fu.is_read_only {
+            active_event.is_read_only = Set(is_read_only);
+        }
+
         if let Some(is_feedback_visible) = event_fu.is_feedback_visible {
             active_event.is_feedback_visible = Set(is_feedback_visible);
         }

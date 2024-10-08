@@ -90,7 +90,7 @@ impl DbRepository {
     // region: Event
     pub async fn get_events(&self) -> RepositoryResult<Vec<event::Model>> {
         let events = event::Entity::find()
-            .order_by_asc(event::Column::Start)
+            .order_by_desc(event::Column::Start)
             .all(self.conn())
             .await?;
 
@@ -345,7 +345,7 @@ impl DbRepository {
             .apply_if(before, |q, v| {
                 q.filter(sidequest_attempt::Column::AttemptedAt.lte(v))
             })
-            .order_by_asc(sidequest_attempt::Column::AttemptedAt)
+            .order_by_desc(sidequest_attempt::Column::AttemptedAt)
     }
 
     pub async fn get_sidequest_attempts(

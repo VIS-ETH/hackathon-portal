@@ -3,7 +3,7 @@ pub mod models;
 mod team;
 
 pub mod groups;
-mod policies;
+pub mod policies;
 
 use crate::authorization::models::UserRoles;
 use crate::ServiceResult;

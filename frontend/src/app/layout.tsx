@@ -1,31 +1,43 @@
 "use client";
 
-import QueryProvider from "./QueryProvider";
+import QueryProvider from "../contexts/QueryContext";
 import "./globals.css";
 
-import { PropsWithChildren } from "react";
-import { IntlConfig, IntlProvider } from "react-intl";
+import ErrorNotificationsAffix from "@/components/notifications/ErrorNotificationsAffix";
+import { ErrorContextProvider } from "@/contexts/ErrorContext";
+import { MantineContextProvider } from "@/contexts/MantineContext";
 
-import { MantineProvider, createTheme } from "@mantine/core";
+import { PropsWithChildren } from "react";
+import { IntlProvider } from "react-intl";
+
+import { ColorSchemeScript } from "@mantine/core";
 import "@mantine/core/styles.css";
 
 import "@mantine/carousel/styles.css";
 import "@mantine/dates/styles.css";
 import "@mantine/notifications/styles.css";
 
-const theme = createTheme({});
-
-export default function RootLayout({ children }: Readonly<PropsWithChildren>) {
+const Layout = ({ children }: Readonly<PropsWithChildren>) => {
   return (
     <html lang="en">
-      <head></head>
+      <head>
+        {/* Prevent color scheme flashes */}
+        <ColorSchemeScript />
+      </head>
       <body>
-        <MantineProvider theme={theme} defaultColorScheme="light">
+        <ErrorContextProvider>
           <IntlProvider locale="de">
-            <QueryProvider>{children}</QueryProvider>
+            <QueryProvider>
+              <MantineContextProvider>
+                {children}
+                <ErrorNotificationsAffix />
+              </MantineContextProvider>
+            </QueryProvider>
           </IntlProvider>
-        </MantineProvider>
+        </ErrorContextProvider>
       </body>
     </html>
   );
-}
+};
+
+export default Layout;

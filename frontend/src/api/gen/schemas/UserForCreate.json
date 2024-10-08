@@ -1,9 +1,0 @@
-{
-  "type": "object",
-  "properties": {
-    "auth_id": { "type": "string" },
-    "name": { "type": "string", "nullable": true }
-  },
-  "required": ["auth_id"],
-  "x-readme-ref-name": "UserForCreate"
-}

@@ -1,5 +1,0 @@
-{
-  "type": "string",
-  "enum": ["Start", "Stop"],
-  "x-readme-ref-name": "AggregationAction"
-}

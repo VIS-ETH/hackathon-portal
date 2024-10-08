@@ -1,6 +1,0 @@
-{
-  "type": "object",
-  "properties": { "event_id": { "type": "string", "format": "uuid" } },
-  "required": ["event_id"],
-  "x-readme-ref-name": "EventIdQuery"
-}

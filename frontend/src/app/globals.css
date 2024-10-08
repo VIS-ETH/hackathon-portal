@@ -1,4 +1,4 @@
-:root {
+/* :root {
   --background: #ffffff;
   --foreground: #171717;
 }
@@ -8,7 +8,7 @@
     --background: #0a0a0a;
     --foreground: #ededed;
   }
-}
+} */
 
 html,
 body {
@@ -19,26 +19,11 @@ body {
   flex-direction: column;
 }
 
-/* body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-* {
-  box-sizing: border-box;
-  /* padding: 0; */
-/* margin: 0; */
-
-header a {
+/*
+  Disable default link styling.
+  TODO: re-enable for markdown content.
+*/
+a {
   color: inherit;
   text-decoration: none;
-}
-
-@media (prefers-color-scheme: light) {
-  html {
-    color-scheme: light;
-  }
 }
