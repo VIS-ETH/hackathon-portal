@@ -1,9 +1,8 @@
-use chrono::NaiveDateTime;
+use crate::{ApiError, ApiResult};
 use repositories::db::prelude::{EventRole, TeamRole};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use uuid::Uuid;
-use crate::{ApiError, ApiResult};
 
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
 pub struct EventRoleOptQuery {

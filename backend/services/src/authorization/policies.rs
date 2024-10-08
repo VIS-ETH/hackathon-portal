@@ -1,8 +1,8 @@
-use serde::{Deserialize, Serialize};
-use utoipa::ToSchema;
 use crate::authorization::groups::{Group, Groups};
 use repositories::db::prelude::EventPhase;
 use repositories::db::sea_orm_active_enums::EventVisibility;
+use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
 
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
 pub struct Policies {
@@ -19,7 +19,12 @@ pub struct Policies {
 }
 
 impl Policies {
-    pub fn new(groups: Groups, event_visibility: EventVisibility, event_phase: EventPhase, event_is_ro: bool) -> Self {
+    pub fn new(
+        groups: Groups,
+        event_visibility: EventVisibility,
+        event_phase: EventPhase,
+        event_is_ro: bool,
+    ) -> Self {
         Self {
             can_view_event: groups.can_view_event(event_visibility),
             can_view_event_internal: groups.can_view_event_internal(event_visibility),
@@ -27,14 +32,25 @@ impl Policies {
             can_create_team: groups.can_create_team(event_visibility, event_phase, event_is_ro),
             can_view_team_confidential: groups.can_view_team_confidential(event_visibility),
             can_manage_team: groups.can_manage_team(event_visibility, event_phase, event_is_ro),
-            can_manage_project: groups.can_manage_project(event_visibility, event_phase, event_is_ro),
-            can_manage_sidequest: groups.can_manage_sidequest(event_visibility, event_phase, event_is_ro),
+            can_manage_project: groups.can_manage_project(
+                event_visibility,
+                event_phase,
+                event_is_ro,
+            ),
+            can_manage_sidequest: groups.can_manage_sidequest(
+                event_visibility,
+                event_phase,
+                event_is_ro,
+            ),
             can_view_sidequest_attempt: groups.can_view_sidequest_attempt(event_visibility),
-            can_manage_sidequest_attempt: groups.can_manage_sidequest_attempt(event_visibility, event_phase, event_is_ro),
+            can_manage_sidequest_attempt: groups.can_manage_sidequest_attempt(
+                event_visibility,
+                event_phase,
+                event_is_ro,
+            ),
         }
     }
 }
-
 
 impl Groups {
     #[must_use]

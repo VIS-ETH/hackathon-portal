@@ -4,7 +4,7 @@ use crate::{ApiError, ApiResult};
 use axum::body::Body;
 use axum::extract::Request;
 use axum::extract::State;
-use axum::http::{HeaderValue, Method, Uri};
+use axum::http::{HeaderMap, HeaderValue, Method, Uri};
 use axum::middleware::Next;
 use axum::response::Response;
 use std::sync::Arc;
@@ -12,6 +12,7 @@ use tracing::info;
 use uuid::Uuid;
 
 const AUTH_ID_KEY: &str = "X-Authentik-Email";
+const USERNAME_KEY: &str = "X-Authentik-Username";
 const NAME_KEY: &str = "X-Authentik-Name";
 
 #[allow(dead_code)]
@@ -42,38 +43,20 @@ pub async fn mw_resolve_ctx(
     mut req: Request<Body>,
     next: Next,
 ) -> Response {
-    let Some(mut auth_id) = req
-        .headers()
-        .get(AUTH_ID_KEY)
-        .and_then(|value| value.to_str().ok())
-        .and_then(|value| Some(value.to_string()))
-    else {
-        return next.run(req).await;
+    let auth_id = extract_header(req.headers(), AUTH_ID_KEY);
+    let username = extract_header(req.headers(), USERNAME_KEY);
+    let name = extract_header(req.headers(), NAME_KEY);
+
+    let (auth_id, username, name) = match (auth_id, username, name) {
+        (Some(auth_id), Some(username), Some(name)) => (auth_id, username, name),
+        _ => return next.run(req).await,
     };
 
-    let Some(name) = req
-        .headers()
-        .get(NAME_KEY)
-        .and_then(|value| value.to_str().ok())
-    else {
-        return next.run(req).await;
-    };
-
-    // Normalize ETH email addresses
-    // discard e.g. @student.ethz.ch, @inf.ethz.ch, etc
-    if auth_id.ends_with(".ethz.ch") {
-        let parts: Vec<&str> = auth_id.split('@').collect();
-
-        if parts.len() != 2 {
-            return next.run(req).await;
-        }
-
-        auth_id = format!("{}@ethz.ch", parts[0]);
-    }
+    let auth_id = normalize_auth_id(&auth_id, &username);
 
     let Ok(user) = state
         .user_service
-        .create_or_get_user(&auth_id, Some(name))
+        .create_or_get_user(&auth_id, Some(&name))
         .await
     else {
         return next.run(req).await;
@@ -111,4 +94,24 @@ pub async fn mw_map_response(
     );
 
     res
+}
+
+fn extract_header(headers: &HeaderMap, key: &str) -> Option<String> {
+    headers
+        .get(key)
+        .and_then(|value| value.to_str().ok())
+        .map(String::from)
+}
+
+fn normalize_auth_id(auth_id: &str, username: &str) -> String {
+    let auth_id = auth_id.to_lowercase();
+    let username = username.to_lowercase();
+
+    let is_ethz_email = auth_id.ends_with("@ethz.ch") || auth_id.ends_with(".ethz.ch");
+
+    if is_ethz_email {
+        return format!("{}@ethz.ch", username);
+    }
+
+    auth_id
 }

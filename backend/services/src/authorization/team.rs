@@ -59,8 +59,8 @@ impl AuthorizationService {
                     db_team_role_assignment::Column::TeamId,
                     db_team_role_assignment::Column::Role,
                 ])
-                    .do_nothing()
-                    .to_owned(),
+                .do_nothing()
+                .to_owned(),
             )
             .on_empty_do_nothing()
             .exec_without_returning(&txn)

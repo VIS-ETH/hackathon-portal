@@ -1,13 +1,13 @@
 use crate::api_state::ApiState;
 use crate::ctx::Ctx;
 use crate::error::ApiJson;
+use crate::routers::users::models::PoliciesQuery;
 use axum::extract::{Query, State};
 use axum::routing::{get, patch};
 use axum::{Json, Router};
 use services::authorization::groups::Groups;
 use services::authorization::policies::Policies;
 use services::user::models::{User, UserForUpdate};
-use crate::routers::users::models::PoliciesQuery;
 
 pub mod models;
 

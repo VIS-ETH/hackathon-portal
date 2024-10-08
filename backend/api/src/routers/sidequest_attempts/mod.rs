@@ -96,7 +96,9 @@ pub async fn get_sidequest_attempts(
     } else if let Some(team_id) = query.team_id {
         let team_groups = Groups::from_event_and_team(ctx.roles(), event.id, team_id);
 
-        if !team_groups.can_view_team_confidential(event.visibility) && !event_groups.can_view_sidequest_attempt(event.visibility) {
+        if !team_groups.can_view_team_confidential(event.visibility)
+            && !event_groups.can_view_sidequest_attempt(event.visibility)
+        {
             return Err(ApiError::Forbidden {
                 action: "view sidequest attempts for this event".to_string(),
             });

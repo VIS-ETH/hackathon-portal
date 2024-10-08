@@ -55,7 +55,6 @@ pub enum ServiceError {
         message: String,
     },
 
-
     // region: external library errors
     #[from]
     Repository(RepositoryError),

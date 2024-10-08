@@ -1,12 +1,7 @@
-use std::{error::Error, process::exit};
-
 use minilp::{ComparisonOp, OptimizationDirection, Problem, Solution, Variable};
 use uuid::Uuid;
 
 use std::collections::HashMap;
-
-use crate::ServiceError;
-
 
 type TeamId = Uuid;
 type ProjectId = Uuid;
@@ -36,8 +31,12 @@ impl GroupAssignment {
         max_project_size: i32,
         preferences: Preference,
     ) -> Option<Self> {
-        if teams.len() > (project.len() as i32 * max_project_size).try_into().unwrap() {
-            return None
+        if teams.len()
+            > (project.len() as i32 * max_project_size)
+                .try_into()
+                .unwrap()
+        {
+            return None;
         }
         let problem = Problem::new(OptimizationDirection::Minimize);
         let variables = Vec::<AssignmentVariable>::new();
@@ -61,7 +60,7 @@ impl GroupAssignment {
                 let score = self.preferences.get(&t);
                 let coeff = match score {
                     None => self.project.len() as i32,
-                    Some(perf) => *perf.get(&p).unwrap_or(&((self.project.len() as i32))),
+                    Some(perf) => *perf.get(&p).unwrap_or(&(self.project.len() as i32)),
                 };
 
                 let variable = self.problem.add_var(coeff as f64, (0.0, 1.0));

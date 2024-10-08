@@ -113,8 +113,10 @@ pub async fn get_teams(
         ("event_id"= Uuid, Query, description = "Filter by event id"),
     )
 )]
-pub async fn get_teams_roles(ctx: Ctx,
-                             State(state): State<ApiState>, Query(query): Query<EventIdQuery>,
+pub async fn get_teams_roles(
+    ctx: Ctx,
+    State(state): State<ApiState>,
+    Query(query): Query<EventIdQuery>,
 ) -> ApiJson<TeamRolesMap> {
     let event = state.event_service.get_event(query.event_id).await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
@@ -124,7 +126,6 @@ pub async fn get_teams_roles(ctx: Ctx,
             action: "view team roles for this event".to_string(),
         });
     }
-
 
     let mut roles = HashMap::new();
     let all_roles = ctx.roles().team.clone();
@@ -137,7 +138,6 @@ pub async fn get_teams_roles(ctx: Ctx,
             roles.insert(team.id, team_roles.clone());
         }
     }
-
 
     Ok(Json(roles))
 }
