@@ -1,7 +1,7 @@
 pub mod models;
 
 use crate::authorization::AuthorizationService;
-use crate::team::models::{ProjectPreferences, Team, TeamForCreate, TeamForUpdate};
+use crate::team::models::{Team, TeamForCreate, TeamForUpdate};
 use crate::{ServiceError, ServiceResult};
 use repositories::db::prelude::*;
 use repositories::DbRepository;
@@ -179,17 +179,10 @@ impl TeamService {
         Ok(team.into())
     }
 
-    pub async fn get_team_project_preferences(
-        &self,
-        team_id: Uuid,
-    ) -> ServiceResult<ProjectPreferences> {
+    pub async fn get_team_project_preferences(&self, team_id: Uuid) -> ServiceResult<Vec<Uuid>> {
         let pps = self.db_repo.get_project_preferences(team_id).await?;
 
         let pps = pps.into_iter().map(|pp| pp.project_id).collect();
-
-        let pps = ProjectPreferences {
-            project_preferences: pps,
-        };
 
         Ok(pps)
     }
@@ -197,11 +190,11 @@ impl TeamService {
     pub async fn update_team_project_preferences(
         &self,
         team_id: Uuid,
-        pps: ProjectPreferences,
-    ) -> ServiceResult<ProjectPreferences> {
-        let set = pps.project_preferences.iter().collect::<HashSet<_>>();
+        pps: Vec<Uuid>,
+    ) -> ServiceResult<Vec<Uuid>> {
+        let set = pps.iter().collect::<HashSet<_>>();
 
-        if set.len() != pps.project_preferences.len() {
+        if set.len() != pps.len() {
             return Err(ServiceError::ProjectPreferenceDuplicate);
         }
 
@@ -220,7 +213,7 @@ impl TeamService {
             .exec(&txn)
             .await?;
 
-        for (index, project_id) in pps.project_preferences.iter().enumerate() {
+        for (index, project_id) in pps.iter().enumerate() {
             let active_pp = db_project_preference::ActiveModel {
                 team_id: Set(team_id),
                 project_id: Set(*project_id),
@@ -234,10 +227,6 @@ impl TeamService {
         txn.commit().await?;
 
         let pps = new_pps.into_iter().map(|pp| pp.project_id).collect();
-
-        let pps = ProjectPreferences {
-            project_preferences: pps,
-        };
 
         Ok(pps)
     }

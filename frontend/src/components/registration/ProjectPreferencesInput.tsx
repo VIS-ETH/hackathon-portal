@@ -42,8 +42,8 @@ const ProjectPreferencesInput = ({
   );
 
   useEffect(() => {
-    if (remotePPS?.project_preferences.length == N_PREFERENCES) {
-      setLocalPPS(remotePPS.project_preferences);
+    if (remotePPS?.length == N_PREFERENCES) {
+      setLocalPPS(remotePPS);
     }
   }, [remotePPS]);
 
@@ -67,11 +67,7 @@ const ProjectPreferencesInput = ({
 
     updatePPSMutation.mutateAsync({
       teamId: team.id,
-      data: {
-        project_preferences: newPPS.filter(
-          (pp) => pp !== undefined,
-        ) as string[],
-      },
+      data: newPPS.filter((pp) => pp !== undefined),
     });
 
     refetchRemotePPS();

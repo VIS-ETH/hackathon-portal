@@ -1895,7 +1895,10 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ProjectPreferences" }
+                "schema": {
+                  "type": "array",
+                  "items": { "type": "string", "format": "uuid" }
+                }
               }
             }
           },
@@ -1924,7 +1927,10 @@
           "description": "",
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/ProjectPreferences" }
+              "schema": {
+                "type": "array",
+                "items": { "type": "string", "format": "uuid" }
+              }
             }
           },
           "required": true
@@ -1934,7 +1940,10 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ProjectPreferences" }
+                "schema": {
+                  "type": "array",
+                  "items": { "type": "string", "format": "uuid" }
+                }
               }
             }
           },
@@ -2533,16 +2542,6 @@
           "project_id": { "type": "string", "format": "uuid", "nullable": true }
         }
       },
-      "ProjectPreferences": {
-        "type": "object",
-        "required": ["project_preferences"],
-        "properties": {
-          "project_preferences": {
-            "type": "array",
-            "items": { "type": "string", "format": "uuid" }
-          }
-        }
-      },
       "PublicError": {
         "type": "object",
         "required": ["status", "message"],
@@ -2732,8 +2731,9 @@
       "UserForUpdate": { "type": "object" },
       "UserLeaderboardEntry": {
         "type": "object",
-        "required": ["user_id", "user_name", "score"],
+        "required": ["user_id", "user_name", "score", "result"],
         "properties": {
+          "result": { "type": "number", "format": "double" },
           "score": { "type": "integer", "format": "int64", "minimum": 0 },
           "user_id": { "type": "string", "format": "uuid" },
           "user_name": { "type": "string" }

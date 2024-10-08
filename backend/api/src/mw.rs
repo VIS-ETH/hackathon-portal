@@ -108,7 +108,6 @@ fn extract_header(headers: &HeaderMap, key: &str) -> Option<String> {
         .map(String::from)
 }
 
-
 /// Ensures that all ETH email addresses are normalized to the following format:
 /// `username@ethz.ch` (in contrast to e.g. `username@student.ethz.ch`, `first.last@inf.ethz.ch` etc.)
 /// Assumes that the ETH usernames are unique and stable.

@@ -36,8 +36,3 @@ pub struct TeamForCreate {
 pub struct TeamForUpdate {
     pub name: Option<String>,
 }
-
-#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
-pub struct ProjectPreferences {
-    pub project_preferences: Vec<Uuid>,
-}

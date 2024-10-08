@@ -1,23 +1,33 @@
-import IconTextGroup from "../IconTextGroup";
-import NoEntriesTr from "../NoEntriesTr";
-import TeamsTableRow from "./TeamsTableRow";
+import TeamsTableRow from "./Row";
+import { TableView } from "./TableView";
 
-import { useGetProjectsMatching, useGetTeams, useIndexTeams } from "@/api/gen";
+import { useGetTeams, useIndexTeams } from "@/api/gen";
 import { Event } from "@/api/gen/schemas";
+import IconTextGroup from "@/components/IconTextGroup";
+import NoEntriesTr from "@/components/NoEntriesTr";
 import {
   cardProps,
   cardSectionProps,
   iconProps,
   secondaryButtonProps,
+  segmentedControlProps,
 } from "@/styles/common";
 
 import { useState } from "react";
 
-import { Button, Card, Group, Stack, Table, Text } from "@mantine/core";
+import {
+  Button,
+  Card,
+  Group,
+  SegmentedControl,
+  SegmentedControlProps,
+  Stack,
+  Table,
+  Text,
+} from "@mantine/core";
 
 import {
   IconAlertTriangle,
-  IconLine,
   IconListNumbers,
   IconRefresh,
 } from "@tabler/icons-react";
@@ -27,18 +37,11 @@ type TeamsTableProps = {
 };
 
 const TeamsTable = ({ event }: TeamsTableProps) => {
-  const [getMatchingEnabled, setGetMatchingEnabled] = useState(false);
+  const [view, setView] = useState<TableView>("General");
 
   const { data: teams = [], refetch: refetchTeams } = useGetTeams({
     event_id: event.id,
   });
-
-  const { data: projectsMatching, refetch: refetchProjectsMatching } =
-    useGetProjectsMatching(event.id, {
-      query: {
-        enabled: getMatchingEnabled,
-      },
-    });
 
   const indexTeamsMutation = useIndexTeams();
 
@@ -78,6 +81,7 @@ const TeamsTable = ({ event }: TeamsTableProps) => {
           <Group>
             <Button
               {...secondaryButtonProps}
+              size="sm"
               leftSection={<IconRefresh {...iconProps} />}
               onClick={() => {
                 refetchTeams();
@@ -87,39 +91,59 @@ const TeamsTable = ({ event }: TeamsTableProps) => {
             </Button>
             <Button
               {...secondaryButtonProps}
-              leftSection={<IconLine {...iconProps} />}
-              onClick={() => {
-                refetchProjectsMatching();
-                setGetMatchingEnabled(true);
-              }}
-            >
-              Generate Matching
-            </Button>
-            <Button
-              {...secondaryButtonProps}
+              size="sm"
               color="red"
               leftSection={<IconListNumbers {...iconProps} />}
               onClick={handleIndexTeams}
             >
               Index Teams
             </Button>
+            <SegmentedControl
+              {...(segmentedControlProps as SegmentedControlProps)}
+              data={Object.values(TableView)}
+              value={view}
+              onChange={(value) => setView(value as keyof typeof TableView)}
+              disabled={teams.length === 0}
+            />
           </Group>
         </Card.Section>
         <Card.Section>
-          <Table.ScrollContainer minWidth={1500}>
+          <Table.ScrollContainer minWidth={0}>
             <Table striped>
               <Table.Thead>
                 <Table.Tr>
-                  <Table.Th>Idx</Table.Th>
-                  <Table.Th>Name</Table.Th>
-                  <Table.Th>Project</Table.Th>
-                  {projectsMatching && <Table.Th>Matching</Table.Th>}
-                  <Table.Th>Preferences</Table.Th>
-                  <Table.Th miw={150}>Password</Table.Th>
-                  <Table.Th>Members</Table.Th>
-                  <Table.Th>Mentor&nbsp;1</Table.Th>
-                  <Table.Th>Mentor&nbsp;2</Table.Th>
-                  <Table.Th>Actions</Table.Th>
+                  <Table.Th miw={50}>Idx</Table.Th>
+                  <Table.Th miw={200}>Name</Table.Th>
+                  {(view == TableView.Projects ||
+                    view == TableView.Mentors) && (
+                    <Table.Th miw={200}>Project</Table.Th>
+                  )}
+                  {view == TableView.Projects && (
+                    <>
+                      <Table.Th miw={200}>Matching</Table.Th>
+                      {Array.from({ length: 3 }).map((_, i) => (
+                        <Table.Th key={i} miw={200}>
+                          Preference&nbsp;{i + 1}
+                        </Table.Th>
+                      ))}
+                    </>
+                  )}
+                  {view == TableView.Password && (
+                    <Table.Th miw={200}>Password</Table.Th>
+                  )}
+                  {view == TableView.Members &&
+                    Array.from({ length: event.max_team_size }).map((_, i) => (
+                      <Table.Th key={i} miw={200}>
+                        Member&nbsp;{i + 1}
+                      </Table.Th>
+                    ))}
+                  {view == TableView.Mentors &&
+                    Array.from({ length: 2 }).map((_, i) => (
+                      <Table.Th key={i} miw={200}>
+                        Mentor&nbsp;{i + 1}
+                      </Table.Th>
+                    ))}
+                  {view == TableView.General && <Table.Th>Actions</Table.Th>}
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
@@ -129,12 +153,12 @@ const TeamsTable = ({ event }: TeamsTableProps) => {
                       key={team.id}
                       event={event}
                       team={team}
-                      proposedProjectId={projectsMatching?.[team.id]}
+                      view={view}
                       refetch={refetchTeams}
                     />
                   ))
                 ) : (
-                  <NoEntriesTr colSpan={9} />
+                  <NoEntriesTr colSpan={3} />
                 )}
               </Table.Tbody>
             </Table>

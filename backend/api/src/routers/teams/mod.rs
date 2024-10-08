@@ -14,7 +14,7 @@ use axum::{Json, Router};
 use repositories::db::prelude::TeamRole;
 use services::authorization::groups::Groups;
 use services::authorization::models::{TeamAffiliate, TeamRoles, TeamRolesMap};
-use services::team::models::{ProjectPreferences, Team, TeamForCreate, TeamForUpdate};
+use services::team::models::{Team, TeamForCreate, TeamForUpdate};
 use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
 
@@ -449,7 +449,7 @@ pub async fn update_team_project(
     get,
     path = "/api/teams/{team_id}/project-preferences",
     responses(
-        (status = StatusCode::OK, body = ProjectPreferences),
+        (status = StatusCode::OK, body = Vec<Uuid>),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
 )]
@@ -457,7 +457,7 @@ pub async fn get_team_project_preferences(
     ctx: Ctx,
     State(state): State<ApiState>,
     Path(team_id): Path<Uuid>,
-) -> ApiJson<ProjectPreferences> {
+) -> ApiJsonVec<Uuid> {
     let team = state.team_service.get_team(team_id).await?;
     let event = state.event_service.get_event(team.event_id).await?;
     let groups = Groups::from_event_and_team(ctx.roles(), event.id, team.id);
@@ -480,7 +480,7 @@ pub async fn get_team_project_preferences(
     patch,
     path = "/api/teams/{team_id}/project-preferences",
     responses(
-        (status = StatusCode::OK, body = ProjectPreferences),
+        (status = StatusCode::OK, body = Vec<Uuid>),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
 )]
@@ -488,8 +488,8 @@ pub async fn update_team_project_preferences(
     ctx: Ctx,
     State(state): State<ApiState>,
     Path(team_id): Path<Uuid>,
-    Json(body): Json<ProjectPreferences>,
-) -> ApiJson<ProjectPreferences> {
+    Json(body): Json<Vec<Uuid>>,
+) -> ApiJsonVec<Uuid> {
     let team = state.team_service.get_team(team_id).await?;
     let event = state.event_service.get_event(team.event_id).await?;
     let groups = Groups::from_event_and_team(ctx.roles(), event.id, team.id);

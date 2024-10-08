@@ -338,7 +338,10 @@ impl SidequestService {
         for result in results {
             user_scores.insert(
                 result.user_id,
-                (result_to_score[&result.best_result.to_string()], result.best_result),
+                (
+                    result_to_score[&result.best_result.to_string()],
+                    result.best_result,
+                ),
             );
         }
 

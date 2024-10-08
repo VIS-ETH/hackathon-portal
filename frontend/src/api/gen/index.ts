@@ -46,7 +46,6 @@ import type {
   ProjectForCreate,
   ProjectForUpdate,
   ProjectIdDTO,
-  ProjectPreferences,
   PublicError,
   PutEventRolesBody,
   PutTeamRolesBody,
@@ -5677,7 +5676,7 @@ export const getTeamProjectPreferences = (
   options?: SecondParameter<typeof customInstance>,
   signal?: AbortSignal,
 ) => {
-  return customInstance<ProjectPreferences>(
+  return customInstance<string[]>(
     { url: `/api/teams/${teamId}/project-preferences`, method: "GET", signal },
     options,
   );
@@ -5826,15 +5825,15 @@ export function useGetTeamProjectPreferences<
 
 export const updateTeamProjectPreferences = (
   teamId: string,
-  projectPreferences: ProjectPreferences,
+  updateTeamProjectPreferencesBody: string[],
   options?: SecondParameter<typeof customInstance>,
 ) => {
-  return customInstance<ProjectPreferences>(
+  return customInstance<string[]>(
     {
       url: `/api/teams/${teamId}/project-preferences`,
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      data: projectPreferences,
+      data: updateTeamProjectPreferencesBody,
     },
     options,
   );
@@ -5847,21 +5846,21 @@ export const getUpdateTeamProjectPreferencesMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof updateTeamProjectPreferences>>,
     TError,
-    { teamId: string; data: ProjectPreferences },
+    { teamId: string; data: string[] },
     TContext
   >;
   request?: SecondParameter<typeof customInstance>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof updateTeamProjectPreferences>>,
   TError,
-  { teamId: string; data: ProjectPreferences },
+  { teamId: string; data: string[] },
   TContext
 > => {
   const { mutation: mutationOptions, request: requestOptions } = options ?? {};
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof updateTeamProjectPreferences>>,
-    { teamId: string; data: ProjectPreferences }
+    { teamId: string; data: string[] }
   > = (props) => {
     const { teamId, data } = props ?? {};
 
@@ -5874,7 +5873,7 @@ export const getUpdateTeamProjectPreferencesMutationOptions = <
 export type UpdateTeamProjectPreferencesMutationResult = NonNullable<
   Awaited<ReturnType<typeof updateTeamProjectPreferences>>
 >;
-export type UpdateTeamProjectPreferencesMutationBody = ProjectPreferences;
+export type UpdateTeamProjectPreferencesMutationBody = string[];
 export type UpdateTeamProjectPreferencesMutationError = PublicError;
 
 export const useUpdateTeamProjectPreferences = <
@@ -5884,14 +5883,14 @@ export const useUpdateTeamProjectPreferences = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof updateTeamProjectPreferences>>,
     TError,
-    { teamId: string; data: ProjectPreferences },
+    { teamId: string; data: string[] },
     TContext
   >;
   request?: SecondParameter<typeof customInstance>;
 }): UseMutationResult<
   Awaited<ReturnType<typeof updateTeamProjectPreferences>>,
   TError,
-  { teamId: string; data: ProjectPreferences },
+  { teamId: string; data: string[] },
   TContext
 > => {
   const mutationOptions =
