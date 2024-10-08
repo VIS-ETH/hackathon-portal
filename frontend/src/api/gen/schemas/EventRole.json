@@ -1,5 +1,0 @@
-{
-  "type": "string",
-  "enum": ["Admin", "Mentor", "Participant", "SidequestMaster", "Stakeholder"],
-  "x-readme-ref-name": "EventRole"
-}

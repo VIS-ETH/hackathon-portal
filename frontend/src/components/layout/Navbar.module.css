@@ -1,0 +1,91 @@
+.tabsList {
+  &::before {
+    display: none;
+  }
+}
+
+.tab {
+  font-weight: 500;
+  height: rem(35);
+  background-color: transparent;
+  position: relative;
+  border: none;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+
+  &::before,
+  &::after {
+    background-color: light-dark(
+      var(--mantine-color-gray-2),
+      var(--mantine-color-dark-7)
+    ) !important;
+  }
+
+  &:hover {
+    background-color: light-dark(
+      var(--mantine-color-gray-1),
+      var(--mantine-color-dark-5)
+    );
+  }
+
+  &[data-active] {
+    background-color: light-dark(
+      var(--mantine-color-white),
+      var(--mantine-color-dark-7)
+    );
+  }
+
+  /* Inverted border radius for the bottom corners */
+  &[data-active]::before,
+  &[data-active]::after {
+    content: "";
+    position: absolute;
+    bottom: 0px;
+    height: 8px;
+    width: 16px;
+    background-color: transparent !important;
+  }
+
+  &[data-active]::before {
+    left: -16px;
+    box-shadow: 8px 0 0 0 white;
+    border-bottom-right-radius: 8px;
+  }
+
+  &[data-active]::after {
+    right: -16px;
+    box-shadow: -8px 0 0 0 white;
+    border-bottom-left-radius: 8px;
+  }
+}
+
+.mobileLink {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding-left: var(--mantine-spacing-md);
+  padding-right: var(--mantine-spacing-md);
+  text-decoration: none;
+  color: light-dark(var(--mantine-color-black), var(--mantine-color-white));
+  font-weight: 500;
+  font-size: var(--mantine-font-size-sm);
+
+  @media (max-width: $mantine-breakpoint-sm) {
+    height: rem(42px);
+    width: 100%;
+  }
+
+  @mixin hover {
+    background-color: light-dark(
+      var(--mantine-color-gray-0),
+      var(--mantine-color-dark-6)
+    );
+  }
+}
+
+.mobileLinkActive {
+  background-color: light-dark(
+    var(--mantine-color-gray-1),
+    var(--mantine-color-dark-6)
+  );
+}

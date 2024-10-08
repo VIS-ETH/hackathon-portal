@@ -61,6 +61,7 @@ pub struct EventForUpdate {
     pub documentation_content: Option<String>,
     pub max_team_size: Option<u32>,
     pub sidequest_cooldown: Option<u32>,
+    pub is_read_only: Option<bool>,
     pub is_feedback_visible: Option<bool>,
     pub visibility: Option<EventVisibility>,
     pub phase: Option<EventPhase>,

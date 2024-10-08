@@ -1,5 +1,0 @@
-{
-  "type": "string",
-  "enum": ["Private", "Public", "Restricted"],
-  "x-readme-ref-name": "EventVisibility"
-}

@@ -109,9 +109,36 @@ pub async fn get_teams(
         (status = StatusCode::OK, body = HashMap<Uuid, HashSet<TeamRole>>),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
+    params(
+        ("event_id"= Uuid, Query, description = "Filter by event id"),
+    )
 )]
-pub async fn get_teams_roles(ctx: Ctx) -> ApiJson<TeamRolesMap> {
-    let roles = ctx.roles().team.clone();
+pub async fn get_teams_roles(ctx: Ctx,
+                             State(state): State<ApiState>, Query(query): Query<EventIdQuery>,
+) -> ApiJson<TeamRolesMap> {
+    let event = state.event_service.get_event(query.event_id).await?;
+    let groups = Groups::from_event(ctx.roles(), event.id);
+
+    if !groups.can_view_event(event.visibility) {
+        return Err(ApiError::Forbidden {
+            action: "view team roles for this event".to_string(),
+        });
+    }
+
+
+    let mut roles = HashMap::new();
+    let all_roles = ctx.roles().team.clone();
+
+    // TODO: inefficient
+    let teams = state.team_service.get_teams(event.id).await?;
+
+    for team in teams {
+        if let Some(team_roles) = all_roles.get(&team.id) {
+            roles.insert(team.id, team_roles.clone());
+        }
+    }
+
+
     Ok(Json(roles))
 }
 
@@ -485,7 +512,7 @@ pub async fn update_team_project_preferences(
     get,
     path = "/api/teams/{team_id}/password",
     responses(
-        (status = StatusCode::OK, body = TeamPassword),
+        (status = StatusCode::OK, body = PasswordDTO),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
 )]

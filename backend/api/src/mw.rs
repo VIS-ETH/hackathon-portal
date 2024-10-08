@@ -42,10 +42,11 @@ pub async fn mw_resolve_ctx(
     mut req: Request<Body>,
     next: Next,
 ) -> Response {
-    let Some(auth_id) = req
+    let Some(mut auth_id) = req
         .headers()
         .get(AUTH_ID_KEY)
         .and_then(|value| value.to_str().ok())
+        .and_then(|value| Some(value.to_string()))
     else {
         return next.run(req).await;
     };
@@ -58,9 +59,21 @@ pub async fn mw_resolve_ctx(
         return next.run(req).await;
     };
 
+    // Normalize ETH email addresses
+    // discard e.g. @student.ethz.ch, @inf.ethz.ch, etc
+    if auth_id.ends_with(".ethz.ch") {
+        let parts: Vec<&str> = auth_id.split('@').collect();
+
+        if parts.len() != 2 {
+            return next.run(req).await;
+        }
+
+        auth_id = format!("{}@ethz.ch", parts[0]);
+    }
+
     let Ok(user) = state
         .user_service
-        .create_or_get_user(auth_id, Some(name))
+        .create_or_get_user(&auth_id, Some(name))
         .await
     else {
         return next.run(req).await;

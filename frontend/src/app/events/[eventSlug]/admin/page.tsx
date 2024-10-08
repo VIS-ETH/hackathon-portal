@@ -1,0 +1,88 @@
+"use client";
+
+import PageSkeleton from "@/components/PageSkeleton";
+import DocumentationContentControls from "@/components/admin/DocumentationContentControls";
+import EventAffiliatesTable from "@/components/admin/EventAffiliatesTable";
+import EventSettings from "@/components/admin/EventSettings";
+import InvitationControls from "@/components/admin/InvitationControls";
+import TeamPasswordsControls from "@/components/admin/TeamPasswordsControls";
+import TeamsTable from "@/components/admin/TeamsTable";
+import WelcomeContentControls from "@/components/admin/WelcomeContentControls";
+import { useResolveParams } from "@/hooks/useResolveParams";
+import { iconProps } from "@/styles/common";
+
+import { useState } from "react";
+
+import { Stack, Tabs } from "@mantine/core";
+
+import {
+  IconAlignJustified,
+  IconSettings,
+  IconShieldHalf,
+  IconUsers,
+} from "@tabler/icons-react";
+
+const Admin = () => {
+  const { event, refetchEvent } = useResolveParams();
+  const [activeTab, setActiveTab] = useState<string | null>();
+
+  if (!event) {
+    return <PageSkeleton />;
+  }
+
+  return (
+    <Tabs defaultValue="general" mt="-md" onChange={setActiveTab}>
+      <Tabs.List>
+        <Tabs.Tab value="general" leftSection={<IconSettings {...iconProps} />}>
+          General
+        </Tabs.Tab>
+        <Tabs.Tab value="roles" leftSection={<IconShieldHalf {...iconProps} />}>
+          Roles
+        </Tabs.Tab>
+        <Tabs.Tab value="teams" leftSection={<IconUsers {...iconProps} />}>
+          Teams
+        </Tabs.Tab>
+        <Tabs.Tab
+          value="welcome"
+          leftSection={<IconAlignJustified {...iconProps} />}
+        >
+          Welcome Content
+        </Tabs.Tab>
+        <Tabs.Tab
+          value="documentation"
+          leftSection={<IconAlignJustified {...iconProps} />}
+        >
+          Documentation Content
+        </Tabs.Tab>
+      </Tabs.List>
+
+      <Tabs.Panel value="general" mt="md">
+        <EventSettings event={event} refetch={refetchEvent} />
+      </Tabs.Panel>
+
+      <Tabs.Panel value="roles" mt="md">
+        <Stack>
+          <EventAffiliatesTable event={event} />
+          <InvitationControls event={event} />
+        </Stack>
+      </Tabs.Panel>
+
+      <Tabs.Panel value="teams" mt="md">
+        <Stack>
+          {activeTab === "teams" && <TeamsTable event={event} />}
+          <TeamPasswordsControls event={event} />
+        </Stack>
+      </Tabs.Panel>
+
+      <Tabs.Panel value="welcome" mt="md">
+        <WelcomeContentControls event={event} refetch={refetchEvent} />
+      </Tabs.Panel>
+
+      <Tabs.Panel value="documentation" mt="md">
+        <DocumentationContentControls event={event} refetch={refetchEvent} />
+      </Tabs.Panel>
+    </Tabs>
+  );
+};
+
+export default Admin;

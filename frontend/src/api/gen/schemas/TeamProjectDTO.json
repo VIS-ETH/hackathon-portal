@@ -1,7 +1,0 @@
-{
-  "type": "object",
-  "properties": {
-    "project_id": { "type": "string", "format": "uuid", "nullable": true }
-  },
-  "x-readme-ref-name": "TeamProjectDTO"
-}

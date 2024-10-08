@@ -541,8 +541,7 @@ impl SidequestService {
             .await?;
 
         let scores = scores.into_iter().fold(HashMap::new(), |mut acc, score| {
-            let mut default = vec![];
-            let entry = acc.get_mut(&score.team_id).unwrap_or(&mut default);
+            let mut entry = acc.entry(score.team_id).or_insert(vec![]);
 
             entry.push(HistoryEntry {
                 date: score.valid_at,
