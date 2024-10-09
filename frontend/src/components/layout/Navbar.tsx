@@ -5,7 +5,7 @@ import UserMenu from "./UserMenu";
 
 import { useGetMe } from "@/api/gen";
 import { useResolveParams } from "@/hooks/useResolveParams";
-import { containerProps } from "@/styles/common";
+import { badgeProps, containerProps } from "@/styles/common";
 
 import {
   Badge,
@@ -110,7 +110,7 @@ const Navbar = () => {
             {event?.name ?? "Loading"}
           </Text>
           {event && (
-            <Badge variant="default" size="md" radius="sm">
+            <Badge {...badgeProps} visibleFrom="sm">
               {event.phase}
             </Badge>
           )}

@@ -4,11 +4,11 @@
 ## Docker
 
 ```bash
-docker volume create hackd_db
-docker network create hackd_public
-docker network create hackd_private
+docker volume create portal_db
+docker network create portal_public
+docker network create portal_private
 
-cp stack.env.example stack.env # and fill in the values
+cp .env.j2 .env # and fill in the missing values
 
 docker-compose up -d db         # just run the db
 docker-compose up -d --build    # run the whole stack
@@ -17,5 +17,5 @@ docker-compose up -d --build    # run the whole stack
 ## DB
 
 ```bash
-make schema-push
+make db-push
 ```
