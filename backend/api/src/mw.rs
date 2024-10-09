@@ -104,8 +104,12 @@ pub async fn mw_map_response(
 fn extract_header(headers: &HeaderMap, key: &str) -> Option<String> {
     headers
         .get(key)
-        .and_then(|value| value.to_str().ok())
-        .map(String::from)
+        .and_then(|value| {
+            // value.to_str() apparently fails on non-ascii characters
+            let bytes = value.as_bytes();
+            let lossy = String::from_utf8_lossy(bytes);
+            Some(lossy.to_string())
+        })
 }
 
 /// Ensures that all ETH email addresses are normalized to the following format:
