@@ -49,14 +49,16 @@ const EventTimelineItem = ({
               <FormattedDateTimeRange
                 from={new Date(`${appointment.start}Z`)}
                 to={new Date(`${appointment.end}Z`)}
-                dateStyle="short"
-                timeStyle="short"
+                weekday="long"
+                hour="2-digit"
+                minute="2-digit"
               />
             ) : (
               <FormattedDate
                 value={new Date(`${appointment.start}Z`)}
-                dateStyle="short"
-                timeStyle="short"
+                weekday="long"
+                hour="2-digit"
+                minute="2-digit"
               />
             )}
           </Text>
