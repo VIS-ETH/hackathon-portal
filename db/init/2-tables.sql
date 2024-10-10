@@ -1,24 +1,5 @@
-create type event_phase as enum ('REGISTRATION', 'HACKING', 'GRADING', 'FINISHED');
 
-alter type event_phase owner to portal;
-
-create type event_role as enum ('ADMIN', 'MENTOR', 'STAKEHOLDER', 'PARTICIPANT', 'SIDEQUEST_MASTER');
-
-alter type event_role owner to portal;
-
-create type event_visibility as enum ('HIDDEN', 'INTERNAL', 'PUBLIC');
-
-alter type event_visibility owner to portal;
-
-create type team_role as enum ('MENTOR', 'MEMBER');
-
-alter type team_role owner to portal;
-
-create type expert_rating_category as enum ('FUNCTIONALITY', 'UX', 'PRESENTATION');
-
-alter type expert_rating_category owner to portal;
-
-create table event
+create table if not exists event
 (
     id                    uuid default gen_random_uuid() not null
         primary key,
@@ -39,7 +20,7 @@ create table event
 alter table event
     owner to portal;
 
-create table appointment
+create table if not exists appointment
 (
     id          uuid default gen_random_uuid() not null
         primary key,
@@ -56,13 +37,13 @@ create table appointment
 alter table appointment
     owner to portal;
 
-create unique index event_name_key
+create unique index if not exists event_name_key
     on event (name);
 
-create unique index event_slug_key
+create unique index if not exists event_slug_key
     on event (slug);
 
-create table project
+create table if not exists project
 (
     id       uuid default gen_random_uuid() not null
         primary key,
@@ -77,13 +58,13 @@ create table project
 alter table project
     owner to portal;
 
-create unique index project_event_id_name_key
+create unique index if not exists project_event_id_name_key
     on project (event_id, name);
 
-create unique index project_event_id_slug_key
+create unique index if not exists project_event_id_slug_key
     on project (event_id, slug);
 
-create table sidequest
+create table if not exists sidequest
 (
     id                      uuid default gen_random_uuid() not null
         primary key,
@@ -99,13 +80,13 @@ create table sidequest
 alter table sidequest
     owner to portal;
 
-create unique index sidequest_event_id_name_key
+create unique index if not exists sidequest_event_id_name_key
     on sidequest (event_id, name);
 
-create unique index sidequest_event_id_slug_key
+create unique index if not exists sidequest_event_id_slug_key
     on sidequest (event_id, slug);
 
-create table team
+create table if not exists team
 (
     id         uuid default gen_random_uuid() not null
         primary key,
@@ -124,7 +105,7 @@ create table team
 alter table team
     owner to portal;
 
-create table project_preference
+create table if not exists project_preference
 (
     team_id    uuid    not null
         references team
@@ -139,7 +120,7 @@ create table project_preference
 alter table project_preference
     owner to portal;
 
-create table sidequest_score
+create table if not exists sidequest_score
 (
     id       uuid default gen_random_uuid() not null
         primary key,
@@ -153,13 +134,13 @@ create table sidequest_score
 alter table sidequest_score
     owner to portal;
 
-create unique index team_event_id_name_key
+create unique index if not exists team_event_id_name_key
     on team (event_id, name);
 
-create unique index team_event_id_slug_key
+create unique index if not exists team_event_id_slug_key
     on team (event_id, slug);
 
-create table "user"
+create table if not exists "user"
 (
     id      uuid default gen_random_uuid() not null
         primary key,
@@ -171,7 +152,7 @@ create table "user"
 alter table "user"
     owner to portal;
 
-create table event_role_assignment
+create table if not exists event_role_assignment
 (
     user_id  uuid       not null
         references "user"
@@ -186,7 +167,7 @@ create table event_role_assignment
 alter table event_role_assignment
     owner to portal;
 
-create table sidequest_attempt
+create table if not exists sidequest_attempt
 (
     id           uuid default gen_random_uuid() not null
         primary key,
@@ -203,7 +184,7 @@ create table sidequest_attempt
 alter table sidequest_attempt
     owner to portal;
 
-create table team_role_assignment
+create table if not exists team_role_assignment
 (
     user_id uuid      not null
         references "user"
@@ -218,13 +199,13 @@ create table team_role_assignment
 alter table team_role_assignment
     owner to portal;
 
-create unique index user_auth_id_key
+create unique index if not exists user_auth_id_key
     on "user" (auth_id);
 
-create unique index user_name_index_key
+create unique index if not exists user_name_index_key
     on "user" (name, index);
 
-create table expert_rating
+create table if not exists expert_rating
 (
     id       uuid default gen_random_uuid() not null
         primary key,
@@ -241,5 +222,5 @@ create table expert_rating
 alter table expert_rating
     owner to portal;
 
-create unique index expert_rating_team_id_user_id_category_key
+create unique index if not exists expert_rating_team_id_user_id_category_key
     on expert_rating (team_id, user_id, category);
