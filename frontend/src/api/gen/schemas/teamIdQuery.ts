@@ -5,6 +5,6 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface ProjectPreferences {
-  project_preferences: string[];
+export interface TeamIdQuery {
+  team_id: string;
 }

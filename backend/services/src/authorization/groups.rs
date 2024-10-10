@@ -30,14 +30,17 @@ graph {
     EventStaff [label="EventStaff"]
     TeamAffiliate [label="TeamAffiliate"]
     EventAffiliate [label="EventAffiliate"]
+    ExpertRater [label="ExpertRater"]
     EventGuest [label="EventGuest"]
 
     { rank=same; EventSidequestMaster, EventStakeholder, EventMentor }
 
-    EventAdmin -- {TeamMember, TeamMentor, EventSidequestMaster, EventStakeholder}
+    EventAdmin -- {EventStakeholder, TeamMentor, TeamMember, EventSidequestMaster}
+    ExpertRater -- {EventStaff}
     {TeamMember, TeamMentor} -- TeamAffiliate
     TeamMentor -- EventMentor
-    {EventMentor, EventStakeholder, EventSidequestMaster} -- EventStaff
+    {EventMentor, EventStakeholder} -- ExpertRater
+    EventSidequestMaster -- EventStaff
     TeamAffiliate -- EventAffiliate
     {EventParticipant, EventStaff} -- EventAffiliate
     TeamMember -- EventParticipant
@@ -63,6 +66,8 @@ pub enum Group {
     TeamAffiliate,
     EventAffiliate,
     EventGuest,
+    // Rating
+    ExpertRater,
 }
 
 impl From<EventRole> for Group {
@@ -101,14 +106,15 @@ impl PartialOrd for Group {
                 | Self::EventGuest
                 | Self::EventAffiliate
                 | Self::EventStaff
-                | Self::TeamAffiliate => Some(Ordering::Greater),
+                | Self::TeamAffiliate
+                | Self::ExpertRater => Some(Ordering::Greater),
             },
             Self::EventMentor => match other {
                 Self::EventAdmin | Self::TeamMentor => Some(Ordering::Less),
 
                 Self::EventMentor => Some(Ordering::Equal),
 
-                Self::EventGuest | Self::EventAffiliate | Self::EventStaff => {
+                Self::EventGuest | Self::EventAffiliate | Self::EventStaff | Self::ExpertRater => {
                     Some(Ordering::Greater)
                 }
 
@@ -139,7 +145,7 @@ impl PartialOrd for Group {
 
                 Self::EventStakeholder => Some(Ordering::Equal),
 
-                Self::EventStaff | Self::EventAffiliate | Self::EventGuest => {
+                Self::EventStaff | Self::EventAffiliate | Self::EventGuest | Self::ExpertRater => {
                     Some(Ordering::Greater)
                 }
                 _ => None,
@@ -165,7 +171,8 @@ impl PartialOrd for Group {
                 | Self::EventStaff
                 | Self::EventAffiliate
                 | Self::EventGuest
-                | Self::TeamAffiliate => Some(Ordering::Greater),
+                | Self::TeamAffiliate
+                | Self::ExpertRater => Some(Ordering::Greater),
 
                 _ => None,
             },
@@ -174,7 +181,8 @@ impl PartialOrd for Group {
                 | Self::EventMentor
                 | Self::EventSidequestMaster
                 | Self::EventStakeholder
-                | Self::TeamMentor => Some(Ordering::Less),
+                | Self::TeamMentor
+                | Self::ExpertRater => Some(Ordering::Less),
 
                 Self::EventStaff => Some(Ordering::Equal),
 
@@ -200,7 +208,8 @@ impl PartialOrd for Group {
                 | Self::TeamMember
                 | Self::TeamMentor
                 | Self::EventStaff
-                | Self::TeamAffiliate => Some(Ordering::Less),
+                | Self::TeamAffiliate
+                | Self::ExpertRater => Some(Ordering::Less),
 
                 Self::EventAffiliate => Some(Ordering::Equal),
 
@@ -216,9 +225,24 @@ impl PartialOrd for Group {
                 | Self::TeamMentor
                 | Self::EventAffiliate
                 | Self::EventStaff
-                | Self::TeamAffiliate => Some(Ordering::Less),
+                | Self::TeamAffiliate
+                | Self::ExpertRater => Some(Ordering::Less),
 
                 Self::EventGuest => Some(Ordering::Equal),
+            },
+            Self::ExpertRater => match other {
+                Self::EventAdmin
+                | Self::TeamMentor
+                | Self::EventMentor
+                | Self::EventStakeholder => Some(Ordering::Less),
+
+                Self::ExpertRater => Some(Ordering::Equal),
+
+                Self::EventStaff | Self::EventAffiliate | Self::EventGuest => {
+                    Some(Ordering::Greater)
+                }
+
+                _ => None,
             },
         }
     }

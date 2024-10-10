@@ -81,7 +81,13 @@ pub async fn get_my_policies(
         unreachable!("Query validation ensures exactly one of event_id or team_id is set")
     };
 
-    let policies = Policies::new(groups, event.visibility, event.phase, event.is_read_only);
+    let policies = Policies::new(
+        groups,
+        event.visibility,
+        event.phase,
+        event.is_read_only,
+        event.is_feedback_visible,
+    );
 
     Ok(Json(policies))
 }

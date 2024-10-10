@@ -7,6 +7,7 @@ pub mod prelude;
 pub mod appointment;
 pub mod event;
 pub mod event_role_assignment;
+pub mod expert_rating;
 pub mod project;
 pub mod project_preference;
 pub mod sea_orm_active_enums;
@@ -164,6 +165,36 @@ impl DbRepository {
             })?;
 
         Ok(team)
+    }
+    // endregion
+
+    // region: Expert Rating
+    pub async fn get_expert_ratings(
+        &self,
+        team_id: Uuid,
+    ) -> RepositoryResult<Vec<expert_rating::Model>> {
+        let expert_ratings = expert_rating::Entity::find()
+            .filter(expert_rating::Column::TeamId.eq(team_id))
+            .order_by_asc(expert_rating::Column::Id)
+            .all(self.conn())
+            .await?;
+
+        Ok(expert_ratings)
+    }
+
+    pub async fn get_expert_rating(
+        &self,
+        expert_rating_id: Uuid,
+    ) -> RepositoryResult<expert_rating::Model> {
+        let expert_rating = expert_rating::Entity::find_by_id(expert_rating_id)
+            .one(self.conn())
+            .await?
+            .ok_or_else(|| RepositoryError::ResourceNotFound {
+                resource: "Expert Rating".to_string(),
+                id: expert_rating_id.to_string(),
+            })?;
+
+        Ok(expert_rating)
     }
     // endregion
 

@@ -1,6 +1,7 @@
 mod appointments;
 mod docs;
 mod events;
+mod expert_ratings;
 mod projects;
 mod sidequest_attempts;
 mod sidequests;
@@ -27,6 +28,7 @@ pub fn get_router(state: &ApiState) -> Router {
         .nest("/users", users::get_router(state))
         .nest("/events", events::get_router(state))
         .nest("/teams", teams::get_router(state))
+        .nest("/expert-ratings", expert_ratings::get_router(state))
         .nest("/projects", projects::get_router(state))
         .nest("/sidequests", sidequests::get_router(state))
         .nest("/sidequest-attempts", sidequest_attempts::get_router(state))
@@ -37,10 +39,8 @@ pub async fn get_api_router(api_state: ApiState) -> ApiResult<Router> {
     let origins = if cfg!(debug_assertions) {
         vec![
             "http://127.0.0.1:3000".parse()?,
-            "http://127.0.0.1:3001".parse()?,
             "http://127.0.0.1:8080".parse()?,
             "http://localhost:3000".parse()?,
-            "http://localhost:3001".parse()?,
             "http://localhost:8080".parse()?,
         ]
     } else {

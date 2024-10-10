@@ -14,6 +14,10 @@ create type team_role as enum ('MENTOR', 'MEMBER');
 
 alter type team_role owner to portal;
 
+create type expert_rating_category as enum ('FUNCTIONALITY', 'UX', 'PRESENTATION');
+
+alter type expert_rating_category owner to portal;
+
 create table event
 (
     id                    uuid default gen_random_uuid() not null
@@ -219,3 +223,23 @@ create unique index user_auth_id_key
 
 create unique index user_name_index_key
     on "user" (name, index);
+
+create table expert_rating
+(
+    id       uuid default gen_random_uuid() not null
+        primary key,
+    team_id  uuid                           not null
+        references team
+            on update cascade on delete restrict,
+    user_id  uuid                           not null
+        references "user"
+            on update cascade on delete restrict,
+    category expert_rating_category         not null,
+    rating   double precision               not null
+);
+
+alter table expert_rating
+    owner to portal;
+
+create unique index expert_rating_team_id_user_id_category_key
+    on expert_rating (team_id, user_id, category);

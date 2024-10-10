@@ -1,6 +1,6 @@
 import NoEntriesTr from "../NoEntriesTr";
 
-import { useGetSidequestsOverviewLeaderboard } from "@/api/gen";
+import { useGetSidequestsLeaderboard } from "@/api/gen";
 import { cardProps } from "@/styles/common";
 
 import { Card, Table } from "@mantine/core";
@@ -12,8 +12,7 @@ type OverviewLeaderboardTableProps = {
 const OverviewLeaderboardTable = ({
   eventId,
 }: OverviewLeaderboardTableProps) => {
-  const { data: leaderboard = [] } =
-    useGetSidequestsOverviewLeaderboard(eventId);
+  const { data: leaderboard = [] } = useGetSidequestsLeaderboard(eventId);
 
   return (
     <Card {...cardProps}>

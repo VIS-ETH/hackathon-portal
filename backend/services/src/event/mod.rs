@@ -2,6 +2,8 @@ pub mod models;
 
 use crate::authorization::AuthorizationService;
 use crate::event::models::{Event, EventForCreate, EventForUpdate};
+use crate::rating::RatingService;
+use crate::sidequest::SidequestService;
 use crate::user::models::{ReducedUser, UserForCreate};
 use crate::user::UserService;
 use crate::ServiceResult;
@@ -17,6 +19,8 @@ use std::sync::Arc;
 pub struct EventService {
     authorization_service: Arc<AuthorizationService>,
     user_service: Arc<UserService>,
+    sidequest_service: Arc<SidequestService>,
+    rating_service: Arc<RatingService>,
     db_repo: DbRepository,
 }
 
@@ -25,11 +29,15 @@ impl EventService {
     pub fn new(
         authorization_service: Arc<AuthorizationService>,
         user_service: Arc<UserService>,
+        sidequest_service: Arc<SidequestService>,
+        rating_service: Arc<RatingService>,
         db_repo: DbRepository,
     ) -> Self {
         Self {
             authorization_service,
             user_service,
+            sidequest_service,
+            rating_service,
             db_repo,
         }
     }
@@ -186,5 +194,29 @@ impl EventService {
             .await?;
 
         Ok(new_users)
+    }
+
+    pub async fn get_leaderboard(&self, event_id: Uuid) -> ServiceResult<Vec<Uuid>> {
+        let expert_leaderboard = self.rating_service.get_expert_leaderboard(event_id).await?;
+        let sidequest_leaderboard = self.sidequest_service.get_leaderboard(event_id).await?;
+
+        let mut seen = HashSet::new();
+        let mut merged = Vec::new();
+
+        for team in expert_leaderboard.into_iter().take(3) {
+            seen.insert(team.team_id);
+            merged.push(team.team_id);
+        }
+
+        for team in sidequest_leaderboard.into_iter().take(3) {
+            if seen.contains(&team.team_id) {
+                continue;
+            }
+
+            seen.insert(team.team_id);
+            merged.push(team.team_id);
+        }
+
+        Ok(merged)
     }
 }
