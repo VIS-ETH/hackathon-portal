@@ -136,7 +136,7 @@ impl TeamService {
         Ok(())
     }
 
-    /// (Re)assigns the team indices (1-based) based on the ascending ordering of the team's project_id and id.
+    /// (Re)assigns the team indices (1-based) based on the ascending ordering of the team's `project_id` and `id`.
     /// Warning: This must only be called if the event has never left the REGISTRATION phase (e.g. since the VM domain depends on the team indices).
     pub async fn index_teams(&self, event_id: Uuid) -> ServiceResult<Vec<Team>> {
         let mut teams = self.db_repo.get_teams(event_id).await?;

@@ -72,7 +72,7 @@ const InvitationControls = ({ event }: InvitationControlsProps) => {
             {...(textareaProps as TextareaProps)}
             value={input}
             onChange={(event) => setInput(event.currentTarget.value)}
-            description="User Auth IDs. ETH email addresses must be normalized, e.g. always end with '@ethz.ch'."
+            description="User Auth IDs. ETH email addresses must be normalized, e.g. be of the form 'ethzusername@ethz.ch'."
             placeholder={PLACEHOLDER}
           />
           <Group>

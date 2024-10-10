@@ -109,11 +109,12 @@ pub enum ExpertRatingCategory {
 }
 
 impl ExpertRatingCategory {
-    pub fn get_weight(&self) -> f64 {
+    #[must_use]
+    pub const fn get_weight(&self) -> f64 {
         match self {
-            ExpertRatingCategory::Functionality => 0.5,
-            ExpertRatingCategory::Ux => 0.3,
-            ExpertRatingCategory::Presentation => 0.2,
+            Self::Functionality => 0.5,
+            Self::Ux => 0.3,
+            Self::Presentation => 0.2,
         }
     }
 }

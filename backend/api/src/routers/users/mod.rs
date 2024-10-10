@@ -82,7 +82,7 @@ pub async fn get_my_policies(
     };
 
     let policies = Policies::new(
-        groups,
+        &groups,
         event.visibility,
         event.phase,
         event.is_read_only,

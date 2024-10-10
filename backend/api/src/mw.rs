@@ -102,11 +102,11 @@ pub async fn mw_map_response(
 }
 
 fn extract_header(headers: &HeaderMap, key: &str) -> Option<String> {
-    headers.get(key).and_then(|value| {
+    headers.get(key).map(|value| {
         // value.to_str() apparently fails on non-ascii characters
         let bytes = value.as_bytes();
         let lossy = String::from_utf8_lossy(bytes);
-        Some(lossy.to_string())
+        lossy.to_string()
     })
 }
 
@@ -120,7 +120,7 @@ fn normalize_auth_id(auth_id: &str, username: &str) -> String {
     let is_ethz_email = auth_id.ends_with("@ethz.ch") || auth_id.ends_with(".ethz.ch");
 
     if is_ethz_email {
-        return format!("{}@ethz.ch", username);
+        return format!("{username}@ethz.ch");
     }
 
     auth_id

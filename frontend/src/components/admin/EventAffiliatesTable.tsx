@@ -32,7 +32,7 @@ type EventAffiliatesTableProps = {
 };
 
 const EventAffiliatesTable = ({ event }: EventAffiliatesTableProps) => {
-  const [unsafe, setUnsafe] = useState(false);
+  const [dangerous, setDangerous] = useState(false);
   const [roleFilter, setRoleFilter] = useState<EventRole | undefined>();
 
   const { data: affiliates = [], refetch: refetchAffiliates } =
@@ -87,9 +87,9 @@ const EventAffiliatesTable = ({ event }: EventAffiliatesTableProps) => {
             }
           />
           <Checkbox
-            checked={unsafe}
-            onChange={(event) => setUnsafe(event.currentTarget.checked)}
-            label="Accept unsafe changes"
+            checked={dangerous}
+            onChange={(event) => setDangerous(event.currentTarget.checked)}
+            label="Accept dangerous changes"
           />
         </Group>
       </Card.Section>
@@ -111,7 +111,7 @@ const EventAffiliatesTable = ({ event }: EventAffiliatesTableProps) => {
                     key={objectHash(affiliate)}
                     event={event}
                     affiliate={affiliate}
-                    unsafe={unsafe}
+                    dangerous={dangerous}
                     refetch={refetchAffiliates}
                   />
                 ))

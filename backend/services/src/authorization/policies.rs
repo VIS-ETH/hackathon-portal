@@ -22,8 +22,9 @@ pub struct Policies {
 }
 
 impl Policies {
+    #[must_use]
     pub fn new(
-        groups: Groups,
+        groups: &Groups,
         event_visibility: EventVisibility,
         event_phase: EventPhase,
         event_is_ro: bool,
@@ -162,6 +163,7 @@ impl Groups {
         self >= &Group::TeamMember
     }
 
+    #[must_use]
     pub fn can_view_team_feedback(
         &self,
         event_visibility: EventVisibility,

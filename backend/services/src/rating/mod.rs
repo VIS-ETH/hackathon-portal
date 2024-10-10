@@ -11,7 +11,7 @@ use repositories::DbRepository;
 use sea_orm::prelude::*;
 use sea_orm::sea_query::Func;
 use sea_orm::{
-    ActiveModelTrait, FromQueryResult, IntoActiveModel, IntoSimpleExpr, QuerySelect, Set,
+    ActiveModelTrait, IntoActiveModel, IntoSimpleExpr, QuerySelect, Set,
 };
 use std::cmp::Ordering;
 use std::collections::HashMap;
@@ -137,7 +137,6 @@ impl RatingService {
 
         let mut leaderboard = ratings_by_team
             .values()
-            .into_iter()
             .map(|team_ratings| {
                 let team_id = team_ratings[0].team_id;
 
@@ -154,7 +153,7 @@ impl RatingService {
                 let overall_rating = ratings_sum / weights_sum;
 
                 let category_ratings = team_ratings
-                    .into_iter()
+                    .iter()
                     .map(|rating| (rating.category, rating.average))
                     .collect();
 

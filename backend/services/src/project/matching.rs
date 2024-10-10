@@ -57,16 +57,16 @@ impl GroupAssignment {
     fn create_variables(&mut self) {
         for t in &self.teams {
             for p in &self.project {
-                let score = self.preferences.get(&t);
+                let score = self.preferences.get(t);
                 let coeff = match score {
                     None => self.project.len() as i32,
-                    Some(perf) => *perf.get(&p).unwrap_or(&(self.project.len() as i32)),
+                    Some(perf) => *perf.get(p).unwrap_or(&(self.project.len() as i32)),
                 };
 
                 let variable = self.problem.add_var(coeff as f64, (0.0, 1.0));
                 self.variables.push(AssignmentVariable {
-                    team: t.clone(),
-                    project: p.clone(),
+                    team: *t,
+                    project: *p,
                     variable,
                 });
             }
@@ -79,7 +79,7 @@ impl GroupAssignment {
                 .clone()
                 .into_iter()
                 .filter_map(|var| {
-                    if var.project == p.clone() {
+                    if var.project == *p {
                         Some((var.variable, 1.0))
                     } else {
                         None
@@ -99,7 +99,7 @@ impl GroupAssignment {
                 .clone()
                 .into_iter()
                 .filter_map(|var| {
-                    if var.team == t.clone() {
+                    if var.team == *t {
                         Some((var.variable, 1.0))
                     } else {
                         None
@@ -111,7 +111,7 @@ impl GroupAssignment {
         }
     }
 
-    fn get_mapping(&mut self, sol: Solution) -> HashMap<Uuid, Uuid> {
+    fn get_mapping(&mut self, sol: &Solution) -> HashMap<Uuid, Uuid> {
         let mut solution = HashMap::<Uuid, Uuid>::new();
         for var in &self.variables {
             let res = *sol.var_value(var.variable);
@@ -131,6 +131,6 @@ impl GroupAssignment {
                 sol
             }
         };
-        Ok(self.get_mapping(sol))
+        Ok(self.get_mapping(&sol))
     }
 }
