@@ -424,7 +424,7 @@ impl SidequestService {
         Ok(scores)
     }
 
-    pub async fn get_overview_leaderboard(
+    pub async fn get_leaderboard(
         &self,
         event_id: Uuid,
     ) -> ServiceResult<Vec<TeamLeaderboardEntry>> {

@@ -385,6 +385,43 @@
         }
       }
     },
+    "/api/events/{event_id}/expert-ratings/leaderboard": {
+      "get": {
+        "tags": ["crate::routers::events"],
+        "operationId": "get_expert_ratings_leaderboard",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExpertRatingLeaderboardEntry"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/events/{event_id}/invite": {
       "post": {
         "tags": ["crate::routers::events"],
@@ -414,6 +451,41 @@
                 "schema": {
                   "type": "array",
                   "items": { "$ref": "#/components/schemas/ReducedUser" }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/events/{event_id}/leaderboard": {
+      "get": {
+        "tags": ["crate::routers::events"],
+        "operationId": "get_leaderboard",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "type": "string", "format": "uuid" }
                 }
               }
             }
@@ -655,7 +727,7 @@
     "/api/events/{event_id}/sidequests/leaderboard": {
       "get": {
         "tags": ["crate::routers::events"],
-        "operationId": "get_sidequests_overview_leaderboard",
+        "operationId": "get_sidequests_leaderboard",
         "parameters": [
           {
             "name": "event_id",
@@ -798,6 +870,174 @@
                   "type": "array",
                   "items": { "$ref": "#/components/schemas/Team" }
                 }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/expert-ratings": {
+      "get": {
+        "tags": ["crate::routers::expert_ratings"],
+        "operationId": "get_expert_ratings",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "query",
+            "description": "Filter by team id",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/ExpertRating" }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["crate::routers::expert_ratings"],
+        "operationId": "create_expert_rating",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ExpertRatingForCreate" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ExpertRating" }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/expert-ratings/{rating_id}": {
+      "get": {
+        "tags": ["crate::routers::expert_ratings"],
+        "operationId": "get_expert_rating",
+        "parameters": [
+          {
+            "name": "rating_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ExpertRating" }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["crate::routers::expert_ratings"],
+        "operationId": "delete_expert_rating",
+        "parameters": [
+          {
+            "name": "rating_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ExpertRating" }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["crate::routers::expert_ratings"],
+        "operationId": "update_expert_rating",
+        "parameters": [
+          {
+            "name": "rating_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ExpertRatingForUpdate" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ExpertRating" }
               }
             }
           },
@@ -1766,6 +2006,44 @@
         }
       }
     },
+    "/api/teams/{team_id}/expert-ratings": {
+      "get": {
+        "tags": ["crate::routers::teams"],
+        "operationId": "get_team_expert_ratings",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "number",
+                    "format": "double"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/teams/{team_id}/password": {
       "get": {
         "tags": ["crate::routers::teams"],
@@ -2421,9 +2699,51 @@
         "type": "string",
         "enum": ["Hidden", "Internal", "Public"]
       },
+      "ExpertRating": {
+        "type": "object",
+        "required": ["id", "user_id", "team_id", "category", "rating"],
+        "properties": {
+          "category": { "$ref": "#/components/schemas/ExpertRatingCategory" },
+          "id": { "type": "string", "format": "uuid" },
+          "rating": { "type": "number", "format": "double" },
+          "team_id": { "type": "string", "format": "uuid" },
+          "user_id": { "type": "string", "format": "uuid" }
+        }
+      },
+      "ExpertRatingCategory": {
+        "type": "string",
+        "enum": ["Functionality", "Ux", "Presentation"]
+      },
+      "ExpertRatingForCreate": {
+        "type": "object",
+        "required": ["team_id", "category", "rating"],
+        "properties": {
+          "category": { "$ref": "#/components/schemas/ExpertRatingCategory" },
+          "rating": { "type": "number", "format": "double" },
+          "team_id": { "type": "string", "format": "uuid" }
+        }
+      },
+      "ExpertRatingForUpdate": {
+        "type": "object",
+        "properties": {
+          "rating": { "type": "number", "format": "double", "nullable": true }
+        }
+      },
+      "ExpertRatingLeaderboardEntry": {
+        "type": "object",
+        "required": ["team_id", "rating", "categories"],
+        "properties": {
+          "categories": {
+            "type": "object",
+            "additionalProperties": { "type": "number", "format": "double" }
+          },
+          "rating": { "type": "number", "format": "double" },
+          "team_id": { "type": "string", "format": "uuid" }
+        }
+      },
       "Group": {
         "type": "string",
-        "description": "A group is a power set of roles and has a partial order relation defined on it.\nThis allows for easy permissions testing, e.g. to ensure that a resource is only accessed\nby a user that either is an event admin, event mentor, event sidequest master, or event stakeholder,\nwe can simply write `user_groups >= Group::EventStaff`.\n\nHere is the corresponding Hasse diagram for the group:\n\n```graphviz\ngraph {\n  layout = dot\n  rankdir = TB\n  node [ shape=\"none\" ]\n\n    EventAdmin [label=\"EventAdmin\"]\n    EventMentor [label=\"EventMentor\"]\n    EventParticipant [label=\"EventParticipant\"]\n    EventSidequestMaster [label=\"EventSidequestMaster\"]\n    EventStakeholder [label=\"EventStakeholder\"]\n    TeamMember [label=\"TeamMember\"]\n    TeamMentor [label=\"TeamMentor\"]\n    EventStaff [label=\"EventStaff\"]\n    TeamAffiliate [label=\"TeamAffiliate\"]\n    EventAffiliate [label=\"EventAffiliate\"]\n    EventGuest [label=\"EventGuest\"]\n\n    { rank=same; EventSidequestMaster, EventStakeholder, EventMentor }\n\n    EventAdmin -- {TeamMember, TeamMentor, EventSidequestMaster, EventStakeholder}\n    {TeamMember, TeamMentor} -- TeamAffiliate\n    TeamMentor -- EventMentor\n    {EventMentor, EventStakeholder, EventSidequestMaster} -- EventStaff\n    TeamAffiliate -- EventAffiliate\n    {EventParticipant, EventStaff} -- EventAffiliate\n    TeamMember -- EventParticipant\n    EventAffiliate -- EventGuest\n}\n```\n*",
+        "description": "A group is a power set of roles and has a partial order relation defined on it.\nThis allows for easy permissions testing, e.g. to ensure that a resource is only accessed\nby a user that either is an event admin, event mentor, event sidequest master, or event stakeholder,\nwe can simply write `user_groups >= Group::EventStaff`.\n\nHere is the corresponding Hasse diagram for the group:\n\n```graphviz\ngraph {\n  layout = dot\n  rankdir = TB\n  node [ shape=\"none\" ]\n\n    EventAdmin [label=\"EventAdmin\"]\n    EventMentor [label=\"EventMentor\"]\n    EventParticipant [label=\"EventParticipant\"]\n    EventSidequestMaster [label=\"EventSidequestMaster\"]\n    EventStakeholder [label=\"EventStakeholder\"]\n    TeamMember [label=\"TeamMember\"]\n    TeamMentor [label=\"TeamMentor\"]\n    EventStaff [label=\"EventStaff\"]\n    TeamAffiliate [label=\"TeamAffiliate\"]\n    EventAffiliate [label=\"EventAffiliate\"]\n    ExpertRater [label=\"ExpertRater\"]\n    EventGuest [label=\"EventGuest\"]\n\n    { rank=same; EventSidequestMaster, EventStakeholder, EventMentor }\n\n    EventAdmin -- {EventStakeholder, TeamMentor, TeamMember, EventSidequestMaster}\n    ExpertRater -- {EventStaff}\n    {TeamMember, TeamMentor} -- TeamAffiliate\n    TeamMentor -- EventMentor\n    {EventMentor, EventStakeholder} -- ExpertRater\n    EventSidequestMaster -- EventStaff\n    TeamAffiliate -- EventAffiliate\n    {EventParticipant, EventStaff} -- EventAffiliate\n    TeamMember -- EventParticipant\n    EventAffiliate -- EventGuest\n}\n```\n*",
         "enum": [
           "EventAdmin",
           "EventMentor",
@@ -2435,7 +2755,8 @@
           "EventStaff",
           "TeamAffiliate",
           "EventAffiliate",
-          "EventGuest"
+          "EventGuest",
+          "ExpertRater"
         ]
       },
       "Groups": {
@@ -2480,10 +2801,13 @@
         "required": [
           "can_view_event",
           "can_view_event_internal",
+          "can_view_event_feedback",
           "can_manage_event",
           "can_create_team",
           "can_view_team_confidential",
+          "can_view_team_feedback",
           "can_manage_team",
+          "can_manage_expert_rating",
           "can_manage_project",
           "can_manage_sidequest",
           "can_view_sidequest_attempt",
@@ -2492,14 +2816,17 @@
         "properties": {
           "can_create_team": { "type": "boolean" },
           "can_manage_event": { "type": "boolean" },
+          "can_manage_expert_rating": { "type": "boolean" },
           "can_manage_project": { "type": "boolean" },
           "can_manage_sidequest": { "type": "boolean" },
           "can_manage_sidequest_attempt": { "type": "boolean" },
           "can_manage_team": { "type": "boolean" },
           "can_view_event": { "type": "boolean" },
+          "can_view_event_feedback": { "type": "boolean" },
           "can_view_event_internal": { "type": "boolean" },
           "can_view_sidequest_attempt": { "type": "boolean" },
-          "can_view_team_confidential": { "type": "boolean" }
+          "can_view_team_confidential": { "type": "boolean" },
+          "can_view_team_feedback": { "type": "boolean" }
         }
       },
       "PoliciesQuery": {
@@ -2691,6 +3018,11 @@
       "TeamForUpdate": {
         "type": "object",
         "properties": { "name": { "type": "string", "nullable": true } }
+      },
+      "TeamIdQuery": {
+        "type": "object",
+        "required": ["team_id"],
+        "properties": { "team_id": { "type": "string", "format": "uuid" } }
       },
       "TeamLeaderboardEntry": {
         "type": "object",

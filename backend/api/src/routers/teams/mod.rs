@@ -11,7 +11,7 @@ use crate::ApiError;
 use axum::extract::{Path, Query, State};
 use axum::routing::{delete, get, patch, post, put};
 use axum::{Json, Router};
-use repositories::db::prelude::TeamRole;
+use repositories::db::prelude::{ExpertRatingCategory, TeamRole};
 use services::authorization::groups::Groups;
 use services::authorization::models::{TeamAffiliate, TeamRoles, TeamRolesMap};
 use services::team::models::{Team, TeamForCreate, TeamForUpdate};
@@ -42,6 +42,7 @@ pub fn get_router(state: &ApiState) -> Router {
         )
         .route("/:team_id/password", get(get_team_password))
         .route("/:team_id/password", patch(update_team_password))
+        .route("/:team_id/expert-ratings", get(get_team_expert_ratings))
         .with_state(state.clone())
 }
 
@@ -567,4 +568,35 @@ pub async fn update_team_password(
         .await?;
 
     Ok(Json(team))
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/teams/{team_id}/expert-ratings",
+    responses(
+        (status = StatusCode::OK, body = HashMap<ExpertRatingCategory, f64>),
+        (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
+    ),
+)]
+pub async fn get_team_expert_ratings(
+    ctx: Ctx,
+    State(state): State<ApiState>,
+    Path(team_id): Path<Uuid>,
+) -> ApiJson<HashMap<ExpertRatingCategory, f64>> {
+    let team = state.team_service.get_team(team_id).await?;
+    let event = state.event_service.get_event(team.event_id).await?;
+    let groups = Groups::from_event_and_team(ctx.roles(), event.id, team.id);
+
+    if !groups.can_view_team_feedback(event.visibility, event.phase, event.is_feedback_visible) {
+        return Err(ApiError::Forbidden {
+            action: "view expert ratings for this team".to_string(),
+        });
+    }
+
+    let ratings = state
+        .rating_service
+        .aggregate_expert_ratings(team_id)
+        .await?;
+
+    Ok(Json(ratings))
 }

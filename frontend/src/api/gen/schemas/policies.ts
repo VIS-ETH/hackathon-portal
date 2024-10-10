@@ -8,12 +8,15 @@
 export interface Policies {
   can_create_team: boolean;
   can_manage_event: boolean;
+  can_manage_expert_rating: boolean;
   can_manage_project: boolean;
   can_manage_sidequest: boolean;
   can_manage_sidequest_attempt: boolean;
   can_manage_team: boolean;
   can_view_event: boolean;
+  can_view_event_feedback: boolean;
   can_view_event_internal: boolean;
   can_view_sidequest_attempt: boolean;
   can_view_team_confidential: boolean;
+  can_view_team_feedback: boolean;
 }

@@ -6,6 +6,7 @@ import EventAffiliatesTable from "@/components/admin/EventAffiliatesTable";
 import EventSettings from "@/components/admin/EventSettings";
 import InvitationControls from "@/components/admin/InvitationControls";
 import TeamPasswordsControls from "@/components/admin/TeamPasswordsControls";
+import TeamRanking from "@/components/admin/TeamRanking";
 import TeamsTable from "@/components/admin/TeamsTable";
 import WelcomeContentControls from "@/components/admin/WelcomeContentControls";
 import { useResolveParams } from "@/hooks/useResolveParams";
@@ -19,6 +20,7 @@ import {
   IconAlignJustified,
   IconSettings,
   IconShieldHalf,
+  IconTrophy,
   IconUsers,
 } from "@tabler/icons-react";
 
@@ -41,6 +43,9 @@ const Admin = () => {
         </Tabs.Tab>
         <Tabs.Tab value="teams" leftSection={<IconUsers {...iconProps} />}>
           Teams
+        </Tabs.Tab>
+        <Tabs.Tab value="ranking" leftSection={<IconTrophy {...iconProps} />}>
+          Ranking
         </Tabs.Tab>
         <Tabs.Tab
           value="welcome"
@@ -72,6 +77,10 @@ const Admin = () => {
           {activeTab === "teams" && <TeamsTable event={event} />}
           <TeamPasswordsControls event={event} />
         </Stack>
+      </Tabs.Panel>
+
+      <Tabs.Panel value="ranking" mt="md">
+        <TeamRanking eventId={event.id} />
       </Tabs.Panel>
 
       <Tabs.Panel value="welcome" mt="md">

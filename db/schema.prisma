@@ -29,6 +29,12 @@ enum team_role {
   MEMBER
 }
 
+enum expert_rating_category {
+  FUNCTIONALITY
+  UX
+  PRESENTATION
+}
+
 model event {
   id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
 
@@ -73,6 +79,7 @@ model team {
   team_role_assignment team_role_assignment[]
   project_preference   project_preference[]
   sidequest_score      sidequest_score[]
+  expert_rating        expert_rating[]
 
   // meta
   @@unique([event_id, name])
@@ -91,6 +98,7 @@ model user {
   event_role_assignment event_role_assignment[]
   team_role_assignment  team_role_assignment[]
   sidequest_attempt     sidequest_attempt[]
+  expert_rating         expert_rating[]
 
   // meta
   @@unique([name, index])
@@ -155,6 +163,23 @@ model project_preference {
   project project @relation(fields: [project_id], references: [id])
 
   @@id([team_id, project_id])
+}
+
+model expert_rating {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  // fields
+  team_id  String                 @db.Uuid
+  user_id  String                 @db.Uuid
+  category expert_rating_category
+  rating   Float
+
+  // relations
+  team team @relation(fields: [team_id], references: [id])
+  user user @relation(fields: [user_id], references: [id])
+
+  // meta
+  @@unique([team_id, user_id, category])
 }
 
 model sidequest {

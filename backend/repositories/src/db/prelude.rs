@@ -3,6 +3,7 @@
 pub use super::appointment as db_appointment;
 pub use super::event as db_event;
 pub use super::event_role_assignment as db_event_role_assignment;
+pub use super::expert_rating as db_expert_rating;
 pub use super::project as db_project;
 pub use super::project_preference as db_project_preference;
 pub use super::sidequest as db_sidequest;
@@ -12,4 +13,4 @@ pub use super::team as db_team;
 pub use super::team_role_assignment as db_team_role_assignment;
 pub use super::user as db_user;
 
-pub use super::sea_orm_active_enums::{EventPhase, EventRole, TeamRole};
+pub use super::sea_orm_active_enums::{EventPhase, EventRole, ExpertRatingCategory, TeamRole};

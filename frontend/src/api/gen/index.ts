@@ -22,9 +22,14 @@ import type {
   EventAffiliate,
   EventForUpdate,
   EventRole,
+  ExpertRating,
+  ExpertRatingForCreate,
+  ExpertRatingForUpdate,
+  ExpertRatingLeaderboardEntry,
   GetAppointmentsParams,
   GetEventAffiliatesParams,
   GetEventsRoles200,
+  GetExpertRatingsParams,
   GetMyPoliciesParams,
   GetProjectsMatching200,
   GetProjectsParams,
@@ -36,6 +41,7 @@ import type {
   GetSidequestsTeamLeaderboardParams,
   GetSidequestsUserLeaderboardParams,
   GetTeamAffiliatesParams,
+  GetTeamExpertRatings200,
   GetTeamsParams,
   GetTeamsRoles200,
   GetTeamsRolesParams,
@@ -1280,6 +1286,163 @@ export function useGetEventAffiliates<
   return query;
 }
 
+export const getExpertRatingsLeaderboard = (
+  eventId: string,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<ExpertRatingLeaderboardEntry[]>(
+    {
+      url: `/api/events/${eventId}/expert-ratings/leaderboard`,
+      method: "GET",
+      signal,
+    },
+    options,
+  );
+};
+
+export const getGetExpertRatingsLeaderboardQueryKey = (eventId: string) => {
+  return [`/api/events/${eventId}/expert-ratings/leaderboard`] as const;
+};
+
+export const getGetExpertRatingsLeaderboardQueryOptions = <
+  TData = Awaited<ReturnType<typeof getExpertRatingsLeaderboard>>,
+  TError = PublicError,
+>(
+  eventId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getExpertRatingsLeaderboard>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetExpertRatingsLeaderboardQueryKey(eventId);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getExpertRatingsLeaderboard>>
+  > = ({ signal }) =>
+    getExpertRatingsLeaderboard(eventId, requestOptions, signal);
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!eventId,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getExpertRatingsLeaderboard>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetExpertRatingsLeaderboardQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getExpertRatingsLeaderboard>>
+>;
+export type GetExpertRatingsLeaderboardQueryError = PublicError;
+
+export function useGetExpertRatingsLeaderboard<
+  TData = Awaited<ReturnType<typeof getExpertRatingsLeaderboard>>,
+  TError = PublicError,
+>(
+  eventId: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getExpertRatingsLeaderboard>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getExpertRatingsLeaderboard>>,
+          TError,
+          TData
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+): DefinedUseQueryResult<TData, TError> & { queryKey: QueryKey };
+export function useGetExpertRatingsLeaderboard<
+  TData = Awaited<ReturnType<typeof getExpertRatingsLeaderboard>>,
+  TError = PublicError,
+>(
+  eventId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getExpertRatingsLeaderboard>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getExpertRatingsLeaderboard>>,
+          TError,
+          TData
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey };
+export function useGetExpertRatingsLeaderboard<
+  TData = Awaited<ReturnType<typeof getExpertRatingsLeaderboard>>,
+  TError = PublicError,
+>(
+  eventId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getExpertRatingsLeaderboard>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+export function useGetExpertRatingsLeaderboard<
+  TData = Awaited<ReturnType<typeof getExpertRatingsLeaderboard>>,
+  TError = PublicError,
+>(
+  eventId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getExpertRatingsLeaderboard>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetExpertRatingsLeaderboardQueryOptions(
+    eventId,
+    options,
+  );
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
 export const inviteUsers = (
   eventId: string,
   inviteUsersDTO: InviteUsersDTO,
@@ -1354,6 +1517,134 @@ export const useInviteUsers = <
 
   return useMutation(mutationOptions);
 };
+
+export const getLeaderboard = (
+  eventId: string,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<string[]>(
+    { url: `/api/events/${eventId}/leaderboard`, method: "GET", signal },
+    options,
+  );
+};
+
+export const getGetLeaderboardQueryKey = (eventId: string) => {
+  return [`/api/events/${eventId}/leaderboard`] as const;
+};
+
+export const getGetLeaderboardQueryOptions = <
+  TData = Awaited<ReturnType<typeof getLeaderboard>>,
+  TError = PublicError,
+>(
+  eventId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getLeaderboard>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetLeaderboardQueryKey(eventId);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getLeaderboard>>> = ({
+    signal,
+  }) => getLeaderboard(eventId, requestOptions, signal);
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!eventId,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getLeaderboard>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetLeaderboardQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getLeaderboard>>
+>;
+export type GetLeaderboardQueryError = PublicError;
+
+export function useGetLeaderboard<
+  TData = Awaited<ReturnType<typeof getLeaderboard>>,
+  TError = PublicError,
+>(
+  eventId: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getLeaderboard>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getLeaderboard>>,
+          TError,
+          TData
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+): DefinedUseQueryResult<TData, TError> & { queryKey: QueryKey };
+export function useGetLeaderboard<
+  TData = Awaited<ReturnType<typeof getLeaderboard>>,
+  TError = PublicError,
+>(
+  eventId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getLeaderboard>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getLeaderboard>>,
+          TError,
+          TData
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey };
+export function useGetLeaderboard<
+  TData = Awaited<ReturnType<typeof getLeaderboard>>,
+  TError = PublicError,
+>(
+  eventId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getLeaderboard>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+export function useGetLeaderboard<
+  TData = Awaited<ReturnType<typeof getLeaderboard>>,
+  TError = PublicError,
+>(
+  eventId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getLeaderboard>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetLeaderboardQueryOptions(eventId, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
 
 export const getProjectsMatching = (
   eventId: string,
@@ -1953,7 +2244,7 @@ export function useGetSidequestsHistory<
   return query;
 }
 
-export const getSidequestsOverviewLeaderboard = (
+export const getSidequestsLeaderboard = (
   eventId: string,
   options?: SecondParameter<typeof customInstance>,
   signal?: AbortSignal,
@@ -1968,21 +2259,19 @@ export const getSidequestsOverviewLeaderboard = (
   );
 };
 
-export const getGetSidequestsOverviewLeaderboardQueryKey = (
-  eventId: string,
-) => {
+export const getGetSidequestsLeaderboardQueryKey = (eventId: string) => {
   return [`/api/events/${eventId}/sidequests/leaderboard`] as const;
 };
 
-export const getGetSidequestsOverviewLeaderboardQueryOptions = <
-  TData = Awaited<ReturnType<typeof getSidequestsOverviewLeaderboard>>,
+export const getGetSidequestsLeaderboardQueryOptions = <
+  TData = Awaited<ReturnType<typeof getSidequestsLeaderboard>>,
   TError = PublicError,
 >(
   eventId: string,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getSidequestsOverviewLeaderboard>>,
+        Awaited<ReturnType<typeof getSidequestsLeaderboard>>,
         TError,
         TData
       >
@@ -1993,13 +2282,11 @@ export const getGetSidequestsOverviewLeaderboardQueryOptions = <
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey =
-    queryOptions?.queryKey ??
-    getGetSidequestsOverviewLeaderboardQueryKey(eventId);
+    queryOptions?.queryKey ?? getGetSidequestsLeaderboardQueryKey(eventId);
 
   const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getSidequestsOverviewLeaderboard>>
-  > = ({ signal }) =>
-    getSidequestsOverviewLeaderboard(eventId, requestOptions, signal);
+    Awaited<ReturnType<typeof getSidequestsLeaderboard>>
+  > = ({ signal }) => getSidequestsLeaderboard(eventId, requestOptions, signal);
 
   return {
     queryKey,
@@ -2007,33 +2294,33 @@ export const getGetSidequestsOverviewLeaderboardQueryOptions = <
     enabled: !!eventId,
     ...queryOptions,
   } as UseQueryOptions<
-    Awaited<ReturnType<typeof getSidequestsOverviewLeaderboard>>,
+    Awaited<ReturnType<typeof getSidequestsLeaderboard>>,
     TError,
     TData
   > & { queryKey: QueryKey };
 };
 
-export type GetSidequestsOverviewLeaderboardQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getSidequestsOverviewLeaderboard>>
+export type GetSidequestsLeaderboardQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getSidequestsLeaderboard>>
 >;
-export type GetSidequestsOverviewLeaderboardQueryError = PublicError;
+export type GetSidequestsLeaderboardQueryError = PublicError;
 
-export function useGetSidequestsOverviewLeaderboard<
-  TData = Awaited<ReturnType<typeof getSidequestsOverviewLeaderboard>>,
+export function useGetSidequestsLeaderboard<
+  TData = Awaited<ReturnType<typeof getSidequestsLeaderboard>>,
   TError = PublicError,
 >(
   eventId: string,
   options: {
     query: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getSidequestsOverviewLeaderboard>>,
+        Awaited<ReturnType<typeof getSidequestsLeaderboard>>,
         TError,
         TData
       >
     > &
       Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getSidequestsOverviewLeaderboard>>,
+          Awaited<ReturnType<typeof getSidequestsLeaderboard>>,
           TError,
           TData
         >,
@@ -2042,22 +2329,22 @@ export function useGetSidequestsOverviewLeaderboard<
     request?: SecondParameter<typeof customInstance>;
   },
 ): DefinedUseQueryResult<TData, TError> & { queryKey: QueryKey };
-export function useGetSidequestsOverviewLeaderboard<
-  TData = Awaited<ReturnType<typeof getSidequestsOverviewLeaderboard>>,
+export function useGetSidequestsLeaderboard<
+  TData = Awaited<ReturnType<typeof getSidequestsLeaderboard>>,
   TError = PublicError,
 >(
   eventId: string,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getSidequestsOverviewLeaderboard>>,
+        Awaited<ReturnType<typeof getSidequestsLeaderboard>>,
         TError,
         TData
       >
     > &
       Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getSidequestsOverviewLeaderboard>>,
+          Awaited<ReturnType<typeof getSidequestsLeaderboard>>,
           TError,
           TData
         >,
@@ -2066,15 +2353,15 @@ export function useGetSidequestsOverviewLeaderboard<
     request?: SecondParameter<typeof customInstance>;
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey };
-export function useGetSidequestsOverviewLeaderboard<
-  TData = Awaited<ReturnType<typeof getSidequestsOverviewLeaderboard>>,
+export function useGetSidequestsLeaderboard<
+  TData = Awaited<ReturnType<typeof getSidequestsLeaderboard>>,
   TError = PublicError,
 >(
   eventId: string,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getSidequestsOverviewLeaderboard>>,
+        Awaited<ReturnType<typeof getSidequestsLeaderboard>>,
         TError,
         TData
       >
@@ -2083,15 +2370,15 @@ export function useGetSidequestsOverviewLeaderboard<
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
-export function useGetSidequestsOverviewLeaderboard<
-  TData = Awaited<ReturnType<typeof getSidequestsOverviewLeaderboard>>,
+export function useGetSidequestsLeaderboard<
+  TData = Awaited<ReturnType<typeof getSidequestsLeaderboard>>,
   TError = PublicError,
 >(
   eventId: string,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getSidequestsOverviewLeaderboard>>,
+        Awaited<ReturnType<typeof getSidequestsLeaderboard>>,
         TError,
         TData
       >
@@ -2099,7 +2386,7 @@ export function useGetSidequestsOverviewLeaderboard<
     request?: SecondParameter<typeof customInstance>;
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions = getGetSidequestsOverviewLeaderboardQueryOptions(
+  const queryOptions = getGetSidequestsLeaderboardQueryOptions(
     eventId,
     options,
   );
@@ -2522,6 +2809,517 @@ export const useIndexTeams = <
   TContext
 > => {
   const mutationOptions = getIndexTeamsMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
+
+export const getExpertRatings = (
+  params: GetExpertRatingsParams,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<ExpertRating[]>(
+    { url: `/api/expert-ratings`, method: "GET", params, signal },
+    options,
+  );
+};
+
+export const getGetExpertRatingsQueryKey = (params: GetExpertRatingsParams) => {
+  return [`/api/expert-ratings`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetExpertRatingsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getExpertRatings>>,
+  TError = PublicError,
+>(
+  params: GetExpertRatingsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getExpertRatings>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetExpertRatingsQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getExpertRatings>>
+  > = ({ signal }) => getExpertRatings(params, requestOptions, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getExpertRatings>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetExpertRatingsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getExpertRatings>>
+>;
+export type GetExpertRatingsQueryError = PublicError;
+
+export function useGetExpertRatings<
+  TData = Awaited<ReturnType<typeof getExpertRatings>>,
+  TError = PublicError,
+>(
+  params: GetExpertRatingsParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getExpertRatings>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getExpertRatings>>,
+          TError,
+          TData
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+): DefinedUseQueryResult<TData, TError> & { queryKey: QueryKey };
+export function useGetExpertRatings<
+  TData = Awaited<ReturnType<typeof getExpertRatings>>,
+  TError = PublicError,
+>(
+  params: GetExpertRatingsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getExpertRatings>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getExpertRatings>>,
+          TError,
+          TData
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey };
+export function useGetExpertRatings<
+  TData = Awaited<ReturnType<typeof getExpertRatings>>,
+  TError = PublicError,
+>(
+  params: GetExpertRatingsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getExpertRatings>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+export function useGetExpertRatings<
+  TData = Awaited<ReturnType<typeof getExpertRatings>>,
+  TError = PublicError,
+>(
+  params: GetExpertRatingsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getExpertRatings>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetExpertRatingsQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+export const createExpertRating = (
+  expertRatingForCreate: ExpertRatingForCreate,
+  options?: SecondParameter<typeof customInstance>,
+) => {
+  return customInstance<ExpertRating>(
+    {
+      url: `/api/expert-ratings`,
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      data: expertRatingForCreate,
+    },
+    options,
+  );
+};
+
+export const getCreateExpertRatingMutationOptions = <
+  TError = PublicError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createExpertRating>>,
+    TError,
+    { data: ExpertRatingForCreate },
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createExpertRating>>,
+  TError,
+  { data: ExpertRatingForCreate },
+  TContext
+> => {
+  const { mutation: mutationOptions, request: requestOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createExpertRating>>,
+    { data: ExpertRatingForCreate }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createExpertRating(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateExpertRatingMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createExpertRating>>
+>;
+export type CreateExpertRatingMutationBody = ExpertRatingForCreate;
+export type CreateExpertRatingMutationError = PublicError;
+
+export const useCreateExpertRating = <
+  TError = PublicError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createExpertRating>>,
+    TError,
+    { data: ExpertRatingForCreate },
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createExpertRating>>,
+  TError,
+  { data: ExpertRatingForCreate },
+  TContext
+> => {
+  const mutationOptions = getCreateExpertRatingMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
+
+export const getExpertRating = (
+  ratingId: string,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<ExpertRating>(
+    { url: `/api/expert-ratings/${ratingId}`, method: "GET", signal },
+    options,
+  );
+};
+
+export const getGetExpertRatingQueryKey = (ratingId: string) => {
+  return [`/api/expert-ratings/${ratingId}`] as const;
+};
+
+export const getGetExpertRatingQueryOptions = <
+  TData = Awaited<ReturnType<typeof getExpertRating>>,
+  TError = PublicError,
+>(
+  ratingId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getExpertRating>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetExpertRatingQueryKey(ratingId);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getExpertRating>>> = ({
+    signal,
+  }) => getExpertRating(ratingId, requestOptions, signal);
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!ratingId,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getExpertRating>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetExpertRatingQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getExpertRating>>
+>;
+export type GetExpertRatingQueryError = PublicError;
+
+export function useGetExpertRating<
+  TData = Awaited<ReturnType<typeof getExpertRating>>,
+  TError = PublicError,
+>(
+  ratingId: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getExpertRating>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getExpertRating>>,
+          TError,
+          TData
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+): DefinedUseQueryResult<TData, TError> & { queryKey: QueryKey };
+export function useGetExpertRating<
+  TData = Awaited<ReturnType<typeof getExpertRating>>,
+  TError = PublicError,
+>(
+  ratingId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getExpertRating>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getExpertRating>>,
+          TError,
+          TData
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey };
+export function useGetExpertRating<
+  TData = Awaited<ReturnType<typeof getExpertRating>>,
+  TError = PublicError,
+>(
+  ratingId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getExpertRating>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+export function useGetExpertRating<
+  TData = Awaited<ReturnType<typeof getExpertRating>>,
+  TError = PublicError,
+>(
+  ratingId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getExpertRating>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetExpertRatingQueryOptions(ratingId, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+export const deleteExpertRating = (
+  ratingId: string,
+  options?: SecondParameter<typeof customInstance>,
+) => {
+  return customInstance<ExpertRating>(
+    { url: `/api/expert-ratings/${ratingId}`, method: "DELETE" },
+    options,
+  );
+};
+
+export const getDeleteExpertRatingMutationOptions = <
+  TError = PublicError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteExpertRating>>,
+    TError,
+    { ratingId: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteExpertRating>>,
+  TError,
+  { ratingId: string },
+  TContext
+> => {
+  const { mutation: mutationOptions, request: requestOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteExpertRating>>,
+    { ratingId: string }
+  > = (props) => {
+    const { ratingId } = props ?? {};
+
+    return deleteExpertRating(ratingId, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteExpertRatingMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteExpertRating>>
+>;
+
+export type DeleteExpertRatingMutationError = PublicError;
+
+export const useDeleteExpertRating = <
+  TError = PublicError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteExpertRating>>,
+    TError,
+    { ratingId: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof deleteExpertRating>>,
+  TError,
+  { ratingId: string },
+  TContext
+> => {
+  const mutationOptions = getDeleteExpertRatingMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
+
+export const updateExpertRating = (
+  ratingId: string,
+  expertRatingForUpdate: ExpertRatingForUpdate,
+  options?: SecondParameter<typeof customInstance>,
+) => {
+  return customInstance<ExpertRating>(
+    {
+      url: `/api/expert-ratings/${ratingId}`,
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      data: expertRatingForUpdate,
+    },
+    options,
+  );
+};
+
+export const getUpdateExpertRatingMutationOptions = <
+  TError = PublicError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateExpertRating>>,
+    TError,
+    { ratingId: string; data: ExpertRatingForUpdate },
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateExpertRating>>,
+  TError,
+  { ratingId: string; data: ExpertRatingForUpdate },
+  TContext
+> => {
+  const { mutation: mutationOptions, request: requestOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateExpertRating>>,
+    { ratingId: string; data: ExpertRatingForUpdate }
+  > = (props) => {
+    const { ratingId, data } = props ?? {};
+
+    return updateExpertRating(ratingId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateExpertRatingMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateExpertRating>>
+>;
+export type UpdateExpertRatingMutationBody = ExpertRatingForUpdate;
+export type UpdateExpertRatingMutationError = PublicError;
+
+export const useUpdateExpertRating = <
+  TError = PublicError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateExpertRating>>,
+    TError,
+    { ratingId: string; data: ExpertRatingForUpdate },
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof updateExpertRating>>,
+  TError,
+  { ratingId: string; data: ExpertRatingForUpdate },
+  TContext
+> => {
+  const mutationOptions = getUpdateExpertRatingMutationOptions(options);
 
   return useMutation(mutationOptions);
 };
@@ -5363,6 +6161,155 @@ export function useGetTeamAffiliates<
     params,
     options,
   );
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+export const getTeamExpertRatings = (
+  teamId: string,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<GetTeamExpertRatings200>(
+    { url: `/api/teams/${teamId}/expert-ratings`, method: "GET", signal },
+    options,
+  );
+};
+
+export const getGetTeamExpertRatingsQueryKey = (teamId: string) => {
+  return [`/api/teams/${teamId}/expert-ratings`] as const;
+};
+
+export const getGetTeamExpertRatingsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getTeamExpertRatings>>,
+  TError = PublicError,
+>(
+  teamId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getTeamExpertRatings>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetTeamExpertRatingsQueryKey(teamId);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getTeamExpertRatings>>
+  > = ({ signal }) => getTeamExpertRatings(teamId, requestOptions, signal);
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!teamId,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getTeamExpertRatings>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetTeamExpertRatingsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getTeamExpertRatings>>
+>;
+export type GetTeamExpertRatingsQueryError = PublicError;
+
+export function useGetTeamExpertRatings<
+  TData = Awaited<ReturnType<typeof getTeamExpertRatings>>,
+  TError = PublicError,
+>(
+  teamId: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getTeamExpertRatings>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTeamExpertRatings>>,
+          TError,
+          TData
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+): DefinedUseQueryResult<TData, TError> & { queryKey: QueryKey };
+export function useGetTeamExpertRatings<
+  TData = Awaited<ReturnType<typeof getTeamExpertRatings>>,
+  TError = PublicError,
+>(
+  teamId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getTeamExpertRatings>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTeamExpertRatings>>,
+          TError,
+          TData
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey };
+export function useGetTeamExpertRatings<
+  TData = Awaited<ReturnType<typeof getTeamExpertRatings>>,
+  TError = PublicError,
+>(
+  teamId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getTeamExpertRatings>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+export function useGetTeamExpertRatings<
+  TData = Awaited<ReturnType<typeof getTeamExpertRatings>>,
+  TError = PublicError,
+>(
+  teamId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getTeamExpertRatings>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetTeamExpertRatingsQueryOptions(teamId, options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;

@@ -29,14 +29,17 @@ graph {
     EventStaff [label="EventStaff"]
     TeamAffiliate [label="TeamAffiliate"]
     EventAffiliate [label="EventAffiliate"]
+    ExpertRater [label="ExpertRater"]
     EventGuest [label="EventGuest"]
 
     { rank=same; EventSidequestMaster, EventStakeholder, EventMentor }
 
-    EventAdmin -- {TeamMember, TeamMentor, EventSidequestMaster, EventStakeholder}
+    EventAdmin -- {EventStakeholder, TeamMentor, TeamMember, EventSidequestMaster}
+    ExpertRater -- {EventStaff}
     {TeamMember, TeamMentor} -- TeamAffiliate
     TeamMentor -- EventMentor
-    {EventMentor, EventStakeholder, EventSidequestMaster} -- EventStaff
+    {EventMentor, EventStakeholder} -- ExpertRater
+    EventSidequestMaster -- EventStaff
     TeamAffiliate -- EventAffiliate
     {EventParticipant, EventStaff} -- EventAffiliate
     TeamMember -- EventParticipant
@@ -60,4 +63,5 @@ export const Group = {
   TeamAffiliate: "TeamAffiliate",
   EventAffiliate: "EventAffiliate",
   EventGuest: "EventGuest",
+  ExpertRater: "ExpertRater",
 } as const;
