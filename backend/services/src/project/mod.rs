@@ -149,25 +149,21 @@ impl ProjectService {
         let matching_problem = GroupAssignment::new(team_ids, project_ids, 2, preference);
 
         let Some(mut matching) = matching_problem else {
-                return Err(ServiceError::Matching {
-                    message: "failed to instantiate the problem.".to_string(),
-                })
-            };
+            return Err(ServiceError::Matching {
+                message: "failed to instantiate the problem.".to_string(),
+            });
+        };
 
         let solution = matching.solve();
 
         match solution {
             Ok(solution) => Ok(solution),
-            Err(minilp::Error::Infeasible) => {
-                Err(ServiceError::Matching {
-                    message: ("no feasible solution found.".to_string()),
-                })
-            }
-            Err(minilp::Error::Unbounded) => {
-                Err(ServiceError::Matching {
-                    message: ("problem is unbounded.".to_string()),
-                })
-            }
+            Err(minilp::Error::Infeasible) => Err(ServiceError::Matching {
+                message: ("no feasible solution found.".to_string()),
+            }),
+            Err(minilp::Error::Unbounded) => Err(ServiceError::Matching {
+                message: ("problem is unbounded.".to_string()),
+            }),
         }
     }
 }

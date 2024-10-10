@@ -70,6 +70,8 @@ model team {
   slug     String
   index    Int
   password String?
+  extra_score Float?
+  comment String?
 
   // relations
   event   event    @relation(fields: [event_id], references: [id])

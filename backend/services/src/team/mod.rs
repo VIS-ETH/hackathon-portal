@@ -3,6 +3,7 @@ pub mod models;
 use crate::authorization::AuthorizationService;
 use crate::team::models::{Team, TeamForCreate, TeamForUpdate};
 use crate::{ServiceError, ServiceResult};
+use models::{TeamForUpdateInternal, TeamInternal};
 use repositories::db::prelude::*;
 use repositories::DbRepository;
 use sea_orm::prelude::*;
@@ -67,7 +68,18 @@ impl TeamService {
         Ok(teams)
     }
 
+    pub async fn get_teams_internal(&self, event_id: Uuid) -> ServiceResult<Vec<TeamInternal>> {
+        let teams = self.db_repo.get_teams(event_id).await?;
+        let teams = teams.into_iter().map(TeamInternal::from).collect();
+        Ok(teams)
+    }
+
     pub async fn get_team(&self, team_id: Uuid) -> ServiceResult<Team> {
+        let team = self.db_repo.get_team(team_id).await?;
+        Ok(team.into())
+    }
+
+    pub async fn get_team_internal(&self, team_id: Uuid) -> ServiceResult<TeamInternal> {
         let team = self.db_repo.get_team(team_id).await?;
         Ok(team.into())
     }
@@ -98,6 +110,23 @@ impl TeamService {
 
         let team = active_team.update(self.db_repo.conn()).await?;
 
+        Ok(team.into())
+    }
+
+    pub async fn update_team_internal(
+        &self,
+        team_id: Uuid,
+        team_fui: TeamForUpdateInternal,
+    ) -> ServiceResult<TeamInternal> {
+        let team = self.db_repo.get_team(team_id).await?;
+        let mut active_team = team.into_active_model();
+        if let Some(comment) = &team_fui.comment {
+            active_team.comment = Set(Some(comment.clone()));
+        }
+        if let Some(extra_score) = &team_fui.extra_score {
+            active_team.extra_score = Set(Some(*extra_score));
+        }
+        let team = active_team.update(self.db_repo.conn()).await?;
         Ok(team.into())
     }
 

@@ -198,7 +198,23 @@ impl EventService {
 
     pub async fn get_leaderboard(&self, event_id: Uuid) -> ServiceResult<Vec<Uuid>> {
         let expert_leaderboard = self.rating_service.get_expert_leaderboard(event_id).await?;
-        let sidequest_leaderboard = self.sidequest_service.get_leaderboard(event_id).await?;
+        let mut sidequest_leaderboard = self.sidequest_service.get_leaderboard(event_id).await?;
+
+        // Add bonus points
+        let teams = self.db_repo.get_teams(event_id).await?;
+        sidequest_leaderboard = sidequest_leaderboard
+            .into_iter()
+            .map(|mut team| {
+                let extra_score = teams
+                    .iter()
+                    .find(|t| t.id == team.team_id)
+                    .and_then(|t| t.extra_score);
+                if let Some(extra_score) = extra_score {
+                    team.score += extra_score;
+                }
+                team
+            })
+            .collect::<Vec<_>>();
 
         let mut seen = HashSet::new();
         let mut merged = Vec::new();
