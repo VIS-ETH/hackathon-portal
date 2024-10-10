@@ -15,6 +15,18 @@ services:
       - 5432:5432 # remove in prod
     restart: unless-stopped
 
+  db_maintenance:
+    image: node
+    container_name: portal_db_maintenance
+    command: sleep 10m
+    env_file:
+      - .env
+    networks:
+      - portal_private
+    volumes:
+      - ./Makefile:/data/Makefile
+      - ./db:/data/db
+
   backend:
     container_name: portal_backend
     build:
