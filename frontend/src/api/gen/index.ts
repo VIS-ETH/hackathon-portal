@@ -42,6 +42,7 @@ import type {
   GetSidequestsUserLeaderboardParams,
   GetTeamAffiliatesParams,
   GetTeamExpertRatings200,
+  GetTeamsInternalParams,
   GetTeamsParams,
   GetTeamsRoles200,
   GetTeamsRolesParams,
@@ -63,6 +64,8 @@ import type {
   TeamAffiliate,
   TeamForCreate,
   TeamForUpdate,
+  TeamForUpdateInternal,
+  TeamInternal,
   TeamLeaderboardEntry,
   TeamRole,
   User,
@@ -5471,6 +5474,150 @@ export const useCreateTeam = <
   return useMutation(mutationOptions);
 };
 
+export const getTeamsInternal = (
+  params: GetTeamsInternalParams,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<TeamInternal[]>(
+    { url: `/api/teams/internal`, method: "GET", params, signal },
+    options,
+  );
+};
+
+export const getGetTeamsInternalQueryKey = (params: GetTeamsInternalParams) => {
+  return [`/api/teams/internal`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetTeamsInternalQueryOptions = <
+  TData = Awaited<ReturnType<typeof getTeamsInternal>>,
+  TError = PublicError,
+>(
+  params: GetTeamsInternalParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getTeamsInternal>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetTeamsInternalQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getTeamsInternal>>
+  > = ({ signal }) => getTeamsInternal(params, requestOptions, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getTeamsInternal>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetTeamsInternalQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getTeamsInternal>>
+>;
+export type GetTeamsInternalQueryError = PublicError;
+
+export function useGetTeamsInternal<
+  TData = Awaited<ReturnType<typeof getTeamsInternal>>,
+  TError = PublicError,
+>(
+  params: GetTeamsInternalParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getTeamsInternal>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTeamsInternal>>,
+          TError,
+          TData
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+): DefinedUseQueryResult<TData, TError> & { queryKey: QueryKey };
+export function useGetTeamsInternal<
+  TData = Awaited<ReturnType<typeof getTeamsInternal>>,
+  TError = PublicError,
+>(
+  params: GetTeamsInternalParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getTeamsInternal>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTeamsInternal>>,
+          TError,
+          TData
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey };
+export function useGetTeamsInternal<
+  TData = Awaited<ReturnType<typeof getTeamsInternal>>,
+  TError = PublicError,
+>(
+  params: GetTeamsInternalParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getTeamsInternal>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+export function useGetTeamsInternal<
+  TData = Awaited<ReturnType<typeof getTeamsInternal>>,
+  TError = PublicError,
+>(
+  params: GetTeamsInternalParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getTeamsInternal>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetTeamsInternalQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
 export const getTeamsRoles = (
   params: GetTeamsRolesParams,
   options?: SecondParameter<typeof customInstance>,
@@ -5936,7 +6083,7 @@ export const updateTeam = (
   teamForUpdate: TeamForUpdate,
   options?: SecondParameter<typeof customInstance>,
 ) => {
-  return customInstance<Appointment>(
+  return customInstance<Team>(
     {
       url: `/api/teams/${teamId}`,
       method: "PATCH",
@@ -6319,6 +6466,229 @@ export function useGetTeamExpertRatings<
 
   return query;
 }
+
+export const getTeamInternal = (
+  teamId: string,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<TeamInternal>(
+    { url: `/api/teams/${teamId}/internal`, method: "GET", signal },
+    options,
+  );
+};
+
+export const getGetTeamInternalQueryKey = (teamId: string) => {
+  return [`/api/teams/${teamId}/internal`] as const;
+};
+
+export const getGetTeamInternalQueryOptions = <
+  TData = Awaited<ReturnType<typeof getTeamInternal>>,
+  TError = PublicError,
+>(
+  teamId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getTeamInternal>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetTeamInternalQueryKey(teamId);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getTeamInternal>>> = ({
+    signal,
+  }) => getTeamInternal(teamId, requestOptions, signal);
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!teamId,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getTeamInternal>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetTeamInternalQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getTeamInternal>>
+>;
+export type GetTeamInternalQueryError = PublicError;
+
+export function useGetTeamInternal<
+  TData = Awaited<ReturnType<typeof getTeamInternal>>,
+  TError = PublicError,
+>(
+  teamId: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getTeamInternal>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTeamInternal>>,
+          TError,
+          TData
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+): DefinedUseQueryResult<TData, TError> & { queryKey: QueryKey };
+export function useGetTeamInternal<
+  TData = Awaited<ReturnType<typeof getTeamInternal>>,
+  TError = PublicError,
+>(
+  teamId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getTeamInternal>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTeamInternal>>,
+          TError,
+          TData
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey };
+export function useGetTeamInternal<
+  TData = Awaited<ReturnType<typeof getTeamInternal>>,
+  TError = PublicError,
+>(
+  teamId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getTeamInternal>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+export function useGetTeamInternal<
+  TData = Awaited<ReturnType<typeof getTeamInternal>>,
+  TError = PublicError,
+>(
+  teamId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getTeamInternal>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetTeamInternalQueryOptions(teamId, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+export const updateTeamInternal = (
+  teamId: string,
+  teamForUpdateInternal: TeamForUpdateInternal,
+  options?: SecondParameter<typeof customInstance>,
+) => {
+  return customInstance<TeamInternal>(
+    {
+      url: `/api/teams/${teamId}/internal`,
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      data: teamForUpdateInternal,
+    },
+    options,
+  );
+};
+
+export const getUpdateTeamInternalMutationOptions = <
+  TError = PublicError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateTeamInternal>>,
+    TError,
+    { teamId: string; data: TeamForUpdateInternal },
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateTeamInternal>>,
+  TError,
+  { teamId: string; data: TeamForUpdateInternal },
+  TContext
+> => {
+  const { mutation: mutationOptions, request: requestOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateTeamInternal>>,
+    { teamId: string; data: TeamForUpdateInternal }
+  > = (props) => {
+    const { teamId, data } = props ?? {};
+
+    return updateTeamInternal(teamId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateTeamInternalMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateTeamInternal>>
+>;
+export type UpdateTeamInternalMutationBody = TeamForUpdateInternal;
+export type UpdateTeamInternalMutationError = PublicError;
+
+export const useUpdateTeamInternal = <
+  TError = PublicError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateTeamInternal>>,
+    TError,
+    { teamId: string; data: TeamForUpdateInternal },
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof updateTeamInternal>>,
+  TError,
+  { teamId: string; data: TeamForUpdateInternal },
+  TContext
+> => {
+  const mutationOptions = getUpdateTeamInternalMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
 
 export const getTeamPassword = (
   teamId: string,

@@ -4,19 +4,28 @@ import {
   useGetExpertRatingsLeaderboard,
   useGetSidequestsLeaderboard,
 } from "@/api/gen";
-import { Team } from "@/api/gen/schemas";
+import { TeamInternal } from "@/api/gen/schemas";
 import { cardProps } from "@/styles/common";
 
-import { Accordion, Card, Group, SimpleGrid, Stack, Text } from "@mantine/core";
+import {
+  Accordion,
+  Card,
+  Group,
+  SimpleGrid,
+  Stack,
+  Text,
+  Textarea,
+} from "@mantine/core";
 
 type TeamRankingEntryProps = {
-  team: Team;
+  team: TeamInternal;
   rank: number;
 };
 
 const TeamRankingEntry = ({ team, rank }: TeamRankingEntryProps) => {
   const { data: expertRatingsLeaderboard = [] } =
     useGetExpertRatingsLeaderboard(team.event_id);
+
   const { data: sidequestsLeaderboard = [] } = useGetSidequestsLeaderboard(
     team.event_id,
   );
@@ -51,7 +60,7 @@ const TeamRankingEntry = ({ team, rank }: TeamRankingEntryProps) => {
         <Accordion variant="filled">
           <Accordion.Item value="disclosure">
             <Accordion.Control>
-              <SimpleGrid cols={3}>
+              <SimpleGrid cols={4}>
                 <Group align="center">
                   <Text ff="monospace">{rank}</Text>
                   <Text fw={600}>{team?.name}</Text>
@@ -68,11 +77,23 @@ const TeamRankingEntry = ({ team, rank }: TeamRankingEntryProps) => {
                   </Text>
                   <Text c="dimmed">Sidequest</Text>
                 </Stack>
+                <Stack gap={0} ta="center">
+                  <Text>{team.extra_score || 0}</Text>
+                  <Text c="dimmed">Bonus</Text>
+                </Stack>
               </SimpleGrid>
             </Accordion.Control>
             <Accordion.Panel>
               {expertEntry ? (
-                <TeamExpertRatingsTable team={team} entry={expertEntry.entry} />
+                <Stack>
+                  <TeamExpertRatingsTable
+                    team={team}
+                    entry={expertEntry.entry}
+                  />
+                  <Textarea readOnly variant="filled">
+                    {team.comment}
+                  </Textarea>
+                </Stack>
               ) : (
                 <Text c="dimmed">No expert ratings</Text>
               )}

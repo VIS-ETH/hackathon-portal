@@ -1,7 +1,7 @@
 import TeamsTableRow from "./Row";
 import { TableView } from "./TableView";
 
-import { useGetTeams, useIndexTeams } from "@/api/gen";
+import { useGetTeamsInternal, useIndexTeams } from "@/api/gen";
 import { Event } from "@/api/gen/schemas";
 import IconTextGroup from "@/components/IconTextGroup";
 import NoEntriesTr from "@/components/NoEntriesTr";
@@ -39,7 +39,7 @@ type TeamsTableProps = {
 const TeamsTable = ({ event }: TeamsTableProps) => {
   const [view, setView] = useState<TableView>("General");
 
-  const { data: teams = [], refetch: refetchTeams } = useGetTeams({
+  const { data: teams = [], refetch: refetchTeams } = useGetTeamsInternal({
     event_id: event.id,
   });
 
@@ -143,6 +143,12 @@ const TeamsTable = ({ event }: TeamsTableProps) => {
                         Mentor&nbsp;{i + 1}
                       </Table.Th>
                     ))}
+                  {view == TableView.Comments && (
+                    <>
+                      <Table.Th>Comment</Table.Th>
+                      <Table.Th>Extra Points</Table.Th>{" "}
+                    </>
+                  )}
                   {view == TableView.General && <Table.Th>Actions</Table.Th>}
                 </Table.Tr>
               </Table.Thead>

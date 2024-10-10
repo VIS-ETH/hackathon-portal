@@ -1,5 +1,6 @@
 import ActionsTd from "./ActionsTd";
 import AffiliateTds from "./AffiliateTds";
+import ExtraScoreTd from "./ExtraScoreTd";
 import MatchingTds from "./MatchingTds";
 import NameTd from "./NameTd";
 import PasswordTd from "./PasswordTd";
@@ -45,6 +46,9 @@ const TeamsTableRow = ({ event, team, view, refetch }: TeamsTableRowProps) => {
         <AffiliateTds team={team} role={TeamRole.Mentor} max={2} />
       )}
       {view == TableView.General && <ActionsTd team={team} refetch={refetch} />}
+      {view == TableView.Comments && (
+        <ExtraScoreTd team={team} refetch={refetch} />
+      )}
     </Table.Tr>
   );
 };

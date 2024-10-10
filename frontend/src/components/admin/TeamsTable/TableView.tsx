@@ -6,4 +6,5 @@ export const TableView = {
   Password: "Password",
   Members: "Members",
   Mentors: "Mentors",
+  Comments: "Comments",
 } as const;

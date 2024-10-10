@@ -10,9 +10,7 @@ use repositories::db::prelude::*;
 use repositories::DbRepository;
 use sea_orm::prelude::*;
 use sea_orm::sea_query::Func;
-use sea_orm::{
-    ActiveModelTrait, IntoActiveModel, IntoSimpleExpr, QuerySelect, Set,
-};
+use sea_orm::{ActiveModelTrait, IntoActiveModel, IntoSimpleExpr, QuerySelect, Set};
 use std::cmp::Ordering;
 use std::collections::HashMap;
 
