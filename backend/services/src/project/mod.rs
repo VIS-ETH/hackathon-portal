@@ -127,6 +127,7 @@ impl ProjectService {
 
     pub async fn get_matching(&self, event_id: Uuid) -> ServiceResult<HashMap<Uuid, Uuid>> {
         let projects = self.db_repo.get_projects(event_id).await?;
+        let event = self.db_repo.get_event(event_id).await?;
         let project_ids = projects.into_iter().map(|p| p.id).collect::<Vec<_>>();
 
         let teams = self.db_repo.get_teams(event_id).await?;
@@ -146,7 +147,12 @@ impl ProjectService {
             preference.insert(team.id, team_pref);
         }
 
-        let matching_problem = GroupAssignment::new(team_ids, project_ids, 2, preference);
+        let matching_problem = GroupAssignment::new(
+            team_ids,
+            project_ids,
+            event.max_teams_per_project,
+            preference,
+        );
 
         let Some(mut matching) = matching_problem else {
             return Err(ServiceError::Matching {

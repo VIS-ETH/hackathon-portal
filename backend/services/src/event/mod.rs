@@ -12,6 +12,7 @@ use repositories::db::sea_orm_active_enums::EventVisibility;
 use repositories::DbRepository;
 use sea_orm::prelude::*;
 use sea_orm::{ActiveModelTrait, IntoActiveModel, Set};
+use std::cmp::Ordering;
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 
@@ -142,6 +143,10 @@ impl EventService {
             active_event.max_team_size = Set(max_team_size as i32);
         }
 
+        if let Some(max_teams_per_project) = event_fu.max_teams_per_project {
+            active_event.max_teams_per_project = Set(max_teams_per_project as i32);
+        }
+
         if let Some(sidequest_cooldown) = event_fu.sidequest_cooldown {
             active_event.sidequest_cooldown = Set(sidequest_cooldown as i32);
         }
@@ -197,24 +202,29 @@ impl EventService {
     }
 
     pub async fn get_leaderboard(&self, event_id: Uuid) -> ServiceResult<Vec<Uuid>> {
+        let teams = self.db_repo.get_teams(event_id).await?;
         let expert_leaderboard = self.rating_service.get_expert_leaderboard(event_id).await?;
-        let mut sidequest_leaderboard = self.sidequest_service.get_leaderboard(event_id).await?;
+        let sidequest_leaderboard = self.sidequest_service.get_leaderboard(event_id).await?;
 
         // Add bonus points
-        let teams = self.db_repo.get_teams(event_id).await?;
-        sidequest_leaderboard = sidequest_leaderboard
+        let mut sidequest_leaderboard = sidequest_leaderboard
             .into_iter()
             .map(|mut team| {
                 let extra_score = teams
                     .iter()
                     .find(|t| t.id == team.team_id)
                     .and_then(|t| t.extra_score);
+
                 if let Some(extra_score) = extra_score {
                     team.score += extra_score;
                 }
+
                 team
             })
             .collect::<Vec<_>>();
+
+        sidequest_leaderboard
+            .sort_by(|a, b| b.score.partial_cmp(&a.score).unwrap_or(Ordering::Equal));
 
         let mut seen = HashSet::new();
         let mut merged = Vec::new();
@@ -224,7 +234,7 @@ impl EventService {
             merged.push(team.team_id);
         }
 
-        for team in sidequest_leaderboard.into_iter().take(3) {
+        for team in sidequest_leaderboard {
             if seen.contains(&team.team_id) {
                 continue;
             }

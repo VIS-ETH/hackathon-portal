@@ -16,6 +16,8 @@ export interface Event {
   is_read_only: boolean;
   /** @minimum 0 */
   max_team_size: number;
+  /** @minimum 0 */
+  max_teams_per_project: number;
   name: string;
   phase: EventPhase;
   /** @minimum 0 */

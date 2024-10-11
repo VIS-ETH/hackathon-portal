@@ -21,6 +21,11 @@ export interface EventForUpdate {
    * @nullable
    */
   max_team_size?: number | null;
+  /**
+   * @minimum 0
+   * @nullable
+   */
+  max_teams_per_project?: number | null;
   /** @nullable */
   name?: string | null;
   /** @nullable */
