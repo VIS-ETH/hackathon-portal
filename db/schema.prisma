@@ -46,6 +46,7 @@ model event {
   welcome_content       String?
   documentation_content String?
   max_team_size         Int
+  max_teams_per_project  Int  @default(2) // max team per project 
   sidequest_cooldown    Int // in minutes
   is_read_only          Boolean
   is_feedback_visible   Boolean

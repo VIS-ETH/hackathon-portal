@@ -6,7 +6,7 @@ use models::{AttemptForCreate, SidequestForCreate, SidequestForUpdate};
 use repositories::db::prelude::*;
 use repositories::DbRepository;
 use std::cmp::Ordering;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 
 use crate::authorization::AuthorizationService;
@@ -431,24 +431,44 @@ impl SidequestService {
         let teams = self.db_repo.get_teams(event_id).await?;
 
         let team_mapping = teams
-            .into_iter()
+            .iter()
             .map(|team| (team.id, team))
             .collect::<HashMap<_, _>>();
 
         let scores = self.aggregate_scores(event_id).await?;
 
-        let mut entries = scores
-            .into_iter()
-            .filter_map(|(team_id, score)| {
-                let team = team_mapping.get(&team_id)?;
+        let mut seen = HashSet::new();
+        let mut entries = Vec::new();
 
-                Some(TeamLeaderboardEntry {
-                    team_id,
-                    team_name: team.name.clone(),
-                    score,
-                })
-            })
-            .collect::<Vec<_>>();
+        for (team_id, team_score) in scores {
+            let Some(team) = team_mapping.get(&team_id) else {
+                continue;
+            };
+
+            let entry = TeamLeaderboardEntry {
+                team_id,
+                team_name: team.name.clone(),
+                score: team_score,
+            };
+
+            seen.insert(team_id);
+            entries.push(entry);
+        }
+
+        for team in teams {
+            if seen.contains(&team.id) {
+                continue;
+            }
+
+            let entry = TeamLeaderboardEntry {
+                team_id: team.id,
+                team_name: team.name.clone(),
+                score: 0.0,
+            };
+
+            seen.insert(team.id);
+            entries.push(entry);
+        }
 
         entries.sort_by(|a, b| b.score.partial_cmp(&a.score).unwrap_or(Ordering::Equal));
 

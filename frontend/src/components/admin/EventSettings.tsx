@@ -62,6 +62,10 @@ const EventSettings = ({ event, refetch }: EventSettingsProps) => {
           delete draft.max_team_size;
         }
 
+        if (!draft.max_teams_per_project && draft.max_teams_per_project !== 0) {
+          delete draft.max_teams_per_project;
+        }
+
         if (!draft.sidequest_cooldown && draft.sidequest_cooldown !== 0) {
           delete draft.sidequest_cooldown;
         }
@@ -156,6 +160,15 @@ const EventSettings = ({ event, refetch }: EventSettingsProps) => {
           key={form.key("sidequest_cooldown")}
           label="Sidequest cooldown (minutes)"
           placeholder={event.sidequest_cooldown.toString()}
+          min={0}
+          step={1}
+        />
+        <NumberInput
+          {...(inputProps as NumberInputProps)}
+          {...form.getInputProps("max_teams_per_project")}
+          key={form.key("max_teams_per_project")}
+          label="Max team per project"
+          placeholder={event.max_teams_per_project.toString()}
           min={0}
           step={1}
         />

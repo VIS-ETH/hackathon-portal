@@ -3296,6 +3296,7 @@
           "start",
           "end",
           "max_team_size",
+          "max_teams_per_project",
           "sidequest_cooldown",
           "is_read_only",
           "is_feedback_visible",
@@ -3322,6 +3323,11 @@
             "type": "boolean"
           },
           "max_team_size": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "max_teams_per_project": {
             "type": "integer",
             "format": "int32",
             "minimum": 0
@@ -3426,6 +3432,12 @@
             "nullable": true
           },
           "max_team_size": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true,
+            "minimum": 0
+          },
+          "max_teams_per_project": {
             "type": "integer",
             "format": "int32",
             "nullable": true,
