@@ -27,6 +27,7 @@ import { DateTimePicker, DateTimePickerProps } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 
 import { produce } from "immer";
+import { stringify } from "yaml";
 
 type EventSettingsProps = {
   event: Event;
@@ -82,6 +83,14 @@ const EventSettings = ({ event, refetch }: EventSettingsProps) => {
   }, [form.setValues, event]);
 
   const handleSubmit = async (data: EventForUpdate) => {
+    const confirmation = confirm(
+      `WARNING - READ THIS: Are you sure that you want to submit the following patch for ${event.name}?\n\nIf you are not 100% sure of the implications, CANCEL and ASK FOR HELP.\n\n${stringify(data)}`,
+    );
+
+    if (!confirmation) {
+      return;
+    }
+
     await updateEventMutation.mutateAsync({
       eventId: event.id,
       data,
