@@ -27,6 +27,26 @@ services:
       - ./Makefile:/data/Makefile
       - ./db:/data/db
 
+  db_backup:
+    image: prodrigestivill/postgres-backup-local
+    container_name: portal_db_backup
+    env_file:
+      - .env
+    environment:
+      POSTGRES_EXTRA_OPTS: -Z1 --schema=public --blobs
+      SCHEDULE: 0,15,30,45 * * * *
+      BACKUP_ON_START: TRUE
+      BACKUP_KEEP_DAYS: 7
+      BACKUP_KEEP_WEEKS: 4
+      BACKUP_KEEP_MONTHS: 6
+    networks:
+      - portal_private
+    volumes:
+      - portal_db_backup:/backups
+    depends_on:
+      - db
+    restart: unless-stopped
+
   backend:
     container_name: portal_backend
     build:
@@ -84,6 +104,8 @@ services:
 
 volumes:
   portal_db:
+    external: true
+  portal_db_backup:
     external: true
 
 networks:
