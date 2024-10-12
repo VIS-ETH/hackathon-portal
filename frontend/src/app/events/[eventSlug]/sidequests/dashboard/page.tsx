@@ -17,11 +17,11 @@ const SidequestsDashboard = () => {
   return (
     <Overlay backgroundOpacity={1} color="#fff">
       <Stack p="lg" gap="lg" h="100%" justify="stretch">
-        <Box flex={1}>
+        <Box style={{ flex: 1, flexGrow: 1 }}>
           <HistoryChart eventId={event.id} grow />
         </Box>
-        <Box flex={1} style={{ overflow: "scroll" }}>
-          <OverviewLeaderboardTable eventId={event.id} />
+        <Box style={{ flex: 1, flexGrow: 0 }}>
+          <OverviewLeaderboardTable eventId={event.id} limit={3} />
         </Box>
       </Stack>
     </Overlay>

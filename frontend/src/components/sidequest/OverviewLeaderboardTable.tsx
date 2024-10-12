@@ -7,10 +7,12 @@ import { Card, Table } from "@mantine/core";
 
 type OverviewLeaderboardTableProps = {
   eventId: string;
+  limit?: number;
 };
 
 const OverviewLeaderboardTable = ({
   eventId,
+  limit,
 }: OverviewLeaderboardTableProps) => {
   const { data: leaderboard = [] } = useGetSidequestsLeaderboard(eventId);
 
@@ -27,7 +29,7 @@ const OverviewLeaderboardTable = ({
             </Table.Thead>
             <Table.Tbody>
               {leaderboard.length ? (
-                leaderboard.map((entry) => (
+                leaderboard.slice(0, limit).map((entry) => (
                   <Table.Tr key={entry.team_id}>
                     <Table.Td>{entry.team_name}</Table.Td>
                     <Table.Td>{Math.round(entry.score * 100) / 100}</Table.Td>
