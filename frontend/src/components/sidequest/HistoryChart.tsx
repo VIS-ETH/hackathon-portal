@@ -1,5 +1,6 @@
 import { useGetSidequestsHistory, useGetTeams } from "@/api/gen";
 import { cardProps } from "@/styles/common";
+import { fmtDateWeekdayTime } from "@/utils";
 
 import { useIntl } from "react-intl";
 
@@ -17,7 +18,12 @@ type HistoryChartProps = {
 const HistoryChart = ({ eventId }: HistoryChartProps) => {
   const intl = useIntl();
 
-  const { data: history = {} } = useGetSidequestsHistory(eventId);
+  const { data: history = {} } = useGetSidequestsHistory(eventId, undefined, {
+    query: {
+      refetchInterval: 1000 * 60,
+    },
+  });
+
   const { data: teams = [] } = useGetTeams({
     event_id: eventId,
   });
@@ -46,14 +52,11 @@ const HistoryChart = ({ eventId }: HistoryChartProps) => {
     },
     xaxis: {
       type: "datetime",
+      labels: {
+        formatter: (value: string) => fmtDateWeekdayTime(value, intl),
+      },
       tooltip: {
-        formatter: (value: string) => {
-          return intl.formatDate(value, {
-            weekday: "long",
-            hour: "2-digit",
-            minute: "2-digit",
-          });
-        },
+        formatter: (value: string) => fmtDateWeekdayTime(value, intl),
       },
     },
     markers: {

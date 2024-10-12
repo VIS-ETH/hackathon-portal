@@ -30,7 +30,7 @@ const OverviewLeaderboardTable = ({
                 leaderboard.map((entry) => (
                   <Table.Tr key={entry.team_id}>
                     <Table.Td>{entry.team_name}</Table.Td>
-                    <Table.Td>{entry.score}</Table.Td>
+                    <Table.Td>{Math.round(entry.score * 100) / 100}</Table.Td>
                   </Table.Tr>
                 ))
               ) : (
