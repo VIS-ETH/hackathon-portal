@@ -13,9 +13,10 @@ const ApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
 type HistoryChartProps = {
   eventId: string;
+  grow?: boolean;
 };
 
-const HistoryChart = ({ eventId }: HistoryChartProps) => {
+const HistoryChart = ({ eventId, grow }: HistoryChartProps) => {
   const intl = useIntl();
 
   const { data: history = {} } = useGetSidequestsHistory(eventId, undefined, {
@@ -72,9 +73,14 @@ const HistoryChart = ({ eventId }: HistoryChartProps) => {
   };
 
   return (
-    <Card {...cardProps}>
-      <Card.Section>
-        <ApexChart type="line" options={options} series={series} height={400} />
+    <Card {...cardProps} h={grow ? "100%" : undefined}>
+      <Card.Section h={grow ? "100%" : undefined}>
+        <ApexChart
+          type="line"
+          options={options}
+          series={series}
+          height={grow ? "100%" : 400}
+        />
       </Card.Section>
     </Card>
   );
