@@ -10,7 +10,9 @@ use repositories::db::prelude::*;
 use repositories::DbRepository;
 use sea_orm::prelude::*;
 use sea_orm::sea_query::Func;
-use sea_orm::{ActiveModelTrait, IntoActiveModel, IntoSimpleExpr, QuerySelect, Set};
+use sea_orm::{
+    ActiveModelTrait, FromQueryResult, IntoActiveModel, IntoSimpleExpr, QuerySelect, Set,
+};
 use std::cmp::Ordering;
 use std::collections::HashMap;
 
@@ -110,55 +112,64 @@ impl RatingService {
         &self,
         event_id: Uuid,
     ) -> ServiceResult<Vec<ExpertRatingLeaderboardEntry>> {
+        #[derive(FromQueryResult)]
+        pub struct AggregatedRatingx {
+            team_id: Uuid,
+            category: ExpertRatingCategory,
+            rating_sum: f64,
+            rating_count: i64,
+        }
+
         let ratings = db_expert_rating::Entity::find()
             .select_only()
             .column(db_expert_rating::Column::TeamId)
             .column(db_expert_rating::Column::Category)
-            .expr_as(
-                Func::avg(db_expert_rating::Column::Rating.into_simple_expr()),
-                "average",
-            )
+            .column_as(db_expert_rating::Column::Rating.sum(), "rating_sum")
+            .column_as(db_expert_rating::Column::Rating.count(), "rating_count")
             .inner_join(db_team::Entity)
             .filter(db_team::Column::EventId.eq(event_id))
             .group_by(db_expert_rating::Column::TeamId)
             .group_by(db_expert_rating::Column::Category)
-            .into_model::<AggregatedRating>()
+            .into_model::<AggregatedRatingx>()
             .all(self.db_repo.conn())
             .await?;
 
-        let ratings_by_team = ratings
-            .iter()
-            .chunk_by(|rating| rating.team_id)
-            .into_iter()
-            .map(|(team_id, ratings)| (team_id, ratings.collect::<Vec<_>>()))
-            .collect::<HashMap<_, _>>();
+        let teams = ratings.into_iter().fold(HashMap::new(), |mut acc, rating| {
+            let team_ratings = acc.entry(rating.team_id).or_insert_with(Vec::new);
+            team_ratings.push(rating);
+            acc
+        });
 
-        let mut leaderboard = ratings_by_team
+        let mut leaderboard = teams
             .values()
-            .map(|team_ratings| {
-                let team_id = team_ratings[0].team_id;
+            .into_iter()
+            .map(|ratings| {
+                let team_id = ratings[0].team_id;
 
-                let weights_sum = team_ratings
-                    .iter()
-                    .map(|rating| rating.category.get_weight())
-                    .sum::<f64>();
+                let (total_weight, total_rating) =
+                    ratings.iter().fold((0.0, 0.0), |acc, rating| {
+                        (
+                            acc.0 + rating.category.get_weight(),
+                            acc.1
+                                + (rating.rating_sum / rating.rating_count as f64)
+                                    * rating.category.get_weight(),
+                        )
+                    });
 
-                let ratings_sum = team_ratings
-                    .iter()
-                    .map(|rating| rating.average * rating.category.get_weight())
-                    .sum::<f64>();
+                let rating = total_rating / total_weight;
 
-                let overall_rating = ratings_sum / weights_sum;
-
-                let category_ratings = team_ratings
-                    .iter()
-                    .map(|rating| (rating.category, rating.average))
-                    .collect();
+                let categories = ratings.into_iter().fold(HashMap::new(), |mut acc, rating| {
+                    acc.insert(
+                        rating.category,
+                        rating.rating_sum / rating.rating_count as f64,
+                    );
+                    acc
+                });
 
                 ExpertRatingLeaderboardEntry {
                     team_id,
-                    rating: overall_rating,
-                    categories: category_ratings,
+                    rating,
+                    categories,
                 }
             })
             .collect::<Vec<_>>();
