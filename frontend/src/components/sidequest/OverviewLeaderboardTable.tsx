@@ -14,7 +14,11 @@ const OverviewLeaderboardTable = ({
   eventId,
   limit,
 }: OverviewLeaderboardTableProps) => {
-  const { data: leaderboard = [] } = useGetSidequestsLeaderboard(eventId);
+  const { data: leaderboard = [] } = useGetSidequestsLeaderboard(eventId, {
+    query: {
+      refetchInterval: 1000 * 60,
+    },
+  });
 
   return (
     <Card {...cardProps}>
