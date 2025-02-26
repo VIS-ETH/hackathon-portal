@@ -21,6 +21,7 @@ import { useEffect, useState } from "react";
 
 import {
   Button,
+  Divider,
   Drawer,
   NumberInput,
   NumberInputProps,
@@ -101,28 +102,34 @@ const CreateAttemptDrawer = ({
       title="Create Attempt"
     >
       <Stack>
-        <TeamSelect eventId={eventId} teamId={team?.id} setTeam={setTeam} />
-        {team && (
+        <SidequestSelect
+          eventId={eventId}
+          sidequestId={sidequest?.id}
+          setSidequest={setSidequest}
+        />
+        {sidequest && (
           <>
-            <TeamAffiliateSelect
-              teamId={team.id}
-              affiliateId={user?.id}
-              setAffiliate={setUser}
-              role={TeamRole.Member}
+            <TeamSelect
+              eventId={eventId}
+              teamId={team?.id}
+              setTeam={(team) => {
+                setTeam(team);
+                setUser(undefined);
+              }}
             />
-            {user && (
+            {team && (
               <>
-                {cooldown && <CooldownText cooldown={cooldown} />}
-                {canAttempt && (
+                <TeamAffiliateSelect
+                  teamId={team.id}
+                  affiliateId={user?.id}
+                  setAffiliate={setUser}
+                  role={TeamRole.Member}
+                />
+                {user && (
                   <>
-                    <SidequestSelect
-                      eventId={eventId}
-                      sidequestId={sidequest?.id}
-                      setSidequest={setSidequest}
-                    />
-                    {sidequest && (
+                    {cooldown && <CooldownText cooldown={cooldown} />}
+                    {canAttempt && (
                       <>
-                        <MarkdownCard content={sidequest.description} />
                         <NumberInput
                           {...(inputProps as NumberInputProps)}
                           value={result}
@@ -146,6 +153,8 @@ const CreateAttemptDrawer = ({
                 )}
               </>
             )}
+            <Divider />
+            <MarkdownCard content={sidequest.description} />
           </>
         )}
       </Stack>
