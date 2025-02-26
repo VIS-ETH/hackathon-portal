@@ -1,4 +1,4 @@
-FROM rust:slim-bookworm as builder
+FROM rust:slim-bookworm AS builder
 
 WORKDIR /app
 
@@ -14,7 +14,7 @@ RUN cargo build --package api --release
 
 #############################
 
-FROM debian:bookworm-slim as runtime
+FROM debian:bookworm-slim AS runtime
 
 WORKDIR /app
 

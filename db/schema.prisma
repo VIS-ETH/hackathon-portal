@@ -46,7 +46,7 @@ model event {
   welcome_content       String?
   documentation_content String?
   max_team_size         Int
-  max_teams_per_project  Int  @default(2) // max team per project 
+  max_teams_per_project Int              @default(2) // max team per project
   sidequest_cooldown    Int // in minutes
   is_read_only          Boolean
   is_feedback_visible   Boolean
@@ -67,12 +67,12 @@ model team {
   project_id String? @db.Uuid
 
   // fields
-  name     String
-  slug     String
-  index    Int
-  password String?
+  name        String
+  slug        String
+  index       Int
+  password    String?
   extra_score Float?
-  comment String?
+  comment     String?
 
   // relations
   event   event    @relation(fields: [event_id], references: [id])
