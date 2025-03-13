@@ -1,55 +1,15 @@
 use crate::authorization::models::UserRoles;
-use repositories::db::prelude::{EventRole, TeamRole};
+use crate::authorization::policies::Policies;
+use repositories::db::prelude::{EventPhase, EventRole, TeamRole};
+use repositories::db::sea_orm_active_enums::EventVisibility;
 use serde::{Deserialize, Serialize};
-use std::cmp::Ordering;
+use std::collections::HashSet;
 use strum::{Display, VariantArray};
 use utoipa::ToSchema;
 use uuid::Uuid;
 
-/**
-A group is a power set of roles and has a partial order relation defined on it.
-This allows for easy permissions testing, e.g. to ensure that a resource is only accessed
-by a user that either is an event admin, event mentor, event sidequest master, or event stakeholder,
-we can simply write `user_groups >= Group::EventStaff`.
-
-Here is the corresponding Hasse diagram for the group:
-
-```graphviz
-graph {
-  layout = dot
-  rankdir = TB
-  node [ shape="none" ]
-
-    EventAdmin [label="EventAdmin"]
-    EventMentor [label="EventMentor"]
-    EventParticipant [label="EventParticipant"]
-    EventSidequestMaster [label="EventSidequestMaster"]
-    EventStakeholder [label="EventStakeholder"]
-    TeamMember [label="TeamMember"]
-    TeamMentor [label="TeamMentor"]
-    EventStaff [label="EventStaff"]
-    TeamAffiliate [label="TeamAffiliate"]
-    EventAffiliate [label="EventAffiliate"]
-    ExpertRater [label="ExpertRater"]
-    EventGuest [label="EventGuest"]
-
-    { rank=same; EventSidequestMaster, EventStakeholder, EventMentor }
-
-    EventAdmin -- {EventStakeholder, TeamMentor, TeamMember, EventSidequestMaster}
-    ExpertRater -- {EventStaff}
-    {TeamMember, TeamMentor} -- TeamAffiliate
-    TeamMentor -- EventMentor
-    {EventMentor, EventStakeholder} -- ExpertRater
-    EventSidequestMaster -- EventStaff
-    TeamAffiliate -- EventAffiliate
-    {EventParticipant, EventStaff} -- EventAffiliate
-    TeamMember -- EventParticipant
-    EventAffiliate -- EventGuest
-}
-```
-**/
 #[derive(
-    Serialize, Deserialize, Display, Debug, Clone, Copy, Eq, PartialEq, VariantArray, ToSchema,
+    Serialize, Deserialize, Display, Debug, Clone, Copy, Eq, PartialEq, VariantArray, ToSchema, Hash,
 )]
 pub enum Group {
     // Event roles
@@ -58,242 +18,38 @@ pub enum Group {
     EventParticipant,
     EventSidequestMaster,
     EventStakeholder,
+    EventStaff,
+    EventAffiliate,
+    EventGuest,
     // Team roles
     TeamMember,
     TeamMentor,
-    // Power sets
-    EventStaff,
     TeamAffiliate,
-    EventAffiliate,
-    EventGuest,
-    // Rating
+    // Other roles
     ExpertRater,
 }
 
-impl From<EventRole> for Group {
-    fn from(value: EventRole) -> Self {
-        match value {
-            EventRole::Admin => Self::EventAdmin,
-            EventRole::Mentor => Self::EventMentor,
-            EventRole::Participant => Self::EventParticipant,
-            EventRole::SidequestMaster => Self::EventSidequestMaster,
-            EventRole::Stakeholder => Self::EventStakeholder,
-        }
-    }
-}
-
-impl From<TeamRole> for Group {
-    fn from(value: TeamRole) -> Self {
-        match value {
-            TeamRole::Member => Self::TeamMember,
-            TeamRole::Mentor => Self::TeamMentor,
-        }
-    }
-}
-
-impl PartialOrd for Group {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        match self {
-            Self::EventAdmin => match other {
-                Self::EventAdmin => Some(Ordering::Equal),
-
-                Self::EventMentor
-                | Self::EventParticipant
-                | Self::EventSidequestMaster
-                | Self::EventStakeholder
-                | Self::TeamMember
-                | Self::TeamMentor
-                | Self::EventGuest
-                | Self::EventAffiliate
-                | Self::EventStaff
-                | Self::TeamAffiliate
-                | Self::ExpertRater => Some(Ordering::Greater),
-            },
-            Self::EventMentor => match other {
-                Self::EventAdmin | Self::TeamMentor => Some(Ordering::Less),
-
-                Self::EventMentor => Some(Ordering::Equal),
-
-                Self::EventGuest | Self::EventAffiliate | Self::EventStaff | Self::ExpertRater => {
-                    Some(Ordering::Greater)
-                }
-
-                _ => None,
-            },
-            Self::EventParticipant => match other {
-                Self::EventAdmin | Self::TeamMember => Some(Ordering::Less),
-
-                Self::EventParticipant => Some(Ordering::Equal),
-
-                Self::EventAffiliate | Self::EventGuest => Some(Ordering::Greater),
-
-                _ => None,
-            },
-            Self::EventSidequestMaster => match other {
-                Self::EventAdmin => Some(Ordering::Less),
-
-                Self::EventSidequestMaster => Some(Ordering::Equal),
-
-                Self::EventStaff | Self::EventAffiliate | Self::EventGuest => {
-                    Some(Ordering::Greater)
-                }
-
-                _ => None,
-            },
-            Self::EventStakeholder => match other {
-                Self::EventAdmin => Some(Ordering::Less),
-
-                Self::EventStakeholder => Some(Ordering::Equal),
-
-                Self::EventStaff | Self::EventAffiliate | Self::EventGuest | Self::ExpertRater => {
-                    Some(Ordering::Greater)
-                }
-                _ => None,
-            },
-            Self::TeamMember => match other {
-                Self::EventAdmin => Some(Ordering::Less),
-
-                Self::TeamMember => Some(Ordering::Equal),
-
-                Self::EventParticipant
-                | Self::TeamAffiliate
-                | Self::EventAffiliate
-                | Self::EventGuest => Some(Ordering::Greater),
-
-                _ => None,
-            },
-            Self::TeamMentor => match other {
-                Self::EventAdmin => Some(Ordering::Less),
-
-                Self::TeamMentor => Some(Ordering::Equal),
-
-                Self::EventMentor
-                | Self::EventStaff
-                | Self::EventAffiliate
-                | Self::EventGuest
-                | Self::TeamAffiliate
-                | Self::ExpertRater => Some(Ordering::Greater),
-
-                _ => None,
-            },
-            Self::EventStaff => match other {
-                Self::EventAdmin
-                | Self::EventMentor
-                | Self::EventSidequestMaster
-                | Self::EventStakeholder
-                | Self::TeamMentor
-                | Self::ExpertRater => Some(Ordering::Less),
-
-                Self::EventStaff => Some(Ordering::Equal),
-
-                Self::EventGuest | Self::EventAffiliate => Some(Ordering::Greater),
-
-                _ => None,
-            },
-            Self::TeamAffiliate => match other {
-                Self::EventAdmin | Self::TeamMember | Self::TeamMentor => Some(Ordering::Less),
-
-                Self::TeamAffiliate => Some(Ordering::Equal),
-
-                Self::EventAffiliate | Self::EventGuest => Some(Ordering::Greater),
-
-                _ => None,
-            },
-            Self::EventAffiliate => match other {
-                Self::EventAdmin
-                | Self::EventMentor
-                | Self::EventParticipant
-                | Self::EventSidequestMaster
-                | Self::EventStakeholder
-                | Self::TeamMember
-                | Self::TeamMentor
-                | Self::EventStaff
-                | Self::TeamAffiliate
-                | Self::ExpertRater => Some(Ordering::Less),
-
-                Self::EventAffiliate => Some(Ordering::Equal),
-
-                Self::EventGuest => Some(Ordering::Greater),
-            },
-            Self::EventGuest => match other {
-                Self::EventAdmin
-                | Self::EventMentor
-                | Self::EventParticipant
-                | Self::EventSidequestMaster
-                | Self::EventStakeholder
-                | Self::TeamMember
-                | Self::TeamMentor
-                | Self::EventAffiliate
-                | Self::EventStaff
-                | Self::TeamAffiliate
-                | Self::ExpertRater => Some(Ordering::Less),
-
-                Self::EventGuest => Some(Ordering::Equal),
-            },
-            Self::ExpertRater => match other {
-                Self::EventAdmin
-                | Self::TeamMentor
-                | Self::EventMentor
-                | Self::EventStakeholder => Some(Ordering::Less),
-
-                Self::ExpertRater => Some(Ordering::Equal),
-
-                Self::EventStaff | Self::EventAffiliate | Self::EventGuest => {
-                    Some(Ordering::Greater)
-                }
-
-                _ => None,
-            },
-        }
-    }
-}
-
-impl PartialEq<Group> for Groups {
-    fn eq(&self, other: &Group) -> bool {
-        self.groups.iter().all(|group| group == other)
-    }
-}
-
-impl PartialOrd<Group> for Groups {
-    fn partial_cmp(&self, _: &Group) -> Option<Ordering> {
-        // Only support comparisons of the form `[Group] >= Group`
-        None
-    }
-
-    fn ge(&self, other: &Group) -> bool {
-        self.groups.iter().any(|group| group >= other)
-    }
-}
-
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
-pub struct Groups {
-    groups: Vec<Group>,
-}
+pub struct Groups(pub HashSet<Group>);
 
 impl Groups {
     #[must_use]
-    pub fn new(groups: Vec<Group>) -> Self {
-        Self { groups }
+    pub const fn new(groups: HashSet<Group>) -> Self {
+        Self(groups)
     }
 
     #[must_use]
-    pub fn from_roles(roles: &UserRoles, event_id: Option<Uuid>, team_id: Option<Uuid>) -> Self {
-        let mut groups = Vec::new();
+    pub fn from_roles(event_roles: &[EventRole], team_roles: &[TeamRole]) -> Self {
+        let mut groups = HashSet::new();
 
-        if let Some(event_id) = event_id {
-            for event_role in roles.get_event_roles(&event_id) {
-                groups.push(event_role.into());
-            }
+        for event_role in event_roles {
+            let role_groups = Self::from(*event_role);
+            groups.extend(role_groups.0);
         }
 
-        if let Some(team_id) = team_id {
-            for team_role in roles.get_team_roles(&team_id) {
-                groups.push(team_role.into());
-            }
-        }
-
-        if groups.is_empty() {
-            groups.push(Group::EventGuest);
+        for team_role in team_roles {
+            let role_groups = Self::from(*team_role);
+            groups.extend(role_groups.0);
         }
 
         Self::new(groups)
@@ -301,96 +57,331 @@ impl Groups {
 
     #[must_use]
     pub fn from_event(roles: &UserRoles, event_id: Uuid) -> Self {
-        Self::from_roles(roles, Some(event_id), None)
+        let event_roles = roles.get_event_roles(&event_id);
+
+        Self::from_roles(&event_roles.into_iter().collect::<Vec<_>>(), &[])
     }
 
     #[must_use]
     pub fn from_event_and_team(roles: &UserRoles, event_id: Uuid, team_id: Uuid) -> Self {
-        Self::from_roles(roles, Some(event_id), Some(team_id))
+        let event_roles = roles.get_event_roles(&event_id);
+        let team_roles = roles.get_team_roles(&team_id);
+
+        Self::from_roles(
+            &event_roles.into_iter().collect::<Vec<_>>(),
+            &team_roles.into_iter().collect::<Vec<_>>(),
+        )
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use std::fmt::Display;
+impl From<EventRole> for Groups {
+    fn from(value: EventRole) -> Self {
+        const ADMIN_GROUPS: &[Group] = &[
+            Group::EventAdmin,
+            Group::EventMentor,
+            Group::EventParticipant,
+            Group::EventSidequestMaster,
+            Group::EventStakeholder,
+            Group::EventStaff,
+            Group::EventAffiliate,
+            Group::EventGuest,
+            Group::TeamMember,
+            Group::TeamMentor,
+            Group::TeamAffiliate,
+            Group::ExpertRater,
+        ];
 
-    #[test]
-    fn test_group_reflexivity() {
-        for group in Group::VARIANTS {
-            assert!(
-                group <= group,
-                "{}",
-                display_reflexivity_error(group, false)
-            );
-            assert!(group >= group, "{}", display_reflexivity_error(group, true));
+        const MENTOR_GROUPS: &[Group] = &[
+            Group::EventMentor,
+            Group::EventStaff,
+            Group::EventAffiliate,
+            Group::EventGuest,
+            Group::ExpertRater,
+        ];
+
+        const PARTICIPANT_GROUPS: &[Group] = &[
+            Group::EventParticipant,
+            Group::EventAffiliate,
+            Group::EventGuest,
+        ];
+
+        const SIDEQUEST_MASTER_GROUPS: &[Group] = &[
+            Group::EventSidequestMaster,
+            Group::EventStaff,
+            Group::EventAffiliate,
+            Group::EventGuest,
+        ];
+
+        const STAKEHOLDER_GROUPS: &[Group] = &[
+            Group::EventStakeholder,
+            Group::EventStaff,
+            Group::EventAffiliate,
+            Group::EventGuest,
+            Group::ExpertRater,
+        ];
+
+        let groups = match value {
+            EventRole::Admin => ADMIN_GROUPS,
+            EventRole::Mentor => MENTOR_GROUPS,
+            EventRole::Participant => PARTICIPANT_GROUPS,
+            EventRole::SidequestMaster => SIDEQUEST_MASTER_GROUPS,
+            EventRole::Stakeholder => STAKEHOLDER_GROUPS,
+        };
+
+        Self::new(groups.iter().copied().collect())
+    }
+}
+
+impl From<TeamRole> for Groups {
+    fn from(value: TeamRole) -> Self {
+        const MEMBER_GROUPS: &[Group] = &[Group::TeamMember, Group::TeamAffiliate];
+
+        const MENTOR_GROUPS: &[Group] = &[Group::TeamMentor, Group::TeamAffiliate];
+
+        let groups = match value {
+            TeamRole::Member => MEMBER_GROUPS,
+            TeamRole::Mentor => MENTOR_GROUPS,
+        };
+
+        Self::new(groups.iter().copied().collect())
+    }
+}
+
+impl PartialEq<Group> for Groups {
+    fn eq(&self, other: &Group) -> bool {
+        self.0.contains(other)
+    }
+}
+
+impl Groups {
+    #[must_use]
+    pub fn can_view_event(&self, event_visibility: EventVisibility) -> bool {
+        if self == &Group::EventStaff {
+            return true;
         }
-    }
 
-    #[test]
-    fn test_group_transitivity() {
-        for a in Group::VARIANTS {
-            for b in Group::VARIANTS {
-                for c in Group::VARIANTS {
-                    if a <= b && b <= c {
-                        assert!(a <= c, "{}", display_transitivity_error(&a, &b, &c, false));
-                    }
-
-                    if a >= b && b >= c {
-                        assert!(a >= c, "{}", display_transitivity_error(&a, &b, &c, true));
-                    }
-                }
-            }
+        if self == &Group::EventAffiliate {
+            return event_visibility != EventVisibility::Hidden;
         }
+
+        event_visibility == EventVisibility::Public
     }
 
-    #[test]
-    fn test_group_antisymmetry() {
-        for a in Group::VARIANTS {
-            for b in Group::VARIANTS {
-                if a <= b && b <= a {
-                    assert_eq!(a, b, "{}", display_antisymmetry_error(&a, &b, false));
-                }
-
-                if a >= b && b >= a {
-                    assert_eq!(a, b, "{}", display_antisymmetry_error(&a, &b, true));
-                }
-            }
+    #[must_use]
+    pub fn can_view_event_internal(&self, event_visibility: EventVisibility) -> bool {
+        if let Some(decision) = self.default_can_view_policy(event_visibility) {
+            return decision;
         }
+
+        self == &Group::EventAffiliate
     }
 
-    #[test]
-    fn misc_comparisons() {
-        let non_admin_groups = Group::VARIANTS
-            .iter()
-            .filter(|group| **group != Group::EventAdmin)
-            .copied()
-            .collect::<Vec<_>>();
+    #[must_use]
+    pub fn can_view_event_feedback(
+        &self,
+        event_visibility: EventVisibility,
+        event_phase: EventPhase,
+        event_feedback_is_visible: bool,
+    ) -> bool {
+        if let Some(decision) = self.default_can_view_policy(event_visibility) {
+            return decision;
+        }
 
-        let non_admin_groups = Groups::new(non_admin_groups);
+        if self.can_view_event_internal(event_visibility) {
+            return event_phase == EventPhase::Finished && event_feedback_is_visible;
+        }
 
-        assert!(!(non_admin_groups >= Group::EventAdmin));
-
-        assert!(Group::TeamMember >= Group::TeamAffiliate);
-        assert!(Group::TeamMentor >= Group::TeamAffiliate);
-        assert!(!(Group::TeamAffiliate >= Group::TeamMember));
-        assert!(!(Group::TeamAffiliate >= Group::TeamMentor));
-        assert!(!(Group::TeamMentor >= Group::TeamMember));
-        assert!(!(Group::TeamMember >= Group::TeamMentor));
+        false
     }
 
-    fn display_reflexivity_error<T: Display>(a: T, rev: bool) -> String {
-        let cmp = if rev { ">=" } else { "<=" };
-        format!("{a} !{cmp} {a}")
+    #[must_use]
+    pub fn can_manage_event(&self) -> bool {
+        self == &Group::EventAdmin
     }
 
-    fn display_transitivity_error<T: Display>(a: T, b: T, c: T, rev: bool) -> String {
-        let cmp = if rev { ">=" } else { "<=" };
-        format!("{a} {cmp} {b} {cmp} {c} but {a} !{cmp} {c}")
+    #[must_use]
+    pub fn can_create_team(
+        &self,
+        event_visibility: EventVisibility,
+        event_phase: EventPhase,
+        event_is_ro: bool,
+    ) -> bool {
+        if let Some(decision) = self.default_can_manage_policy(event_visibility, event_is_ro) {
+            return decision;
+        }
+
+        if self == &Group::EventParticipant {
+            return event_phase == EventPhase::Registration;
+        }
+
+        false
     }
 
-    fn display_antisymmetry_error<T: Display>(a: T, b: T, rev: bool) -> String {
-        let cmp = if rev { ">=" } else { "<=" };
-        format!("{a} {cmp} {b} and {b} {cmp} {a} but {a} != {b}")
+    #[must_use]
+    pub fn can_manage_expert_rating(
+        &self,
+        event_visibility: EventVisibility,
+        event_phase: EventPhase,
+        event_is_ro: bool,
+    ) -> bool {
+        if let Some(decision) = self.default_can_manage_policy(event_visibility, event_is_ro) {
+            return decision;
+        }
+
+        if self == &Group::ExpertRater {
+            return event_phase == EventPhase::Grading;
+        }
+
+        false
+    }
+
+    #[must_use]
+    pub fn can_view_team_confidential(&self, event_visibility: EventVisibility) -> bool {
+        if let Some(decision) = self.default_can_view_policy(event_visibility) {
+            return decision;
+        }
+
+        self == &Group::TeamMember
+    }
+
+    #[must_use]
+    pub fn can_view_team_feedback(
+        &self,
+        event_visibility: EventVisibility,
+        event_phase: EventPhase,
+        event_feedback_is_visible: bool,
+    ) -> bool {
+        if let Some(decision) = self.default_can_view_policy(event_visibility) {
+            return decision;
+        }
+
+        if self == &Group::TeamAffiliate {
+            return event_phase == EventPhase::Finished && event_feedback_is_visible;
+        }
+
+        false
+    }
+
+    #[must_use]
+    pub fn can_manage_team(
+        &self,
+        event_visibility: EventVisibility,
+        event_phase: EventPhase,
+        event_is_ro: bool,
+    ) -> bool {
+        if let Some(decision) = self.default_can_manage_policy(event_visibility, event_is_ro) {
+            return decision;
+        }
+
+        if self == &Group::TeamMember {
+            return event_phase == EventPhase::Registration;
+        }
+
+        false
+    }
+
+    #[must_use]
+    pub fn can_manage_project(
+        &self,
+        event_visibility: EventVisibility,
+        event_phase: EventPhase,
+        event_is_ro: bool,
+    ) -> bool {
+        if let Some(decision) = self.default_can_manage_policy(event_visibility, event_is_ro) {
+            return decision;
+        }
+
+        if self == &Group::EventStakeholder {
+            return event_phase == EventPhase::Registration;
+        }
+
+        false
+    }
+
+    #[must_use]
+    pub fn can_manage_sidequest(
+        &self,
+        event_visibility: EventVisibility,
+        event_phase: EventPhase,
+        event_is_ro: bool,
+    ) -> bool {
+        if let Some(decision) = self.default_can_manage_policy(event_visibility, event_is_ro) {
+            return decision;
+        }
+
+        if self == &Group::EventSidequestMaster {
+            return event_phase == EventPhase::Registration;
+        }
+
+        false
+    }
+
+    #[must_use]
+    pub fn can_view_sidequest_attempt(&self, event_visibility: EventVisibility) -> bool {
+        if let Some(decision) = self.default_can_view_policy(event_visibility) {
+            return decision;
+        }
+
+        self == &Group::EventSidequestMaster
+    }
+
+    #[must_use]
+    pub fn can_manage_sidequest_attempt(
+        &self,
+        event_visibility: EventVisibility,
+        event_phase: EventPhase,
+        event_is_ro: bool,
+    ) -> bool {
+        if let Some(decision) = self.default_can_manage_policy(event_visibility, event_is_ro) {
+            return decision;
+        }
+
+        if self == &Group::EventSidequestMaster {
+            return event_phase == EventPhase::Hacking;
+        }
+
+        false
+    }
+
+    /// - Some(true) iff the groups definitely grant viewing permissions
+    /// - Some(false) iff the groups definitely deny viewing permissions
+    /// - None iff the groups do not have a definite answer
+    fn default_can_view_policy(&self, event_visibility: EventVisibility) -> Option<bool> {
+        if self == &Group::EventAdmin {
+            return Some(true);
+        }
+
+        if !self.can_view_event(event_visibility) {
+            return Some(false);
+        }
+
+        None
+    }
+
+    /// - Some(true) iff the groups definitely grant management permissions
+    /// - Some(false) iff the groups definitely deny management permissions
+    /// - None iff the groups do not have a definite answer
+    fn default_can_manage_policy(
+        &self,
+        event_visibility: EventVisibility,
+        event_is_ro: bool,
+    ) -> Option<bool> {
+        if self == &Group::EventAdmin {
+            return Some(true);
+        }
+
+        if !self.can_view_event(event_visibility) {
+            return Some(false);
+        }
+
+        if !(self == &Group::EventAffiliate) {
+            return Some(false);
+        }
+
+        if event_is_ro {
+            return Some(false);
+        }
+
+        None
     }
 }
