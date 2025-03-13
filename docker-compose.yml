@@ -87,6 +87,35 @@ services:
       - backend
     restart: unless-stopped
 
+
+  minio:
+    image: quay.io/minio/minio:latest
+    container_name: minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    env_file:
+      - .env
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+
+  minio-init:
+    image: quay.io/minio/mc:latest
+    depends_on:
+      - minio
+    env_file:
+      - .env
+    volumes:
+      - ./minio/policy.json:/root/policy.json:ro
+    entrypoint: >
+      /bin/sh -c "
+      until (/usr/bin/mc alias set localminio http://minio:9000 $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD); do sleep 1; done;
+      /usr/bin/mc mb --ignore-existing localminio/test-bucket;
+      /usr/bin/mc admin accesskey create localminio/  $MINIO_ROOT_USER --access-key  $MINIO_ACCESS_KEY  --secret-key $MINIO_SECRET_KEY --policy /root/policy.json;
+      echo 'Bucket created!';
+      exit 0;
+      "
   traefik:
     container_name: portal_traefik
     image: traefik
@@ -107,6 +136,8 @@ volumes:
   portal_db:
     external: true
   portal_db_backup:
+    external: true
+  minio_data:
     external: true
 
 networks:
