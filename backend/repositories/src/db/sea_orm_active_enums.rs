@@ -16,6 +16,7 @@ use serde::{Deserialize, Serialize};
     Hash,
     Copy,
     strum::Display,
+    strum::VariantArray,
 )]
 #[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "event_phase")]
 pub enum EventPhase {
@@ -41,6 +42,7 @@ pub enum EventPhase {
     Hash,
     Copy,
     strum::Display,
+    strum::VariantArray,
 )]
 #[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "event_role")]
 pub enum EventRole {
@@ -69,6 +71,7 @@ pub enum EventRole {
     Hash,
     Copy,
     strum::Display,
+    strum::VariantArray,
 )]
 #[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "event_visibility")]
 pub enum EventVisibility {
@@ -93,6 +96,7 @@ pub enum EventVisibility {
     Hash,
     Copy,
     strum::Display,
+    strum::VariantArray,
 )]
 #[sea_orm(
     rs_type = "String",
@@ -132,6 +136,7 @@ impl ExpertRatingCategory {
     Hash,
     Copy,
     strum::Display,
+    strum::VariantArray,
 )]
 #[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "team_role")]
 pub enum TeamRole {
