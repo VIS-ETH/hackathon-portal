@@ -16,6 +16,7 @@ pub mod sidequest_attempt;
 pub mod sidequest_score;
 pub mod team;
 pub mod team_role_assignment;
+pub mod upload;
 pub mod user;
 
 pub use crate::RepositoryResult;
@@ -517,6 +518,18 @@ impl DbRepository {
             })?;
 
         Ok(appointment)
+    }
+    // endregion
+
+    // region: Upload
+    pub async fn get_pending_uploads(&self) -> RepositoryResult<Vec<upload::Model>> {
+        let uploads = upload::Entity::find()
+            .filter(upload::Column::ValidatedAt.is_null())
+            .order_by_asc(upload::Column::UploadedAfter)
+            .all(self.conn())
+            .await?;
+
+        Ok(uploads)
     }
     // endregion
 }

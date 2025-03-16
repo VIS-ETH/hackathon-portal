@@ -2,6 +2,7 @@ pub mod models;
 
 use crate::authorization::AuthorizationService;
 use crate::team::models::{Team, TeamCredentials, TeamForCreate, TeamForUpdate};
+use crate::upload::UploadService;
 use crate::{ServiceError, ServiceResult};
 use hackathon_portal_repositories::db::prelude::*;
 use hackathon_portal_repositories::DbRepository;
@@ -14,14 +15,20 @@ use std::sync::Arc;
 #[derive(Clone)]
 pub struct TeamService {
     authorization_service: Arc<AuthorizationService>,
+    upload_service: Arc<UploadService>,
     db_repo: DbRepository,
 }
 
 impl TeamService {
     #[must_use]
-    pub fn new(authorization_service: Arc<AuthorizationService>, db_repo: DbRepository) -> Self {
+    pub fn new(
+        authorization_service: Arc<AuthorizationService>,
+        upload_service: Arc<UploadService>,
+        db_repo: DbRepository,
+    ) -> Self {
         Self {
             authorization_service,
+            upload_service,
             db_repo,
         }
     }
@@ -58,12 +65,19 @@ impl TeamService {
             return Err(err);
         }
 
-        Ok(team.into())
+        let mut team = Team::from(team);
+        self.inject_photo_url(&mut team).await?;
+
+        Ok(team)
     }
 
     pub async fn get_teams(&self, event_id: Uuid) -> ServiceResult<Vec<Team>> {
         let teams = self.db_repo.get_teams(event_id).await?;
-        let teams = teams.into_iter().map(Team::from).collect();
+        let mut teams = teams.into_iter().map(Team::from).collect();
+
+        for team in &mut teams {
+            self.inject_photo_url(team).await?;
+        }
 
         Ok(teams)
     }
@@ -86,7 +100,11 @@ impl TeamService {
 
     pub async fn get_team_by_slug(&self, event_slug: &str, team_slug: &str) -> ServiceResult<Team> {
         let team = self.db_repo.get_team_by_slug(event_slug, team_slug).await?;
-        Ok(team.into())
+        let mut team = Team::from(team);
+
+        self.inject_photo_url(&mut team).await?;
+
+        Ok(team)
     }
 
     pub async fn update_team(&self, team_id: Uuid, team_fu: TeamForUpdate) -> ServiceResult<Team> {
@@ -109,8 +127,11 @@ impl TeamService {
         }
 
         let team = active_team.update(self.db_repo.conn()).await?;
+        let mut team = Team::from(team);
 
-        Ok(team.into())
+        self.inject_photo_url(&mut team).await?;
+
+        Ok(team)
     }
 
     pub async fn update_team_internal(
@@ -285,5 +306,11 @@ impl TeamService {
         let team = active_team.update(self.db_repo.conn()).await?;
 
         Ok(team.into())
+    }
+
+    async fn inject_photo_url(&self, team: &mut Team) -> ServiceResult<()> {
+        self.upload_service
+            .inject_url_opt(team.photo_url.as_mut())
+            .await
     }
 }

@@ -342,6 +342,26 @@ impl Groups {
         false
     }
 
+    /// Additional authorization checks (e.g. rate limiting and size constraints)
+    /// are required and implemented by the media service. This serves as a coarse-grained check.
+    #[must_use]
+    pub fn can_create_upload(
+        &self,
+        event_visibility: EventVisibility,
+        event_phase: EventPhase,
+        event_is_ro: bool,
+    ) -> bool {
+        if let Some(decision) = self.default_can_manage_policy(event_visibility, event_is_ro) {
+            return decision;
+        }
+
+        if self == &Group::EventAffiliate {
+            return matches!(event_phase, EventPhase::Registration | EventPhase::Hacking);
+        }
+
+        false
+    }
+
     /// - Some(true) iff the groups definitely grant viewing permissions
     /// - Some(false) iff the groups definitely deny viewing permissions
     /// - None iff the groups do not have a definite answer

@@ -11,6 +11,9 @@ pub use super::sidequest_attempt as db_sidequest_attempt;
 pub use super::sidequest_score as db_sidequest_score;
 pub use super::team as db_team;
 pub use super::team_role_assignment as db_team_role_assignment;
+pub use super::upload as db_upload;
 pub use super::user as db_user;
 
-pub use super::sea_orm_active_enums::{EventPhase, EventRole, ExpertRatingCategory, TeamRole};
+pub use super::sea_orm_active_enums::{
+    EventPhase, EventRole, ExpertRatingCategory, MediaUsage, TeamRole,
+};

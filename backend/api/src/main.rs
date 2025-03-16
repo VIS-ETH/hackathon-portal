@@ -31,6 +31,8 @@ async fn main() -> ApiResult<()> {
 
     let api_state = ApiState::from_config(&config).await?;
 
+    api_state.upload_service.validate_uploads().await?;
+
     let api_router = get_api_router(api_state.clone()).await?;
     let addr = SocketAddr::new(config.server.ip, config.server.port);
     let listener = TcpListener::bind(&addr).await?;

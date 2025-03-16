@@ -6,8 +6,16 @@ import ExpertRatingCard from "@/components/team/ExpertRatingCard";
 import TeamAffiliatesCard from "@/components/team/TeamAffiliatesCard";
 import TeamDetailsCard from "@/components/team/TeamDetailsCard";
 import { useResolveParams } from "@/hooks/useResolveParams";
+import { cardProps } from "@/styles/common";
 
-import { SimpleGrid, Stack, Title } from "@mantine/core";
+import {
+  AspectRatio,
+  Card,
+  Group,
+  SimpleGrid,
+  Stack,
+  Title,
+} from "@mantine/core";
 
 const Team = () => {
   const { event, team, policies } = useResolveParams();
@@ -19,7 +27,22 @@ const Team = () => {
 
   return (
     <Stack>
-      <Title order={2}>{team.name}</Title>
+      <Group>
+        {team.photo_url && (
+          <Card {...cardProps} pb={0}>
+            <Card.Section>
+              <AspectRatio ratio={2 / 1} w="150px">
+                <img
+                  src={team.photo_url}
+                  alt={team.name}
+                  style={{ objectFit: "cover", objectPosition: "center" }}
+                />
+              </AspectRatio>
+            </Card.Section>
+          </Card>
+        )}
+        <Title order={2}>{team.name}</Title>
+      </Group>
       <SimpleGrid
         cols={{ xs: 1, sm: policies.can_view_event_internal ? 2 : 1 }}
       >

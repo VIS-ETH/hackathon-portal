@@ -6,6 +6,7 @@ pub mod project;
 pub mod rating;
 pub mod sidequest;
 pub mod team;
+pub mod upload;
 pub mod user;
 mod utils;
 

@@ -150,10 +150,10 @@ impl RatingService {
                 let (total_weight, total_rating) =
                     ratings.iter().fold((0.0, 0.0), |acc, rating| {
                         (
-                            acc.0 + rating.category.get_weight(),
+                            acc.0 + self.get_expert_rating_category_weight(rating.category),
                             acc.1
                                 + (rating.rating_sum / rating.rating_count as f64)
-                                    * rating.category.get_weight(),
+                                    * self.get_expert_rating_category_weight(rating.category),
                         )
                     });
 
@@ -178,5 +178,13 @@ impl RatingService {
         leaderboard.sort_by(|a, b| b.rating.partial_cmp(&a.rating).unwrap_or(Ordering::Equal));
 
         Ok(leaderboard)
+    }
+
+    pub fn get_expert_rating_category_weight(&self, category: ExpertRatingCategory) -> f64 {
+        match category {
+            ExpertRatingCategory::Functionality => 0.5,
+            ExpertRatingCategory::Ux => 0.3,
+            ExpertRatingCategory::Presentation => 0.2,
+        }
     }
 }

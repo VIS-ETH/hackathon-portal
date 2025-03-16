@@ -22,6 +22,7 @@ pub struct Policies {
     pub can_manage_sidequest: bool,
     pub can_view_sidequest_attempt: bool,
     pub can_manage_sidequest_attempt: bool,
+    pub can_create_upload: bool,
 }
 
 impl Policies {
@@ -71,6 +72,7 @@ impl Policies {
                 event_phase,
                 event_is_ro,
             ),
+            can_create_upload: groups.can_create_upload(event_visibility, event_phase, event_is_ro),
         }
     }
 }

@@ -55,6 +55,15 @@ pub enum ServiceError {
         message: String,
     },
 
+    UploadsRateLimitExceeded,
+
+    UploadsSizeLimitExceeded {
+        size: i64,
+        limit: i64,
+    },
+
+    UploadsMimeNotAllowed,
+
     // region: external library errors
     #[from]
     Repository(RepositoryError),

@@ -141,6 +141,10 @@ impl From<&RepositoryError> for PublicError {
                 (StatusCode::CONFLICT, format!("Slug '{slug}' is not unique"))
             }
             RepositoryError::SeaORM(_) => ise,
+            RepositoryError::S3HeadObject(_) => ise,
+            RepositoryError::S3GetObject(_) => ise,
+            RepositoryError::S3PutObject(_) => ise,
+            RepositoryError::S3PresigningConfig(_) => ise,
         };
 
         Self::new(status, message)
@@ -199,6 +203,27 @@ impl From<&ServiceError> for PublicError {
             ServiceError::EventPhase { current_phase } => (
                 StatusCode::FORBIDDEN,
                 format!("This action is not allowed in the phase {current_phase}"),
+            ),
+            ServiceError::UploadsMimeNotAllowed => (
+                StatusCode::BAD_REQUEST,
+                "You may not upload files of this type".to_string(),
+            ),
+            ServiceError::UploadsSizeLimitExceeded { size, limit } => {
+                let size = (*size as f64) / 2f64.powf(20f64);
+                let limit = (*limit as f64) / 2f64.powf(20f64);
+
+                (
+                    StatusCode::BAD_REQUEST,
+                    format!(
+                        "File ({:.1} MB) exceeds the size limit of {:.1} MB",
+                        size,
+                        limit
+                    ),
+                )
+            },
+            ServiceError::UploadsRateLimitExceeded => (
+                StatusCode::FORBIDDEN,
+                "You have uploaded too many files in a short period of time. Please wait and try again later.".to_string()
             ),
             ServiceError::Repository(e) => return e.into(),
             ServiceError::Matching { message } => (StatusCode::BAD_REQUEST, message.clone()),

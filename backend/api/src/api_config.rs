@@ -2,6 +2,7 @@ use crate::error::ApiResult;
 use config::{Config, Environment};
 use dotenvy::dotenv;
 use hackathon_portal_repositories::db::DbConfig;
+use hackathon_portal_repositories::s3::S3Config;
 use serde::Deserialize;
 use std::net::IpAddr;
 use std::path::Path;
@@ -14,8 +15,9 @@ pub struct ServerConfig {
 
 #[derive(Debug, Deserialize)]
 pub struct ApiConfig {
-    pub postgres: DbConfig,
     pub server: ServerConfig,
+    pub postgres: DbConfig,
+    pub s3: S3Config,
 }
 
 impl ApiConfig {
@@ -24,7 +26,7 @@ impl ApiConfig {
 
         let s = Config::builder()
             .add_source(config::File::with_name(path.to_string_lossy().as_ref()).required(false))
-            .add_source(Environment::with_prefix("portal").separator("_"))
+            .add_source(Environment::with_prefix("portal").separator("__"))
             .set_default("server.ip", "127.0.0.1")?
             .set_default("server.port", 8080)?
             .build()?;
