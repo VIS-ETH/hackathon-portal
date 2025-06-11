@@ -4,21 +4,14 @@ version = "1.0.0"
 edition = "2021"
 
 [dependencies]
-chrono = "0.4.38"
-chrono-tz = "0.10.0"
-derive_more = { version = "1.0.0", features = ["full"] }
-hackathon-portal-repositories = { path = "../repositories" }
+chrono = { workspace = true }
+derive_more = { workspace = true }
+hackathon-portal-repositories = { workspace = true }
 itertools = "0.13.0"
 minilp = "0.2.2"
-sea-orm = { version = "1.0.0", features = [
-    "sqlx-postgres",
-    "runtime-tokio-native-tls",
-    "macros",
-    "with-json",
-] }
-serde = { version = "1.0.204", features = ["derive"] }
-serde_with = "3.9.0"
-strum = { version = "0.26.3", features = ["derive"] }
-tokio = { version = "1.39.2", features = ["full"] }
-utoipa = { version = "4.2.3", features = ["uuid", "chrono"] }
-uuid = { version = "1.10.0", features = ["v4"] }
+sea-orm = { workspace = true }
+serde = { workspace = true }
+serde_with = { workspace = true }
+strum = { workspace = true }
+utoipa = { workspace = true }
+uuid = { workspace = true }

@@ -4,15 +4,10 @@ version = "1.0.0"
 edition = "2021"
 
 [dependencies]
-derive_more = { version = "1.0.0", features = ["full"] }
-sea-orm = { version = "1.0.1", features = [
-    "sqlx-postgres",
-    "runtime-tokio-native-tls",
-    "macros",
-    "with-json",
-] }
-serde = { version = "1.0.204", features = ["derive"] }
-serde_with = "3.9.0"
+derive_more = { workspace = true }
+sea-orm = { workspace = true }
+serde = { workspace = true }
+serde_with = { workspace = true }
 slug = "0.1.6"
-strum = { version = "0.26.3", features = ["derive"] }
-utoipa = { version = "4.2.3", features = ["axum_extras", "chrono", "uuid"] }
+strum = { workspace = true }
+utoipa = { workspace = true }

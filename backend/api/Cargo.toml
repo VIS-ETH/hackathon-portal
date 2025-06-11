@@ -6,29 +6,23 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-
-# web
 axum = "0.7.5"
-chrono = "0.4.38"
+chrono = { workspace = true }
 chrono-tz = "0.10.0"
 clap = { version = "4.5.18", features = ["derive"] }
 config = "0.14.0"
-derive_more = { version = "1.0.0", features = ["full"] }
-hackathon-portal-repositories = { path = "../repositories" }
-hackathon-portal-services = { path = "../services" }
-
-# logging
-log = "0.4.22"
-serde = { version = "1.0.204", features = ["derive"] }
+derive_more = { workspace = true }
+hackathon-portal-repositories = { workspace = true }
+hackathon-portal-services = { workspace = true }
+serde = { workspace = true }
 serde_json = "1.0.128"
-serde_with = "3.9.0"
-
-tokio = { version = "1.39.2", features = ["full"] }
+serde_with = { workspace = true }
+tokio = { workspace = true }
 tower-http = { version = "0.6.1", features = ["cors"] }
 tracing = "0.1.40"
 tracing-appender = "0.2.3"
 tracing-subscriber = { version = "0.3.18", features = ["registry", "json", "env-filter"] }
-utoipa = { version = "4.2.3", features = ["axum_extras", "uuid", "chrono"] }
+utoipa = { workspace = true }
 utoipa-swagger-ui = { version = "7.1.0", features = ["axum"] }
 utoipauto = "0.1.12"
-uuid = { version = "1.10.0", features = ["v4"] }
+uuid = { workspace = true }
