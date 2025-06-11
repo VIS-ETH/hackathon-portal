@@ -1,14 +1,14 @@
 use crate::api_config::ApiConfig;
 use crate::ApiResult;
-use repositories::DbRepository;
-use services::appointment::AppointmentService;
-use services::authorization::AuthorizationService;
-use services::event::EventService;
-use services::project::ProjectService;
-use services::rating::RatingService;
-use services::sidequest::SidequestService;
-use services::team::TeamService;
-use services::user::UserService;
+use hackathon_portal_repositories::DbRepository;
+use hackathon_portal_services::appointment::AppointmentService;
+use hackathon_portal_services::authorization::AuthorizationService;
+use hackathon_portal_services::event::EventService;
+use hackathon_portal_services::project::ProjectService;
+use hackathon_portal_services::rating::RatingService;
+use hackathon_portal_services::sidequest::SidequestService;
+use hackathon_portal_services::team::TeamService;
+use hackathon_portal_services::user::UserService;
 use std::sync::Arc;
 
 #[derive(Clone)]

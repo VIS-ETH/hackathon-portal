@@ -1,4 +1,4 @@
-use repositories::db::prelude::{EventRole, TeamRole};
+use hackathon_portal_repositories::db::prelude::{EventRole, TeamRole};
 use sea_orm::{FromQueryResult, TryGetable};
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};

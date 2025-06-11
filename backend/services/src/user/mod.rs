@@ -2,8 +2,8 @@ pub mod models;
 
 use crate::user::models::{User, UserForCreate, UserForUpdate};
 use crate::ServiceResult;
-use repositories::db::prelude::*;
-use repositories::DbRepository;
+use hackathon_portal_repositories::db::prelude::*;
+use hackathon_portal_repositories::DbRepository;
 use sea_orm::prelude::*;
 use sea_orm::{IntoActiveModel, QuerySelect, SelectColumns, Set, TransactionTrait};
 

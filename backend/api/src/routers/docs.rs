@@ -2,7 +2,9 @@ use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 use utoipauto::utoipauto;
 
-#[utoipauto(paths = "api/src, services/src from services, repositories/src from repositories")]
+#[utoipauto(
+    paths = "api/src, services/src from hackathon_portal_services, repositories/src from hackathon_portal_repositories"
+)]
 #[derive(OpenApi)]
 #[openapi(
     servers(

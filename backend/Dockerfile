@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y \
 
 COPY . .
 
-RUN cargo build --package api --release
+RUN cargo build --package hackathon-portal-api --release
 
 #############################
 
@@ -24,6 +24,6 @@ RUN apt-get update && apt-get install -y \
     curl \
     ca-certificates
 
-COPY --from=builder /app/target/release/api /app/api
+COPY --from=builder /app/target/release/hackathon-portal-api /app/hackathon-portal-api
 
-CMD ["/app/api"]
+CMD ["/app/hackathon-portal-api"]

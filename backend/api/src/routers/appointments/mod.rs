@@ -8,8 +8,10 @@ use crate::ApiError;
 use axum::extract::{Path, Query, State};
 use axum::routing::{delete, get, patch, post};
 use axum::{Json, Router};
-use services::appointment::models::{Appointment, AppointmentForCreate, AppointmentForUpdate};
-use services::authorization::groups::Groups;
+use hackathon_portal_services::appointment::models::{
+    Appointment, AppointmentForCreate, AppointmentForUpdate,
+};
+use hackathon_portal_services::authorization::groups::Groups;
 use uuid::Uuid;
 
 pub fn get_router(state: &ApiState) -> Router {

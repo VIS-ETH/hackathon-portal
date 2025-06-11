@@ -5,9 +5,9 @@ use crate::routers::users::models::PoliciesQuery;
 use axum::extract::{Query, State};
 use axum::routing::{get, patch};
 use axum::{Json, Router};
-use services::authorization::groups::Groups;
-use services::authorization::policies::Policies;
-use services::user::models::{User, UserForUpdate};
+use hackathon_portal_services::authorization::groups::Groups;
+use hackathon_portal_services::authorization::policies::Policies;
+use hackathon_portal_services::user::models::{User, UserForUpdate};
 
 pub mod models;
 

@@ -1,10 +1,10 @@
 [package]
-name = "services"
+name = "hackathon-portal-services"
 version = "1.0.0"
 edition = "2021"
 
 [dependencies]
-repositories = { path = "../repositories" }
+hackathon-portal-repositories = { path = "../repositories" }
 tokio = { version = "1.39.2", features = ["full"] }
 derive_more = { version = "1.0.0", features = ["full"] }
 serde = { version = "1.0.204", features = ["derive"] }

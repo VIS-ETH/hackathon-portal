@@ -1,10 +1,10 @@
 [package]
-name = "cli"
+name = "hackathon-portal-cli"
 version = "1.0.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-repositories = { path = "../repositories" }
-services = { path = "../services" }
+hackathon-portal-repositories = { path = "../repositories" }
+hackathon-portal-services = { path = "../services" }

@@ -11,10 +11,10 @@ use crate::ApiError;
 use axum::extract::{Path, Query, State};
 use axum::routing::{delete, get, patch, post, put};
 use axum::{Json, Router};
-use repositories::db::prelude::{ExpertRatingCategory, TeamRole};
-use services::authorization::groups::Groups;
-use services::authorization::models::{TeamAffiliate, TeamRoles, TeamRolesMap};
-use services::team::models::{
+use hackathon_portal_repositories::db::prelude::{ExpertRatingCategory, TeamRole};
+use hackathon_portal_services::authorization::groups::Groups;
+use hackathon_portal_services::authorization::models::{TeamAffiliate, TeamRoles, TeamRolesMap};
+use hackathon_portal_services::team::models::{
     Team, TeamForCreate, TeamForUpdate, TeamForUpdateInternal, TeamInternal,
 };
 use std::collections::{HashMap, HashSet};

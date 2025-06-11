@@ -2,8 +2,8 @@ use crate::{ApiError, ApiResult};
 use axum::async_trait;
 use axum::extract::FromRequestParts;
 use axum::http::request::Parts;
-use services::authorization::models::UserRoles;
-use services::user::models::User;
+use hackathon_portal_services::authorization::models::UserRoles;
+use hackathon_portal_services::user::models::User;
 
 #[derive(Debug, Clone)]
 pub struct Ctx {

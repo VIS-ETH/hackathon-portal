@@ -1,7 +1,7 @@
 use chrono::NaiveDateTime;
 use derive_more::From;
-use repositories::db::prelude::EventPhase;
-use repositories::RepositoryError;
+use hackathon_portal_repositories::db::prelude::EventPhase;
+use hackathon_portal_repositories::RepositoryError;
 use serde::Serialize;
 use serde_with::{serde_as, DisplayFromStr};
 use std::fmt;

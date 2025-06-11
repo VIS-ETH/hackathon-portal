@@ -1,13 +1,13 @@
 [package]
-name = "api"
+name = "hackathon-portal-api"
 version = "1.0.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-repositories = { path = "../repositories" }
-services = { path = "../services" }
+hackathon-portal-repositories = { path = "../repositories" }
+hackathon-portal-services = { path = "../services" }
 
 tokio = { version = "1.39.2", features = ["full"] }
 serde = { version = "1.0.204", features = ["derive"] }

@@ -1,7 +1,7 @@
 use crate::authorization::models::UserRoles;
 use crate::authorization::policies::Policies;
-use repositories::db::prelude::{EventPhase, EventRole, TeamRole};
-use repositories::db::sea_orm_active_enums::EventVisibility;
+use hackathon_portal_repositories::db::prelude::{EventPhase, EventRole, TeamRole};
+use hackathon_portal_repositories::db::sea_orm_active_enums::EventVisibility;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use strum::{Display, VariantArray};

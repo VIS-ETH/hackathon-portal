@@ -7,7 +7,7 @@ pub mod policies;
 
 use crate::authorization::models::UserRoles;
 use crate::ServiceResult;
-use repositories::DbRepository;
+use hackathon_portal_repositories::DbRepository;
 use sea_orm::prelude::*;
 
 #[derive(Clone)]

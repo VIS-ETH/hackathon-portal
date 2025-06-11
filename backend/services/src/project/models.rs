@@ -1,4 +1,4 @@
-use repositories::db::prelude::db_project;
+use hackathon_portal_repositories::db::prelude::db_project;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use uuid::Uuid;

@@ -5,9 +5,9 @@ use crate::rating::models::{
     ExpertRatingLeaderboardEntry,
 };
 use crate::ServiceResult;
+use hackathon_portal_repositories::db::prelude::*;
+use hackathon_portal_repositories::DbRepository;
 use itertools::Itertools;
-use repositories::db::prelude::*;
-use repositories::DbRepository;
 use sea_orm::prelude::*;
 use sea_orm::sea_query::Func;
 use sea_orm::{

@@ -11,14 +11,16 @@ use crate::ApiError;
 use axum::extract::{Path, Query, State};
 use axum::routing::{delete, get, patch, post, put};
 use axum::{Json, Router};
-use repositories::db::prelude::EventRole;
-use services::authorization::groups::Groups;
-use services::authorization::models::{EventAffiliate, EventRoles, EventRolesMap};
-use services::event::models::{Event, EventForUpdate};
-use services::rating::models::ExpertRatingLeaderboardEntry;
-use services::sidequest::models::{HistoryEntry, TeamLeaderboardEntry, UserLeaderboardEntry};
-use services::team::models::Team;
-use services::user::models::ReducedUser;
+use hackathon_portal_repositories::db::prelude::EventRole;
+use hackathon_portal_services::authorization::groups::Groups;
+use hackathon_portal_services::authorization::models::{EventAffiliate, EventRoles, EventRolesMap};
+use hackathon_portal_services::event::models::{Event, EventForUpdate};
+use hackathon_portal_services::rating::models::ExpertRatingLeaderboardEntry;
+use hackathon_portal_services::sidequest::models::{
+    HistoryEntry, TeamLeaderboardEntry, UserLeaderboardEntry,
+};
+use hackathon_portal_services::team::models::Team;
+use hackathon_portal_services::user::models::ReducedUser;
 use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
 

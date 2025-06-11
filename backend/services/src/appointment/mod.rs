@@ -2,8 +2,8 @@ pub mod models;
 
 use crate::appointment::models::{Appointment, AppointmentForCreate, AppointmentForUpdate};
 use crate::ServiceResult;
-use repositories::db::prelude::*;
-use repositories::DbRepository;
+use hackathon_portal_repositories::db::prelude::*;
+use hackathon_portal_repositories::DbRepository;
 use sea_orm::prelude::*;
 use sea_orm::{ActiveModelTrait, IntoActiveModel, Set};
 

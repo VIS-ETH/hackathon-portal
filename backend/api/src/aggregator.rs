@@ -1,7 +1,7 @@
 use crate::api_state::ApiState;
 use chrono::{DurationRound, Utc};
-use repositories::db::prelude::EventPhase;
-use services::ServiceResult;
+use hackathon_portal_repositories::db::prelude::EventPhase;
+use hackathon_portal_services::ServiceResult;
 use std::time::Duration;
 use tokio::time::sleep;
 use tracing::{error, info};

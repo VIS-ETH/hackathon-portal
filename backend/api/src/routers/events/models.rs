@@ -1,7 +1,7 @@
 use chrono::NaiveDateTime;
-use repositories::db::prelude::EventRole;
+use hackathon_portal_repositories::db::prelude::EventRole;
+use hackathon_portal_services::user::models::UserForCreate;
 use serde::{Deserialize, Serialize};
-use services::user::models::UserForCreate;
 use std::collections::HashSet;
 use utoipa::ToSchema;
 use uuid::Uuid;

@@ -3,7 +3,7 @@ use crate::authorization::AuthorizationService;
 use crate::user::fmt_user_name;
 use crate::utils::try_insert_result_to_int;
 use crate::{ServiceError, ServiceResult};
-use repositories::db::prelude::*;
+use hackathon_portal_repositories::db::prelude::*;
 use sea_orm::prelude::*;
 use sea_orm::sea_query::OnConflict;
 use sea_orm::{Condition, JoinType, QuerySelect, QueryTrait, SelectColumns, Set, TransactionTrait};

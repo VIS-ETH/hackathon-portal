@@ -2,9 +2,9 @@ pub mod models;
 
 use crate::{ServiceError, ServiceResult};
 use chrono::{NaiveDateTime, Utc};
+use hackathon_portal_repositories::db::prelude::*;
+use hackathon_portal_repositories::DbRepository;
 use models::{AttemptForCreate, SidequestForCreate, SidequestForUpdate};
-use repositories::db::prelude::*;
-use repositories::DbRepository;
 use std::cmp::Ordering;
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
