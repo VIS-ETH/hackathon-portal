@@ -2,23 +2,27 @@
 BACKEND_VERSION := $(shell grep '^version = ' backend/api/Cargo.toml | sed 's/version = "\(.*\)"/\1/')
 FRONTEND_VERSION := $(shell jq -r '.version' frontend/package.json)
 
-db-push:
-	npx prisma db push --schema db/schema.prisma
+prisma-push:
+	npx -r prisma db push --schema db/schema.prisma
 
-db-generate:
-	sea-orm-cli generate entity -o backend/repositories/src/db --with-serde both
-	@echo "Add `#[derive(Copy, Hash, strum::Display, utoipa::ToSchema)]` to all enums in `sea_orm_active_enums.rs`"
-	@echo "Run `cargo fmt`"
+prisma-generate:
+	npx -r prisma migrate diff --from-empty --to-schema-datamodel db/schema.prisma --script > db/init/1-schema.sql
 
-db-generate-schema:
-	npx -y prisma migrate diff --from-empty --to-schema-datamodel db/schema.prisma --script > db/init/1-schema.sql
+seaorm-generate:
+	sea-orm-cli generate entity -o backend/repositories/src/db --with-serde both --enum-extra-derives "Copy, Hash, strum::Display, utoipa::ToSchema"
+	cargo fmt --manifest-path backend/Cargo.toml --all
 
-_build-backend:
-	@echo "Building backend version $(BACKEND_VERSION)"
-	@docker buildx build --platform linux/amd64,linux/arm64 -t registry.3brh4rd.dev/hackathon-portal/backend:$(BACKEND_VERSION) --push backend
+cargo-install:
+	cargo install sea-orm-cli \
+		cargo-sort \
+		cargo-edit \
+		cargo-udeps
 
-_build-frontend:
-	@echo "Building frontend version $(FRONTEND_VERSION)"
-	@docker buildx build --platform linux/amd64,linux/arm64 -t registry.3brh4rd.dev/hackathon-portal/frontend:$(FRONTEND_VERSION) --push frontend
+fmt:
+	cd db && npx -y prisma format
+	cd backend && cargo fmt --all && cargo sort -w
+	cd frontend && npm run fmt
 
-_build: _build-backend _build-frontend
+lint:
+	cd backend && cargo clippy -- -D warnings && cargo +nighly udeps && cargo fmt --check
+	cd frontend && npm run lint
