@@ -31,11 +31,7 @@ impl GroupAssignment {
         max_project_size: i32,
         preferences: Preference,
     ) -> Option<Self> {
-        if teams.len()
-            > (project.len() as i32 * max_project_size)
-                .try_into()
-                .unwrap()
-        {
+        if teams.len() > (project.len() * max_project_size as usize) {
             return None;
         }
         let problem = Problem::new(OptimizationDirection::Minimize);
@@ -63,7 +59,7 @@ impl GroupAssignment {
                     Some(perf) => *perf.get(p).unwrap_or(&(self.project.len() as i32)),
                 };
 
-                let variable = self.problem.add_var(coeff as f64, (0.0, 1.0));
+                let variable = self.problem.add_var(f64::from(coeff), (0.0, 1.0));
                 self.variables.push(AssignmentVariable {
                     team: *t,
                     project: *p,
@@ -87,7 +83,7 @@ impl GroupAssignment {
                 })
                 .collect::<Vec<_>>();
             self.problem
-                .add_constraint(&vars, ComparisonOp::Le, self.mps as f64);
+                .add_constraint(&vars, ComparisonOp::Le, f64::from(self.mps));
             self.problem.add_constraint(&vars, ComparisonOp::Ge, 0.0);
         }
     }
@@ -123,14 +119,7 @@ impl GroupAssignment {
     }
 
     pub fn solve(&mut self) -> Result<HashMap<Uuid, Uuid>, minilp::Error> {
-        let res = self.problem.solve();
-        let sol = match res {
-            Err(err) => return Err(err),
-            Ok(sol) => {
-                // println!("unhappines points: {}", sol.objective() - self.teams as f64);
-                sol
-            }
-        };
-        Ok(self.get_mapping(&sol))
+        let solution = self.problem.solve()?;
+        Ok(self.get_mapping(&solution))
     }
 }

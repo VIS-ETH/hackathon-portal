@@ -52,9 +52,8 @@ pub async fn mw_resolve_ctx(
     let username = extract_header(req.headers(), USERNAME_KEY);
     let name = extract_header(req.headers(), NAME_KEY);
 
-    let (auth_id, username, name) = match (auth_id, username, name) {
-        (Some(auth_id), Some(username), Some(name)) => (auth_id, username, name),
-        _ => return next.run(req).await,
+    let (Some(auth_id), Some(username), Some(name)) = (auth_id, username, name) else {
+        return next.run(req).await;
     };
 
     let auth_id = normalize_auth_id(&auth_id, &username);

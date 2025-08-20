@@ -12,6 +12,7 @@ use hackathon_portal_services::user::UserService;
 use std::sync::Arc;
 
 #[derive(Clone)]
+#[allow(clippy::struct_field_names)]
 pub struct ApiState {
     pub authorization_service: Arc<AuthorizationService>,
     pub user_service: Arc<UserService>,
@@ -24,6 +25,7 @@ pub struct ApiState {
 }
 
 impl ApiState {
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         authorization_service: Arc<AuthorizationService>,
         user_service: Arc<UserService>,

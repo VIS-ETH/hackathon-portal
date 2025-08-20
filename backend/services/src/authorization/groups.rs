@@ -1,5 +1,4 @@
 use crate::authorization::models::UserRoles;
-use crate::authorization::policies::Policies;
 use hackathon_portal_repositories::db::prelude::{EventPhase, EventRole, TeamRole};
 use hackathon_portal_repositories::db::sea_orm_active_enums::EventVisibility;
 use serde::{Deserialize, Serialize};

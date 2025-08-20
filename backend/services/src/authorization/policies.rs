@@ -1,10 +1,11 @@
 use crate::authorization::groups::Groups;
-use hackathon_portal_repositories::db::prelude::{EventPhase, EventRole, TeamRole};
+use hackathon_portal_repositories::db::prelude::EventPhase;
 use hackathon_portal_repositories::db::sea_orm_active_enums::EventVisibility;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, ToSchema)]
+#[allow(clippy::struct_excessive_bools)]
 pub struct Policies {
     pub can_view_event: bool,
     pub can_view_event_internal: bool,

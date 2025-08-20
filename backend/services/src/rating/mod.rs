@@ -7,7 +7,6 @@ use crate::rating::models::{
 use crate::ServiceResult;
 use hackathon_portal_repositories::db::prelude::*;
 use hackathon_portal_repositories::DbRepository;
-use itertools::Itertools;
 use sea_orm::prelude::*;
 use sea_orm::sea_query::Func;
 use sea_orm::{
@@ -134,15 +133,17 @@ impl RatingService {
             .all(self.db_repo.conn())
             .await?;
 
-        let teams = ratings.into_iter().fold(HashMap::new(), |mut acc, rating| {
-            let team_ratings = acc.entry(rating.team_id).or_insert_with(Vec::new);
-            team_ratings.push(rating);
-            acc
-        });
+        let teams =
+            ratings
+                .into_iter()
+                .fold(HashMap::new(), |mut acc: HashMap<Uuid, Vec<_>>, rating| {
+                    let team_ratings = acc.entry(rating.team_id).or_default();
+                    team_ratings.push(rating);
+                    acc
+                });
 
         let mut leaderboard = teams
             .values()
-            .into_iter()
             .map(|ratings| {
                 let team_id = ratings[0].team_id;
 
@@ -158,7 +159,7 @@ impl RatingService {
 
                 let rating = total_rating / total_weight;
 
-                let categories = ratings.into_iter().fold(HashMap::new(), |mut acc, rating| {
+                let categories = ratings.iter().fold(HashMap::new(), |mut acc, rating| {
                     acc.insert(
                         rating.category,
                         rating.rating_sum / rating.rating_count as f64,

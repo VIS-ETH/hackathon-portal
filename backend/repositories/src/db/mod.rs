@@ -65,20 +65,18 @@ impl DbRepository {
         let builder = self.conn().get_database_backend();
         let slug_col = Alias::new("slug").into_column_ref();
 
-        let mut query = Query::select()
+        let mut query = Query::select();
+        let mut query_ref = query
             .column(slug_col.clone())
             .from(table)
-            .and_where(Column(slug_col).eq(slug.clone()))
-            .to_owned();
+            .and_where(Column(slug_col).eq(slug.clone()));
 
         if let Some(event_id) = event_id {
             let event_id_col = Alias::new("event_id").into_column_ref();
-            query = query
-                .and_where(Column(event_id_col).eq(event_id))
-                .to_owned();
+            query_ref = query_ref.and_where(Column(event_id_col).eq(event_id));
         }
 
-        let stmt = builder.build(&query);
+        let stmt = builder.build(query_ref);
         let result = self.conn().execute(stmt).await?;
 
         if result.rows_affected() != 0 {
