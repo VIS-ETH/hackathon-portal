@@ -5,6 +5,7 @@
 
 ```bash
 docker volume create portal_db
+docker volume create portal_db_backup
 docker network create portal_public
 docker network create portal_private
 
