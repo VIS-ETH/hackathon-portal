@@ -1,6 +1,7 @@
 *.local
 .env
 stack.env
+compose.override.yaml
 
 # Created by https://www.toptal.com/developers/gitignore/api/macos,visualstudiocode,jetbrains+all
 # Edit at https://www.toptal.com/developers/gitignore?templates=macos,visualstudiocode,jetbrains+all

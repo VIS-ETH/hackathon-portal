@@ -1,4 +1,3 @@
-
 # Getting started
 
 ## Docker
@@ -6,6 +5,7 @@
 ```bash
 docker volume create portal_db
 docker volume create portal_db_backup
+docker volume create portal_minio_data
 docker network create portal_public
 docker network create portal_private
 
