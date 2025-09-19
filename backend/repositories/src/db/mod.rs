@@ -26,7 +26,13 @@ use sea_orm::sea_query::SimpleExpr::Column;
 use sea_orm::sea_query::{Alias, IntoColumnRef, IntoTableRef, Query};
 use sea_orm::sqlx::types::chrono::NaiveDateTime;
 pub use sea_orm::DbErr;
+use serde::{Deserialize, Serialize};
 use slug::slugify;
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DbConfig {
+    pub url: String,
+}
 
 #[derive(Clone)]
 pub struct DbRepository {
@@ -39,9 +45,9 @@ impl DbRepository {
         Self { conn }
     }
 
-    pub async fn from_url(url: &str) -> RepositoryResult<Self> {
+    pub async fn from_config(config: &DbConfig) -> RepositoryResult<Self> {
         let result = Self {
-            conn: Database::connect(url).await?,
+            conn: Database::connect(config.url.clone()).await?,
         };
 
         Ok(result)

@@ -49,7 +49,7 @@ impl ApiState {
     }
 
     pub async fn from_config(config: &ApiConfig) -> ApiResult<Self> {
-        let db_repo = DbRepository::from_url(&config.db).await?;
+        let db_repo = DbRepository::from_config(&config.postgres).await?;
 
         let authorization_service = Arc::new(AuthorizationService::new(db_repo.clone()));
         let user_service = Arc::new(UserService::new(db_repo.clone()));

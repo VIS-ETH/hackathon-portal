@@ -1,5 +1,7 @@
 use crate::error::ApiResult;
 use config::{Config, Environment};
+use dotenvy::dotenv;
+use hackathon_portal_repositories::db::DbConfig;
 use serde::Deserialize;
 use std::net::IpAddr;
 use std::path::Path;
@@ -12,12 +14,14 @@ pub struct ServerConfig {
 
 #[derive(Debug, Deserialize)]
 pub struct ApiConfig {
-    pub db: String,
+    pub postgres: DbConfig,
     pub server: ServerConfig,
 }
 
 impl ApiConfig {
     pub fn parse(path: &Path) -> ApiResult<Self> {
+        dotenv()?;
+
         let s = Config::builder()
             .add_source(config::File::with_name(path.to_string_lossy().as_ref()).required(false))
             .add_source(Environment::with_prefix("portal").separator("_"))
