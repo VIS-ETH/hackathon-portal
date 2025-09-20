@@ -39,10 +39,10 @@ services:
 
       until (mc alias set local http://minio:9000 $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD); do sleep 1; done;
 
-      mc mb --ignore-existing local/$PORTAL_S3_BUCKET;
+      mc mb --ignore-existing local/$PORTAL__S3__BUCKET;
       echo "Bucket created";
 
-      mc admin accesskey create local $MINIO_ROOT_USER --access-key $PORTAL_S3_ACCESS_KEY --secret-key $PORTAL_S3_SECRET_KEY --policy /root/policy.json;
+      mc admin accesskey create local $MINIO_ROOT_USER --access-key $PORTAL__S3__ACCESS_KEY --secret-key $PORTAL__S3__SECRET_KEY --policy /root/policy.json;
       echo "Access key created";
       '
     depends_on:

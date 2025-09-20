@@ -7,15 +7,12 @@ import TeamAffiliatesCard from "@/components/team/TeamAffiliatesCard";
 import TeamDetailsCard from "@/components/team/TeamDetailsCard";
 import TeamMenu from "@/components/team/TeamMenu";
 import { useResolveParams } from "@/hooks/useResolveParams";
-import { cardProps } from "@/styles/common";
 
 import {
-  AspectRatio,
-  Card,
   Group,
   SimpleGrid,
   Stack,
-  Title,
+  Title
 } from "@mantine/core";
 
 const Team = () => {

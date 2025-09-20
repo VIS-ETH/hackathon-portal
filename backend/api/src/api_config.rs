@@ -22,7 +22,7 @@ pub struct ApiConfig {
 
 impl ApiConfig {
     pub fn parse(path: &Path) -> ApiResult<Self> {
-        dotenv()?;
+        let _ = dotenv();
 
         let s = Config::builder()
             .add_source(config::File::with_name(path.to_string_lossy().as_ref()).required(false))

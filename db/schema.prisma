@@ -260,12 +260,12 @@ model upload {
   user_id String @db.Uuid
 
   // fields
-  usage           media_usage
-  content_type    String
-  content_length  BigInt
-  requested_at    DateTime
-  uploaded_at     DateTime?
-  validated_at    DateTime?
+  usage          media_usage
+  content_type   String
+  content_length BigInt
+  requested_at   DateTime
+  uploaded_at    DateTime?
+  validated_at   DateTime?
 
   // relations
   user user @relation(fields: [user_id], references: [id])

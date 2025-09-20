@@ -55,7 +55,7 @@ const Uploader = ({
     }
 
     setIsUploading(true);
-    let uploadedIds: string[] = [];
+    const uploadedIds: string[] = [];
 
     for (const file of files) {
       try {
@@ -72,7 +72,7 @@ const Uploader = ({
             },
           });
 
-        let response = await fetch(uploadUrl, {
+        const uploadResponse = await fetch(uploadUrl, {
           method: "PUT",
           headers: {
             "Content-Type": contentType,
@@ -81,9 +81,9 @@ const Uploader = ({
           body: file,
         });
 
-        if (!response.ok) {
+        if (!uploadResponse.ok) {
           throw new Error(
-            `Upload failed with ${response.status}: ${response.statusText}`,
+            `Upload failed with ${uploadResponse.status}: ${uploadResponse.statusText}`,
           );
         }
 

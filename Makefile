@@ -16,9 +16,9 @@ seaorm-generate:
 
 fmt:
 	cd db && npx -y prisma format
-	cd backend && cargo fmt --all && cargo sort -w
 	cd frontend && npm run fmt
+	cd backend && cargo fmt --all && cargo sort -w
 
 lint:
-	cd backend && cargo clippy -- -D warnings && cargo +nighly udeps && cargo fmt --check
 	cd frontend && npm run lint
+	cd backend && cargo clippy -- -D warnings && cargo fmt --check

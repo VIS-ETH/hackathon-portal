@@ -4,6 +4,7 @@ version = "1.0.0"
 edition = "2021"
 
 [dependencies]
+aws-smithy-types-convert = { version = "0.60.9", features = ["convert-chrono"] }
 chrono = { workspace = true }
 derive_more = { workspace = true }
 hackathon-portal-repositories = { workspace = true }
@@ -17,7 +18,6 @@ strum = { workspace = true }
 tracing = { workspace = true }
 utoipa = { workspace = true }
 uuid = { workspace = true }
-aws-smithy-types-convert = { version = "0.60.9", features = ["convert-chrono"] }
 
 [lints]
 workspace = true

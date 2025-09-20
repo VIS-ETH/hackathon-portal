@@ -141,8 +141,7 @@ impl UploadService {
 
         let last_modified = head
             .last_modified
-            .map(|dt| dt.to_chrono_utc().ok())
-            .flatten()
+            .and_then(|dt| dt.to_chrono_utc().ok())
             .map(|dt| dt.naive_utc());
 
         let mut active_upload = upload.into_active_model();

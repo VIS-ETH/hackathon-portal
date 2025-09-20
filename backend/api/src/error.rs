@@ -48,9 +48,6 @@ pub enum ApiError {
     Config(#[serde_as(as = "DisplayFromStr")] config::ConfigError),
 
     #[from]
-    Dotenvy(#[serde_as(as = "DisplayFromStr")] dotenvy::Error),
-
-    #[from]
     Io(#[serde_as(as = "DisplayFromStr")] std::io::Error),
 
     #[from]
@@ -271,7 +268,6 @@ impl From<&ApiError> for PublicError {
             ApiError::Service(e) => return e.into(),
             ApiError::Repository(e) => return e.into(),
             ApiError::Config(_)
-            | ApiError::Dotenvy(_)
             | ApiError::Io(_)
             | ApiError::InvalidHeaderValue(_)
             | ApiError::TracingSetGlobalDefault(_)

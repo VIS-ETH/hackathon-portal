@@ -1,6 +1,6 @@
 import Uploader from "../Uploader";
 
-import { useGetTeam, useUpdateTeam } from "@/api/gen";
+import { useUpdateTeam } from "@/api/gen";
 import { Team } from "@/api/gen/schemas";
 import { modalProps } from "@/styles/common";
 
