@@ -1,8 +1,6 @@
 use crate::authorization::groups::Groups;
 use hackathon_portal_repositories::db::prelude::EventPhase;
-use hackathon_portal_repositories::db::sea_orm_active_enums::EventRole;
 use hackathon_portal_repositories::db::sea_orm_active_enums::EventVisibility;
-use hackathon_portal_repositories::db::sea_orm_active_enums::TeamRole;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 

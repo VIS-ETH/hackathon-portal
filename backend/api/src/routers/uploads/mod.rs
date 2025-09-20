@@ -3,7 +3,7 @@ pub mod models;
 use crate::api_state::ApiState;
 use crate::ctx::Ctx;
 use crate::error::ApiJson;
-use crate::routers::upload::models::CreateUploadDTO;
+use crate::routers::uploads::models::CreateUploadDTO;
 use crate::ApiError;
 use axum::extract::State;
 use axum::routing::post;
