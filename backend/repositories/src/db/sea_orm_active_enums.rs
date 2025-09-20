@@ -133,6 +133,7 @@ impl ExpertRatingCategory {
     Copy,
     Hash,
     strum :: Display,
+    strum :: VariantArray,
     utoipa :: ToSchema,
 )]
 #[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "media_usage")]

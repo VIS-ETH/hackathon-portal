@@ -7,6 +7,7 @@
 
 export interface Policies {
   can_create_team: boolean;
+  can_create_upload: boolean;
   can_manage_event: boolean;
   can_manage_expert_rating: boolean;
   can_manage_project: boolean;

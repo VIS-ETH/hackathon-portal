@@ -23,7 +23,8 @@ const PasswordTd = ({ team }: PasswordTdProps) => {
       data: {
         vm_password: password,
         ai_api_key: ai_api_key,
-    }});
+      },
+    });
 
     refetchCredentials?.();
   };
