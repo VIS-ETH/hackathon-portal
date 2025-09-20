@@ -263,8 +263,8 @@ model upload {
   usage           media_usage
   content_type    String
   content_length  BigInt
-  uploaded_after  DateTime
-  uploaded_before DateTime
+  requested_at    DateTime
+  uploaded_at     DateTime?
   validated_at    DateTime?
 
   // relations

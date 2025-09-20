@@ -8,4 +8,6 @@
 export interface TeamForUpdate {
   /** @nullable */
   name?: string | null;
+  /** @nullable */
+  photo_id?: string | null;
 }

@@ -5,6 +5,7 @@ import PageSkeleton from "@/components/PageSkeleton";
 import ExpertRatingCard from "@/components/team/ExpertRatingCard";
 import TeamAffiliatesCard from "@/components/team/TeamAffiliatesCard";
 import TeamDetailsCard from "@/components/team/TeamDetailsCard";
+import TeamMenu from "@/components/team/TeamMenu";
 import { useResolveParams } from "@/hooks/useResolveParams";
 import { cardProps } from "@/styles/common";
 
@@ -18,7 +19,7 @@ import {
 } from "@mantine/core";
 
 const Team = () => {
-  const { event, team, policies } = useResolveParams();
+  const { event, team, refetchTeam, policies } = useResolveParams();
   const { data: project } = useGetProject(team?.project_id ?? "");
 
   if (!event || !team || !policies) {
@@ -27,21 +28,9 @@ const Team = () => {
 
   return (
     <Stack>
-      <Group>
-        {team.photo_url && (
-          <Card {...cardProps} pb={0}>
-            <Card.Section>
-              <AspectRatio ratio={2 / 1} w="150px">
-                <img
-                  src={team.photo_url}
-                  alt={team.name}
-                  style={{ objectFit: "cover", objectPosition: "center" }}
-                />
-              </AspectRatio>
-            </Card.Section>
-          </Card>
-        )}
+      <Group justify="space-between">
         <Title order={2}>{team.name}</Title>
+        <TeamMenu team={team} refetchTeam={refetchTeam} policies={policies} />
       </Group>
       <SimpleGrid
         cols={{ xs: 1, sm: policies.can_view_event_internal ? 2 : 1 }}

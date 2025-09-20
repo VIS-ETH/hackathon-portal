@@ -2473,7 +2473,7 @@
     },
     "/api/uploads": {
       "post": {
-        "tags": ["crate::routers::upload"],
+        "tags": ["crate::routers::uploads"],
         "operationId": "create_upload",
         "requestBody": {
           "description": "",
@@ -2489,7 +2489,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Upload" }
+                "schema": { "$ref": "#/components/schemas/UploadUrl" }
               }
             }
           },
@@ -2963,6 +2963,8 @@
           "can_create_team",
           "can_view_team_confidential",
           "can_view_team_feedback",
+          "can_update_team_name",
+          "can_update_team_photo",
           "can_manage_team",
           "can_manage_expert_rating",
           "can_manage_project",
@@ -2980,6 +2982,8 @@
           "can_manage_sidequest": { "type": "boolean" },
           "can_manage_sidequest_attempt": { "type": "boolean" },
           "can_manage_team": { "type": "boolean" },
+          "can_update_team_name": { "type": "boolean" },
+          "can_update_team_photo": { "type": "boolean" },
           "can_view_event": { "type": "boolean" },
           "can_view_event_feedback": { "type": "boolean" },
           "can_view_event_internal": { "type": "boolean" },
@@ -3184,7 +3188,10 @@
       },
       "TeamForUpdate": {
         "type": "object",
-        "properties": { "name": { "type": "string", "nullable": true } }
+        "properties": {
+          "name": { "type": "string", "nullable": true },
+          "photo_id": { "type": "string", "format": "uuid", "nullable": true }
+        }
       },
       "TeamForUpdateInternal": {
         "type": "object",
@@ -3251,15 +3258,18 @@
           "usage",
           "content_length",
           "content_type",
-          "uploaded_after",
-          "uploaded_before"
+          "requested_at"
         ],
         "properties": {
           "content_length": { "type": "integer", "format": "int64" },
           "content_type": { "type": "string" },
           "id": { "type": "string", "format": "uuid" },
-          "uploaded_after": { "type": "string", "format": "date-time" },
-          "uploaded_before": { "type": "string", "format": "date-time" },
+          "requested_at": { "type": "string", "format": "date-time" },
+          "uploaded_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
           "usage": { "$ref": "#/components/schemas/MediaUsage" },
           "user_id": { "type": "string", "format": "uuid" },
           "validated_at": {

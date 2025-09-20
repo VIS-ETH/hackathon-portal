@@ -10,8 +10,9 @@ export interface Upload {
   content_length: number;
   content_type: string;
   id: string;
-  uploaded_after: string;
-  uploaded_before: string;
+  requested_at: string;
+  /** @nullable */
+  uploaded_at?: string | null;
   usage: MediaUsage;
   user_id: string;
   /** @nullable */

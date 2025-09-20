@@ -522,10 +522,22 @@ impl DbRepository {
     // endregion
 
     // region: Upload
+    pub async fn get_upload(&self, upload_id: Uuid) -> RepositoryResult<upload::Model> {
+        let upload = upload::Entity::find_by_id(upload_id)
+            .one(self.conn())
+            .await?
+            .ok_or_else(|| RepositoryError::ResourceNotFound {
+                resource: "Upload".to_string(),
+                id: upload_id.to_string(),
+            })?;
+
+        Ok(upload)
+    }
+
     pub async fn get_pending_uploads(&self) -> RepositoryResult<Vec<upload::Model>> {
         let uploads = upload::Entity::find()
             .filter(upload::Column::ValidatedAt.is_null())
-            .order_by_asc(upload::Column::UploadedAfter)
+            .order_by_asc(upload::Column::RequestedAt)
             .all(self.conn())
             .await?;
 

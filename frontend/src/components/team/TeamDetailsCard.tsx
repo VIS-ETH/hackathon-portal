@@ -2,10 +2,23 @@ import IconTextGroup from "../IconTextGroup";
 
 import { useGetEvent, useGetProject, useGetTeamCredentials } from "@/api/gen";
 import { Team } from "@/api/gen/schemas";
-import { cardProps, iconProps, secondaryButtonProps } from "@/styles/common";
+import {
+  cardProps,
+  cardSectionProps,
+  iconProps,
+  secondaryButtonProps,
+} from "@/styles/common";
 import { fmtTeamIndex } from "@/utils";
 
-import { Button, Card, CopyButton, Group, Stack, Text } from "@mantine/core";
+import {
+  Button,
+  Card,
+  CopyButton,
+  Group,
+  Image,
+  Stack,
+  Text,
+} from "@mantine/core";
 
 import {
   IconKey,
@@ -123,20 +136,33 @@ const TeamDetailsCard = ({ team, canViewPassword }: TeamDetailsCardProps) => {
 
   return (
     <Card {...cardProps}>
-      <Stack gap="sm" justify="space-between" h="100%">
-        <Stack gap="sm">
-          {projectLink}
-          {publicUrlLink}
-          {directUrlLink}
+      {team.photo_url && (
+        <Card.Section {...cardSectionProps} p={0}>
+          <Image
+            src={team.photo_url}
+            alt="Team Photo"
+            w="100%"
+            mah={400}
+            fit="cover"
+          />
+        </Card.Section>
+      )}
+      <Card.Section {...cardSectionProps}>
+        <Stack gap="sm" justify="space-between" h="100%">
+          <Stack gap="sm">
+            {projectLink}
+            {publicUrlLink}
+            {directUrlLink}
+          </Stack>
+          {password && (
+            <Group grow>
+              {copyConfigButton}
+              {copyPasswordButton}
+              {copyAIKeyButton}
+            </Group>
+          )}
         </Stack>
-        {password && (
-          <Group grow>
-            {copyConfigButton}
-            {copyPasswordButton}
-            {copyAIKeyButton}
-          </Group>
-        )}
-      </Stack>
+      </Card.Section>
     </Card>
   );
 };

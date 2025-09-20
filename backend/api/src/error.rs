@@ -207,11 +207,11 @@ impl From<&ServiceError> for PublicError {
                 StatusCode::FORBIDDEN,
                 format!("This action is not allowed in the phase {current_phase}"),
             ),
-            ServiceError::UploadsMimeNotAllowed => (
+            ServiceError::UploadContentTypeNotAllowed => (
                 StatusCode::BAD_REQUEST,
                 "You may not upload files of this type".to_string(),
             ),
-            ServiceError::UploadsSizeLimitExceeded { size, limit } => {
+            ServiceError::UploadContentLengthExceeded { size, limit } => {
                 let size = (*size as f64) / 2f64.powf(20f64);
                 let limit = (*limit as f64) / 2f64.powf(20f64);
 
@@ -222,9 +222,22 @@ impl From<&ServiceError> for PublicError {
                     ),
                 )
             },
-            ServiceError::UploadsRateLimitExceeded => (
+            ServiceError::UploadRateLimitExceeded => (
                 StatusCode::FORBIDDEN,
                 "You have uploaded too many files in a short period of time. Please wait and try again later.".to_string()
+            ),
+            ServiceError::UploadIsAlreadyValidated => (
+                StatusCode::FORBIDDEN,
+                "This upload has already been validated and cannot be reused".to_string(),
+            ),
+            ServiceError::UploadMediaUsageMismatch {
+                expected,
+                actual,
+            } => (
+                StatusCode::FORBIDDEN,
+                format!(
+                    "Upload media usage mismatch: expected '{expected}', got '{actual}'"
+                ),
             ),
             ServiceError::Repository(e) => return e.into(),
             ServiceError::Matching { message } => (StatusCode::BAD_REQUEST, message.clone()),

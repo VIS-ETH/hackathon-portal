@@ -11,8 +11,8 @@ pub struct Upload {
     pub usage: MediaUsage,
     pub content_length: i64,
     pub content_type: String,
-    pub uploaded_after: NaiveDateTime,
-    pub uploaded_before: NaiveDateTime,
+    pub requested_at: NaiveDateTime,
+    pub uploaded_at: Option<NaiveDateTime>,
     pub validated_at: Option<NaiveDateTime>,
 }
 
@@ -24,8 +24,8 @@ impl From<db_upload::Model> for Upload {
             usage: value.usage,
             content_length: value.content_length,
             content_type: value.content_type,
-            uploaded_after: value.uploaded_after,
-            uploaded_before: value.uploaded_before,
+            requested_at: value.requested_at,
+            uploaded_at: value.uploaded_at,
             validated_at: value.validated_at,
         }
     }

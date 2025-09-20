@@ -25,7 +25,7 @@ const TeamAffiliatesCard = ({ teamId }: TeamAffiliatesCardProps) => {
 
   return (
     <Card {...cardProps}>
-      <CardSection {...cardSectionProps}>
+      <CardSection {...cardSectionProps} h="100%">
         <Stack gap="sm">
           {members.length ? (
             <>

@@ -14,6 +14,8 @@ export interface Policies {
   can_manage_sidequest: boolean;
   can_manage_sidequest_attempt: boolean;
   can_manage_team: boolean;
+  can_update_team_name: boolean;
+  can_update_team_photo: boolean;
   can_view_event: boolean;
   can_view_event_feedback: boolean;
   can_view_event_internal: boolean;

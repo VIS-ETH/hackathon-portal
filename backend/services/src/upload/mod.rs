@@ -2,6 +2,7 @@ pub mod models;
 
 use crate::upload::models::UploadUrl;
 use crate::{ServiceError, ServiceResult};
+use aws_smithy_types_convert::date_time::DateTimeExt;
 use chrono::Utc;
 use hackathon_portal_repositories::db::prelude::*;
 use hackathon_portal_repositories::s3::S3Repository;
@@ -10,7 +11,6 @@ use mime::Mime;
 use sea_orm::prelude::*;
 use sea_orm::{ActiveModelTrait, IntoActiveModel, Set};
 use std::time::Duration;
-use tracing::{error, info};
 
 #[derive(Clone)]
 pub struct UploadService {
@@ -32,7 +32,7 @@ impl UploadService {
     fn validate_content_type(usage: MediaUsage, mime: &Mime) -> ServiceResult<()> {
         match (usage, (mime.type_(), mime.subtype())) {
             (MediaUsage::TeamPhoto, (mime::IMAGE, mime::JPEG | mime::PNG)) => Ok(()),
-            _ => Err(ServiceError::UploadsMimeNotAllowed),
+            _ => Err(ServiceError::UploadContentTypeNotAllowed),
         }
     }
 
@@ -44,7 +44,7 @@ impl UploadService {
         let limit = limit_mb * Self::MB;
 
         if size > limit {
-            return Err(ServiceError::UploadsSizeLimitExceeded { size, limit });
+            return Err(ServiceError::UploadContentLengthExceeded { size, limit });
         }
 
         Ok(())
@@ -55,12 +55,12 @@ impl UploadService {
 
         let recent_uploads = db_upload::Entity::find()
             .filter(db_upload::Column::UserId.eq(user_id))
-            .filter(db_upload::Column::UploadedAfter.gt(rate_limit_cutoff))
+            .filter(db_upload::Column::RequestedAt.gt(rate_limit_cutoff))
             .count(self.db_repo.conn())
             .await?;
 
         if recent_uploads >= Self::UPLOADS_RATE_LIMIT_COUNT {
-            Err(ServiceError::UploadsRateLimitExceeded)
+            Err(ServiceError::UploadRateLimitExceeded)
         } else {
             Ok(())
         }
@@ -104,8 +104,8 @@ impl UploadService {
             usage: Set(usage),
             content_length: Set(content_size),
             content_type: Set(content_type.to_string()),
-            uploaded_after: Set(Utc::now().naive_utc()),
-            uploaded_before: Set((Utc::now() + Self::PRESIGNED_URL_EXPIRATION).naive_utc()),
+            requested_at: Set(Utc::now().naive_utc()),
+            uploaded_at: Set(None),
             validated_at: Set(None),
         };
 
@@ -116,36 +116,39 @@ impl UploadService {
         Ok(upload)
     }
 
-    pub async fn validate_upload(&self, upload: db_upload::Model) -> ServiceResult<()> {
-        let now = Utc::now().naive_utc();
+    pub async fn validate_upload(
+        &self,
+        id: Uuid,
+        usage: MediaUsage,
+        allow_reuse: bool,
+    ) -> ServiceResult<()> {
+        // TODO: transaction
 
-        let upload_exists = self.s3_repo.object_exists(&upload.id.to_string()).await?;
-        let upload_expired = now > upload.uploaded_before;
+        let upload = self.db_repo.get_upload(id).await?;
 
-        if upload_exists {
-            info!(upload_id = %upload.id, "Upload validated successfully");
-            let mut active_upload = upload.into_active_model();
-            active_upload.validated_at = Set(Some(now));
-            active_upload.update(self.db_repo.conn()).await?;
-        } else if upload_expired {
-            info!(upload_id = %upload.id, "Upload expired and will be deleted");
-            db_upload::Entity::delete_by_id(upload.id)
-                .exec(self.db_repo.conn())
-                .await?;
+        if upload.validated_at.is_some() && !allow_reuse {
+            return Err(ServiceError::UploadIsAlreadyValidated);
         }
 
-        Ok(())
-    }
-
-    pub async fn validate_uploads(&self) -> ServiceResult<()> {
-        let uploads = self.db_repo.get_pending_uploads().await?;
-
-        for upload in uploads {
-            let id = upload.id;
-            if let Err(e) = self.validate_upload(upload).await {
-                error!(upload = %id, error = %e, "Error validating upload");
-            }
+        if upload.usage != usage {
+            return Err(ServiceError::UploadMediaUsageMismatch {
+                expected: usage,
+                actual: upload.usage,
+            });
         }
+
+        let head = self.s3_repo.head_object(&upload.id.to_string()).await?;
+
+        let last_modified = head
+            .last_modified
+            .map(|dt| dt.to_chrono_utc().ok())
+            .flatten()
+            .map(|dt| dt.naive_utc());
+
+        let mut active_upload = upload.into_active_model();
+        active_upload.uploaded_at = Set(last_modified);
+        active_upload.validated_at = Set(Some(Utc::now().naive_utc()));
+        active_upload.save(self.db_repo.conn()).await?;
 
         Ok(())
     }

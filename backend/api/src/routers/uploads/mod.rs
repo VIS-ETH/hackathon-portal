@@ -24,7 +24,7 @@ pub fn get_router(state: &ApiState) -> Router {
     post,
     path = "/api/uploads",
     responses(
-        (status = StatusCode::OK, body = Upload),
+        (status = StatusCode::OK, body = UploadUrl),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
 )]

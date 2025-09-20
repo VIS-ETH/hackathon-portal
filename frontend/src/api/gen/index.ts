@@ -69,7 +69,7 @@ import type {
   TeamInternal,
   TeamLeaderboardEntry,
   TeamRole,
-  Upload,
+  UploadUrl,
   User,
   UserForUpdate,
   UserLeaderboardEntry,
@@ -8234,7 +8234,7 @@ export const createUpload = (
   options?: SecondParameter<typeof customInstance>,
   signal?: AbortSignal,
 ) => {
-  return customInstance<Upload>(
+  return customInstance<UploadUrl>(
     {
       url: `/api/uploads`,
       method: "POST",

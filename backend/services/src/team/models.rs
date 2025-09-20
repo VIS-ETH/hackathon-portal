@@ -64,6 +64,7 @@ pub struct TeamForCreate {
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
 pub struct TeamForUpdate {
     pub name: Option<String>,
+    pub photo_id: Option<Uuid>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]

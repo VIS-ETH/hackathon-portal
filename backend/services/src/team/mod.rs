@@ -126,6 +126,18 @@ impl TeamService {
             active_team.slug = Set(slug);
         }
 
+        if let Some(photo_id) = &team_fu.photo_id {
+            if photo_id.is_nil() {
+                active_team.photo_id = Set(None);
+            } else {
+                self.upload_service
+                    .validate_upload(*photo_id, MediaUsage::TeamPhoto, false)
+                    .await?;
+
+                active_team.photo_id = Set(Some(*photo_id));
+            }
+        }
+
         let team = active_team.update(self.db_repo.conn()).await?;
         let mut team = Team::from(team);
 

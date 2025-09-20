@@ -14,8 +14,8 @@ pub struct Model {
     #[sea_orm(column_type = "Text")]
     pub content_type: String,
     pub content_length: i64,
-    pub uploaded_after: DateTime,
-    pub uploaded_before: DateTime,
+    pub requested_at: DateTime,
+    pub uploaded_at: Option<DateTime>,
     pub validated_at: Option<DateTime>,
 }
 

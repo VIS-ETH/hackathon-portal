@@ -1,5 +1,6 @@
-use crate::{RepositoryError, RepositoryResult};
+use crate::RepositoryResult;
 use aws_sdk_s3::config::{Credentials, Region};
+use aws_sdk_s3::operation::head_object::HeadObjectOutput;
 use aws_sdk_s3::presigning::PresigningConfig;
 use aws_sdk_s3::{Client, Config};
 use mime::Mime;
@@ -52,26 +53,16 @@ impl S3Repository {
         Self::new(client, bucket)
     }
 
-    pub async fn object_exists(&self, key: &str) -> RepositoryResult<bool> {
-        let result = self
+    pub async fn head_object(&self, key: &str) -> RepositoryResult<HeadObjectOutput> {
+        let response = self
             .client
             .head_object()
             .bucket(&self.bucket)
             .key(key)
             .send()
-            .await;
+            .await?;
 
-        match result {
-            Ok(_) => Ok(true),
-            Err(e)
-                if e.as_service_error().is_some_and(
-                    aws_sdk_s3::operation::head_object::HeadObjectError::is_not_found,
-                ) =>
-            {
-                Ok(false)
-            }
-            Err(e) => Err(RepositoryError::S3HeadObject(e)),
-        }
+        Ok(response)
     }
 
     pub async fn presign_get_object(
