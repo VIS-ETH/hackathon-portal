@@ -129,7 +129,10 @@ const TeamsTable = ({ event }: TeamsTableProps) => {
                     </>
                   )}
                   {view == TableView.Password && (
-                    <Table.Th miw={200}>Password</Table.Th>
+                    <>
+                      <Table.Th miw={200}>VM Password</Table.Th>
+                      <Table.Th miw={200}>ML Key</Table.Th>
+                    </>
                   )}
                   {view == TableView.Members &&
                     Array.from({ length: event.max_team_size }).map((_, i) => (

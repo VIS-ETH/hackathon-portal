@@ -1,7 +1,7 @@
 pub mod models;
 
 use crate::authorization::AuthorizationService;
-use crate::team::models::{Team, TeamForCreate, TeamForUpdate};
+use crate::team::models::{Team, TeamCredentials, TeamForCreate, TeamForUpdate};
 use crate::{ServiceError, ServiceResult};
 use hackathon_portal_repositories::db::prelude::*;
 use hackathon_portal_repositories::DbRepository;
@@ -260,19 +260,27 @@ impl TeamService {
         Ok(pps)
     }
 
-    pub async fn get_team_password(&self, team_id: Uuid) -> ServiceResult<Option<String>> {
+    pub async fn get_team_credentials(&self, team_id: Uuid) -> ServiceResult<TeamCredentials> {
         let team = self.db_repo.get_team(team_id).await?;
-        Ok(team.password)
+        Ok(TeamCredentials {
+            vm_password: team.password,
+            ai_api_key: team.ai_api_key,
+        })
     }
 
-    pub async fn update_team_password(
+    pub async fn update_team_credentials(
         &self,
         team_id: Uuid,
-        password: Option<String>,
+        credentials: TeamCredentials,
     ) -> ServiceResult<Team> {
         let team = self.db_repo.get_team(team_id).await?;
         let mut active_team = team.into_active_model();
-        active_team.password = Set(password);
+        if credentials.vm_password.is_some() {
+            active_team.password = Set(credentials.vm_password);
+        }
+        if credentials.ai_api_key.is_some() {
+            active_team.ai_api_key = Set(credentials.ai_api_key);
+        }
 
         let team = active_team.update(self.db_repo.conn()).await?;
 

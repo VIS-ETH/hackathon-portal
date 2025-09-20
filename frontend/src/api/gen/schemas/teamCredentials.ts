@@ -5,8 +5,9 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface SidequestAttemptsCooldownQuery {
-  event_id: string;
+export interface TeamCredentials {
   /** @nullable */
-  user_id?: string | null;
+  ai_api_key?: string | null;
+  /** @nullable */
+  vm_password?: string | null;
 }

@@ -71,6 +71,7 @@ model team {
   slug        String
   index       Int
   password    String?
+  ai_api_key  String?
   extra_score Float?
   comment     String?
 
