@@ -1,0 +1,18 @@
+include:
+  - compose.app.yaml
+  - compose.minio.yaml
+  - compose.postgres.yaml
+
+volumes:
+  portal_db:
+    external: true
+  portal_db_backup:
+    external: true
+  portal_minio_data:
+    external: true
+
+networks:
+  portal_public:
+    external: true
+  portal_private:
+    external: true

@@ -1,8 +1,6 @@
 use crate::authorization::groups::Groups;
 use hackathon_portal_repositories::db::prelude::EventPhase;
-use hackathon_portal_repositories::db::sea_orm_active_enums::EventRole;
 use hackathon_portal_repositories::db::sea_orm_active_enums::EventVisibility;
-use hackathon_portal_repositories::db::sea_orm_active_enums::TeamRole;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
@@ -16,12 +14,15 @@ pub struct Policies {
     pub can_create_team: bool,
     pub can_view_team_confidential: bool,
     pub can_view_team_feedback: bool,
+    pub can_update_team_name: bool,
+    pub can_update_team_photo: bool,
     pub can_manage_team: bool,
     pub can_manage_expert_rating: bool,
     pub can_manage_project: bool,
     pub can_manage_sidequest: bool,
     pub can_view_sidequest_attempt: bool,
     pub can_manage_sidequest_attempt: bool,
+    pub can_create_upload: bool,
 }
 
 impl Policies {
@@ -49,6 +50,16 @@ impl Policies {
                 event_phase,
                 event_feedback_is_visible,
             ),
+            can_update_team_name: groups.can_update_team_name(
+                event_visibility,
+                event_phase,
+                event_is_ro,
+            ),
+            can_update_team_photo: groups.can_update_team_photo(
+                event_visibility,
+                event_phase,
+                event_is_ro,
+            ),
             can_manage_team: groups.can_manage_team(event_visibility, event_phase, event_is_ro),
             can_manage_expert_rating: groups.can_manage_expert_rating(
                 event_visibility,
@@ -71,6 +82,7 @@ impl Policies {
                 event_phase,
                 event_is_ro,
             ),
+            can_create_upload: groups.can_create_upload(event_visibility, event_phase, event_is_ro),
         }
     }
 }

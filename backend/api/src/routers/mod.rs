@@ -6,6 +6,7 @@ mod projects;
 mod sidequest_attempts;
 mod sidequests;
 mod teams;
+mod uploads;
 mod users;
 
 use crate::api_state::ApiState;
@@ -33,6 +34,7 @@ pub fn get_router(state: &ApiState) -> Router {
         .nest("/sidequests", sidequests::get_router(state))
         .nest("/sidequest-attempts", sidequest_attempts::get_router(state))
         .nest("/appointments", appointments::get_router(state))
+        .nest("/uploads", uploads::get_router(state))
 }
 
 pub async fn get_api_router(api_state: ApiState) -> ApiResult<Router> {

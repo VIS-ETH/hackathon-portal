@@ -16,6 +16,9 @@ CREATE TYPE "public"."team_role" AS ENUM ('MENTOR', 'MEMBER');
 -- CreateEnum
 CREATE TYPE "public"."expert_rating_category" AS ENUM ('FUNCTIONALITY', 'UX', 'PRESENTATION');
 
+-- CreateEnum
+CREATE TYPE "public"."media_usage" AS ENUM ('TEAM_PHOTO');
+
 -- CreateTable
 CREATE TABLE "public"."event" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
@@ -48,6 +51,7 @@ CREATE TABLE "public"."team" (
     "ai_api_key" TEXT,
     "extra_score" DOUBLE PRECISION,
     "comment" TEXT,
+    "photo_id" UUID,
 
     CONSTRAINT "team_pkey" PRIMARY KEY ("id")
 );
@@ -157,6 +161,20 @@ CREATE TABLE "public"."appointment" (
     CONSTRAINT "appointment_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "public"."upload" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "user_id" UUID NOT NULL,
+    "usage" "public"."media_usage" NOT NULL,
+    "content_type" TEXT NOT NULL,
+    "content_length" BIGINT NOT NULL,
+    "requested_at" TIMESTAMP(3) NOT NULL,
+    "uploaded_at" TIMESTAMP(3),
+    "validated_at" TIMESTAMP(3),
+
+    CONSTRAINT "upload_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "event_name_key" ON "public"."event"("name");
 
@@ -195,6 +213,9 @@ ALTER TABLE "public"."team" ADD CONSTRAINT "team_event_id_fkey" FOREIGN KEY ("ev
 
 -- AddForeignKey
 ALTER TABLE "public"."team" ADD CONSTRAINT "team_project_id_fkey" FOREIGN KEY ("project_id") REFERENCES "public"."project"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "public"."team" ADD CONSTRAINT "team_photo_id_fkey" FOREIGN KEY ("photo_id") REFERENCES "public"."upload"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "public"."event_role_assignment" ADD CONSTRAINT "event_role_assignment_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -237,4 +258,7 @@ ALTER TABLE "public"."sidequest_score" ADD CONSTRAINT "sidequest_score_team_id_f
 
 -- AddForeignKey
 ALTER TABLE "public"."appointment" ADD CONSTRAINT "appointment_event_id_fkey" FOREIGN KEY ("event_id") REFERENCES "public"."event"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "public"."upload" ADD CONSTRAINT "upload_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 

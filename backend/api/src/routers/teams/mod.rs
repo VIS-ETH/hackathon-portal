@@ -278,9 +278,19 @@ pub async fn update_team(
     let event = state.event_service.get_event(team.event_id).await?;
     let groups = Groups::from_event_and_team(ctx.roles(), event.id, team.id);
 
-    if !groups.can_manage_team(event.visibility, event.phase, event.is_read_only) {
+    if body.name.is_some()
+        && !groups.can_update_team_name(event.visibility, event.phase, event.is_read_only)
+    {
         return Err(ApiError::Forbidden {
-            action: "edit this team".to_string(),
+            action: "edit the name of this team".to_string(),
+        });
+    }
+
+    if body.photo_id.is_some()
+        && !groups.can_update_team_photo(event.visibility, event.phase, event.is_read_only)
+    {
+        return Err(ApiError::Forbidden {
+            action: "edit the photo of this team".to_string(),
         });
     }
 

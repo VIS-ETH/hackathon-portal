@@ -4,15 +4,18 @@ version = "1.0.0"
 edition = "2021"
 
 [dependencies]
+aws-smithy-types-convert = { version = "0.60.9", features = ["convert-chrono"] }
 chrono = { workspace = true }
 derive_more = { workspace = true }
 hackathon-portal-repositories = { workspace = true }
 itertools = "0.14.0"
+mime = { workspace = true }
 minilp = "0.2.2"
 sea-orm = { workspace = true }
 serde = { workspace = true }
 serde_with = { workspace = true }
 strum = { workspace = true }
+tracing = { workspace = true }
 utoipa = { workspace = true }
 uuid = { workspace = true }
 

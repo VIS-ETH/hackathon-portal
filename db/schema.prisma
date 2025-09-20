@@ -1,6 +1,6 @@
 datasource db {
   provider = "postgresql"
-  url      = env("POSTGRES_URL")
+  url      = env("PORTAL__POSTGRES__URL")
 }
 
 enum event_visibility {
@@ -33,6 +33,10 @@ enum expert_rating_category {
   FUNCTIONALITY
   UX
   PRESENTATION
+}
+
+enum media_usage {
+  TEAM_PHOTO
 }
 
 model event {
@@ -74,10 +78,12 @@ model team {
   ai_api_key  String?
   extra_score Float?
   comment     String?
+  photo_id    String? @db.Uuid
 
   // relations
   event   event    @relation(fields: [event_id], references: [id])
   project project? @relation(fields: [project_id], references: [id])
+  photo   upload?  @relation(fields: [photo_id], references: [id])
 
   // related models
   team_role_assignment team_role_assignment[]
@@ -103,6 +109,7 @@ model user {
   team_role_assignment  team_role_assignment[]
   sidequest_attempt     sidequest_attempt[]
   expert_rating         expert_rating[]
+  upload                upload[]
 
   // meta
   @@unique([name, index])
@@ -246,4 +253,23 @@ model appointment {
 
   // relations
   event event @relation(fields: [event_id], references: [id])
+}
+
+model upload {
+  id      String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id String @db.Uuid
+
+  // fields
+  usage          media_usage
+  content_type   String
+  content_length BigInt
+  requested_at   DateTime
+  uploaded_at    DateTime?
+  validated_at   DateTime?
+
+  // relations
+  user user @relation(fields: [user_id], references: [id])
+
+  // related models
+  team team[]
 }

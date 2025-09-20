@@ -1,0 +1,52 @@
+services:
+  minio:
+    image: quay.io/minio/minio
+    command: server /data --console-address ":9001"
+    env_file:
+      - .env
+    volumes:
+      - portal_minio_data:/data
+    ports:
+      - 9000:9000
+    restart: unless-stopped
+    profiles:
+      - dev
+
+  minio-init:
+    image: quay.io/minio/mc
+    env_file:
+      - .env
+    entrypoint: |
+      /bin/sh -c '
+      set -e; # Exit immediately if a command exits with a non-zero status.
+
+      cat > /root/policy.json <<EOL
+      {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Action": [
+              "s3:*"
+            ],
+            "Resource": [
+              "arn:aws:s3:::*"
+            ]
+          }
+        ]
+      }
+      EOL
+
+      until (mc alias set local http://minio:9000 $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD); do sleep 1; done;
+
+      mc mb --ignore-existing local/$PORTAL__S3__BUCKET;
+      echo "Bucket created";
+
+      mc admin accesskey create local $MINIO_ROOT_USER --access-key $PORTAL__S3__ACCESS_KEY --secret-key $PORTAL__S3__SECRET_KEY --policy /root/policy.json;
+      echo "Access key created";
+      '
+    depends_on:
+      - minio
+    restart: no
+    profiles:
+      - dev

@@ -21,6 +21,7 @@ pub struct Model {
     pub extra_score: Option<f64>,
     #[sea_orm(column_type = "Text", nullable)]
     pub comment: Option<String>,
+    pub photo_id: Option<Uuid>,
     #[sea_orm(column_type = "Text", nullable)]
     pub ai_api_key: Option<String>,
 }
@@ -51,6 +52,14 @@ pub enum Relation {
     SidequestScore,
     #[sea_orm(has_many = "super::team_role_assignment::Entity")]
     TeamRoleAssignment,
+    #[sea_orm(
+        belongs_to = "super::upload::Entity",
+        from = "Column::PhotoId",
+        to = "super::upload::Column::Id",
+        on_update = "Cascade",
+        on_delete = "SetNull"
+    )]
+    Upload,
 }
 
 impl Related<super::event::Entity> for Entity {
@@ -80,6 +89,12 @@ impl Related<super::sidequest_score::Entity> for Entity {
 impl Related<super::team_role_assignment::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::TeamRoleAssignment.def()
+    }
+}
+
+impl Related<super::upload::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::Upload.def()
     }
 }
 

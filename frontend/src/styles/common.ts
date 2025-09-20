@@ -6,7 +6,8 @@ import {
   CardSectionProps,
   ContainerProps,
   InputProps,
-  PolymorphicComponentProps,
+  MenuProps,
+  ModalProps,
   SegmentedControlProps,
   SkeletonProps,
   TextProps,
@@ -15,16 +16,16 @@ import {
 
 import { IconProps } from "@tabler/icons-react";
 
-export const containerProps: ContainerProps = {
+export const containerProps: Partial<ContainerProps> = {
   size: "md",
 };
 
-export const inputProps: InputProps = {
+export const inputProps: Partial<InputProps> = {
   size: "md",
   radius: "md",
 };
 
-export const textareaProps: TextareaProps = {
+export const textareaProps: Partial<TextareaProps> = {
   size: "md",
   radius: "md",
   minRows: 5,
@@ -32,73 +33,82 @@ export const textareaProps: TextareaProps = {
   autosize: true,
 };
 
-export const segmentedControlProps: SegmentedControlProps = {
+export const segmentedControlProps: Partial<SegmentedControlProps> = {
   size: "sm",
   radius: "md",
   withItemsBorders: false,
   data: [],
 };
 
-export const primaryButtonProps: ButtonProps = {
+export const primaryButtonProps: Partial<ButtonProps> = {
   radius: "md",
   size: "md",
 };
 
-export const secondaryButtonProps: ButtonProps = {
+export const secondaryButtonProps: Partial<ButtonProps> = {
   radius: "md",
   size: "xs",
 };
 
-export const cardProps: PolymorphicComponentProps<any, CardProps> = {
+export const cardProps: Partial<CardProps> = {
   withBorder: true,
   radius: "md",
   padding: "md",
 };
 
-export const highlightedCardProps: PolymorphicComponentProps<any, CardProps> = {
+export const highlightedCardProps: Partial<CardProps> = {
   ...cardProps,
   withBorder: false,
   bg: "var(--mantine-color-primary-0)",
 };
 
-export const cardSectionProps: PolymorphicComponentProps<
-  any,
-  CardSectionProps
-> = {
+export const cardSectionProps: Partial<CardSectionProps> = {
   p: "md",
   withBorder: true,
 };
 
-export const cardHeaderSectionProps: PolymorphicComponentProps<
-  any,
-  CardSectionProps
-> = {
+export const cardHeaderSectionProps: Partial<CardSectionProps> = {
   py: "xs",
   inheritPadding: true,
   withBorder: true,
 };
 
-export const cardHeaderTextProps: PolymorphicComponentProps<any, TextProps> = {
+export const cardHeaderTextProps: Partial<TextProps> = {
   fw: 700,
   truncate: true,
 };
 
-export const badgeProps: PolymorphicComponentProps<any, BadgeProps> = {
+export const badgeProps: Partial<BadgeProps> = {
   variant: "default",
   radius: "sm",
 };
 
-export const indicatorBadgeProps: PolymorphicComponentProps<any, BadgeProps> = {
+export const indicatorBadgeProps: Partial<BadgeProps> = {
   ...badgeProps,
   variant: "dot",
 };
 
-export const iconProps: IconProps = {
+export const menuProps: Partial<MenuProps> = {
+  radius: "md",
+  shadow: "xl",
+  position: "bottom-end",
+};
+
+export const modalProps: Partial<ModalProps> = {
+  radius: "md",
+};
+
+export const iconProps: Partial<IconProps> = {
   size: 16,
   stroke: 1.5,
 };
 
-export const skeletonProps: SkeletonProps = {
+export const largeIconProps: Partial<IconProps> = {
+  ...iconProps,
+  size: 52,
+};
+
+export const skeletonProps: Partial<SkeletonProps> = {
   height: 24,
   radius: "md",
 };

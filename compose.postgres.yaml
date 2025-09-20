@@ -1,0 +1,56 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: portal_db
+    command: postgres # -c 'log_statement=all'
+    env_file:
+      - .env
+    volumes:
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+      - portal_db:/var/lib/postgresql/data
+    networks:
+      - portal_private
+    restart: unless-stopped
+    profiles:
+      - dev
+      - prod
+
+  postgres-maintenance:
+    image: node:22
+    container_name: portal_db_maintenance
+    command: sleep 10m
+    env_file:
+      - .env
+    networks:
+      - portal_private
+    volumes:
+      - ./Makefile:/data/Makefile
+      - ./db:/data/db
+    depends_on:
+      - postgres
+    restart: no
+    profiles:
+      - dev
+      - prod
+
+  postgres-backup:
+    image: prodrigestivill/postgres-backup-local
+    container_name: portal_db_backup
+    env_file:
+      - .env
+    environment:
+      POSTGRES_EXTRA_OPTS: -Z1 --schema=public --blobs
+      SCHEDULE: "*/15 * * * *"
+      BACKUP_ON_START: TRUE
+      BACKUP_KEEP_DAYS: 7
+      BACKUP_KEEP_WEEKS: 4
+      BACKUP_KEEP_MONTHS: 6
+    networks:
+      - portal_private
+    volumes:
+      - portal_db_backup:/backups
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    profiles:
+      - prod

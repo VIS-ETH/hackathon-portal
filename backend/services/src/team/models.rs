@@ -11,6 +11,7 @@ pub struct Team {
     pub name: String,
     pub slug: String,
     pub index: i32,
+    pub photo_url: Option<String>,
 }
 
 impl From<db_team::Model> for Team {
@@ -22,6 +23,7 @@ impl From<db_team::Model> for Team {
             name: value.name,
             slug: value.slug,
             index: value.index,
+            photo_url: value.photo_id.map(String::from),
         }
     }
 }
@@ -62,6 +64,7 @@ pub struct TeamForCreate {
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
 pub struct TeamForUpdate {
     pub name: Option<String>,
+    pub photo_id: Option<Uuid>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]

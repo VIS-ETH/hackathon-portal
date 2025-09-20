@@ -136,6 +136,26 @@ impl ExpertRatingCategory {
     strum :: VariantArray,
     utoipa :: ToSchema,
 )]
+#[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "media_usage")]
+pub enum MediaUsage {
+    #[sea_orm(string_value = "TEAM_PHOTO")]
+    TeamPhoto,
+}
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Eq,
+    EnumIter,
+    DeriveActiveEnum,
+    Serialize,
+    Deserialize,
+    Copy,
+    Hash,
+    strum :: Display,
+    strum :: VariantArray,
+    utoipa :: ToSchema,
+)]
 #[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "team_role")]
 pub enum TeamRole {
     #[sea_orm(string_value = "MENTOR")]

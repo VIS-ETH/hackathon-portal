@@ -11,6 +11,8 @@ export interface Team {
   index: number;
   name: string;
   /** @nullable */
+  photo_url?: string | null;
+  /** @nullable */
   project_id?: string | null;
   slug: string;
 }

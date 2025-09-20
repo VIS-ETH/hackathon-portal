@@ -25,6 +25,8 @@ pub enum Relation {
     SidequestAttempt,
     #[sea_orm(has_many = "super::team_role_assignment::Entity")]
     TeamRoleAssignment,
+    #[sea_orm(has_many = "super::upload::Entity")]
+    Upload,
 }
 
 impl Related<super::event_role_assignment::Entity> for Entity {
@@ -48,6 +50,12 @@ impl Related<super::sidequest_attempt::Entity> for Entity {
 impl Related<super::team_role_assignment::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::TeamRoleAssignment.def()
+    }
+}
+
+impl Related<super::upload::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::Upload.def()
     }
 }
 

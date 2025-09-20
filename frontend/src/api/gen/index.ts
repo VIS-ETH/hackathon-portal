@@ -14,6 +14,7 @@ import type {
   AttemptForCreate,
   AttemptForUpdate,
   Cooldown,
+  CreateUploadDTO,
   DeleteEventRolesBody,
   DeleteSidequest200,
   DeleteSidequestAttempt200,
@@ -68,6 +69,7 @@ import type {
   TeamInternal,
   TeamLeaderboardEntry,
   TeamRole,
+  UploadUrl,
   User,
   UserForUpdate,
   UserLeaderboardEntry,
@@ -8223,6 +8225,89 @@ export const useDeleteTeamRoles = <TError = PublicError, TContext = unknown>(
   TContext
 > => {
   const mutationOptions = getDeleteTeamRolesMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+
+export const createUpload = (
+  createUploadDTO: CreateUploadDTO,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<UploadUrl>(
+    {
+      url: `/api/uploads`,
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      data: createUploadDTO,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getCreateUploadMutationOptions = <
+  TError = PublicError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createUpload>>,
+    TError,
+    { data: CreateUploadDTO },
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createUpload>>,
+  TError,
+  { data: CreateUploadDTO },
+  TContext
+> => {
+  const mutationKey = ["createUpload"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createUpload>>,
+    { data: CreateUploadDTO }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createUpload(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateUploadMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createUpload>>
+>;
+export type CreateUploadMutationBody = CreateUploadDTO;
+export type CreateUploadMutationError = PublicError;
+
+export const useCreateUpload = <TError = PublicError, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof createUpload>>,
+      TError,
+      { data: CreateUploadDTO },
+      TContext
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof createUpload>>,
+  TError,
+  { data: CreateUploadDTO },
+  TContext
+> => {
+  const mutationOptions = getCreateUploadMutationOptions(options);
 
   return useMutation(mutationOptions, queryClient);
 };

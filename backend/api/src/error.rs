@@ -60,6 +60,9 @@ pub enum ApiError {
 
     #[from]
     TracingFilterParse(#[serde_as(as = "DisplayFromStr")] tracing_subscriber::filter::ParseError),
+
+    #[from]
+    JobScheduler(#[serde_as(as = "DisplayFromStr")] tokio_cron_scheduler::JobSchedulerError),
     // endregion
 }
 
@@ -137,7 +140,11 @@ impl From<&RepositoryError> for PublicError {
             RepositoryError::SlugNotUnique { slug } => {
                 (StatusCode::CONFLICT, format!("Slug '{slug}' is not unique"))
             }
-            RepositoryError::SeaORM(_) => ise,
+            RepositoryError::SeaORM(_)
+            | RepositoryError::S3HeadObject(_)
+            | RepositoryError::S3GetObject(_)
+            | RepositoryError::S3PutObject(_)
+            | RepositoryError::S3PresigningConfig(_) => ise,
         };
 
         Self::new(status, message)
@@ -197,6 +204,38 @@ impl From<&ServiceError> for PublicError {
                 StatusCode::FORBIDDEN,
                 format!("This action is not allowed in the phase {current_phase}"),
             ),
+            ServiceError::UploadContentTypeNotAllowed => (
+                StatusCode::BAD_REQUEST,
+                "You may not upload files of this type".to_string(),
+            ),
+            ServiceError::UploadContentLengthExceeded { size, limit } => {
+                let size = (*size as f64) / 2f64.powf(20f64);
+                let limit = (*limit as f64) / 2f64.powf(20f64);
+
+                (
+                    StatusCode::BAD_REQUEST,
+                    format!(
+                        "File ({size:.1} MB) exceeds the size limit of {limit:.1} MB"
+                    ),
+                )
+            },
+            ServiceError::UploadRateLimitExceeded => (
+                StatusCode::FORBIDDEN,
+                "You have uploaded too many files in a short period of time. Please wait and try again later.".to_string()
+            ),
+            ServiceError::UploadIsAlreadyValidated => (
+                StatusCode::FORBIDDEN,
+                "This upload has already been validated and cannot be reused".to_string(),
+            ),
+            ServiceError::UploadMediaUsageMismatch {
+                expected,
+                actual,
+            } => (
+                StatusCode::FORBIDDEN,
+                format!(
+                    "Upload media usage mismatch: expected '{expected}', got '{actual}'"
+                ),
+            ),
             ServiceError::Repository(e) => return e.into(),
             ServiceError::Matching { message } => (StatusCode::BAD_REQUEST, message.clone()),
             ServiceError::SeaORM(_) => ise,
@@ -232,7 +271,8 @@ impl From<&ApiError> for PublicError {
             | ApiError::Io(_)
             | ApiError::InvalidHeaderValue(_)
             | ApiError::TracingSetGlobalDefault(_)
-            | ApiError::TracingFilterParse(_) => ise,
+            | ApiError::TracingFilterParse(_)
+            | ApiError::JobScheduler(_) => ise,
         };
 
         Self::new(status, message)

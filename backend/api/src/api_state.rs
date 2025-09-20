@@ -1,5 +1,6 @@
 use crate::api_config::ApiConfig;
 use crate::ApiResult;
+use hackathon_portal_repositories::s3::S3Repository;
 use hackathon_portal_repositories::DbRepository;
 use hackathon_portal_services::appointment::AppointmentService;
 use hackathon_portal_services::authorization::AuthorizationService;
@@ -8,6 +9,7 @@ use hackathon_portal_services::project::ProjectService;
 use hackathon_portal_services::rating::RatingService;
 use hackathon_portal_services::sidequest::SidequestService;
 use hackathon_portal_services::team::TeamService;
+use hackathon_portal_services::upload::UploadService;
 use hackathon_portal_services::user::UserService;
 use std::sync::Arc;
 
@@ -22,6 +24,7 @@ pub struct ApiState {
     pub project_service: Arc<ProjectService>,
     pub sidequest_service: Arc<SidequestService>,
     pub appointment_service: Arc<AppointmentService>,
+    pub upload_service: Arc<UploadService>,
 }
 
 impl ApiState {
@@ -35,6 +38,7 @@ impl ApiState {
         project_service: Arc<ProjectService>,
         sidequest_service: Arc<SidequestService>,
         appointment_service: Arc<AppointmentService>,
+        upload_service: Arc<UploadService>,
     ) -> Self {
         Self {
             authorization_service,
@@ -45,17 +49,22 @@ impl ApiState {
             project_service,
             sidequest_service,
             appointment_service,
+            upload_service,
         }
     }
 
     pub async fn from_config(config: &ApiConfig) -> ApiResult<Self> {
-        let db_repo = DbRepository::from_url(&config.db).await?;
+        let db_repo = DbRepository::from_config(&config.postgres).await?;
+
+        let s3_repo = S3Repository::from_config(&config.s3);
 
         let authorization_service = Arc::new(AuthorizationService::new(db_repo.clone()));
         let user_service = Arc::new(UserService::new(db_repo.clone()));
+        let upload_service = Arc::new(UploadService::new(db_repo.clone(), s3_repo));
 
         let team_service = Arc::new(TeamService::new(
             authorization_service.clone(),
+            upload_service.clone(),
             db_repo.clone(),
         ));
 
@@ -87,6 +96,7 @@ impl ApiState {
             project_service,
             sidequest_service,
             appointment_service,
+            upload_service,
         );
 
         Ok(state)

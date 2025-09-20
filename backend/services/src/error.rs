@@ -1,6 +1,6 @@
 use chrono::NaiveDateTime;
 use derive_more::From;
-use hackathon_portal_repositories::db::prelude::EventPhase;
+use hackathon_portal_repositories::db::prelude::{EventPhase, MediaUsage};
 use hackathon_portal_repositories::RepositoryError;
 use serde::Serialize;
 use serde_with::{serde_as, DisplayFromStr};
@@ -53,6 +53,22 @@ pub enum ServiceError {
 
     Matching {
         message: String,
+    },
+
+    UploadRateLimitExceeded,
+
+    UploadContentLengthExceeded {
+        size: i64,
+        limit: i64,
+    },
+
+    UploadContentTypeNotAllowed,
+
+    UploadIsAlreadyValidated,
+
+    UploadMediaUsageMismatch {
+        expected: MediaUsage,
+        actual: MediaUsage,
     },
 
     // region: external library errors
