@@ -83,7 +83,7 @@ model team {
   // relations
   event   event    @relation(fields: [event_id], references: [id])
   project project? @relation(fields: [project_id], references: [id])
-  photo   upload?   @relation(fields: [photo_id], references: [id])
+  photo   upload?  @relation(fields: [photo_id], references: [id])
 
   // related models
   team_role_assignment team_role_assignment[]
@@ -109,7 +109,7 @@ model user {
   team_role_assignment  team_role_assignment[]
   sidequest_attempt     sidequest_attempt[]
   expert_rating         expert_rating[]
-  upload                 upload[]
+  upload                upload[]
 
   // meta
   @@unique([name, index])

@@ -29,14 +29,14 @@ impl UploadService {
         Self { db_repo, s3_repo }
     }
 
-    async fn validate_content_type(&self, usage: MediaUsage, mime: &Mime) -> ServiceResult<()> {
+    fn validate_content_type(usage: MediaUsage, mime: &Mime) -> ServiceResult<()> {
         match (usage, (mime.type_(), mime.subtype())) {
             (MediaUsage::TeamPhoto, (mime::IMAGE, mime::JPEG | mime::PNG)) => Ok(()),
             _ => Err(ServiceError::UploadsMimeNotAllowed),
         }
     }
 
-    async fn validate_content_length(&self, usage: MediaUsage, size: i64) -> ServiceResult<()> {
+    fn validate_content_length(usage: MediaUsage, size: i64) -> ServiceResult<()> {
         let limit_mb = match usage {
             MediaUsage::TeamPhoto => 10,
         };
@@ -73,8 +73,8 @@ impl UploadService {
         content_type: &Mime,
         content_size: i64,
     ) -> ServiceResult<()> {
-        self.validate_content_type(usage, content_type).await?;
-        self.validate_content_length(usage, content_size).await?;
+        Self::validate_content_type(usage, content_type)?;
+        Self::validate_content_length(usage, content_size)?;
         self.validate_rate_limit(user_id).await?;
 
         Ok(())
@@ -92,7 +92,7 @@ impl UploadService {
             .s3_repo
             .presign_put_object(
                 &id.to_string(),
-                Some(&content_type),
+                Some(content_type),
                 Some(content_size),
                 Self::PRESIGNED_URL_EXPIRATION,
             )
@@ -141,8 +141,9 @@ impl UploadService {
         let uploads = self.db_repo.get_pending_uploads().await?;
 
         for upload in uploads {
+            let id = upload.id;
             if let Err(e) = self.validate_upload(upload).await {
-                error!(upload_id = %upload.id, error = %e, "Error validating upload");
+                error!(upload = %id, error = %e, "Error validating upload");
             }
         }
 

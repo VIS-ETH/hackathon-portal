@@ -1,7 +1,5 @@
 use crate::{RepositoryError, RepositoryResult};
 use aws_sdk_s3::config::{Credentials, Region};
-use aws_sdk_s3::error::SdkError;
-use aws_sdk_s3::operation::head_object::HeadObjectError;
 use aws_sdk_s3::presigning::PresigningConfig;
 use aws_sdk_s3::{Client, Config};
 use mime::Mime;
@@ -25,10 +23,12 @@ pub struct S3Repository {
 }
 
 impl S3Repository {
+    #[must_use]
     pub fn new(client: Client, bucket: String) -> Self {
         Self { client, bucket }
     }
 
+    #[must_use]
     pub fn from_config(config: &S3Config) -> Self {
         let bucket = config.bucket.clone();
 
@@ -63,7 +63,13 @@ impl S3Repository {
 
         match result {
             Ok(_) => Ok(true),
-            Err(e) if e.as_service_error().is_some_and(|se| se.is_not_found()) => Ok(false),
+            Err(e)
+                if e.as_service_error().is_some_and(
+                    aws_sdk_s3::operation::head_object::HeadObjectError::is_not_found,
+                ) =>
+            {
+                Ok(false)
+            }
             Err(e) => Err(RepositoryError::S3HeadObject(e)),
         }
     }

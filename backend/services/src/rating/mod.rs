@@ -180,6 +180,7 @@ impl RatingService {
         Ok(leaderboard)
     }
 
+    #[must_use]
     pub fn get_expert_rating_category_weight(&self, category: ExpertRatingCategory) -> f64 {
         match category {
             ExpertRatingCategory::Functionality => 0.5,

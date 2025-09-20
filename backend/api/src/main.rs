@@ -1,4 +1,3 @@
-mod aggregator;
 mod api_args;
 mod api_config;
 mod api_state;
@@ -8,6 +7,7 @@ mod models;
 mod mw;
 mod routers;
 mod utils;
+mod workers;
 
 use crate::api_args::ApiArgs;
 use crate::api_config::ApiConfig;
@@ -19,7 +19,7 @@ use std::net::SocketAddr;
 use tokio::net::TcpListener;
 use tracing::info;
 
-use crate::aggregator::Aggregator;
+use crate::workers::Workers;
 pub use error::{ApiError, ApiResult, PublicError};
 
 #[tokio::main]
@@ -31,17 +31,12 @@ async fn main() -> ApiResult<()> {
 
     let api_state = ApiState::from_config(&config).await?;
 
-    api_state.upload_service.validate_uploads().await?;
+    let workers = Workers::new(api_state.clone()).await?;
+    workers.start().await?;
 
     let api_router = get_api_router(api_state.clone()).await?;
     let addr = SocketAddr::new(config.server.ip, config.server.port);
     let listener = TcpListener::bind(&addr).await?;
-
-    let aggregator = Aggregator::new(chrono::Duration::minutes(5), api_state);
-
-    tokio::spawn(async move {
-        aggregator.start().await;
-    });
 
     info!(
         "listening on http://{}, docs on http://{}/api/docs",

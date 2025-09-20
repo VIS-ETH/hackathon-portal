@@ -63,6 +63,9 @@ pub enum ApiError {
 
     #[from]
     TracingFilterParse(#[serde_as(as = "DisplayFromStr")] tracing_subscriber::filter::ParseError),
+
+    #[from]
+    JobScheduler(#[serde_as(as = "DisplayFromStr")] tokio_cron_scheduler::JobSchedulerError),
     // endregion
 }
 
@@ -140,11 +143,11 @@ impl From<&RepositoryError> for PublicError {
             RepositoryError::SlugNotUnique { slug } => {
                 (StatusCode::CONFLICT, format!("Slug '{slug}' is not unique"))
             }
-            RepositoryError::SeaORM(_) => ise,
-            RepositoryError::S3HeadObject(_) => ise,
-            RepositoryError::S3GetObject(_) => ise,
-            RepositoryError::S3PutObject(_) => ise,
-            RepositoryError::S3PresigningConfig(_) => ise,
+            RepositoryError::SeaORM(_)
+            | RepositoryError::S3HeadObject(_)
+            | RepositoryError::S3GetObject(_)
+            | RepositoryError::S3PutObject(_)
+            | RepositoryError::S3PresigningConfig(_) => ise,
         };
 
         Self::new(status, message)
@@ -215,9 +218,7 @@ impl From<&ServiceError> for PublicError {
                 (
                     StatusCode::BAD_REQUEST,
                     format!(
-                        "File ({:.1} MB) exceeds the size limit of {:.1} MB",
-                        size,
-                        limit
+                        "File ({size:.1} MB) exceeds the size limit of {limit:.1} MB"
                     ),
                 )
             },
@@ -261,7 +262,8 @@ impl From<&ApiError> for PublicError {
             | ApiError::Io(_)
             | ApiError::InvalidHeaderValue(_)
             | ApiError::TracingSetGlobalDefault(_)
-            | ApiError::TracingFilterParse(_) => ise,
+            | ApiError::TracingFilterParse(_)
+            | ApiError::JobScheduler(_) => ise,
         };
 
         Self::new(status, message)

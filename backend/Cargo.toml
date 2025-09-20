@@ -7,6 +7,7 @@ chrono = "0.4.41"
 derive_more = { version = "2.0.1", features = ["full"] }
 hackathon-portal-repositories = { path = "repositories" }
 hackathon-portal-services = { path = "services" }
+mime = "0.3.17"
 sea-orm = { version = "1.1.12", features = [
     "sqlx-postgres",
     "runtime-tokio-native-tls",
@@ -18,10 +19,9 @@ serde_json = "1.0.140"
 serde_with = "3.12.0"
 strum = { version = "0.27.1", features = ["derive"] }
 tokio = { version = "1.45.1", features = ["full"] }
+tracing = "0.1.41"
 utoipa = { version = "4.2.3", features = ["axum_extras", "chrono", "uuid"] }
 uuid = { version = "1.17.0", features = ["v4"] }
-mime = "0.3.17"
-tracing = "0.1.41"
 
 [workspace.lints.rust]
 unsafe_code = "deny"
@@ -41,6 +41,8 @@ cast_possible_truncation = { level = "allow", priority = 1 }
 style = { level = "warn", priority = 0 }
 
 perf = { level = "warn", priority = 0 }
+large_enum_variant = { level = "allow", priority = 1 }
+result_large_err = { level = "allow", priority = 1 }
 
 complexity = { level = "warn", priority = 0 }
 

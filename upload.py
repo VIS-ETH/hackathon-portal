@@ -44,4 +44,4 @@ def upload_image_to_presigned_url(image_path, presigned_url):
         print(f"Error uploading image: {str(e)}")
         return False
 
-upload_image_to_presigned_url("/Users/hannes/Desktop/20Matur-7740.jpg", "http://localhost:9000/portal/b61dda03-3e9d-4094-b3cb-bd9b8cc6f341?x-id=PutObject&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=portal%2F20250920%2Flocal%2Fs3%2Faws4_request&X-Amz-Date=20250920T133341Z&X-Amz-Expires=900&X-Amz-SignedHeaders=content-length%3Bcontent-type%3Bhost&X-Amz-Signature=ff9b49203a21becfcc55e2c2c067d7c428c3c16439bba52def3cac3bc26a52fe")
+upload_image_to_presigned_url("/Users/hannes/Desktop/20Matur-7740.jpg", "http://localhost:9000/portal/b7b624ad-3166-4ae8-8a7c-9858091f03e5?x-id=PutObject&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=portal%2F20250920%2Flocal%2Fs3%2Faws4_request&X-Amz-Date=20250920T160328Z&X-Amz-Expires=900&X-Amz-SignedHeaders=content-length%3Bcontent-type%3Bhost&X-Amz-Signature=a255b348bc4813956dd9faa59df6aed2a2e71db85945855fcc89606b6f766ee3")
