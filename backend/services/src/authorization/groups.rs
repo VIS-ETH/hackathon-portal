@@ -262,6 +262,42 @@ impl Groups {
     }
 
     #[must_use]
+    pub fn can_update_team_name(
+        &self,
+        event_visibility: EventVisibility,
+        event_phase: EventPhase,
+        event_is_ro: bool,
+    ) -> bool {
+        if let Some(decision) = self.default_can_manage_policy(event_visibility, event_is_ro) {
+            return decision;
+        }
+
+        if self == &Group::TeamMember {
+            return matches!(event_phase, EventPhase::Registration);
+        }
+
+        false
+    }
+
+    #[must_use]
+    pub fn can_update_team_photo(
+        &self,
+        event_visibility: EventVisibility,
+        event_phase: EventPhase,
+        event_is_ro: bool,
+    ) -> bool {
+        if let Some(decision) = self.default_can_manage_policy(event_visibility, event_is_ro) {
+            return decision;
+        }
+
+        if self == &Group::TeamMember {
+            return matches!(event_phase, EventPhase::Registration | EventPhase::Hacking);
+        }
+
+        false
+    }
+
+    #[must_use]
     pub fn can_manage_team(
         &self,
         event_visibility: EventVisibility,

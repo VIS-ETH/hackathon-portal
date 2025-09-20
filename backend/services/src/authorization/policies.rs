@@ -14,6 +14,8 @@ pub struct Policies {
     pub can_create_team: bool,
     pub can_view_team_confidential: bool,
     pub can_view_team_feedback: bool,
+    pub can_update_team_name: bool,
+    pub can_update_team_photo: bool,
     pub can_manage_team: bool,
     pub can_manage_expert_rating: bool,
     pub can_manage_project: bool,
@@ -47,6 +49,16 @@ impl Policies {
                 event_visibility,
                 event_phase,
                 event_feedback_is_visible,
+            ),
+            can_update_team_name: groups.can_update_team_name(
+                event_visibility,
+                event_phase,
+                event_is_ro,
+            ),
+            can_update_team_photo: groups.can_update_team_photo(
+                event_visibility,
+                event_phase,
+                event_is_ro,
             ),
             can_manage_team: groups.can_manage_team(event_visibility, event_phase, event_is_ro),
             can_manage_expert_rating: groups.can_manage_expert_rating(
