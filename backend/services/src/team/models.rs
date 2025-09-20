@@ -69,3 +69,9 @@ pub struct TeamForUpdateInternal {
     pub comment: Option<String>,
     pub extra_score: Option<f64>,
 }
+
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+pub struct TeamCredentials {
+    pub vm_password: Option<String>,
+    pub ai_api_key: Option<String>,
+}

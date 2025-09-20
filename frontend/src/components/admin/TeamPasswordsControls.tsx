@@ -1,4 +1,4 @@
-import { useGetTeams, useUpdateTeamPassword } from "@/api/gen";
+import { useGetTeams, useUpdateTeamCredentials } from "@/api/gen";
 import { Event } from "@/api/gen/schemas";
 import {
   cardProps,
@@ -27,12 +27,14 @@ type TeamPasswordsControlsProps = {
 };
 
 const TeamPasswordsControls = ({ event }: TeamPasswordsControlsProps) => {
-  const [input, setInput] = useState("");
+  const [pw_input, setPWInput] = useState("");
+  const [ml_input, setMLInput] = useState("");
+
   const { data: teams } = useGetTeams({
     event_id: event.id,
   });
 
-  const updateTeamPasswordMutation = useUpdateTeamPassword();
+  const updateTeamCredentialsMutation = useUpdateTeamCredentials();
 
   const indicesAreUnique =
     teams?.length === new Set(teams?.map((team) => team.index)).size;
@@ -42,16 +44,32 @@ const TeamPasswordsControls = ({ event }: TeamPasswordsControlsProps) => {
       return;
     }
 
-    let parsed: object;
+    let pw_parsed: object;
+    let ml_parsed: object;
 
     try {
-      parsed = parse(input);
+      if (pw_input === "") {
+        pw_parsed = {};
+      } else {
+        pw_parsed = parse(pw_input);
+      }
     } catch (error) {
-      alert(`Failed to parse input: ${error}`);
+      alert(`Failed to parse password input: ${error}`);
       return;
     }
 
-    const payloads = Object.entries(parsed)
+    try {
+      if (ml_input === "") {
+        ml_parsed = {};
+      } else {
+        ml_parsed = parse(ml_input);
+      }
+    } catch (error) {
+      alert(`Failed to parse AI key input: ${error}`);
+      return;
+    }
+
+    const pw_payloads = Object.entries(pw_parsed)
       .filter(([key]) => key.startsWith("team-"))
       .map(([key, password]) => {
         const index = parseInt(key.replace("team-", ""));
@@ -66,14 +84,48 @@ const TeamPasswordsControls = ({ event }: TeamPasswordsControlsProps) => {
         };
       });
 
-    for (const payload of payloads) {
+    const ai_keys_payload = Object.entries(ml_parsed)
+      .filter(([key]) => key.startsWith("team-"))
+      .map(([key, ai_key]) => {
+        const index = parseInt(key.replace("team-", ""));
+        const team = teams?.find((team) => team.index === index);
+
+        return {
+          key,
+          index: index,
+          id: team?.id,
+          name: team?.name,
+          ai_key,
+        };
+      });
+
+    for (const payload of [...pw_payloads, ...ai_keys_payload]) {
       if (!payload.id) {
         alert(`Team with key ${payload.key} not found`);
         return;
       }
     }
 
-    const confirmationText = `Are you sure you want to update the passwords for ${payloads.length} teams?\n\n${payloads.map((payload) => `${payload.name} (${payload.index}): ${payload.password}`).join("\n")}`;
+    const keys = new Set([
+      ...ai_keys_payload.map((payload) => payload.key),
+      ...pw_payloads.map((payload) => payload.key),
+    ]);
+
+    const payloads = Array.from(keys).map((key) => {
+      const pw_payload = pw_payloads.find((payload) => payload.key === key);
+      const ai_payload = ai_keys_payload.find((payload) => payload.key === key);
+
+      return {
+        key,
+        index: pw_payload?.index || ai_payload?.index,
+        id: pw_payload?.id || ai_payload?.id,
+        name: pw_payload?.name || ai_payload?.name,
+        password: pw_payload?.password,
+        ai_api_key: ai_payload?.ai_key,
+      };
+    });
+
+    const confirmationText = `Are you sure you want to update the passwords for ${payloads.length} teams?\n\n${payloads.map((payload) => `${payload.name} (${payload.index}): ${payload.password} ${payload.ai_api_key}`).join("\n")}`;
     const confirmation = confirm(confirmationText);
 
     if (!confirmation) {
@@ -81,28 +133,40 @@ const TeamPasswordsControls = ({ event }: TeamPasswordsControlsProps) => {
     }
 
     for (const payload of payloads) {
-      await updateTeamPasswordMutation.mutateAsync({
+      await updateTeamCredentialsMutation.mutateAsync({
         teamId: payload.id as string,
         data: {
-          password: payload.password as string,
+          vm_password: payload.password?.toString(),
+          ai_api_key: payload.ai_api_key?.toString(),
         },
       });
     }
 
     alert("Passwords updated");
 
-    setInput("");
+    setPWInput("");
+    setMLInput("");
   };
 
   return (
     <Card {...cardProps}>
       <Card.Section {...cardSectionProps}>
-        <Textarea
-          {...(textareaProps as TextareaProps)}
-          value={input}
-          onChange={(event) => setInput(event.currentTarget.value)}
-          placeholder={PLACEHOLDER}
-        />
+        <Group grow>
+          <Textarea
+            {...(textareaProps as TextareaProps)}
+            value={pw_input}
+            onChange={(event) => setPWInput(event.currentTarget.value)}
+            placeholder={PLACEHOLDER_PW}
+            description="VM Passwords"
+          />
+          <Textarea
+            {...(textareaProps as TextareaProps)}
+            value={ml_input}
+            onChange={(event) => setMLInput(event.currentTarget.value)}
+            placeholder={PLACEHOLDER_ML}
+            description="AI Keys"
+          />
+        </Group>
       </Card.Section>
       <Card.Section {...cardSectionProps}>
         <Group>
@@ -113,7 +177,7 @@ const TeamPasswordsControls = ({ event }: TeamPasswordsControlsProps) => {
             onClick={handleRun}
             disabled={!indicesAreUnique}
           >
-            Update Passwords
+            Update Credentials
           </Button>
           {!indicesAreUnique && (
             <Text c="red">Team indices are not unique</Text>
@@ -124,8 +188,12 @@ const TeamPasswordsControls = ({ event }: TeamPasswordsControlsProps) => {
   );
 };
 
-const PLACEHOLDER = `team-01: password1
+const PLACEHOLDER_PW = `team-01: password1
 team-02: password2
 team-03: password3`;
+
+const PLACEHOLDER_ML = `team-01: key1
+team-02: key2
+team-03: key3`;
 
 export default TeamPasswordsControls;

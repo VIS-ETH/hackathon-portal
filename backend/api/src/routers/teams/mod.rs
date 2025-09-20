@@ -5,7 +5,7 @@ use crate::ctx::Ctx;
 use crate::error::{ApiJson, ApiJsonVec};
 use crate::models::AffectedRows;
 use crate::routers::events::models::EventIdQuery;
-use crate::routers::teams::models::{PasswordDTO, ProjectIdDTO};
+use crate::routers::teams::models::ProjectIdDTO;
 use crate::routers::users::models::TeamRoleOptQuery;
 use crate::ApiError;
 use axum::extract::{Path, Query, State};
@@ -15,7 +15,7 @@ use hackathon_portal_repositories::db::prelude::{ExpertRatingCategory, TeamRole}
 use hackathon_portal_services::authorization::groups::Groups;
 use hackathon_portal_services::authorization::models::{TeamAffiliate, TeamRoles, TeamRolesMap};
 use hackathon_portal_services::team::models::{
-    Team, TeamForCreate, TeamForUpdate, TeamForUpdateInternal, TeamInternal,
+    Team, TeamCredentials, TeamForCreate, TeamForUpdate, TeamForUpdateInternal, TeamInternal,
 };
 use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
@@ -45,8 +45,8 @@ pub fn get_router(state: &ApiState) -> Router {
             "/:team_id/project-preferences",
             patch(update_team_project_preferences),
         )
-        .route("/:team_id/password", get(get_team_password))
-        .route("/:team_id/password", patch(update_team_password))
+        .route("/:team_id/credentials", get(get_team_credentials))
+        .route("/:team_id/credentials", patch(update_team_credentials))
         .route("/:team_id/expert-ratings", get(get_team_expert_ratings))
         .with_state(state.clone())
 }
@@ -604,46 +604,45 @@ pub async fn update_team_project_preferences(
 
 #[utoipa::path(
     get,
-    path = "/api/teams/{team_id}/password",
+    path = "/api/teams/{team_id}/credentials",
     responses(
-        (status = StatusCode::OK, body = PasswordDTO),
+        (status = StatusCode::OK, body = TeamCredentials),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
 )]
-pub async fn get_team_password(
+pub async fn get_team_credentials(
     ctx: Ctx,
     State(state): State<ApiState>,
     Path(team_id): Path<Uuid>,
-) -> ApiJson<PasswordDTO> {
+) -> ApiJson<TeamCredentials> {
     let team = state.team_service.get_team(team_id).await?;
     let event = state.event_service.get_event(team.event_id).await?;
     let groups = Groups::from_event_and_team(ctx.roles(), event.id, team.id);
 
     if !groups.can_view_team_confidential(event.visibility) {
         return Err(ApiError::Forbidden {
-            action: "view the password for this team".to_string(),
+            action: "view the credentials for this team".to_string(),
         });
     }
 
-    let password = state.team_service.get_team_password(team_id).await?;
-    let password = PasswordDTO { password };
+    let credentials = state.team_service.get_team_credentials(team_id).await?;
 
-    Ok(Json(password))
+    Ok(Json(credentials))
 }
 
 #[utoipa::path(
     patch,
-    path = "/api/teams/{team_id}/password",
+    path = "/api/teams/{team_id}/credentials",
     responses(
         (status = StatusCode::OK, body = Team),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
 )]
-pub async fn update_team_password(
+pub async fn update_team_credentials(
     ctx: Ctx,
     State(state): State<ApiState>,
     Path(team_id): Path<Uuid>,
-    Json(body): Json<PasswordDTO>,
+    Json(body): Json<TeamCredentials>,
 ) -> ApiJson<Team> {
     let team = state.team_service.get_team(team_id).await?;
     let event = state.event_service.get_event(team.event_id).await?;
@@ -651,13 +650,13 @@ pub async fn update_team_password(
 
     if !groups.can_manage_event() {
         return Err(ApiError::Forbidden {
-            action: "update the password for this team".to_string(),
+            action: "update the credentials for this team".to_string(),
         });
     }
 
     let team = state
         .team_service
-        .update_team_password(team_id, body.password)
+        .update_team_credentials(team_id, body)
         .await?;
 
     Ok(Json(team))

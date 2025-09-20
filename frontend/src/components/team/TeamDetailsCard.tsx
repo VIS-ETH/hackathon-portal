@@ -1,6 +1,6 @@
 import IconTextGroup from "../IconTextGroup";
 
-import { useGetEvent, useGetProject, useGetTeamPassword } from "@/api/gen";
+import { useGetEvent, useGetProject, useGetTeamCredentials } from "@/api/gen";
 import { Team } from "@/api/gen/schemas";
 import { cardProps, iconProps, secondaryButtonProps } from "@/styles/common";
 import { fmtTeamIndex } from "@/utils";
@@ -25,7 +25,7 @@ const TeamDetailsCard = ({ team, canViewPassword }: TeamDetailsCardProps) => {
   const { data: event } = useGetEvent(team.event_id);
   const { data: project } = useGetProject(team?.project_id ?? "");
 
-  const { data: password } = useGetTeamPassword(team?.id ?? "", {
+  const { data: credentials } = useGetTeamCredentials(team?.id ?? "", {
     query: {
       enabled: !!team && canViewPassword,
     },
@@ -89,8 +89,8 @@ const TeamDetailsCard = ({ team, canViewPassword }: TeamDetailsCardProps) => {
     </CopyButton>
   );
 
-  const copyPasswordButton = password?.password && (
-    <CopyButton value={password.password}>
+  const copyPasswordButton = credentials?.vm_password && (
+    <CopyButton value={credentials.vm_password}>
       {({ copied, copy }) => (
         <Button
           {...secondaryButtonProps}
@@ -103,6 +103,23 @@ const TeamDetailsCard = ({ team, canViewPassword }: TeamDetailsCardProps) => {
       )}
     </CopyButton>
   );
+  const copyAIKeyButton = credentials?.ai_api_key && (
+    <CopyButton value={credentials.ai_api_key}>
+      {({ copied, copy }) => (
+        <Button
+          {...secondaryButtonProps}
+          variant="light"
+          leftSection={<IconKey {...iconProps} />}
+          onClick={copy}
+        >
+          {copied ? "Copied" : "Copy AI Key"}
+        </Button>
+      )}
+    </CopyButton>
+  );
+
+  const password =
+    canViewPassword && (credentials?.vm_password || credentials?.ai_api_key);
 
   return (
     <Card {...cardProps}>
@@ -116,6 +133,7 @@ const TeamDetailsCard = ({ team, canViewPassword }: TeamDetailsCardProps) => {
           <Group grow>
             {copyConfigButton}
             {copyPasswordButton}
+            {copyAIKeyButton}
           </Group>
         )}
       </Stack>

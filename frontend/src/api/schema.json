@@ -1,12 +1,12 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "api",
+    "title": "hackathon-portal-api",
     "description": "",
     "license": {
       "name": ""
     },
-    "version": "0.1.0"
+    "version": "1.0.0"
   },
   "servers": [
     {
@@ -2471,6 +2471,93 @@
         }
       }
     },
+    "/api/teams/{team_id}/credentials": {
+      "get": {
+        "tags": ["crate::routers::teams"],
+        "operationId": "get_team_credentials",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamCredentials"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["crate::routers::teams"],
+        "operationId": "update_team_credentials",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TeamCredentials"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Team"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/teams/{team_id}/expert-ratings": {
       "get": {
         "tags": ["crate::routers::teams"],
@@ -2584,93 +2671,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/TeamInternal"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/teams/{team_id}/password": {
-      "get": {
-        "tags": ["crate::routers::teams"],
-        "operationId": "get_team_password",
-        "parameters": [
-          {
-            "name": "team_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PasswordDTO"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "patch": {
-        "tags": ["crate::routers::teams"],
-        "operationId": "update_team_password",
-        "parameters": [
-          {
-            "name": "team_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "description": "",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PasswordDTO"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Team"
                 }
               }
             }
@@ -3492,16 +3492,16 @@
       },
       "EventPhase": {
         "type": "string",
-        "enum": ["Finished", "Grading", "Hacking", "Registration"]
+        "enum": ["Registration", "Hacking", "Grading", "Finished"]
       },
       "EventRole": {
         "type": "string",
         "enum": [
           "Admin",
           "Mentor",
+          "Stakeholder",
           "Participant",
-          "SidequestMaster",
-          "Stakeholder"
+          "SidequestMaster"
         ]
       },
       "EventRoleOptQuery": {
@@ -3600,33 +3600,27 @@
       },
       "Group": {
         "type": "string",
-        "description": "A group is a power set of roles and has a partial order relation defined on it.\nThis allows for easy permissions testing, e.g. to ensure that a resource is only accessed\nby a user that either is an event admin, event mentor, event sidequest master, or event stakeholder,\nwe can simply write `user_groups >= Group::EventStaff`.\n\nHere is the corresponding Hasse diagram for the group:\n\n```graphviz\ngraph {\n  layout = dot\n  rankdir = TB\n  node [ shape=\"none\" ]\n\n    EventAdmin [label=\"EventAdmin\"]\n    EventMentor [label=\"EventMentor\"]\n    EventParticipant [label=\"EventParticipant\"]\n    EventSidequestMaster [label=\"EventSidequestMaster\"]\n    EventStakeholder [label=\"EventStakeholder\"]\n    TeamMember [label=\"TeamMember\"]\n    TeamMentor [label=\"TeamMentor\"]\n    EventStaff [label=\"EventStaff\"]\n    TeamAffiliate [label=\"TeamAffiliate\"]\n    EventAffiliate [label=\"EventAffiliate\"]\n    ExpertRater [label=\"ExpertRater\"]\n    EventGuest [label=\"EventGuest\"]\n\n    { rank=same; EventSidequestMaster, EventStakeholder, EventMentor }\n\n    EventAdmin -- {EventStakeholder, TeamMentor, TeamMember, EventSidequestMaster}\n    ExpertRater -- {EventStaff}\n    {TeamMember, TeamMentor} -- TeamAffiliate\n    TeamMentor -- EventMentor\n    {EventMentor, EventStakeholder} -- ExpertRater\n    EventSidequestMaster -- EventStaff\n    TeamAffiliate -- EventAffiliate\n    {EventParticipant, EventStaff} -- EventAffiliate\n    TeamMember -- EventParticipant\n    EventAffiliate -- EventGuest\n}\n```\n*",
         "enum": [
           "EventAdmin",
           "EventMentor",
           "EventParticipant",
           "EventSidequestMaster",
           "EventStakeholder",
-          "TeamMember",
-          "TeamMentor",
           "EventStaff",
-          "TeamAffiliate",
           "EventAffiliate",
           "EventGuest",
+          "TeamMember",
+          "TeamMentor",
+          "TeamAffiliate",
           "ExpertRater"
         ]
       },
       "Groups": {
-        "type": "object",
-        "required": ["groups"],
-        "properties": {
-          "groups": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Group"
-            }
-          }
-        }
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Group"
+        },
+        "uniqueItems": true
       },
       "HistoryEntry": {
         "type": "object",
@@ -4030,6 +4024,19 @@
           }
         }
       },
+      "TeamCredentials": {
+        "type": "object",
+        "properties": {
+          "ai_api_key": {
+            "type": "string",
+            "nullable": true
+          },
+          "vm_password": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
       "TeamForCreate": {
         "type": "object",
         "required": ["event_id", "name"],
@@ -4133,7 +4140,7 @@
       },
       "TeamRole": {
         "type": "string",
-        "enum": ["Member", "Mentor"]
+        "enum": ["Mentor", "Member"]
       },
       "TeamRoleOptQuery": {
         "type": "object",

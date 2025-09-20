@@ -1,4 +1,4 @@
-import { useGetTeamPassword, useUpdateTeamPassword } from "@/api/gen";
+import { useGetTeamCredentials, useUpdateTeamCredentials } from "@/api/gen";
 import { Team } from "@/api/gen/schemas";
 import { inputProps } from "@/styles/common";
 
@@ -9,33 +9,46 @@ type PasswordTdProps = {
 };
 
 const PasswordTd = ({ team }: PasswordTdProps) => {
-  const { data: password, refetch: refetchPassword } = useGetTeamPassword(
-    team.id,
-  );
+  const { data: credentials, refetch: refetchCredentials } =
+    useGetTeamCredentials(team.id);
 
-  const updatePasswordMutation = useUpdateTeamPassword();
+  const updatePasswordMutation = useUpdateTeamCredentials();
 
-  const handleUpdate = async (value: string) => {
+  const handleUpdate = async (
+    password: string | undefined,
+    ai_api_key: string | undefined,
+  ) => {
     await updatePasswordMutation.mutateAsync({
       teamId: team.id,
       data: {
-        password: value,
-      },
-    });
+        vm_password: password,
+        ai_api_key: ai_api_key,
+    }});
 
-    refetchPassword?.();
+    refetchCredentials?.();
   };
 
   return (
-    <Table.Td>
-      <PasswordInput
-        {...(inputProps as PasswordInputProps)}
-        size="xs"
-        placeholder="Unset"
-        value={password?.password ?? ""}
-        onChange={(e) => handleUpdate(e.target.value)}
-      />
-    </Table.Td>
+    <>
+      <Table.Td>
+        <PasswordInput
+          {...(inputProps as PasswordInputProps)}
+          size="xs"
+          placeholder="Unset"
+          value={credentials?.vm_password ?? ""}
+          onChange={(e) => handleUpdate(e.target.value, undefined)}
+        />
+      </Table.Td>
+      <Table.Td>
+        <PasswordInput
+          {...(inputProps as PasswordInputProps)}
+          size="xs"
+          placeholder="Unset"
+          value={credentials?.ai_api_key ?? ""}
+          onChange={(e) => handleUpdate(undefined, e.target.value)}
+        />
+      </Table.Td>
+    </>
   );
 };
 

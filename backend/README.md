@@ -1,7 +1,7 @@
 # Backend
 
 ```bash
-cargo run --package api --release
+cargo run --package hackathon-portal-api --release
 ```
 
 ## Endpoints
