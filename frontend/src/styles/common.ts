@@ -129,3 +129,9 @@ export const linkStyle: CSSProperties = {
   textDecoration: "none",
   color: "inherit",
 };
+
+export const hiddenScrollbarStyle: CSSProperties = {
+  overflowY: "scroll",
+  msOverflowStyle: "none",
+  scrollbarWidth: "none",
+};
