@@ -36,7 +36,7 @@ pub async fn create_upload(
     let event = state.event_service.get_event(body.event_id).await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
-    if !groups.can_create_upload(event.visibility, event.phase, event.is_read_only) {
+    if !groups.can_create_upload(event.visibility, event.phase, event.read_only) {
         return Err(ApiError::Forbidden {
             action: "create an upload for this event".to_string(),
         });

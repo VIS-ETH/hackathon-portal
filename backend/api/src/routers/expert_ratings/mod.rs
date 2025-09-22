@@ -37,11 +37,11 @@ pub async fn create_expert_rating(
     State(state): State<ApiState>,
     Json(body): Json<ExpertRatingForCreate>,
 ) -> ApiJson<ExpertRating> {
-    let team = state.team_service.get_team(body.team_id).await?;
+    let team = state.team_service.get_team(body.team_id, false).await?;
     let event = state.event_service.get_event(team.event_id).await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
-    if !groups.can_manage_expert_rating(event.visibility, event.phase, event.is_read_only) {
+    if !groups.can_manage_expert_rating(event.visibility, event.phase, event.read_only) {
         return Err(ApiError::Forbidden {
             action: "create an expert rating for this event".to_string(),
         });
@@ -71,11 +71,11 @@ pub async fn get_expert_ratings(
     State(state): State<ApiState>,
     Query(query): Query<TeamIdQuery>,
 ) -> ApiJsonVec<ExpertRating> {
-    let team = state.team_service.get_team(query.team_id).await?;
+    let team = state.team_service.get_team(query.team_id, false).await?;
     let event = state.event_service.get_event(team.event_id).await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
-    if !groups.can_manage_expert_rating(event.visibility, event.phase, event.is_read_only) {
+    if !groups.can_manage_expert_rating(event.visibility, event.phase, event.read_only) {
         return Err(ApiError::Forbidden {
             action: "view expert ratings for this event".to_string(),
         });
@@ -109,13 +109,13 @@ pub async fn get_expert_rating(
 ) -> ApiJson<ExpertRating> {
     // TODO: think about joins...
     let rating = state.rating_service.get_expert_rating(rating_id).await?;
-    let team = state.team_service.get_team(rating.team_id).await?;
+    let team = state.team_service.get_team(rating.team_id, false).await?;
     let event = state.event_service.get_event(team.event_id).await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
     let user_policy_pass = rating.user_id == ctx.user().id || groups.can_manage_event();
     let rating_policy_pass =
-        groups.can_manage_expert_rating(event.visibility, event.phase, event.is_read_only);
+        groups.can_manage_expert_rating(event.visibility, event.phase, event.read_only);
 
     if !user_policy_pass || !rating_policy_pass {
         return Err(ApiError::Forbidden {
@@ -142,13 +142,13 @@ pub async fn update_expert_rating(
 ) -> ApiJson<ExpertRating> {
     let rating = state.rating_service.get_expert_rating(rating_id).await?;
 
-    let team = state.team_service.get_team(rating.team_id).await?;
+    let team = state.team_service.get_team(rating.team_id, false).await?;
     let event = state.event_service.get_event(team.event_id).await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
     let user_policy_pass = rating.user_id == ctx.user().id || groups.can_manage_event();
     let rating_policy_pass =
-        groups.can_manage_expert_rating(event.visibility, event.phase, event.is_read_only);
+        groups.can_manage_expert_rating(event.visibility, event.phase, event.read_only);
 
     if !user_policy_pass || !rating_policy_pass {
         return Err(ApiError::Forbidden {
@@ -179,13 +179,13 @@ pub async fn delete_expert_rating(
 ) -> ApiJson<ExpertRating> {
     let rating = state.rating_service.get_expert_rating(rating_id).await?;
 
-    let team = state.team_service.get_team(rating.team_id).await?;
+    let team = state.team_service.get_team(rating.team_id, false).await?;
     let event = state.event_service.get_event(team.event_id).await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
     let user_policy_pass = rating.user_id == ctx.user().id || groups.can_manage_event();
     let rating_policy_pass =
-        groups.can_manage_expert_rating(event.visibility, event.phase, event.is_read_only);
+        groups.can_manage_expert_rating(event.visibility, event.phase, event.read_only);
 
     if !user_policy_pass || !rating_policy_pass {
         return Err(ApiError::Forbidden {

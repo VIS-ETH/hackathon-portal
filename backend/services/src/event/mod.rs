@@ -61,8 +61,8 @@ impl EventService {
             end: Set(event_fc.end),
             max_team_size: Set(event_fc.max_team_size as i32),
             sidequest_cooldown: Set(event_fc.sidequest_cooldown as i32),
-            is_read_only: Set(false),
-            is_feedback_visible: Set(false),
+            read_only: Set(false),
+            feedback_visible: Set(false),
             visibility: Set(EventVisibility::Hidden),
             phase: Set(EventPhase::Registration),
             ..Default::default()
@@ -151,12 +151,20 @@ impl EventService {
             active_event.sidequest_cooldown = Set(sidequest_cooldown as i32);
         }
 
-        if let Some(is_read_only) = event_fu.is_read_only {
-            active_event.is_read_only = Set(is_read_only);
+        if let Some(read_only) = event_fu.read_only {
+            active_event.read_only = Set(read_only);
         }
 
-        if let Some(is_feedback_visible) = event_fu.is_feedback_visible {
-            active_event.is_feedback_visible = Set(is_feedback_visible);
+        if let Some(projects_visible) = event_fu.projects_visible {
+            active_event.projects_visible = Set(projects_visible);
+        }
+
+        if let Some(project_assignments_visible) = event_fu.project_assignments_visible {
+            active_event.project_assignments_visible = Set(project_assignments_visible);
+        }
+
+        if let Some(feedback_visible) = event_fu.feedback_visible {
+            active_event.feedback_visible = Set(feedback_visible);
         }
 
         if let Some(visibility) = event_fu.visibility {

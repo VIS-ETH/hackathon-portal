@@ -43,19 +43,21 @@ model event {
   id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
 
   // fields
-  name                  String           @unique
-  slug                  String           @unique
-  start                 DateTime
-  end                   DateTime
-  welcome_content       String?
-  documentation_content String?
-  max_team_size         Int
-  max_teams_per_project Int              @default(2) // max team per project
-  sidequest_cooldown    Int // in minutes
-  is_read_only          Boolean
-  is_feedback_visible   Boolean
-  visibility            event_visibility
-  phase                 event_phase
+  name                        String           @unique
+  slug                        String           @unique
+  start                       DateTime
+  end                         DateTime
+  welcome_content             String?
+  documentation_content       String?
+  max_team_size               Int
+  max_teams_per_project       Int              @default(2) // max team per project
+  sidequest_cooldown          Int // in minutes
+  read_only                   Boolean          @default(true)
+  projects_visible            Boolean          @default(false)
+  project_assignments_visible Boolean          @default(false)
+  feedback_visible            Boolean          @default(false)
+  visibility                  event_visibility
+  phase                       event_phase
 
   // related models
   team                  team[]

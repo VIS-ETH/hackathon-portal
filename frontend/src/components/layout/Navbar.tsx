@@ -58,12 +58,12 @@ const Navbar = () => {
     {
       label: "Projects",
       path: `/events/${event?.slug}/projects`,
-      visible: true,
+      visible: policies?.can_view_project,
     },
     {
       label: "Sidequests",
       path: `/events/${event?.slug}/sidequests`,
-      visible: policies?.can_view_event_internal,
+      visible: policies?.can_view_sidequest,
     },
     {
       label: "Documentation",

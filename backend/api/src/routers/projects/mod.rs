@@ -39,7 +39,7 @@ pub async fn create_project(
     let event = state.event_service.get_event(body.event_id).await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
-    if !groups.can_manage_project(event.visibility, event.phase, event.is_read_only) {
+    if !groups.can_manage_project(event.visibility, event.phase, event.read_only) {
         return Err(ApiError::Forbidden {
             action: "create a project for this event".to_string(),
         });
@@ -69,7 +69,7 @@ pub async fn get_projects(
     let event = state.event_service.get_event(query.event_id).await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
-    if !groups.can_view_event(event.visibility) {
+    if !groups.can_view_project(event.visibility, event.projects_visible) {
         return Err(ApiError::Forbidden {
             action: "view projects for this event".to_string(),
         });
@@ -101,7 +101,7 @@ pub async fn get_project_by_slug(
     let event = state.event_service.get_event(project.event_id).await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
-    if !groups.can_view_event(event.visibility) {
+    if !groups.can_view_project(event.visibility, event.projects_visible) {
         return Err(ApiError::Forbidden {
             action: "view this project".to_string(),
         });
@@ -127,7 +127,7 @@ pub async fn get_project(
     let event = state.event_service.get_event(project.event_id).await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
-    if !groups.can_view_event(event.visibility) {
+    if !groups.can_view_project(event.visibility, event.projects_visible) {
         return Err(ApiError::Forbidden {
             action: "view this project".to_string(),
         });
@@ -154,7 +154,7 @@ pub async fn update_project(
     let event = state.event_service.get_event(project.event_id).await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
-    if !groups.can_manage_project(event.visibility, event.phase, event.is_read_only) {
+    if !groups.can_manage_project(event.visibility, event.phase, event.read_only) {
         return Err(ApiError::Forbidden {
             action: "edit this project".to_string(),
         });
@@ -185,7 +185,7 @@ pub async fn delete_project(
     let event = state.event_service.get_event(project.event_id).await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
-    if !groups.can_manage_project(event.visibility, event.phase, event.is_read_only) {
+    if !groups.can_manage_project(event.visibility, event.phase, event.read_only) {
         return Err(ApiError::Forbidden {
             action: "delete this project".to_string(),
         });

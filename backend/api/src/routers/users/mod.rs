@@ -73,7 +73,7 @@ pub async fn get_my_policies(
         let groups = Groups::from_event(ctx.roles(), event.id);
         (event, groups)
     } else if let Some(team_id) = query.team_id {
-        let team = state.team_service.get_team(team_id).await?;
+        let team = state.team_service.get_team(team_id, false).await?;
         let event = state.event_service.get_event(team.event_id).await?;
         let groups = Groups::from_event_and_team(ctx.roles(), event.id, team.id);
         (event, groups)
@@ -85,8 +85,10 @@ pub async fn get_my_policies(
         &groups,
         event.visibility,
         event.phase,
-        event.is_read_only,
-        event.is_feedback_visible,
+        event.read_only,
+        event.projects_visible,
+        event.project_assignments_visible,
+        event.feedback_visible,
     );
 
     Ok(Json(policies))
