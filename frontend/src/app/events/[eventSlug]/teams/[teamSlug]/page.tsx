@@ -8,12 +8,7 @@ import TeamDetailsCard from "@/components/team/TeamDetailsCard";
 import TeamMenu from "@/components/team/TeamMenu";
 import { useResolveParams } from "@/hooks/useResolveParams";
 
-import {
-  Group,
-  SimpleGrid,
-  Stack,
-  Title
-} from "@mantine/core";
+import { Group, SimpleGrid, Stack, Title } from "@mantine/core";
 
 const Team = () => {
   const { event, team, refetchTeam, policies } = useResolveParams();

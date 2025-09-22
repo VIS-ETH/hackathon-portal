@@ -19,7 +19,7 @@ const IconTextGroup = ({
   children,
 }: IconTextGroupProps) => {
   return (
-    <Group gap={lg ? "md" : "xs"}>
+    <Group gap={lg ? "md" : "xs"} wrap="nowrap">
       <Icon
         {...defaultIconProps}
         {...iconProps}

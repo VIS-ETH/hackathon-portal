@@ -90,7 +90,11 @@ impl TeamService {
 
     pub async fn get_team(&self, team_id: Uuid) -> ServiceResult<Team> {
         let team = self.db_repo.get_team(team_id).await?;
-        Ok(team.into())
+        let mut team = Team::from(team);
+
+        self.inject_photo_url(&mut team).await?;
+
+        Ok(team)
     }
 
     pub async fn get_team_internal(&self, team_id: Uuid) -> ServiceResult<TeamInternal> {

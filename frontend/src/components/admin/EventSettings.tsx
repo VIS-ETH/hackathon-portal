@@ -5,12 +5,19 @@ import {
   EventPhase,
   EventVisibility,
 } from "@/api/gen/schemas";
-import { inputProps, primaryButtonProps } from "@/styles/common";
+import {
+  cardHeaderTextProps,
+  cardProps,
+  inputProps,
+  primaryButtonProps,
+} from "@/styles/common";
 
 import { useEffect } from "react";
 
 import {
+  Anchor,
   Button,
+  Card,
   Checkbox,
   Group,
   NumberInput,
@@ -19,6 +26,7 @@ import {
   SelectProps,
   SimpleGrid,
   Stack,
+  Text,
   TextInput,
   TextInputProps,
 } from "@mantine/core";
@@ -101,93 +109,128 @@ const EventSettings = ({ event, refetch }: EventSettingsProps) => {
   };
 
   return (
-    <form onSubmit={form.onSubmit(handleSubmit)}>
-      <SimpleGrid mb="xl" cols={{ xs: 1, md: 3 }}>
-        <TextInput
-          {...(inputProps as TextInputProps)}
-          {...form.getInputProps("name")}
-          key={form.key("name")}
-          label="Name"
-          placeholder={event.name}
-        />
-        <DateTimePicker
-          {...(inputProps as DateTimePickerProps)}
-          {...form.getInputProps("start")}
-          key={form.key("start")}
-          label="Start"
-          placeholder={event.start + " UTC"}
-        />
-        <DateTimePicker
-          {...(inputProps as DateTimePickerProps)}
-          {...form.getInputProps("end")}
-          key={form.key("end")}
-          label="End"
-          placeholder={event.end + " UTC"}
-        />
-        <Select
-          {...(inputProps as SelectProps)}
-          {...form.getInputProps("visibility")}
-          key={form.key("visibility")}
-          data={Object.values(EventVisibility)}
-          label="Visibility"
-          placeholder={event.visibility}
-          clearable
-        />
-        <Select
-          {...(inputProps as SelectProps)}
-          {...form.getInputProps("phase")}
-          key={form.key("phase")}
-          data={Object.values(EventPhase)}
-          label="Phase"
-          placeholder={event.phase}
-          clearable
-        />
-        <Stack justify="flex-end" gap={2}>
-          <Checkbox
-            {...form.getInputProps("is_read_only", { type: "checkbox" })}
-            key={form.key("is_read_only")}
-            label="Read only"
+    <Stack>
+      <form onSubmit={form.onSubmit(handleSubmit)}>
+        <SimpleGrid mb="xl" cols={{ xs: 1, md: 3 }}>
+          <TextInput
+            {...(inputProps as TextInputProps)}
+            {...form.getInputProps("name")}
+            key={form.key("name")}
+            label="Name"
+            placeholder={event.name}
           />
-          <Checkbox
-            {...form.getInputProps("is_feedback_visible", { type: "checkbox" })}
-            key={form.key("is_feedback_visible")}
-            label="Feedback visible"
+          <DateTimePicker
+            {...(inputProps as DateTimePickerProps)}
+            {...form.getInputProps("start")}
+            key={form.key("start")}
+            label="Start"
+            placeholder={event.start + " UTC"}
           />
-        </Stack>
-        <NumberInput
-          {...(inputProps as NumberInputProps)}
-          {...form.getInputProps("max_team_size")}
-          key={form.key("max_team_size")}
-          label="Max team size"
-          placeholder={event.max_team_size.toString()}
-          min={1}
-          step={1}
-        />
-        <NumberInput
-          {...(inputProps as NumberInputProps)}
-          {...form.getInputProps("sidequest_cooldown")}
-          key={form.key("sidequest_cooldown")}
-          label="Sidequest cooldown (minutes)"
-          placeholder={event.sidequest_cooldown.toString()}
-          min={0}
-          step={1}
-        />
-        <NumberInput
-          {...(inputProps as NumberInputProps)}
-          {...form.getInputProps("max_teams_per_project")}
-          key={form.key("max_teams_per_project")}
-          label="Max team per project"
-          placeholder={event.max_teams_per_project.toString()}
-          min={0}
-          step={1}
-        />
-        <Group align="end">
-          <Button {...primaryButtonProps} type="submit">
-            Update
-          </Button>
+          <DateTimePicker
+            {...(inputProps as DateTimePickerProps)}
+            {...form.getInputProps("end")}
+            key={form.key("end")}
+            label="End"
+            placeholder={event.end + " UTC"}
+          />
+          <Select
+            {...(inputProps as SelectProps)}
+            {...form.getInputProps("visibility")}
+            key={form.key("visibility")}
+            data={Object.values(EventVisibility)}
+            label="Visibility"
+            placeholder={event.visibility}
+            clearable
+          />
+          <Select
+            {...(inputProps as SelectProps)}
+            {...form.getInputProps("phase")}
+            key={form.key("phase")}
+            data={Object.values(EventPhase)}
+            label="Phase"
+            placeholder={event.phase}
+            clearable
+          />
+          <Stack justify="flex-end" gap={2}>
+            <Checkbox
+              {...form.getInputProps("is_read_only", { type: "checkbox" })}
+              key={form.key("is_read_only")}
+              label="Read only"
+            />
+            <Checkbox
+              {...form.getInputProps("is_feedback_visible", {
+                type: "checkbox",
+              })}
+              key={form.key("is_feedback_visible")}
+              label="Feedback visible"
+            />
+          </Stack>
+          <NumberInput
+            {...(inputProps as NumberInputProps)}
+            {...form.getInputProps("max_team_size")}
+            key={form.key("max_team_size")}
+            label="Max team size"
+            placeholder={event.max_team_size.toString()}
+            min={1}
+            step={1}
+          />
+          <NumberInput
+            {...(inputProps as NumberInputProps)}
+            {...form.getInputProps("sidequest_cooldown")}
+            key={form.key("sidequest_cooldown")}
+            label="Sidequest cooldown (minutes)"
+            placeholder={event.sidequest_cooldown.toString()}
+            min={0}
+            step={1}
+          />
+          <NumberInput
+            {...(inputProps as NumberInputProps)}
+            {...form.getInputProps("max_teams_per_project")}
+            key={form.key("max_teams_per_project")}
+            label="Max team per project"
+            placeholder={event.max_teams_per_project.toString()}
+            min={0}
+            step={1}
+          />
+          <Group align="end">
+            <Button {...primaryButtonProps} type="submit">
+              Update
+            </Button>
+          </Group>
+        </SimpleGrid>
+      </form>
+      <Card {...cardProps}>
+        <Group justify="space-between">
+          <Text {...cardHeaderTextProps}>Presentations</Text>
+          <Group>
+            <Anchor
+              href={`/events/${event.slug}/admin/presentations/projects`}
+              target="_blank"
+            >
+              Projects
+            </Anchor>
+            <Anchor
+              href={`/events/${event.slug}/admin/presentations/assignments`}
+              target="_blank"
+            >
+              Assignments
+            </Anchor>
+            <Anchor
+              href={`/events/${event.slug}/admin/presentations/ranking?maxTeams=10`}
+              target="_blank"
+            >
+              Ranking
+            </Anchor>
+            <Anchor
+              href={`/events/${event.slug}/admin/presentations/sidequests-dashboard`}
+              target="_blank"
+            >
+              Sidequests Dashboard
+            </Anchor>
+          </Group>
         </Group>
-      </SimpleGrid>
-    </form>
+      </Card>
+    </Stack>
   );
 };
 
