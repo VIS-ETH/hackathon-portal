@@ -1,16 +1,23 @@
 import { useUpdateTeam } from "@/api/gen";
 import { Team } from "@/api/gen/schemas";
-import { inputProps, primaryButtonProps } from "@/styles/common";
+import {
+  cardHeaderSectionProps,
+  cardHeaderTextProps,
+  cardProps,
+  cardSectionProps,
+  inputProps,
+  primaryButtonProps,
+} from "@/styles/common";
 
 import { useEffect, useState } from "react";
 
 import {
   Button,
+  Card,
   Group,
-  Stack,
+  Text,
   TextInput,
   TextInputProps,
-  Title,
 } from "@mantine/core";
 
 type TeamNameInputProps = {
@@ -45,24 +52,29 @@ const TeamNameInput = ({ team, refetch }: TeamNameInputProps) => {
   };
 
   return (
-    <Stack>
-      <Title order={3}>Team Name</Title>
-      <Group align="end">
-        <TextInput
-          {...(inputProps as TextInputProps)}
-          value={localName}
-          onChange={(event) => setLocalName(event.currentTarget.value)}
-          placeholder={team.name}
-        />
-        <Button
-          {...primaryButtonProps}
-          onClick={handleSave}
-          disabled={localName === team.name || localName === ""}
-        >
-          Save
-        </Button>
-      </Group>
-    </Stack>
+    <Card {...cardProps}>
+      <Card.Section {...cardHeaderSectionProps}>
+        <Text {...cardHeaderTextProps}>Team Name</Text>
+      </Card.Section>
+      <Card.Section {...cardSectionProps}>
+        <Group align="center">
+          <TextInput
+            {...(inputProps as TextInputProps)}
+            value={localName}
+            onChange={(event) => setLocalName(event.currentTarget.value)}
+            placeholder={team.name}
+            flex={1}
+          />
+          <Button
+            {...primaryButtonProps}
+            onClick={handleSave}
+            disabled={localName === team.name || localName === ""}
+          >
+            Update
+          </Button>
+        </Group>
+      </Card.Section>
+    </Card>
   );
 };
 

@@ -79,7 +79,9 @@ const ProjectPreferencesInput = ({
       <SimpleGrid cols={{ xs: 1, sm: 3 }}>
         {Array.from({ length: N_PREFERENCES }).map((_, index) => (
           <Card {...highlightedCardProps} key={index} ta="center">
-            <Text>Project Priority</Text>
+            <Text>
+              {index == 0 ? "Highest Project Priority" : "Project Priority"}
+            </Text>
             <Title mt="sm" order={2}>
               {index + 1}
             </Title>

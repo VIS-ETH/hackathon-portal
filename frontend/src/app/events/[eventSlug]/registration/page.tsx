@@ -50,19 +50,19 @@ const Documentation = () => {
   };
 
   return (
-    <Stack>
+    <>
       {team ? (
-        <>
+        <Stack gap="lg">
           <TeamNameInput team={team} refetch={refetch} />
           <TeamMembersInput team={team} refetch={refetch} />
           {policies?.can_view_project && (
             <ProjectPreferencesInput team={team} refetch={refetch} />
           )}
-        </>
+        </Stack>
       ) : (
         <CreateTeamCard eventId={event.id} refetch={refetch} />
       )}
-    </Stack>
+    </>
   );
 };
 
