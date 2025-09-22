@@ -71,42 +71,92 @@ impl TeamService {
         Ok(team)
     }
 
-    pub async fn get_teams(&self, event_id: Uuid) -> ServiceResult<Vec<Team>> {
+    pub async fn get_teams(
+        &self,
+        event_id: Uuid,
+        project_assignments_visible: bool,
+    ) -> ServiceResult<Vec<Team>> {
         let teams = self.db_repo.get_teams(event_id).await?;
-        let mut teams = teams.into_iter().map(Team::from).collect();
+        let mut teams = teams.into_iter().map(Team::from).collect::<Vec<_>>();
 
         for team in &mut teams {
             self.inject_photo_url(team).await?;
         }
 
+        if !project_assignments_visible {
+            for team in &mut teams {
+                team.project_id = None;
+            }
+        }
+
         Ok(teams)
     }
 
-    pub async fn get_teams_internal(&self, event_id: Uuid) -> ServiceResult<Vec<TeamInternal>> {
+    pub async fn get_teams_internal(
+        &self,
+        event_id: Uuid,
+        project_assignments_visible: bool,
+    ) -> ServiceResult<Vec<TeamInternal>> {
         let teams = self.db_repo.get_teams(event_id).await?;
-        let teams = teams.into_iter().map(TeamInternal::from).collect();
+        let mut teams = teams
+            .into_iter()
+            .map(TeamInternal::from)
+            .collect::<Vec<_>>();
+
+        if !project_assignments_visible {
+            for team in &mut teams {
+                team.project_id = None;
+            }
+        }
+
         Ok(teams)
     }
 
-    pub async fn get_team(&self, team_id: Uuid) -> ServiceResult<Team> {
+    pub async fn get_team(
+        &self,
+        team_id: Uuid,
+        project_assignments_visible: bool,
+    ) -> ServiceResult<Team> {
         let team = self.db_repo.get_team(team_id).await?;
         let mut team = Team::from(team);
 
         self.inject_photo_url(&mut team).await?;
+
+        if !project_assignments_visible {
+            team.project_id = None;
+        }
 
         Ok(team)
     }
 
-    pub async fn get_team_internal(&self, team_id: Uuid) -> ServiceResult<TeamInternal> {
-        let team = self.db_repo.get_team(team_id).await?;
+    pub async fn get_team_internal(
+        &self,
+        team_id: Uuid,
+        project_assignments_visible: bool,
+    ) -> ServiceResult<TeamInternal> {
+        let mut team = self.db_repo.get_team(team_id).await?;
+
+        if !project_assignments_visible {
+            team.project_id = None;
+        }
+
         Ok(team.into())
     }
 
-    pub async fn get_team_by_slug(&self, event_slug: &str, team_slug: &str) -> ServiceResult<Team> {
+    pub async fn get_team_by_slug(
+        &self,
+        event_slug: &str,
+        team_slug: &str,
+        project_assignments_visible: bool,
+    ) -> ServiceResult<Team> {
         let team = self.db_repo.get_team_by_slug(event_slug, team_slug).await?;
         let mut team = Team::from(team);
 
         self.inject_photo_url(&mut team).await?;
+
+        if !project_assignments_visible {
+            team.project_id = None;
+        }
 
         Ok(team)
     }

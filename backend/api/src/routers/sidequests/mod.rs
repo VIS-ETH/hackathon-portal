@@ -44,7 +44,7 @@ pub async fn create_sidequest(
     let event = state.event_service.get_event(body.event_id).await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
-    if !groups.can_manage_sidequest(event.visibility, event.phase, event.is_read_only) {
+    if !groups.can_manage_sidequest(event.visibility, event.read_only) {
         return Err(ApiError::Forbidden {
             action: "create a sidequest for this event".to_string(),
         });
@@ -74,7 +74,7 @@ pub async fn get_sidequests(
     let event = state.event_service.get_event(query.event_id).await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
-    if !groups.can_view_event_internal(event.visibility) {
+    if !groups.can_view_sidequest(event.visibility, event.phase) {
         return Err(ApiError::Forbidden {
             action: "view sidequests for this event".to_string(),
         });
@@ -106,7 +106,7 @@ pub async fn get_sidequest_by_slug(
     let event = state.event_service.get_event(sidequest.event_id).await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
-    if !groups.can_view_event_internal(event.visibility) {
+    if !groups.can_view_sidequest(event.visibility, event.phase) {
         return Err(ApiError::Forbidden {
             action: "view this sidequest".to_string(),
         });
@@ -132,7 +132,7 @@ pub async fn get_sidequest(
     let event = state.event_service.get_event(sidequest.event_id).await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
-    if !groups.can_view_event_internal(event.visibility) {
+    if !groups.can_view_sidequest(event.visibility, event.phase) {
         return Err(ApiError::Forbidden {
             action: "view this sidequest".to_string(),
         });
@@ -161,7 +161,7 @@ pub async fn update_sidequest(
     let event = state.event_service.get_event(sidequest.event_id).await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
-    if !groups.can_manage_sidequest(event.visibility, event.phase, event.is_read_only) {
+    if !groups.can_manage_sidequest(event.visibility, event.read_only) {
         return Err(ApiError::Forbidden {
             action: "edit this sidequest".to_string(),
         });
@@ -192,7 +192,7 @@ pub async fn delete_sidequest(
     let event = state.event_service.get_event(sidequest.event_id).await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
-    if !groups.can_manage_sidequest(event.visibility, event.phase, event.is_read_only) {
+    if !groups.can_manage_sidequest(event.visibility, event.read_only) {
         return Err(ApiError::Forbidden {
             action: "delete this sidequest".to_string(),
         });

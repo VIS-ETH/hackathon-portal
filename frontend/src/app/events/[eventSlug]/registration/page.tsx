@@ -9,10 +9,10 @@ import TeamMembersInput from "@/components/registration/TeamMembersInput";
 import TeamNameInput from "@/components/registration/TeamNameInput";
 import { useResolveParams } from "@/hooks/useResolveParams";
 
-import { Divider, Stack, Title } from "@mantine/core";
+import { Stack } from "@mantine/core";
 
 const Documentation = () => {
-  const { event } = useResolveParams();
+  const { event, policies } = useResolveParams();
 
   const { data: teams, refetch: refetchTeams } = useGetTeams(
     {
@@ -51,14 +51,13 @@ const Documentation = () => {
 
   return (
     <Stack>
-      <Title order={2}>{team ? team.name : "Registration"}</Title>
       {team ? (
         <>
-          <ProjectPreferencesInput team={team} refetch={refetch} />
-          <Divider />
           <TeamNameInput team={team} refetch={refetch} />
-          <Divider />
           <TeamMembersInput team={team} refetch={refetch} />
+          {policies?.can_view_project && (
+            <ProjectPreferencesInput team={team} refetch={refetch} />
+          )}
         </>
       ) : (
         <CreateTeamCard eventId={event.id} refetch={refetch} />

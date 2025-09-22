@@ -383,7 +383,7 @@ pub async fn get_leaderboard(
     let event = state.event_service.get_event(event_id).await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
-    if !groups.can_view_event_feedback(event.visibility, event.phase, event.is_feedback_visible) {
+    if !groups.can_view_event_feedback(event.visibility, event.phase, event.feedback_visible) {
         return Err(ApiError::Forbidden {
             action: "view leaderboard for this event".to_string(),
         });

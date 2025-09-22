@@ -19,6 +19,9 @@ export interface Policies {
   can_view_event: boolean;
   can_view_event_feedback: boolean;
   can_view_event_internal: boolean;
+  can_view_project: boolean;
+  can_view_project_assignment: boolean;
+  can_view_sidequest: boolean;
   can_view_sidequest_attempt: boolean;
   can_view_team_confidential: boolean;
   can_view_team_feedback: boolean;

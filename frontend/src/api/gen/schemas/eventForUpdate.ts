@@ -13,9 +13,7 @@ export interface EventForUpdate {
   /** @nullable */
   end?: string | null;
   /** @nullable */
-  is_feedback_visible?: boolean | null;
-  /** @nullable */
-  is_read_only?: boolean | null;
+  feedback_visible?: boolean | null;
   /**
    * @minimum 0
    * @nullable
@@ -30,6 +28,12 @@ export interface EventForUpdate {
   name?: string | null;
   /** @nullable */
   phase?: EventForUpdatePhase;
+  /** @nullable */
+  project_assignments_visible?: boolean | null;
+  /** @nullable */
+  projects_visible?: boolean | null;
+  /** @nullable */
+  read_only?: boolean | null;
   /**
    * @minimum 0
    * @nullable

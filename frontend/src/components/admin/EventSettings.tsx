@@ -19,6 +19,7 @@ import {
   Button,
   Card,
   Checkbox,
+  Divider,
   Group,
   NumberInput,
   NumberInputProps,
@@ -86,8 +87,13 @@ const EventSettings = ({ event, refetch }: EventSettingsProps) => {
   const updateEventMutation = useUpdateEvent();
 
   useEffect(() => {
-    form.setFieldValue("is_read_only", event.is_read_only);
-    form.setFieldValue("is_feedback_visible", event.is_feedback_visible);
+    form.setFieldValue("read_only", event.read_only);
+    form.setFieldValue("projects_visible", event.projects_visible);
+    form.setFieldValue(
+      "project_assignments_visible",
+      event.project_assignments_visible,
+    );
+    form.setFieldValue("feedback_visible", event.feedback_visible);
   }, [form.setValues, event]);
 
   const handleSubmit = async (data: EventForUpdate) => {
@@ -111,94 +117,109 @@ const EventSettings = ({ event, refetch }: EventSettingsProps) => {
   return (
     <Stack>
       <form onSubmit={form.onSubmit(handleSubmit)}>
-        <SimpleGrid mb="xl" cols={{ xs: 1, md: 3 }}>
-          <TextInput
-            {...(inputProps as TextInputProps)}
-            {...form.getInputProps("name")}
-            key={form.key("name")}
-            label="Name"
-            placeholder={event.name}
-          />
-          <DateTimePicker
-            {...(inputProps as DateTimePickerProps)}
-            {...form.getInputProps("start")}
-            key={form.key("start")}
-            label="Start"
-            placeholder={event.start + " UTC"}
-          />
-          <DateTimePicker
-            {...(inputProps as DateTimePickerProps)}
-            {...form.getInputProps("end")}
-            key={form.key("end")}
-            label="End"
-            placeholder={event.end + " UTC"}
-          />
-          <Select
-            {...(inputProps as SelectProps)}
-            {...form.getInputProps("visibility")}
-            key={form.key("visibility")}
-            data={Object.values(EventVisibility)}
-            label="Visibility"
-            placeholder={event.visibility}
-            clearable
-          />
-          <Select
-            {...(inputProps as SelectProps)}
-            {...form.getInputProps("phase")}
-            key={form.key("phase")}
-            data={Object.values(EventPhase)}
-            label="Phase"
-            placeholder={event.phase}
-            clearable
-          />
-          <Stack justify="flex-end" gap={2}>
+        <Stack>
+          <SimpleGrid cols={{ xs: 1, md: 3 }}>
+            <TextInput
+              {...(inputProps as TextInputProps)}
+              {...form.getInputProps("name")}
+              key={form.key("name")}
+              label="Name"
+              placeholder={event.name}
+            />
+            <DateTimePicker
+              {...(inputProps as DateTimePickerProps)}
+              {...form.getInputProps("start")}
+              key={form.key("start")}
+              label="Start"
+              placeholder={event.start + " UTC"}
+            />
+            <DateTimePicker
+              {...(inputProps as DateTimePickerProps)}
+              {...form.getInputProps("end")}
+              key={form.key("end")}
+              label="End"
+              placeholder={event.end + " UTC"}
+            />
+            <Select
+              {...(inputProps as SelectProps)}
+              {...form.getInputProps("visibility")}
+              key={form.key("visibility")}
+              data={Object.values(EventVisibility)}
+              label="Visibility"
+              placeholder={event.visibility}
+              clearable
+            />
+            <Select
+              {...(inputProps as SelectProps)}
+              {...form.getInputProps("phase")}
+              key={form.key("phase")}
+              data={Object.values(EventPhase)}
+              label="Phase"
+              placeholder={event.phase}
+              clearable
+            />
+            <NumberInput
+              {...(inputProps as NumberInputProps)}
+              {...form.getInputProps("max_team_size")}
+              key={form.key("max_team_size")}
+              label="Max team size"
+              placeholder={event.max_team_size.toString()}
+              min={1}
+              step={1}
+            />
+            <NumberInput
+              {...(inputProps as NumberInputProps)}
+              {...form.getInputProps("sidequest_cooldown")}
+              key={form.key("sidequest_cooldown")}
+              label="Sidequest cooldown (minutes)"
+              placeholder={event.sidequest_cooldown.toString()}
+              min={0}
+              step={1}
+            />
+            <NumberInput
+              {...(inputProps as NumberInputProps)}
+              {...form.getInputProps("max_teams_per_project")}
+              key={form.key("max_teams_per_project")}
+              label="Max team per project"
+              placeholder={event.max_teams_per_project.toString()}
+              min={0}
+              step={1}
+            />
+          </SimpleGrid>
+          <SimpleGrid cols={{ xs: 1, md: 3 }}>
             <Checkbox
-              {...form.getInputProps("is_read_only", { type: "checkbox" })}
-              key={form.key("is_read_only")}
+              {...form.getInputProps("read_only", { type: "checkbox" })}
+              key={form.key("read_only")}
               label="Read only"
             />
             <Checkbox
-              {...form.getInputProps("is_feedback_visible", {
+              {...form.getInputProps("projects_visible", { type: "checkbox" })}
+              key={form.key("projects_visible")}
+              label="Projects visible"
+            />
+            <Checkbox
+              {...form.getInputProps("project_assignments_visible", {
                 type: "checkbox",
               })}
-              key={form.key("is_feedback_visible")}
+              key={form.key("project_assignments_visible")}
+              label="Project assignments visible"
+            />
+            <Checkbox
+              {...form.getInputProps("feedback_visible", {
+                type: "checkbox",
+              })}
+              key={form.key("feedback_visible")}
               label="Feedback visible"
             />
-          </Stack>
-          <NumberInput
-            {...(inputProps as NumberInputProps)}
-            {...form.getInputProps("max_team_size")}
-            key={form.key("max_team_size")}
-            label="Max team size"
-            placeholder={event.max_team_size.toString()}
-            min={1}
-            step={1}
-          />
-          <NumberInput
-            {...(inputProps as NumberInputProps)}
-            {...form.getInputProps("sidequest_cooldown")}
-            key={form.key("sidequest_cooldown")}
-            label="Sidequest cooldown (minutes)"
-            placeholder={event.sidequest_cooldown.toString()}
-            min={0}
-            step={1}
-          />
-          <NumberInput
-            {...(inputProps as NumberInputProps)}
-            {...form.getInputProps("max_teams_per_project")}
-            key={form.key("max_teams_per_project")}
-            label="Max team per project"
-            placeholder={event.max_teams_per_project.toString()}
-            min={0}
-            step={1}
-          />
+          </SimpleGrid>
           <Group align="end">
             <Button {...primaryButtonProps} type="submit">
               Update
             </Button>
           </Group>
-        </SimpleGrid>
+        </Stack>
       </form>
+      <Divider />
       <Card {...cardProps}>
         <Group justify="space-between">
           <Text {...cardHeaderTextProps}>Presentations</Text>

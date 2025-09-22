@@ -316,6 +316,27 @@ impl Groups {
     }
 
     #[must_use]
+    pub fn can_view_project(
+        &self,
+        event_visibility: EventVisibility,
+        event_projects_visible: bool,
+    ) -> bool {
+        if let Some(decision) = self.default_can_view_policy(event_visibility) {
+            return decision;
+        }
+
+        if self == &Group::EventStakeholder {
+            return true;
+        }
+
+        if self == &Group::EventAffiliate {
+            return event_projects_visible;
+        }
+
+        false
+    }
+
+    #[must_use]
     pub fn can_manage_project(
         &self,
         event_visibility: EventVisibility,
@@ -334,18 +355,52 @@ impl Groups {
     }
 
     #[must_use]
-    pub fn can_manage_sidequest(
+    pub fn can_view_project_assignment(
+        &self,
+        event_visibility: EventVisibility,
+        event_projects_visible: bool,
+        event_project_assignments_visible: bool,
+    ) -> bool {
+        if let Some(decision) = self.default_can_view_policy(event_visibility) {
+            return decision;
+        }
+
+        if self == &Group::EventAffiliate {
+            return event_projects_visible && event_project_assignments_visible;
+        }
+
+        false
+    }
+
+    #[must_use]
+    pub fn can_view_sidequest(
         &self,
         event_visibility: EventVisibility,
         event_phase: EventPhase,
-        event_is_ro: bool,
     ) -> bool {
-        if let Some(decision) = self.default_can_manage_policy(event_visibility, event_is_ro) {
+        if let Some(decision) = self.default_can_view_policy(event_visibility) {
             return decision;
         }
 
         if self == &Group::EventSidequestMaster {
-            return event_phase == EventPhase::Registration;
+            return true;
+        }
+
+        if self == &Group::EventAffiliate {
+            return event_phase != EventPhase::Registration;
+        }
+
+        false
+    }
+
+    #[must_use]
+    pub fn can_manage_sidequest(
+        &self,
+        event_visibility: EventVisibility,
+        event_is_ro: bool,
+    ) -> bool {
+        if let Some(decision) = self.default_can_manage_policy(event_visibility, event_is_ro) {
+            return decision;
         }
 
         false

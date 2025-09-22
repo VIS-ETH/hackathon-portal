@@ -23,8 +23,10 @@ pub struct Model {
     pub max_team_size: i32,
     pub max_teams_per_project: i32,
     pub sidequest_cooldown: i32,
-    pub is_read_only: bool,
-    pub is_feedback_visible: bool,
+    pub read_only: bool,
+    pub projects_visible: bool,
+    pub project_assignments_visible: bool,
+    pub feedback_visible: bool,
     pub visibility: EventVisibility,
     pub phase: EventPhase,
 }

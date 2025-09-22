@@ -31,8 +31,10 @@ CREATE TABLE "public"."event" (
     "max_team_size" INTEGER NOT NULL,
     "max_teams_per_project" INTEGER NOT NULL DEFAULT 2,
     "sidequest_cooldown" INTEGER NOT NULL,
-    "is_read_only" BOOLEAN NOT NULL,
-    "is_feedback_visible" BOOLEAN NOT NULL,
+    "read_only" BOOLEAN NOT NULL DEFAULT true,
+    "projects_visible" BOOLEAN NOT NULL DEFAULT false,
+    "project_assignments_visible" BOOLEAN NOT NULL DEFAULT false,
+    "feedback_visible" BOOLEAN NOT NULL DEFAULT false,
     "visibility" "public"."event_visibility" NOT NULL,
     "phase" "public"."event_phase" NOT NULL,
 

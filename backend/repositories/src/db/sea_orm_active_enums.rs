@@ -109,18 +109,6 @@ pub enum ExpertRatingCategory {
     #[sea_orm(string_value = "PRESENTATION")]
     Presentation,
 }
-
-impl ExpertRatingCategory {
-    #[must_use]
-    pub const fn get_weight(&self) -> f64 {
-        match self {
-            Self::Functionality => 0.5,
-            Self::Ux => 0.3,
-            Self::Presentation => 0.2,
-        }
-    }
-}
-
 #[derive(
     Debug,
     Clone,
