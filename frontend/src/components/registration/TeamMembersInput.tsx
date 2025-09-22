@@ -7,11 +7,18 @@ import {
   usePutTeamRoles,
 } from "@/api/gen";
 import { EventAffiliate, EventRole, Team, TeamRole } from "@/api/gen/schemas";
-import { cardProps, iconProps, secondaryButtonProps } from "@/styles/common";
+import {
+  cardHeaderSectionProps,
+  cardHeaderTextProps,
+  cardProps,
+  cardSectionProps,
+  iconProps,
+  secondaryButtonProps,
+} from "@/styles/common";
 
 import { useState } from "react";
 
-import { Button, Card, Group, Stack, Text, Title } from "@mantine/core";
+import { Button, Card, Group, Text } from "@mantine/core";
 
 import { IconPlus, IconX } from "@tabler/icons-react";
 
@@ -74,15 +81,18 @@ const TeamMembersInput = ({ team, refetch }: TeamMembersInputProps) => {
   };
 
   return (
-    <Stack>
-      <Title order={3}>Team Members</Title>
-      <Card {...cardProps} style={{ borderStyle: "dashed" }}>
+    <Card {...cardProps}>
+      <Card.Section {...cardHeaderSectionProps}>
+        <Text {...cardHeaderTextProps}>Team Members</Text>
+      </Card.Section>
+      <Card.Section {...cardSectionProps}>
         <Group justify="space-between">
           <EventAffiliateSelect
             eventId={team.event_id}
             role={EventRole.Participant}
             affiliateId={selectedParticipant?.id}
             setAffiliate={setSelectedParticipant}
+            flex={1}
           />
           <Button
             {...secondaryButtonProps}
@@ -93,11 +103,11 @@ const TeamMembersInput = ({ team, refetch }: TeamMembersInputProps) => {
             Add
           </Button>
         </Group>
-      </Card>
+      </Card.Section>
       {members.map((member) => (
-        <Card key={member.id} {...cardProps}>
-          <Group justify="space-between">
-            <Text fw={600}>{member.name}</Text>
+        <Card.Section key={member.id} {...cardSectionProps}>
+          <Group ms="xs" justify="space-between">
+            <Text>{member.name}</Text>
             <Button
               {...secondaryButtonProps}
               leftSection={<IconX {...iconProps} />}
@@ -107,9 +117,9 @@ const TeamMembersInput = ({ team, refetch }: TeamMembersInputProps) => {
               Remove
             </Button>
           </Group>
-        </Card>
+        </Card.Section>
       ))}
-    </Stack>
+    </Card>
   );
 };
 
