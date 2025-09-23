@@ -8,6 +8,7 @@ use serde::{Deserialize, Serialize};
 use std::time::Duration;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct S3Config {
     pub endpoint: String,
     pub bucket: String,

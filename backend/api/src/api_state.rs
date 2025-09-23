@@ -5,6 +5,7 @@ use hackathon_portal_repositories::DbRepository;
 use hackathon_portal_services::appointment::AppointmentService;
 use hackathon_portal_services::authorization::AuthorizationService;
 use hackathon_portal_services::event::EventService;
+use hackathon_portal_services::health::HealthService;
 use hackathon_portal_services::project::ProjectService;
 use hackathon_portal_services::rating::RatingService;
 use hackathon_portal_services::sidequest::SidequestService;
@@ -16,6 +17,7 @@ use std::sync::Arc;
 #[derive(Clone)]
 #[allow(clippy::struct_field_names)]
 pub struct ApiState {
+    pub health_service: Arc<HealthService>,
     pub authorization_service: Arc<AuthorizationService>,
     pub user_service: Arc<UserService>,
     pub event_service: Arc<EventService>,
@@ -30,6 +32,7 @@ pub struct ApiState {
 impl ApiState {
     #[allow(clippy::too_many_arguments)]
     pub fn new(
+        health_service: Arc<HealthService>,
         authorization_service: Arc<AuthorizationService>,
         user_service: Arc<UserService>,
         event_service: Arc<EventService>,
@@ -41,6 +44,7 @@ impl ApiState {
         upload_service: Arc<UploadService>,
     ) -> Self {
         Self {
+            health_service,
             authorization_service,
             user_service,
             event_service,
@@ -58,6 +62,7 @@ impl ApiState {
 
         let s3_repo = S3Repository::from_config(&config.s3);
 
+        let health_service = Arc::new(HealthService::new(db_repo.clone()));
         let authorization_service = Arc::new(AuthorizationService::new(db_repo.clone()));
         let user_service = Arc::new(UserService::new(db_repo.clone()));
         let upload_service = Arc::new(UploadService::new(db_repo.clone(), s3_repo));
@@ -88,6 +93,7 @@ impl ApiState {
         ));
 
         let state = Self::new(
+            health_service,
             authorization_service,
             user_service,
             event_service,
