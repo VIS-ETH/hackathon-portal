@@ -140,6 +140,9 @@ impl From<&RepositoryError> for PublicError {
             RepositoryError::SlugNotUnique { slug } => {
                 (StatusCode::CONFLICT, format!("Slug '{slug}' is not unique"))
             }
+            RepositoryError::Timeout { message } => {
+                (StatusCode::SERVICE_UNAVAILABLE, message.clone())
+            }
             RepositoryError::SeaORM(_)
             | RepositoryError::S3HeadObject(_)
             | RepositoryError::S3GetObject(_)

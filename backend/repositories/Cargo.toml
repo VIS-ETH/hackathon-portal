@@ -13,6 +13,7 @@ serde_with = { workspace = true }
 slug = "0.1.6"
 strum = { workspace = true }
 utoipa = { workspace = true }
+tokio = { workspace = true }
 
 [lints]
 workspace = true

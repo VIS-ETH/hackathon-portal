@@ -4,6 +4,7 @@ members = ["api", "cli", "repositories", "services"]
 
 [workspace.dependencies]
 chrono = "0.4.41"
+itertools = "0.14.0"
 derive_more = { version = "2.0.1", features = ["full"] }
 hackathon-portal-repositories = { path = "repositories" }
 hackathon-portal-services = { path = "services" }
@@ -37,6 +38,8 @@ cast_sign_loss = { level = "allow", priority = 1 }
 cast_possible_wrap = { level = "allow", priority = 1 }
 cast_precision_loss = { level = "allow", priority = 1 }
 cast_possible_truncation = { level = "allow", priority = 1 }
+struct_excessive_bools = { level = "allow", priority = 1 }
+fn_params_excessive_bools = { level = "allow", priority = 1 }
 
 style = { level = "warn", priority = 0 }
 

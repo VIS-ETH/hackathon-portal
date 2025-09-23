@@ -3,17 +3,41 @@ use config::{Config, Environment};
 use dotenvy::dotenv;
 use hackathon_portal_repositories::db::DbConfig;
 use hackathon_portal_repositories::s3::S3Config;
-use serde::Deserialize;
-use std::net::IpAddr;
+use serde::{Deserialize, Serialize};
+use std::net::{IpAddr, Ipv4Addr};
 use std::path::Path;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct ServerConfig {
+    #[serde(default = "ServerConfig::default_ip")]
     pub ip: IpAddr,
+
+    #[serde(default = "ServerConfig::default_port")]
     pub port: u16,
+
+    #[serde(default = "ServerConfig::default_management_port")]
+    pub management_port: u16,
+
+    pub allowed_origins: Option<Vec<String>>,
 }
 
-#[derive(Debug, Deserialize)]
+impl ServerConfig {
+    pub fn default_ip() -> IpAddr {
+        IpAddr::V4(Ipv4Addr::LOCALHOST)
+    }
+
+    pub fn default_port() -> u16 {
+        8000
+    }
+
+    pub fn default_management_port() -> u16 {
+        8001
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct ApiConfig {
     pub server: ServerConfig,
     pub postgres: DbConfig,
@@ -26,9 +50,13 @@ impl ApiConfig {
 
         let s = Config::builder()
             .add_source(config::File::with_name(path.to_string_lossy().as_ref()).required(false))
-            .add_source(Environment::with_prefix("portal").separator("__"))
-            .set_default("server.ip", "127.0.0.1")?
-            .set_default("server.port", 8080)?
+            .add_source(
+                Environment::with_prefix("portal")
+                    .separator("__")
+                    .list_separator(",")
+                    .with_list_parse_key("server.allowed_origins")
+                    .try_parsing(true),
+            )
             .build()?;
 
         let config = s.try_deserialize()?;

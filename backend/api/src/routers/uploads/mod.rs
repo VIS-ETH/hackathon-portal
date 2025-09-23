@@ -46,8 +46,6 @@ pub async fn create_upload(
         reason: "Invalid mime type".to_string(),
     })?;
 
-    dbg!(&mime, mime.type_(), mime.subtype());
-
     state
         .upload_service
         .validate_upload_request(ctx.user().id, body.usage, &mime, body.content_length)

@@ -9,13 +9,14 @@ services:
       - portal_public
       - portal_private
     expose:
-      - 8080
+      - 8000 # api server
+      - 8001 # management api server
     labels:
       traefik.enable: true
       traefik.docker.network: portal_public
 
       traefik.http.routers.portal_backend.rule: PathPrefix(`/api`)
-      traefik.http.services.portal_backend.loadbalancer.server.port: 8080
+      traefik.http.services.portal_backend.loadbalancer.server.port: 8000
     depends_on:
       - postgres
     restart: unless-stopped

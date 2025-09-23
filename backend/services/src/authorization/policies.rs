@@ -94,6 +94,7 @@ impl Policies {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use hackathon_portal_repositories::db::prelude::{EventRole, TeamRole};
     use itertools::{iproduct, Itertools};
     use strum::VariantArray;
 
@@ -104,6 +105,8 @@ mod tests {
         let event_visibilities = EventVisibility::VARIANTS.into_iter();
         let event_phases = EventPhase::VARIANTS.into_iter();
         let event_is_ro = [true, false].iter();
+        let event_projects_visible = [true, false].iter();
+        let event_project_assignments_visible = [true, false].iter();
         let event_feedback_is_visible = [true, false].iter();
 
         let inputs = iproduct!(
@@ -112,6 +115,8 @@ mod tests {
             event_visibilities,
             event_phases,
             event_is_ro,
+            event_projects_visible,
+            event_project_assignments_visible,
             event_feedback_is_visible
         );
 
@@ -125,6 +130,8 @@ mod tests {
                 *input.3,
                 *input.4,
                 *input.5,
+                *input.6,
+                *input.7,
             );
 
             println!("{idx}: {:?} => {:?}", input, policies);

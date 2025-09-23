@@ -17,6 +17,10 @@ pub enum RepositoryError {
         slug: String,
     },
 
+    Timeout {
+        message: String,
+    },
+
     // region: external library errors
     #[from]
     SeaORM(#[serde_as(as = "DisplayFromStr")] sea_orm::DbErr),
