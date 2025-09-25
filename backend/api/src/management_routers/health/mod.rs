@@ -4,8 +4,6 @@ use axum::extract::State;
 use axum::routing::get;
 use axum::{Json, Router};
 
-pub mod models;
-
 pub fn get_router(state: &ApiState) -> Router {
     Router::new()
         .route("/liveness", get(get_liveness))
