@@ -11,7 +11,11 @@ pub fn setup_logging(verbose: bool) -> ApiResult<()> {
 
     let stdout_layer = tracing_subscriber::fmt::layer().with_writer(stdout_writer);
 
-    let directive_str = if verbose { "debug" } else { "api=info" };
+    let directive_str = if verbose {
+        "debug"
+    } else {
+        "hackathon_portal_api=info"
+    };
 
     let directive = Directive::from_str(directive_str)?;
     let filter = EnvFilter::from_default_env().add_directive(directive);
