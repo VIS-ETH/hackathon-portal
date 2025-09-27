@@ -4,10 +4,10 @@ members = ["api", "cli", "repositories", "services"]
 
 [workspace.dependencies]
 chrono = "0.4.41"
-itertools = "0.14.0"
 derive_more = { version = "2.0.1", features = ["full"] }
 hackathon-portal-repositories = { path = "repositories" }
 hackathon-portal-services = { path = "services" }
+itertools = "0.14.0"
 mime = "0.3.17"
 sea-orm = { version = "1.1.12", features = [
     "sqlx-postgres",

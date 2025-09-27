@@ -10,14 +10,16 @@ default-run = "hackathon-portal-api"
 axum = "0.7.9"
 chrono = { workspace = true }
 chrono-tz = "0.10.3"
-itertools = { workspace = true }
 clap = { version = "4.5.40", features = ["derive"] }
 config = "0.15.11"
 derive_more = { workspace = true }
 dotenvy = "0.15.7"
 hackathon-portal-repositories = { workspace = true }
 hackathon-portal-services = { workspace = true }
+itertools = { workspace = true }
+jsonwebtoken = { version = "9.3.1", features = ["use_pem"] }
 mime = { workspace = true }
+reqwest = { version = "0.12", features = ["json"] }
 serde = { workspace = true }
 serde_json = "1.0.140"
 serde_with = { workspace = true }

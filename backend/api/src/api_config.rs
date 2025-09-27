@@ -1,3 +1,4 @@
+use crate::auth::AuthConfig;
 use crate::error::ApiResult;
 use config::{Config, Environment};
 use dotenvy::dotenv;
@@ -40,6 +41,7 @@ impl ServerConfig {
 #[serde(deny_unknown_fields)]
 pub struct ApiConfig {
     pub server: ServerConfig,
+    pub auth: AuthConfig,
     pub postgres: DbConfig,
     pub s3: S3Config,
 }

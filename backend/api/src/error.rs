@@ -35,6 +35,10 @@ pub enum ApiError {
     NoAuthIdInRequest,
     NoCtxInRequest,
 
+    AuthenticationFailed {
+        reason: String,
+    },
+
     // region: internal library errors
     #[from]
     Service(ServiceError),
@@ -63,6 +67,12 @@ pub enum ApiError {
 
     #[from]
     JobScheduler(#[serde_as(as = "DisplayFromStr")] tokio_cron_scheduler::JobSchedulerError),
+
+    #[from]
+    Reqwest(#[serde_as(as = "DisplayFromStr")] reqwest::Error),
+
+    #[from]
+    Jwt(#[serde_as(as = "DisplayFromStr")] jsonwebtoken::errors::Error),
     // endregion
 }
 
@@ -268,6 +278,10 @@ impl From<&ApiError> for PublicError {
                 StatusCode::UNAUTHORIZED,
                 "You must be authenticated to access this resource".to_string(),
             ),
+            ApiError::AuthenticationFailed { reason: _ } => (
+                StatusCode::UNAUTHORIZED,
+                "Authentication failed".to_string(),
+            ),
             ApiError::Service(e) => return e.into(),
             ApiError::Repository(e) => return e.into(),
             ApiError::Config(_)
@@ -275,7 +289,9 @@ impl From<&ApiError> for PublicError {
             | ApiError::InvalidHeaderValue(_)
             | ApiError::TracingSetGlobalDefault(_)
             | ApiError::TracingFilterParse(_)
-            | ApiError::JobScheduler(_) => ise,
+            | ApiError::JobScheduler(_)
+            | ApiError::Reqwest(_)
+            | ApiError::Jwt(_) => ise,
         };
 
         Self::new(status, message)

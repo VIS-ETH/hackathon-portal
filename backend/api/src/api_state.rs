@@ -1,4 +1,5 @@
 use crate::api_config::ApiConfig;
+use crate::auth::Authenticator;
 use crate::ApiResult;
 use hackathon_portal_repositories::s3::S3Repository;
 use hackathon_portal_repositories::DbRepository;
@@ -17,6 +18,7 @@ use std::sync::Arc;
 #[derive(Clone)]
 #[allow(clippy::struct_field_names)]
 pub struct ApiState {
+    pub authenticator: Authenticator,
     pub health_service: Arc<HealthService>,
     pub authorization_service: Arc<AuthorizationService>,
     pub user_service: Arc<UserService>,
@@ -32,6 +34,7 @@ pub struct ApiState {
 impl ApiState {
     #[allow(clippy::too_many_arguments)]
     pub fn new(
+        authenticator: Authenticator,
         health_service: Arc<HealthService>,
         authorization_service: Arc<AuthorizationService>,
         user_service: Arc<UserService>,
@@ -44,6 +47,7 @@ impl ApiState {
         upload_service: Arc<UploadService>,
     ) -> Self {
         Self {
+            authenticator,
             health_service,
             authorization_service,
             user_service,
@@ -58,6 +62,8 @@ impl ApiState {
     }
 
     pub async fn from_config(config: &ApiConfig) -> ApiResult<Self> {
+        let authenticator = Authenticator::new(&config.auth).await?;
+
         let db_repo = DbRepository::from_config(&config.postgres).await?;
 
         let s3_repo = S3Repository::from_config(&config.s3);
@@ -93,6 +99,7 @@ impl ApiState {
         ));
 
         let state = Self::new(
+            authenticator,
             health_service,
             authorization_service,
             user_service,
