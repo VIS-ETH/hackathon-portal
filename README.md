@@ -39,8 +39,8 @@
 
 4. Create an `.env` file from the example (`cp .env.example .env`), and update the values as needed.
 
-5. (Optional) If you want restore from a PostgreSQL dump, delete all files in the `db/init` folder, and copy your dump
-   file there. **Make sure to revert these changes after the next step and do not commit the dump file to git.**
+5. (Optional) If you have access to migrations that restore a dump, place them in the `db/migrations` folder.
+   Subsequently, run `make prisma-dev` or `make prisma-reset`.
 
 6. Start the dev stack with `docker compose --profile dev up -d`. This will create a local PostgreSQL and MinIO
    instance. To operate on the entire stack, use e.g. `docker compose --profile "*" up/down/...`.
@@ -49,4 +49,5 @@
 
 8. Start the frontend with `cd frontend && npm install` and `npm run dev`.
 
-9. Look at the `Makefile` for more commands that can be useful during development.
+9. Look at the `Makefile` for more commands that can be useful during development. Also, refer to the READMEs in the
+   child folders.

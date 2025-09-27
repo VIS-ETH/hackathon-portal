@@ -3,6 +3,8 @@
 stack.env
 compose.override.yaml
 
+db/migrations/1_viscon_2024_dump/
+
 # Created by https://www.toptal.com/developers/gitignore/api/macos,visualstudiocode,jetbrains+all
 # Edit at https://www.toptal.com/developers/gitignore?templates=macos,visualstudiocode,jetbrains+all
 

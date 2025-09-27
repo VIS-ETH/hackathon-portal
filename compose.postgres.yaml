@@ -6,7 +6,6 @@ services:
     env_file:
       - .env
     volumes:
-      - ./db/init:/docker-entrypoint-initdb.d:ro
       - portal_db:/var/lib/postgresql/data
     networks:
       - portal_private

@@ -7,8 +7,17 @@ include .env
 prisma-push:
 	npx -r prisma db push --schema db/schema.prisma
 
-prisma-generate:
-	npx -r prisma migrate diff --from-empty --to-schema-datamodel db/schema.prisma --script > db/init/1-schema.sql
+prisma-dev:
+	npx -r prisma migrate dev --schema db/schema.prisma
+
+prisma-dev-create:
+	npx -r prisma migrate dev --schema db/schema.prisma --create-only
+
+prisma-prod:
+	npx -r prisma migrate deploy --schema db/schema.prisma
+
+prisma-reset:
+	npx -r prisma migrate reset --schema db/schema.prisma
 
 seaorm-generate:
 	sea-orm-cli generate entity --database-url ${PORTAL__POSTGRES__URL} -o backend/repositories/src/db --with-serde both --enum-extra-derives "Copy, Hash, strum::Display, strum::VariantArray, utoipa::ToSchema"
