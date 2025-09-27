@@ -1,13 +1,6 @@
 import classes from "./Footer.module.css";
 
-import {
-  Center,
-  Container,
-  Image,
-  SimpleGrid,
-  Stack,
-  Text,
-} from "@mantine/core";
+import { Container, Flex, Image, SimpleGrid, Stack } from "@mantine/core";
 
 import Link from "next/link";
 
@@ -19,46 +12,40 @@ const Footer = () => {
           <SimpleGrid
             spacing="xl"
             cols={{
-              xs: 1,
+              base: 1,
               md: 3,
             }}
           >
-            <Center>
-              <Text ta="left" c="dimmed" size="sm">
-                Presented by Hannes Eberhard, Ramon Wick, Andri Florin and Dario
-                Ackermann
-              </Text>
-            </Center>
-            {/* <Center>
+            <Flex align="center" justify={{ base: "center", md: "flex-start" }}>
               <Link href="https://inf.ethz.ch">
                 <Image
-                  src="/assets/logos/dinfk/ethz_dinfk.svg"
-                  h={62}
+                  h={60}
                   w="auto"
+                  src="/assets/logos/dinfk/ethz_dinfk.svg"
                   alt="D-INFK"
                 />
               </Link>
-            </Center> */}
-            <Center>
+            </Flex>
+            <Flex align="center" justify="center">
               <Link href="https://vis.ethz.ch">
                 <Image
-                  src="/assets/logos/vis/vis_logo.svg"
-                  h={52}
+                  h={50}
                   w="auto"
+                  src="/assets/logos/vis/vis_logo.svg"
                   alt="VIS"
                 />
               </Link>
-            </Center>
-            <Center>
+            </Flex>
+            <Flex align="center" justify={{ base: "center", md: "flex-end" }}>
               <Link href="https://vseth.ethz.ch">
                 <Image
-                  src="/assets/logos/vseth/vseth_Logo_bylines_Fachverein.png"
-                  h={62}
+                  h={60}
                   w="auto"
+                  src="/assets/logos/vseth/vseth_Logo_bylines_Fachverein.png"
                   alt="VSETH"
                 />
               </Link>
-            </Center>
+            </Flex>
           </SimpleGrid>
         </Stack>
       </Container>
