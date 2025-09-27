@@ -1,6 +1,7 @@
 mod api_args;
 mod api_config;
 mod api_state;
+mod auth;
 mod ctx;
 mod error;
 mod management_routers;
@@ -45,7 +46,7 @@ async fn main() -> ApiResult<()> {
         "management api",
         config.server.ip,
         config.server.management_port,
-        management_routers::get_router(&api_state),
+        management_routers::get_router(api_state),
         management_routers::get_docs(),
         config.server.allowed_origins,
     );

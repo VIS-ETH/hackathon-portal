@@ -100,10 +100,10 @@ mod tests {
 
     #[test]
     fn exhaustive_enumeration() {
-        let event_roles = EventRole::VARIANTS.into_iter().powerset();
-        let team_roles = TeamRole::VARIANTS.into_iter().powerset();
-        let event_visibilities = EventVisibility::VARIANTS.into_iter();
-        let event_phases = EventPhase::VARIANTS.into_iter();
+        let event_roles = EventRole::VARIANTS.iter().powerset();
+        let team_roles = TeamRole::VARIANTS.iter().powerset();
+        let event_visibilities = EventVisibility::VARIANTS.iter();
+        let event_phases = EventPhase::VARIANTS.iter();
         let event_is_ro = [true, false].iter();
         let event_projects_visible = [true, false].iter();
         let event_project_assignments_visible = [true, false].iter();
@@ -134,7 +134,7 @@ mod tests {
                 *input.7,
             );
 
-            println!("{idx}: {:?} => {:?}", input, policies);
+            println!("{idx}: {input:?} => {policies:?}");
         }
     }
 }

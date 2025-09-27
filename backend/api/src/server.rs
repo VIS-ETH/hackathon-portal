@@ -1,8 +1,7 @@
-use crate::mw::mw_impersonate;
 use crate::{ApiError, ApiResult};
 use axum::extract::Request;
 use axum::http::HeaderValue;
-use axum::{middleware, Router};
+use axum::Router;
 use itertools::iproduct;
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use tokio::net::TcpListener;
@@ -75,13 +74,7 @@ impl Server {
             router = router.merge(self.docs_router);
         }
 
-        router = router.fallback(handle_404);
-
-        if cfg!(debug_assertions) {
-            router = router.layer(middleware::from_fn(mw_impersonate));
-        }
-
-        router = router.layer(cors);
+        router = router.fallback(handle_404).layer(cors);
 
         Ok(router)
     }
