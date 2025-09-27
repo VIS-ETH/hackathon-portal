@@ -78,6 +78,19 @@ pub enum ServiceError {
 
     // region: external library errors
     #[from]
+    Io(#[serde_as(as = "DisplayFromStr")] std::io::Error),
+
+    #[from]
+    TracingSetGlobalDefault(
+        #[serde_as(as = "DisplayFromStr")] tracing::dispatcher::SetGlobalDefaultError,
+    ),
+
+    #[from]
+    TracingAppenderRollingInit(
+        #[serde_as(as = "DisplayFromStr")] tracing_appender::rolling::InitError,
+    ),
+
+    #[from]
     SeaORM(#[serde_as(as = "DisplayFromStr")] sea_orm::DbErr),
     // endregion
 }

@@ -3,6 +3,7 @@ pub mod authorization;
 pub mod error;
 pub mod event;
 pub mod health;
+pub mod logger;
 pub mod project;
 pub mod rating;
 pub mod sidequest;

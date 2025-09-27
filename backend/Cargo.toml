@@ -4,7 +4,11 @@ members = ["api", "cli", "repositories", "services"]
 
 [workspace.dependencies]
 chrono = "0.4.41"
+clap = { version = "4.5.40", features = ["derive"] }
+config = "0.15.11"
 derive_more = { version = "2.0.1", features = ["full"] }
+directories = "6.0.0"
+dotenvy = "0.15.7"
 hackathon-portal-repositories = { path = "repositories" }
 hackathon-portal-services = { path = "services" }
 itertools = "0.14.0"
