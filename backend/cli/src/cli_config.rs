@@ -1,61 +1,27 @@
-use crate::auth::AuthConfig;
-use crate::error::ApiResult;
+use crate::{CliError, CliResult};
 use config::{Config, Environment};
 use directories::ProjectDirs;
 use dotenvy::dotenv;
 use hackathon_portal_repositories::db::DbConfig;
 use hackathon_portal_repositories::s3::S3Config;
 use serde::{Deserialize, Serialize};
-use std::net::{IpAddr, Ipv4Addr};
 use std::path::Path;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
-pub struct ServerConfig {
-    #[serde(default = "ServerConfig::default_ip")]
-    pub ip: IpAddr,
-
-    #[serde(default = "ServerConfig::default_port")]
-    pub port: u16,
-
-    #[serde(default = "ServerConfig::default_management_port")]
-    pub management_port: u16,
-
-    pub allowed_origins: Option<Vec<String>>,
-}
-
-impl ServerConfig {
-    pub fn default_ip() -> IpAddr {
-        IpAddr::V4(Ipv4Addr::LOCALHOST)
-    }
-
-    pub fn default_port() -> u16 {
-        8000
-    }
-
-    pub fn default_management_port() -> u16 {
-        8001
-    }
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
-pub struct ApiConfig {
-    pub server: ServerConfig,
-    pub auth: AuthConfig,
-    pub postgres: DbConfig,
-    pub s3: S3Config,
-    #[serde(skip, default = "ApiConfig::default_dirs")]
+pub struct CliConfig {
+    pub postgres: Option<DbConfig>,
+    pub s3: Option<S3Config>,
+    #[serde(skip, default = "CliConfig::default_dirs")]
     pub dirs: ProjectDirs,
 }
 
-impl ApiConfig {
+impl CliConfig {
     pub fn default_dirs() -> ProjectDirs {
         ProjectDirs::from("", "vseth-1116-vis-kom-vc2-hackathon", "hackathon-portal")
             .expect("Failed to get project directories")
     }
 
-    pub fn parse(path: &Path) -> ApiResult<Self> {
+    pub fn parse(path: &Path) -> CliResult<Self> {
         let _ = dotenv();
 
         let s = Config::builder()
@@ -72,5 +38,19 @@ impl ApiConfig {
         let config = s.try_deserialize()?;
 
         Ok(config)
+    }
+
+    pub fn postgres(&self) -> CliResult<&DbConfig> {
+        self.postgres
+            .as_ref()
+            .ok_or_else(|| CliError::ConfigMissing {
+                field: "postgres".to_string(),
+            })
+    }
+
+    pub fn s3(&self) -> CliResult<&S3Config> {
+        self.s3.as_ref().ok_or_else(|| CliError::ConfigMissing {
+            field: "s3".to_string(),
+        })
     }
 }

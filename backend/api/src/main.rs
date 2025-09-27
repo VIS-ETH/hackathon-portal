@@ -9,25 +9,23 @@ mod models;
 mod mw;
 mod routers;
 mod server;
-mod utils;
 mod workers;
 
 use crate::api_args::ApiArgs;
 use crate::api_config::ApiConfig;
 use crate::api_state::ApiState;
 use crate::server::Server;
-use crate::utils::setup_logging;
 use crate::workers::Workers;
 use clap::Parser;
 pub use error::{ApiError, ApiResult};
+use hackathon_portal_services::logger::Logger;
 use tokio::try_join;
 
 #[tokio::main]
 async fn main() -> ApiResult<()> {
     let args = ApiArgs::parse();
     let config = ApiConfig::parse(&args.config)?;
-
-    setup_logging(args.verbose)?;
+    let _logger = Logger::setup(&config.dirs, args.verbose, args.json)?;
 
     let api_state = ApiState::from_config(&config).await?;
 

@@ -7,6 +7,7 @@ edition = "2021"
 aws-smithy-types-convert = { version = "0.60.9", features = ["convert-chrono"] }
 chrono = { workspace = true }
 derive_more = { workspace = true }
+directories = { workspace = true }
 hackathon-portal-repositories = { workspace = true }
 itertools = { workspace = true }
 mime = { workspace = true }
@@ -16,6 +17,8 @@ serde = { workspace = true }
 serde_with = { workspace = true }
 strum = { workspace = true }
 tracing = { workspace = true }
+tracing-appender = "0.2.3"
+tracing-subscriber = { version = "0.3.19", features = ["env-filter", "json", "registry", "fmt"] }
 utoipa = { workspace = true }
 uuid = { workspace = true }
 

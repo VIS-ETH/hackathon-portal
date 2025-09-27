@@ -58,14 +58,6 @@ pub enum ApiError {
     InvalidHeaderValue(#[serde_as(as = "DisplayFromStr")] InvalidHeaderValue),
 
     #[from]
-    TracingSetGlobalDefault(
-        #[serde_as(as = "DisplayFromStr")] tracing::subscriber::SetGlobalDefaultError,
-    ),
-
-    #[from]
-    TracingFilterParse(#[serde_as(as = "DisplayFromStr")] tracing_subscriber::filter::ParseError),
-
-    #[from]
     JobScheduler(#[serde_as(as = "DisplayFromStr")] tokio_cron_scheduler::JobSchedulerError),
 
     #[from]
@@ -154,10 +146,13 @@ impl From<&RepositoryError> for PublicError {
                 (StatusCode::SERVICE_UNAVAILABLE, message.clone())
             }
             RepositoryError::SeaORM(_)
+            | RepositoryError::S3Build(_)
+            | RepositoryError::S3PresigningConfig(_)
             | RepositoryError::S3HeadObject(_)
             | RepositoryError::S3GetObject(_)
             | RepositoryError::S3PutObject(_)
-            | RepositoryError::S3PresigningConfig(_) => ise,
+            | RepositoryError::S3GetBucketCors(_)
+            | RepositoryError::S3PutBucketCors(_) => ise,
         };
 
         Self::new(status, message)
@@ -251,6 +246,9 @@ impl From<&ServiceError> for PublicError {
             ),
             ServiceError::Repository(e) => return e.into(),
             ServiceError::Matching { message } => (StatusCode::BAD_REQUEST, message.clone()),
+            ServiceError::Io(_) |
+            ServiceError::TracingSetGlobalDefault(_) |
+            ServiceError::TracingAppenderRollingInit(_) |
             ServiceError::SeaORM(_) => ise,
         };
 
@@ -287,8 +285,6 @@ impl From<&ApiError> for PublicError {
             ApiError::Config(_)
             | ApiError::Io(_)
             | ApiError::InvalidHeaderValue(_)
-            | ApiError::TracingSetGlobalDefault(_)
-            | ApiError::TracingFilterParse(_)
             | ApiError::JobScheduler(_)
             | ApiError::Reqwest(_)
             | ApiError::Jwt(_) => ise,

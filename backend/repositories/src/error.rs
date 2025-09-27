@@ -26,6 +26,9 @@ pub enum RepositoryError {
     SeaORM(#[serde_as(as = "DisplayFromStr")] sea_orm::DbErr),
 
     #[from]
+    S3Build(#[serde_as(as = "DisplayFromStr")] aws_sdk_s3::error::BuildError),
+
+    #[from]
     S3PresigningConfig(
         #[serde_as(as = "DisplayFromStr")] aws_sdk_s3::presigning::PresigningConfigError,
     ),
@@ -46,6 +49,18 @@ pub enum RepositoryError {
     S3PutObject(
         #[serde_as(as = "DisplayFromStr")]
         aws_sdk_s3::error::SdkError<aws_sdk_s3::operation::put_object::PutObjectError>,
+    ),
+
+    #[from]
+    S3GetBucketCors(
+        #[serde_as(as = "DisplayFromStr")]
+        aws_sdk_s3::error::SdkError<aws_sdk_s3::operation::get_bucket_cors::GetBucketCorsError>,
+    ),
+
+    #[from]
+    S3PutBucketCors(
+        #[serde_as(as = "DisplayFromStr")]
+        aws_sdk_s3::error::SdkError<aws_sdk_s3::operation::put_bucket_cors::PutBucketCorsError>,
     ),
     // endregion
 }
