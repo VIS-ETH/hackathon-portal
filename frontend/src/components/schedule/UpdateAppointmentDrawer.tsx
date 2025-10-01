@@ -35,8 +35,6 @@ const UpdateAppointmentDrawer = ({
 }: UpdateAppointmentDrawerProps) => {
   const form = useForm<
     AppointmentForUpdate & {
-      startDate: Date;
-      endDate?: Date;
       setEnd: boolean;
     }
   >({
@@ -44,12 +42,16 @@ const UpdateAppointmentDrawer = ({
     validateInputOnChange: true,
     transformValues: (values) =>
       produce(values, (draft) => {
-        draft.start = draft.startDate?.toISOString().replace("Z", "");
-
-        if (draft.setEnd) {
-          draft.end = draft.endDate?.toISOString().replace("Z", "");
+        draft.title = values.title;
+        if (values.start) {
+          // should always be true
+          draft.start = new Date(values.start).toISOString().replace("Z", "");
         }
-
+        if (values.end) {
+          draft.end = new Date(values.end).toISOString().replace("Z", "");
+        } else {
+          draft.end = null;
+        }
         return draft;
       }),
   });
@@ -61,8 +63,8 @@ const UpdateAppointmentDrawer = ({
       title: appointment.title,
       description: appointment.description,
       content: appointment.content,
-      startDate: new Date(`${appointment.start}Z`),
-      endDate: new Date(`${appointment.end ?? appointment.start}Z`),
+      start: `${appointment.start}Z`,
+      end: `${appointment.end ?? appointment.start}Z`,
       setEnd: !!appointment.end,
     });
 
@@ -109,7 +111,7 @@ const UpdateAppointmentDrawer = ({
           />
           <DateTimePicker
             {...(inputProps as DateTimePickerProps)}
-            {...form.getInputProps("startDate")}
+            {...form.getInputProps("start")}
             label="Start"
           />
           <Checkbox
@@ -122,7 +124,7 @@ const UpdateAppointmentDrawer = ({
           {form.getValues().setEnd && (
             <DateTimePicker
               {...(inputProps as DateTimePickerProps)}
-              {...form.getInputProps("endDate")}
+              {...form.getInputProps("end")}
               label="End"
             />
           )}
