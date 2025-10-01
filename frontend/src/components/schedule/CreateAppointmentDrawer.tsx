@@ -35,8 +35,6 @@ const CreateAppointmentDrawer = ({
 }: CreateAppointmentDrawerProps) => {
   const form = useForm<
     AppointmentForCreate & {
-      startDate: Date;
-      endDate?: Date;
       setEnd: boolean;
     }
   >({
@@ -44,18 +42,18 @@ const CreateAppointmentDrawer = ({
     validateInputOnChange: true,
     transformValues: (values) =>
       produce(values, (draft) => {
+        draft.title = values.title;
         draft.event_id = eventId;
-
-        draft.start = draft.startDate.toISOString().replace("Z", "");
-
-        if (draft.setEnd) {
-          draft.end = draft.endDate?.toISOString().replace("Z", "");
+        console.log("type of start", typeof values.start);
+        draft.start = new Date(values.start).toISOString().replace("Z", "");
+        if (values.end) {
+          draft.end = new Date(values.end).toISOString().replace("Z", "");
+        } else {
+          draft.end = null;
         }
-
         return draft;
       }),
   });
-
   const createAppointmentMutation = useCreateAppointment();
 
   useEffect(() => {
@@ -99,10 +97,11 @@ const CreateAppointmentDrawer = ({
           />
           <DateTimePicker
             {...(inputProps as DateTimePickerProps)}
-            {...form.getInputProps("startDate")}
+            {...form.getInputProps("start")}
             label="Start"
             required
           />
+          {/* {typeof (form.getValues().startDate)} */}
           <Checkbox
             checked={form.getValues().setEnd}
             onChange={() =>
@@ -113,7 +112,7 @@ const CreateAppointmentDrawer = ({
           {form.getValues().setEnd && (
             <DateTimePicker
               {...(inputProps as DateTimePickerProps)}
-              {...form.getInputProps("endDate")}
+              {...form.getInputProps("end")}
               label="End"
             />
           )}
