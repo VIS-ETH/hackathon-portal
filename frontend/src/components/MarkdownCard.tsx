@@ -6,12 +6,13 @@ import { Card } from "@mantine/core";
 
 type MarkdownCardProps = {
   content: string;
+  allowHtml?: boolean;
 };
 
-const MarkdownCard = ({ content }: MarkdownCardProps) => {
+const MarkdownCard = ({ content, allowHtml }: MarkdownCardProps) => {
   return (
     <Card {...cardProps} py={0}>
-      <Markdown content={content} />
+      <Markdown content={content} allowHtml={allowHtml} />
     </Card>
   );
 };
