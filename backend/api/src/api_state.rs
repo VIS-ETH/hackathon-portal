@@ -1,6 +1,7 @@
 use crate::api_config::ApiConfig;
 use crate::auth::Authenticator;
 use crate::ApiResult;
+use hackathon_portal_repositories::discord::DiscordConfig;
 use hackathon_portal_repositories::s3::S3Repository;
 use hackathon_portal_repositories::DbRepository;
 use hackathon_portal_services::appointment::AppointmentService;
@@ -19,6 +20,7 @@ use std::sync::Arc;
 #[allow(clippy::struct_field_names)]
 pub struct ApiState {
     pub authenticator: Authenticator,
+    pub discord_config: Arc<DiscordConfig>,
     pub health_service: Arc<HealthService>,
     pub authorization_service: Arc<AuthorizationService>,
     pub user_service: Arc<UserService>,
@@ -35,6 +37,7 @@ impl ApiState {
     #[allow(clippy::too_many_arguments)]
     pub fn new(
         authenticator: Authenticator,
+        discord_config: Arc<DiscordConfig>,
         health_service: Arc<HealthService>,
         authorization_service: Arc<AuthorizationService>,
         user_service: Arc<UserService>,
@@ -48,6 +51,7 @@ impl ApiState {
     ) -> Self {
         Self {
             authenticator,
+            discord_config,
             health_service,
             authorization_service,
             user_service,
@@ -67,6 +71,8 @@ impl ApiState {
         let db_repo = DbRepository::from_config(&config.postgres).await?;
 
         let s3_repo = S3Repository::from_config(&config.s3);
+
+        let discord_config = Arc::new(config.discord.clone());
 
         let health_service = Arc::new(HealthService::new(db_repo.clone()));
         let authorization_service = Arc::new(AuthorizationService::new(db_repo.clone()));
@@ -100,6 +106,7 @@ impl ApiState {
 
         let state = Self::new(
             authenticator,
+            discord_config,
             health_service,
             authorization_service,
             user_service,

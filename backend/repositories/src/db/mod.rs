@@ -8,6 +8,7 @@ pub mod prelude;
 pub mod appointment;
 pub mod event;
 pub mod event_role_assignment;
+pub mod event_user_discord_id;
 pub mod expert_rating;
 pub mod project;
 pub mod project_preference;
@@ -22,6 +23,7 @@ pub mod user;
 
 pub use crate::RepositoryResult;
 
+use crate::db::prelude::db_event_user_discord_id;
 use crate::RepositoryError;
 use sea_orm::prelude::*;
 use sea_orm::sea_query::SimpleExpr::Column;
@@ -554,6 +556,22 @@ impl DbRepository {
             .await?;
 
         Ok(uploads)
+    }
+    // endregion
+
+    // region: EventUserDiscordId
+    pub async fn get_event_user_discord_id(
+        &self,
+        event_id: Uuid,
+        user_id: Uuid,
+    ) -> RepositoryResult<Option<db_event_user_discord_id::Model>> {
+        let entry = db_event_user_discord_id::Entity::find()
+            .filter(db_event_user_discord_id::Column::UserId.eq(user_id))
+            .filter(db_event_user_discord_id::Column::EventId.eq(event_id))
+            .one(self.conn())
+            .await?;
+
+        Ok(entry)
     }
     // endregion
 }

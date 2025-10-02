@@ -1,18 +1,24 @@
 import classes from "./UserMenu.module.css";
 
 import { useGetMe } from "@/api/gen";
+import { useDiscord } from "@/hooks/useDiscord";
 import { iconProps } from "@/styles/common";
 
 import { Avatar, Group, Menu, Text, UnstyledButton } from "@mantine/core";
 
 import { useDisclosure } from "@mantine/hooks";
 
-import { IconChevronDown, IconLogout } from "@tabler/icons-react";
+import {
+  IconBrandDiscord,
+  IconChevronDown,
+  IconLogout,
+} from "@tabler/icons-react";
 import cx from "clsx";
 
 const UserMenu = () => {
   const { data: me } = useGetMe();
   const [opened, handles] = useDisclosure();
+  const { discordAuthUrl } = useDiscord();
 
   return (
     <Menu
@@ -40,6 +46,13 @@ const UserMenu = () => {
       </Menu.Target>
       <Menu.Dropdown>
         <Menu.Label>{me?.auth_id}</Menu.Label>
+        <Menu.Item
+          component="a" // 'a' for anchor tag
+          href={discordAuthUrl}
+          leftSection={<IconBrandDiscord {...iconProps} />}
+        >
+          (Re)connect Discord Account
+        </Menu.Item>
         <Menu.Item
           component="a"
           href="https://auth.viscon-hackathon.ch"

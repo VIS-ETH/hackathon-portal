@@ -59,12 +59,15 @@ model event {
   visibility                  event_visibility
   phase                       event_phase
 
+  discord_server_id String?
+
   // related models
   team                  team[]
   project               project[]
   sidequest             sidequest[]
   appointment           appointment[]
   event_role_assignment event_role_assignment[]
+  event_user_discord_id event_user_discord_id[]
 }
 
 model team {
@@ -112,6 +115,7 @@ model user {
   sidequest_attempt     sidequest_attempt[]
   expert_rating         expert_rating[]
   upload                upload[]
+  event_user_discord_id event_user_discord_id[]
 
   // meta
   @@unique([name, index])
@@ -128,6 +132,19 @@ model event_role_assignment {
 
   // meta
   @@id([user_id, event_id, role])
+}
+
+model event_user_discord_id {
+  event_id   String @db.Uuid
+  user_id    String @db.Uuid
+  discord_id String
+
+  // relations
+  event event? @relation(fields: [event_id], references: [id])
+  user  user?  @relation(fields: [user_id], references: [id])
+
+  // meta
+  @@id([user_id, event_id])
 }
 
 model team_role_assignment {

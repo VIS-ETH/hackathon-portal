@@ -102,6 +102,49 @@ impl UserService {
 
         Ok(user.into())
     }
+
+    pub async fn get_event_discord_id(
+        &self,
+        user_id: Uuid,
+        event_id: Uuid,
+    ) -> ServiceResult<Option<String>> {
+        let entry = self
+            .db_repo
+            .get_event_user_discord_id(event_id, user_id)
+            .await?;
+
+        Ok(entry.map(|e| e.discord_id))
+    }
+
+    /// Links the user's Discord ID to their user account for a specific event.
+    pub async fn update_discord_id(
+        &self,
+        user_id: Uuid,
+        event_id: Uuid,
+        discord_id: String,
+    ) -> ServiceResult<()> {
+        let existing = self
+            .db_repo
+            .get_event_user_discord_id(event_id, user_id)
+            .await?;
+
+        if let Some(existing) = existing {
+            // Update existing record
+            let mut active = existing.into_active_model();
+            active.discord_id = Set(discord_id);
+            active.update(self.db_repo.conn()).await?;
+        } else {
+            // Insert new record
+            let new = db_event_user_discord_id::ActiveModel {
+                user_id: Set(user_id),
+                event_id: Set(event_id),
+                discord_id: Set(discord_id),
+            };
+            new.insert(self.db_repo.conn()).await?;
+        }
+
+        Ok(())
+    }
 }
 
 #[must_use]

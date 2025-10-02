@@ -19,8 +19,10 @@ import type {
   DeleteSidequest200,
   DeleteSidequestAttempt200,
   DeleteTeamRolesBody,
+  DiscordOauthBody,
   Event,
   EventAffiliate,
+  EventDiscordResponse,
   EventForUpdate,
   EventRole,
   ExpertRating,
@@ -49,6 +51,7 @@ import type {
   GetTeamsRolesParams,
   InviteUsersDTO,
   Policies,
+  PostEventDiscordOauth200,
   Project,
   ProjectForCreate,
   ProjectForUpdate,
@@ -1429,6 +1432,255 @@ export function useGetEventAffiliates<
 
   return query;
 }
+
+export const getEventDiscordOauth = (
+  eventId: string,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<EventDiscordResponse>(
+    { url: `/api/events/${eventId}/discord`, method: "GET", signal },
+    options,
+  );
+};
+
+export const getGetEventDiscordOauthQueryKey = (eventId: string) => {
+  return [`/api/events/${eventId}/discord`] as const;
+};
+
+export const getGetEventDiscordOauthQueryOptions = <
+  TData = Awaited<ReturnType<typeof getEventDiscordOauth>>,
+  TError = PublicError,
+>(
+  eventId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getEventDiscordOauth>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetEventDiscordOauthQueryKey(eventId);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getEventDiscordOauth>>
+  > = ({ signal }) => getEventDiscordOauth(eventId, requestOptions, signal);
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!eventId,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getEventDiscordOauth>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetEventDiscordOauthQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getEventDiscordOauth>>
+>;
+export type GetEventDiscordOauthQueryError = PublicError;
+
+export function useGetEventDiscordOauth<
+  TData = Awaited<ReturnType<typeof getEventDiscordOauth>>,
+  TError = PublicError,
+>(
+  eventId: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getEventDiscordOauth>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getEventDiscordOauth>>,
+          TError,
+          Awaited<ReturnType<typeof getEventDiscordOauth>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetEventDiscordOauth<
+  TData = Awaited<ReturnType<typeof getEventDiscordOauth>>,
+  TError = PublicError,
+>(
+  eventId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getEventDiscordOauth>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getEventDiscordOauth>>,
+          TError,
+          Awaited<ReturnType<typeof getEventDiscordOauth>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetEventDiscordOauth<
+  TData = Awaited<ReturnType<typeof getEventDiscordOauth>>,
+  TError = PublicError,
+>(
+  eventId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getEventDiscordOauth>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetEventDiscordOauth<
+  TData = Awaited<ReturnType<typeof getEventDiscordOauth>>,
+  TError = PublicError,
+>(
+  eventId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getEventDiscordOauth>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetEventDiscordOauthQueryOptions(eventId, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+export const postEventDiscordOauth = (
+  eventId: string,
+  discordOauthBody: DiscordOauthBody,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<PostEventDiscordOauth200>(
+    {
+      url: `/api/events/${eventId}/discord`,
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      data: discordOauthBody,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getPostEventDiscordOauthMutationOptions = <
+  TError = PublicError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postEventDiscordOauth>>,
+    TError,
+    { eventId: string; data: DiscordOauthBody },
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postEventDiscordOauth>>,
+  TError,
+  { eventId: string; data: DiscordOauthBody },
+  TContext
+> => {
+  const mutationKey = ["postEventDiscordOauth"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postEventDiscordOauth>>,
+    { eventId: string; data: DiscordOauthBody }
+  > = (props) => {
+    const { eventId, data } = props ?? {};
+
+    return postEventDiscordOauth(eventId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostEventDiscordOauthMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postEventDiscordOauth>>
+>;
+export type PostEventDiscordOauthMutationBody = DiscordOauthBody;
+export type PostEventDiscordOauthMutationError = PublicError;
+
+export const usePostEventDiscordOauth = <
+  TError = PublicError,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof postEventDiscordOauth>>,
+      TError,
+      { eventId: string; data: DiscordOauthBody },
+      TContext
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof postEventDiscordOauth>>,
+  TError,
+  { eventId: string; data: DiscordOauthBody },
+  TContext
+> => {
+  const mutationOptions = getPostEventDiscordOauthMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
 
 export const getExpertRatingsLeaderboard = (
   eventId: string,

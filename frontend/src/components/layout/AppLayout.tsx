@@ -1,3 +1,4 @@
+import DiscordBanner from "../banner/DiscordBanner";
 import Navbar from "./Navbar";
 
 import Footer from "@/components/layout/Footer";
@@ -10,11 +11,13 @@ import { Box, Container } from "@mantine/core";
 type AppLayoutProps = PropsWithChildren & {
   showHeader?: boolean;
   showFooter?: boolean;
+  suppressDiscordBanner?: boolean;
 };
 
 const AppLayout = ({
   showHeader = true,
   showFooter = true,
+  suppressDiscordBanner = false,
   children,
 }: Readonly<AppLayoutProps>) => {
   return (
@@ -26,6 +29,7 @@ const AppLayout = ({
       )}
       <Box component="main" flex="1">
         <Container {...containerProps} py="xl">
+          {!suppressDiscordBanner && <DiscordBanner />}
           {children}
         </Container>
       </Box>

@@ -4,10 +4,12 @@ use crate::api_state::ApiState;
 use crate::ctx::Ctx;
 use crate::error::{ApiJson, ApiJsonVec};
 use crate::models::AffectedRows;
-use crate::routers::events::models::{InviteUsersDTO, SidequestsHistoryQuery};
+use crate::routers::events::models::{
+    DiscordOauthBody, EventDiscordResponse, InviteUsersDTO, SidequestsHistoryQuery,
+};
 use crate::routers::sidequests::models::SidequestIdQuery;
 use crate::routers::users::models::EventRoleOptQuery;
-use crate::ApiError;
+use crate::{ApiError, ApiResult};
 use axum::extract::{Path, Query, State};
 use axum::routing::{delete, get, patch, post, put};
 use axum::{Json, Router};
@@ -21,6 +23,9 @@ use hackathon_portal_services::sidequest::models::{
 };
 use hackathon_portal_services::team::models::Team;
 use hackathon_portal_services::user::models::ReducedUser;
+use reqwest::Client;
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
 
@@ -31,6 +36,8 @@ pub fn get_router(state: &ApiState) -> Router {
         .route("/slug/:event_slug", get(get_event_by_slug))
         .route("/:event_id", get(get_event))
         .route("/:event_id", patch(update_event))
+        .route("/:event_id/discord", get(get_event_discord_oauth))
+        .route("/:event_id/discord", post(post_event_discord_oauth))
         .route("/:event_id/roles", get(get_event_roles))
         .route("/:event_id/roles", put(put_event_roles))
         .route("/:event_id/roles", delete(delete_event_roles))
@@ -552,4 +559,139 @@ pub async fn get_sidequests_history(
         .await?;
 
     Ok(Json(history))
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/events/{event_id}/discord",
+    responses(
+        (status = StatusCode::OK, body = EventDiscordResponse),
+        (status = StatusCode::BAD_REQUEST, body = PublicError),
+        (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
+    ),
+)]
+pub async fn get_event_discord_oauth(
+    ctx: Ctx,
+    State(state): State<ApiState>,
+    Path(event_id): Path<Uuid>,
+) -> ApiJson<EventDiscordResponse> {
+    let event = state.event_service.get_event(event_id).await?;
+    let groups = Groups::from_event(ctx.roles(), event.id);
+
+    if !groups.can_view_event(event.visibility) {
+        return Err(ApiError::Forbidden {
+            action: "view this event".to_string(),
+        });
+    }
+
+    // Extract the user ID from the context
+    let user_id = ctx.user().id;
+
+    let discord_id = state
+        .user_service
+        .get_event_discord_id(user_id, event.id)
+        .await?;
+
+    let response = EventDiscordResponse {
+        discord_user_id: discord_id,
+    };
+
+    Ok(Json(response))
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/events/{event_id}/discord",
+    responses(
+        (status = StatusCode::OK, body = ()),
+        (status = StatusCode::BAD_REQUEST, body = PublicError),
+        (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
+    ),
+)]
+pub async fn post_event_discord_oauth(
+    ctx: Ctx,
+    State(state): State<ApiState>,
+    Path(event_id): Path<Uuid>,
+    Json(body): Json<DiscordOauthBody>,
+) -> ApiResult<()> {
+    #[derive(Deserialize)]
+    struct TokenResponse {
+        access_token: String,
+    }
+
+    #[derive(Deserialize)]
+    struct UserInfoResponse {
+        id: String,
+    }
+
+    #[derive(Serialize)]
+    struct PutMemberRequest<'a> {
+        access_token: &'a str,
+        nick: &'a str,
+    }
+
+    // Verify event and permissions
+    let event = state.event_service.get_event(event_id).await?;
+    let groups = Groups::from_event(ctx.roles(), event.id);
+
+    // TODO: temporary restriction until the Discord config is event-specific
+    if !groups.can_view_event(event.visibility) || !event.slug.contains("viscon-2025") {
+        return Err(ApiError::Forbidden {
+            action: "join this event on Discord".to_string(),
+        });
+    }
+
+    // TODO: move out of the handler at some point
+
+    let client = Client::new();
+    let params = [
+        ("client_id", state.discord_config.client_id.as_str()),
+        ("client_secret", state.discord_config.client_secret.as_str()),
+        ("grant_type", "authorization_code"),
+        ("code", body.code.as_str()),
+        ("redirect_uri", body.redirect_uri.as_str()),
+    ];
+
+    let token = client
+        .post("https://discord.com/api/oauth2/token")
+        .form(&params)
+        .send()
+        .await?
+        .json::<TokenResponse>()
+        .await?;
+
+    // Get user info from Discord
+    let user_info = client
+        .get("https://discord.com/api/users/@me")
+        .bearer_auth(&token.access_token)
+        .send()
+        .await?
+        .json::<UserInfoResponse>()
+        .await?;
+
+    // Add user to guild
+    client
+        .put(format!(
+            "https://discord.com/api/guilds/{}/members/{}",
+            state.discord_config.guild_id, // FIXME hardcoded guild id,
+            user_info.id
+        ))
+        .header(
+            "Authorization",
+            format!("Bot {}", state.discord_config.bot_token),
+        )
+        .json(&PutMemberRequest {
+            access_token: &token.access_token,
+            nick: &ctx.user().name,
+        })
+        .send()
+        .await?
+        .error_for_status()?;
+
+    state
+        .user_service
+        .update_discord_id(ctx.user().id, event.id, user_info.id)
+        .await?;
+
+    Ok(())
 }
