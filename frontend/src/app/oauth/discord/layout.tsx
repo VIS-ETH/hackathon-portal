@@ -2,7 +2,7 @@
 
 import AppLayout from "@/components/layout/AppLayout";
 
-import { PropsWithChildren } from "react";
+import { PropsWithChildren, Suspense } from "react";
 
 const Layout = ({ children }: Readonly<PropsWithChildren>) => {
   return (
@@ -11,7 +11,7 @@ const Layout = ({ children }: Readonly<PropsWithChildren>) => {
       showHeader={false}
       suppressDiscordBanner={true}
     >
-      {children}
+      <Suspense>{children}</Suspense>
     </AppLayout>
   );
 };
