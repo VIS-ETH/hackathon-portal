@@ -22,3 +22,15 @@ pub struct SidequestsHistoryQuery {
     pub after: Option<NaiveDateTime>,
     pub before: Option<NaiveDateTime>,
 }
+
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+pub struct DiscordOauthBody {
+    pub code: String,
+    pub redirect_uri: String,
+}
+
+// Define the response type
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+pub struct EventDiscordResponse {
+    pub discord_user_id: Option<String>, // or U64 depending on your DB schema
+}

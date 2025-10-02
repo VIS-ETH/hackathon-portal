@@ -11,6 +11,19 @@ pub struct User {
     pub name: String,
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+pub struct UserDiscordIds {
+    pub discord_ids: Vec<(Uuid, String)>,
+}
+
+impl From<db_event_user_discord_id::Model> for UserDiscordIds {
+    fn from(value: db_event_user_discord_id::Model) -> Self {
+        Self {
+            discord_ids: vec![(value.user_id, value.discord_id)],
+        }
+    }
+}
+
 impl From<db_user::Model> for User {
     fn from(value: db_user::Model) -> Self {
         Self {

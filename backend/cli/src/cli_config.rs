@@ -3,6 +3,7 @@ use config::{Config, Environment};
 use directories::ProjectDirs;
 use dotenvy::dotenv;
 use hackathon_portal_repositories::db::DbConfig;
+use hackathon_portal_repositories::discord::DiscordConfig;
 use hackathon_portal_repositories::s3::S3Config;
 use serde::{Deserialize, Serialize};
 use std::path::Path;
@@ -11,6 +12,7 @@ use std::path::Path;
 pub struct CliConfig {
     pub postgres: Option<DbConfig>,
     pub s3: Option<S3Config>,
+    pub discord: Option<DiscordConfig>,
     #[serde(skip, default = "CliConfig::default_dirs")]
     pub dirs: ProjectDirs,
 }
@@ -52,5 +54,13 @@ impl CliConfig {
         self.s3.as_ref().ok_or_else(|| CliError::ConfigMissing {
             field: "s3".to_string(),
         })
+    }
+
+    pub fn discord(&self) -> CliResult<&DiscordConfig> {
+        self.discord
+            .as_ref()
+            .ok_or_else(|| CliError::ConfigMissing {
+                field: "discord".to_string(),
+            })
     }
 }

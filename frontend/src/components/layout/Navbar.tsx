@@ -4,6 +4,7 @@ import classes from "./Navbar.module.css";
 import UserMenu from "./UserMenu";
 
 import { useGetMe } from "@/api/gen";
+import { useDiscord } from "@/hooks/useDiscord";
 import { useResolveParams } from "@/hooks/useResolveParams";
 import { badgeProps, containerProps } from "@/styles/common";
 
@@ -33,6 +34,7 @@ const Navbar = () => {
   const { data: me } = useGetMe();
   const { event, policies } = useResolveParams();
   const [drawerOpened, drawerHandles] = useDisclosure(false);
+  const { discordAuthUrl } = useDiscord();
 
   const tabs = [
     {
@@ -148,6 +150,13 @@ const Navbar = () => {
               <Divider my="sm" />
               {mobileTabs}
               <Divider my="sm" />
+              <Link
+                href={discordAuthUrl}
+                className={cx(classes.mobileLink)}
+                referrerPolicy="no-referrer"
+              >
+                (Re)connect Discord Account
+              </Link>
               <Link
                 href="https://auth.viscon-hackathon.ch"
                 referrerPolicy="no-referrer"

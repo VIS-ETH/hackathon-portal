@@ -21,9 +21,9 @@ pub struct Model {
     pub extra_score: Option<f64>,
     #[sea_orm(column_type = "Text", nullable)]
     pub comment: Option<String>,
-    pub photo_id: Option<Uuid>,
     #[sea_orm(column_type = "Text", nullable)]
     pub ai_api_key: Option<String>,
+    pub photo_id: Option<Uuid>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

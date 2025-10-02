@@ -19,6 +19,8 @@ pub struct Model {
 pub enum Relation {
     #[sea_orm(has_many = "super::event_role_assignment::Entity")]
     EventRoleAssignment,
+    #[sea_orm(has_many = "super::event_user_discord_id::Entity")]
+    EventUserDiscordId,
     #[sea_orm(has_many = "super::expert_rating::Entity")]
     ExpertRating,
     #[sea_orm(has_many = "super::sidequest_attempt::Entity")]
@@ -32,6 +34,12 @@ pub enum Relation {
 impl Related<super::event_role_assignment::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::EventRoleAssignment.def()
+    }
+}
+
+impl Related<super::event_user_discord_id::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::EventUserDiscordId.def()
     }
 }
 
@@ -56,6 +64,15 @@ impl Related<super::team_role_assignment::Entity> for Entity {
 impl Related<super::upload::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Upload.def()
+    }
+}
+
+impl Related<super::event::Entity> for Entity {
+    fn to() -> RelationDef {
+        super::event_user_discord_id::Relation::Event.def()
+    }
+    fn via() -> Option<RelationDef> {
+        Some(super::event_user_discord_id::Relation::User.def().rev())
     }
 }
 

@@ -3,6 +3,7 @@
 pub use super::appointment as db_appointment;
 pub use super::event as db_event;
 pub use super::event_role_assignment as db_event_role_assignment;
+pub use super::event_user_discord_id as db_event_user_discord_id;
 pub use super::expert_rating as db_expert_rating;
 pub use super::project as db_project;
 pub use super::project_preference as db_project_preference;

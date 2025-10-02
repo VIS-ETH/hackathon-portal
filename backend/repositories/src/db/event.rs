@@ -24,11 +24,13 @@ pub struct Model {
     pub max_teams_per_project: i32,
     pub sidequest_cooldown: i32,
     pub read_only: bool,
-    pub projects_visible: bool,
-    pub project_assignments_visible: bool,
     pub feedback_visible: bool,
     pub visibility: EventVisibility,
     pub phase: EventPhase,
+    pub project_assignments_visible: bool,
+    pub projects_visible: bool,
+    #[sea_orm(column_type = "Text", nullable)]
+    pub discord_server_id: Option<String>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
@@ -37,6 +39,8 @@ pub enum Relation {
     Appointment,
     #[sea_orm(has_many = "super::event_role_assignment::Entity")]
     EventRoleAssignment,
+    #[sea_orm(has_many = "super::event_user_discord_id::Entity")]
+    EventUserDiscordId,
     #[sea_orm(has_many = "super::project::Entity")]
     Project,
     #[sea_orm(has_many = "super::sidequest::Entity")]
@@ -57,6 +61,12 @@ impl Related<super::event_role_assignment::Entity> for Entity {
     }
 }
 
+impl Related<super::event_user_discord_id::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::EventUserDiscordId.def()
+    }
+}
+
 impl Related<super::project::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Project.def()
@@ -72,6 +82,15 @@ impl Related<super::sidequest::Entity> for Entity {
 impl Related<super::team::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Team.def()
+    }
+}
+
+impl Related<super::user::Entity> for Entity {
+    fn to() -> RelationDef {
+        super::event_user_discord_id::Relation::User.def()
+    }
+    fn via() -> Option<RelationDef> {
+        Some(super::event_user_discord_id::Relation::Event.def().rev())
     }
 }
 
