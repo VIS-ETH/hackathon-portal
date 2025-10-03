@@ -77,6 +77,10 @@ impl UserService {
         let txn = self.db_repo.conn().begin().await?;
         let user = self.db_repo.get_user_txn(user_id, &txn).await?;
 
+        if user.name == name {
+            return Ok(user.into());
+        }
+
         let index = db_user::Entity::find()
             .select_only()
             .select_column_as(db_user::Column::Index.max(), "index")
