@@ -219,8 +219,16 @@ impl DbRepository {
 
     // region: User
     pub async fn get_user(&self, user_id: Uuid) -> RepositoryResult<user::Model> {
+        self.get_user_txn(user_id, self.conn()).await
+    }
+
+    pub async fn get_user_txn<C: ConnectionTrait>(
+        &self,
+        user_id: Uuid,
+        txn: &C,
+    ) -> RepositoryResult<user::Model> {
         let user = user::Entity::find_by_id(user_id)
-            .one(self.conn())
+            .one(txn)
             .await?
             .ok_or_else(|| RepositoryError::ResourceNotFound {
                 resource: "User".to_string(),

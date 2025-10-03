@@ -25,7 +25,6 @@ use hackathon_portal_services::team::models::Team;
 use hackathon_portal_services::user::models::ReducedUser;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
 

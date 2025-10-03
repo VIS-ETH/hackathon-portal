@@ -32,7 +32,7 @@ pub async fn mw_resolve_ctx(
 
     let Ok(user) = state
         .user_service
-        .create_or_get_user(&auth_result.auth_id, Some(&auth_result.name))
+        .create_or_get_user(&auth_result.auth_id, &auth_result.name)
         .await
     else {
         return next.run(req).await;
