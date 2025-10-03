@@ -18,23 +18,12 @@ impl UserService {
         Self { db_repo }
     }
 
-    pub async fn create_or_get_user(
-        &self,
-        auth_id: &str,
-        name: Option<&str>,
-    ) -> ServiceResult<User> {
+    pub async fn create_or_get_user(&self, auth_id: &str, name: &str) -> ServiceResult<User> {
         let user = self.db_repo.get_user_by_auth_id(auth_id).await.ok();
 
-        let name = match name {
-            None | Some("") => None,
-            Some(name) => Some(name),
-        };
-
         if let Some(user) = user {
-            if let Some(name) = name {
-                if user.name != name {
-                    return self.update_user_name(user.id, name).await;
-                }
+            if user.name != name {
+                return self.update_user_name(user.id, name).await;
             }
 
             return Ok(user.into());
@@ -56,7 +45,11 @@ impl UserService {
         let mut new_users = Vec::new();
 
         for user in users {
-            new_users.push(self.create_or_get_user(&user.auth_id, None).await?);
+            // we don't know the name yet, so we use auth_id as a placeholder
+            new_users.push(
+                self.create_or_get_user(&user.auth_id, &user.auth_id)
+                    .await?,
+            );
         }
 
         Ok(new_users)
@@ -81,8 +74,8 @@ impl UserService {
     /// This updates the user's name (not username).
     /// If the name is already taken, the index will be set accordingly.
     pub async fn update_user_name(&self, user_id: Uuid, name: &str) -> ServiceResult<User> {
-        let user = self.db_repo.get_user(user_id).await?;
         let txn = self.db_repo.conn().begin().await?;
+        let user = self.db_repo.get_user_txn(user_id, &txn).await?;
 
         let index = db_user::Entity::find()
             .select_only()
