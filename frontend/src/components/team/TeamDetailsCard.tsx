@@ -31,12 +31,19 @@ import Link from "next/link";
 
 type TeamDetailsCardProps = {
   team: Team;
+  canViewProject: boolean;
   canViewPassword: boolean;
 };
 
-const TeamDetailsCard = ({ team, canViewPassword }: TeamDetailsCardProps) => {
+const TeamDetailsCard = ({
+  team,
+  canViewProject,
+  canViewPassword,
+}: TeamDetailsCardProps) => {
   const { data: event } = useGetEvent(team.event_id);
-  const { data: project } = useGetProject(team?.project_id ?? "");
+  const { data: project } = useGetProject(team?.project_id ?? "", {
+    query: { enabled: !!team && canViewProject },
+  });
 
   const { data: credentials } = useGetTeamCredentials(team?.id ?? "", {
     query: {

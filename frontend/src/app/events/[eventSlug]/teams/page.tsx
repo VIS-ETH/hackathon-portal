@@ -10,9 +10,16 @@ import { Divider, Stack, Title } from "@mantine/core";
 const Teams = () => {
   const { event } = useResolveParams();
 
-  const { data: teams } = useGetTeams({
-    event_id: event?.id ?? "",
-  });
+  const { data: teams } = useGetTeams(
+    {
+      event_id: event?.id ?? "",
+    },
+    {
+      query: {
+        enabled: !!event,
+      },
+    },
+  );
 
   const { data: teamsRoles } = useGetTeamsRoles(
     {
