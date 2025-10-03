@@ -31,6 +31,7 @@ const Team = () => {
       >
         <TeamDetailsCard
           team={team}
+          canViewProject={policies.can_view_project}
           canViewPassword={policies.can_view_team_confidential}
         />
         {policies.can_view_event_internal && (
