@@ -44,7 +44,7 @@ const TeamDetailsCard = ({ team, canViewPassword }: TeamDetailsCardProps) => {
     },
   });
 
-  const publicUrl = `${fmtTeamIndex(team.index)}.viscon-hackathon.ch`;
+  const publicUrl = `${fmtTeamIndex(team.index)}.hackathon.ethz.ch`;
   const directUrl = `${fmtTeamIndex(team.index)}-direct.viscon-hackathon.ch`;
 
   const sshConfig = `Host viscon-${fmtTeamIndex(team.index)}\n  HostName ${directUrl}\n  User viscon`;
