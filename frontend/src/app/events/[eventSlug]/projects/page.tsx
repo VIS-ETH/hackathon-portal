@@ -17,9 +17,14 @@ const Projects = () => {
   const [opened, handles] = useDisclosure();
   const { event, policies } = useResolveParams();
 
-  const { data: projects, refetch: refetchProjects } = useGetProjects({
-    event_id: event?.id ?? "",
-  });
+  const { data: projects, refetch: refetchProjects } = useGetProjects(
+    {
+      event_id: event?.id ?? "",
+    },
+    {
+      query: { enabled: !!event },
+    },
+  );
 
   if (!event || !policies || !projects) {
     return <PageSkeleton />;

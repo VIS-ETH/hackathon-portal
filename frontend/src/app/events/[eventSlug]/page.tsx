@@ -10,7 +10,9 @@ import { Badge, Group, Stack, Title } from "@mantine/core";
 
 const Overview = () => {
   const { event } = useResolveParams();
-  const { data: roles } = useGetEventRoles(event?.id ?? "");
+  const { data: roles } = useGetEventRoles(event?.id ?? "", {
+    query: { enabled: !!event },
+  });
 
   if (!event) {
     return <PageSkeleton />;

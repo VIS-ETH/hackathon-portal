@@ -13,15 +13,20 @@ import { useDisclosure } from "@mantine/hooks";
 
 import { IconPlus } from "@tabler/icons-react";
 
-const Documentation = () => {
+const Schedule = () => {
   const [opened, handles] = useDisclosure();
 
   const { event, policies } = useResolveParams();
 
   const { data: appointments, refetch: refetchAppointments } =
-    useGetAppointments({
-      event_id: event?.id ?? "",
-    });
+    useGetAppointments(
+      {
+        event_id: event?.id ?? "",
+      },
+      {
+        query: { enabled: !!event },
+      },
+    );
 
   if (!event || !policies || !appointments) {
     return <PageSkeleton />;
@@ -58,4 +63,4 @@ const Documentation = () => {
   );
 };
 
-export default Documentation;
+export default Schedule;

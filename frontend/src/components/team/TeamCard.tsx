@@ -1,6 +1,11 @@
 import IconTextGroup from "../IconTextGroup";
 
-import { useGetEvent, useGetProjects, useGetTeamsRoles } from "@/api/gen";
+import {
+  useGetEvent,
+  useGetMyPolicies,
+  useGetProjects,
+  useGetTeamsRoles,
+} from "@/api/gen";
 import { Team } from "@/api/gen/schemas";
 import {
   badgeProps,
@@ -21,9 +26,18 @@ type TeamCardProps = {
 };
 
 const TeamCard = ({ team, highlight }: TeamCardProps) => {
+  const { data: policies } = useGetMyPolicies({
+    event_id: team.event_id,
+  });
+
   const { data: event } = useGetEvent(team.event_id);
   const { data: teamsRoles } = useGetTeamsRoles({ event_id: team.event_id });
-  const { data: projects } = useGetProjects({ event_id: team.event_id });
+  const { data: projects } = useGetProjects(
+    { event_id: team.event_id },
+    {
+      query: { enabled: policies?.can_view_project },
+    },
+  );
 
   const teamRoles = teamsRoles?.[team.id] ?? [];
   const projectName = projects?.find(
