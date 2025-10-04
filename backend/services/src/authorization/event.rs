@@ -1,9 +1,11 @@
 use crate::authorization::models::{AffiliateRow, EventAffiliate, EventRolesMap};
 use crate::authorization::AuthorizationService;
 use crate::user::fmt_user_name;
-use crate::utils::try_insert_result_to_int;
 use crate::{ServiceError, ServiceResult};
-use hackathon_portal_repositories::db::prelude::{db_event_role_assignment, db_user, EventRole};
+use hackathon_portal_repositories::db::{
+    db_event_role_assignment, db_user, EventRole, TryInsertResultExt,
+};
+use hackathon_portal_repositories::db::{EventRepository, EventRoleAssignmentRepository};
 use sea_orm::prelude::*;
 use sea_orm::sea_query::OnConflict;
 use sea_orm::{Condition, QuerySelect, QueryTrait, SelectColumns, Set, TransactionTrait};
@@ -12,7 +14,9 @@ use uuid::Uuid;
 
 impl AuthorizationService {
     pub async fn get_event_roles(&self, user_id: Uuid) -> ServiceResult<EventRolesMap> {
-        let roles = self.db_repo.get_event_roles(None, Some(user_id)).await?;
+        let roles =
+            EventRoleAssignmentRepository::fetch_all_by_user_id(self.db_repo.conn(), user_id)
+                .await?;
 
         let roles_map =
             roles
@@ -34,7 +38,7 @@ impl AuthorizationService {
         roles: EventRolesMap,
     ) -> ServiceResult<u64> {
         // Ensure event exists
-        self.db_repo.get_event(event_id).await?;
+        EventRepository::fetch_by_id(self.db_repo.conn(), event_id).await?;
 
         let mut active_role_assignments = Vec::new();
 
@@ -48,7 +52,7 @@ impl AuthorizationService {
             }
         }
 
-        let result = db_event_role_assignment::Entity::insert_many(active_role_assignments)
+        let rows_affected = db_event_role_assignment::Entity::insert_many(active_role_assignments)
             .on_conflict(
                 OnConflict::columns(vec![
                     db_event_role_assignment::Column::UserId,
@@ -60,9 +64,10 @@ impl AuthorizationService {
             )
             .on_empty_do_nothing()
             .exec_without_returning(self.db_repo.conn())
-            .await?;
+            .await?
+            .unwrap_or_default();
 
-        Ok(try_insert_result_to_int(result))
+        Ok(rows_affected)
     }
 
     pub async fn unassign_event_roles(

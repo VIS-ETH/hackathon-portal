@@ -1,6 +1,6 @@
 use crate::api_state::ApiState;
 use crate::ApiResult;
-use hackathon_portal_repositories::db::prelude::EventPhase;
+use hackathon_portal_repositories::db::EventPhase;
 use tokio_cron_scheduler::Job;
 use tracing::{error, info, info_span, Instrument};
 

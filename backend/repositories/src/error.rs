@@ -8,13 +8,9 @@ pub type RepositoryResult<T> = Result<T, RepositoryError>;
 #[serde_as]
 #[derive(Debug, Serialize, From)]
 pub enum RepositoryError {
-    ResourceNotFound {
-        resource: String,
-        id: String,
-    },
-
-    SlugNotUnique {
-        slug: String,
+    EntityNotFound {
+        entity: String,
+        identifier: String,
     },
 
     Timeout {

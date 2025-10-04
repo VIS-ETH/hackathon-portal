@@ -4,12 +4,12 @@ use crate::upload::models::UploadUrl;
 use crate::{ServiceError, ServiceResult};
 use aws_smithy_types_convert::date_time::DateTimeExt;
 use chrono::Utc;
-use hackathon_portal_repositories::db::prelude::*;
+use hackathon_portal_repositories::db::{db_upload, MediaUsage, UploadRepository};
 use hackathon_portal_repositories::s3::S3Repository;
 use hackathon_portal_repositories::DbRepository;
 use mime::Mime;
 use sea_orm::prelude::*;
-use sea_orm::{ActiveModelTrait, IntoActiveModel, Set};
+use sea_orm::{ActiveModelTrait, IntoActiveModel, Set, TransactionTrait};
 use std::time::Duration;
 
 #[derive(Clone)]
@@ -122,9 +122,9 @@ impl UploadService {
         usage: MediaUsage,
         allow_reuse: bool,
     ) -> ServiceResult<()> {
-        // TODO: transaction
+        let txn = self.db_repo.conn().begin().await?;
 
-        let upload = self.db_repo.get_upload(id).await?;
+        let upload = UploadRepository::fetch_by_id(&txn, id).await?;
 
         if upload.validated_at.is_some() && !allow_reuse {
             return Err(ServiceError::UploadIsAlreadyValidated);
@@ -147,7 +147,9 @@ impl UploadService {
         let mut active_upload = upload.into_active_model();
         active_upload.uploaded_at = Set(last_modified);
         active_upload.validated_at = Set(Some(Utc::now().naive_utc()));
-        active_upload.save(self.db_repo.conn()).await?;
+        active_upload.save(&txn).await?;
+
+        txn.commit().await?;
 
         Ok(())
     }

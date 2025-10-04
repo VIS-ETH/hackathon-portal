@@ -5,7 +5,9 @@ use crate::rating::models::{
     ExpertRatingLeaderboardEntry,
 };
 use crate::ServiceResult;
-use hackathon_portal_repositories::db::prelude::*;
+use hackathon_portal_repositories::db::{
+    db_expert_rating, db_team, ExpertRatingCategory, ExpertRatingRepository,
+};
 use hackathon_portal_repositories::DbRepository;
 use sea_orm::prelude::*;
 use sea_orm::sea_query::Func;
@@ -45,14 +47,16 @@ impl RatingService {
     }
 
     pub async fn get_expert_ratings(&self, team_id: Uuid) -> ServiceResult<Vec<ExpertRating>> {
-        let ratings = self.db_repo.get_expert_ratings(team_id).await?;
+        let ratings =
+            ExpertRatingRepository::fetch_all_by_team_id(self.db_repo.conn(), team_id).await?;
+
         let ratings = ratings.into_iter().map(ExpertRating::from).collect();
 
         Ok(ratings)
     }
 
     pub async fn get_expert_rating(&self, rating_id: Uuid) -> ServiceResult<ExpertRating> {
-        let rating = self.db_repo.get_expert_rating(rating_id).await?;
+        let rating = ExpertRatingRepository::fetch_by_id(self.db_repo.conn(), rating_id).await?;
         Ok(rating.into())
     }
 
@@ -61,7 +65,8 @@ impl RatingService {
         rating_id: Uuid,
         rating_fu: ExpertRatingForUpdate,
     ) -> ServiceResult<ExpertRating> {
-        let rating = self.db_repo.get_expert_rating(rating_id).await?;
+        let rating = ExpertRatingRepository::fetch_by_id(self.db_repo.conn(), rating_id).await?;
+
         let mut active_rating = rating.into_active_model();
 
         if let Some(rating) = rating_fu.rating {
@@ -74,7 +79,8 @@ impl RatingService {
     }
 
     pub async fn delete_expert_rating(&self, rating_id: Uuid) -> ServiceResult<()> {
-        let rating = self.db_repo.get_expert_rating(rating_id).await?;
+        let rating = ExpertRatingRepository::fetch_by_id(self.db_repo.conn(), rating_id).await?;
+
         rating.delete(self.db_repo.conn()).await?;
 
         Ok(())

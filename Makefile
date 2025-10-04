@@ -20,7 +20,7 @@ prisma-reset:
 	npx -r prisma migrate reset --schema db/schema.prisma
 
 seaorm-generate:
-	sea-orm-cli generate entity --database-url ${PORTAL__POSTGRES__URL} -o backend/repositories/src/db --with-serde both --enum-extra-derives "Copy, Hash, strum::Display, strum::VariantArray, utoipa::ToSchema"
+	sea-orm-cli generate entity --database-url ${PORTAL__POSTGRES__URL} -o backend/repositories/src/db/generated --with-serde both --enum-extra-derives "Copy, Hash, strum::Display, strum::VariantArray, utoipa::ToSchema"
 	cargo fmt --manifest-path backend/Cargo.toml --all
 
 fmt:

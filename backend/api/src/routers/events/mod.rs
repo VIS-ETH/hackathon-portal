@@ -13,7 +13,7 @@ use crate::{ApiError, ApiResult};
 use axum::extract::{Path, Query, State};
 use axum::routing::{delete, get, patch, post, put};
 use axum::{Json, Router};
-use hackathon_portal_repositories::db::prelude::EventRole;
+use hackathon_portal_repositories::db::EventRole;
 use hackathon_portal_services::authorization::groups::Groups;
 use hackathon_portal_services::authorization::models::{EventAffiliate, EventRoles, EventRolesMap};
 use hackathon_portal_services::event::models::{Event, EventForUpdate};

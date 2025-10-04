@@ -1,5 +1,5 @@
 use chrono::NaiveDateTime;
-use hackathon_portal_repositories::db::prelude::EventRole;
+use hackathon_portal_repositories::db::EventRole;
 use hackathon_portal_services::user::models::UserForCreate;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;

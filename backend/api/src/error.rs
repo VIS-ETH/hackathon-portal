@@ -135,13 +135,10 @@ impl From<&RepositoryError> for PublicError {
         );
 
         let (status, message) = match value {
-            RepositoryError::ResourceNotFound { resource, id } => (
+            RepositoryError::EntityNotFound { entity, identifier } => (
                 StatusCode::NOT_FOUND,
-                format!("{resource} '{id}' not found"),
+                format!("{entity} with identifier '{identifier}' not found"),
             ),
-            RepositoryError::SlugNotUnique { slug } => {
-                (StatusCode::CONFLICT, format!("Slug '{slug}' is not unique"))
-            }
             RepositoryError::Timeout { message } => {
                 (StatusCode::SERVICE_UNAVAILABLE, message.clone())
             }
@@ -167,6 +164,9 @@ impl From<&ServiceError> for PublicError {
         );
 
         let (status, message) = match value {
+            ServiceError::SlugNotUnique { slug } => {
+                (StatusCode::CONFLICT, format!("Slug '{slug}' is not unique"))
+            },
             ServiceError::ResourceStillInUse { resource, id } => (
                 StatusCode::CONFLICT,
                 format!("{resource} '{id}' is still in use"),

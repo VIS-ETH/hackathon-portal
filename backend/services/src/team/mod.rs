@@ -4,11 +4,15 @@ use crate::authorization::AuthorizationService;
 use crate::team::models::{Team, TeamCredentials, TeamForCreate, TeamForUpdate};
 use crate::upload::UploadService;
 use crate::{ServiceError, ServiceResult};
-use hackathon_portal_repositories::db::prelude::*;
+use hackathon_portal_repositories::db::{
+    db_project_preference, db_sidequest_score, db_team, db_team_role_assignment, MediaUsage,
+    ProjectPreferenceRepository, TeamRepository, TeamRole,
+};
 use hackathon_portal_repositories::DbRepository;
 use models::{TeamForUpdateInternal, TeamInternal};
 use sea_orm::prelude::*;
 use sea_orm::{ActiveModelTrait, IntoActiveModel, Set, TransactionTrait};
+use slug::slugify;
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 
@@ -34,10 +38,11 @@ impl TeamService {
     }
 
     pub async fn create_team(&self, creator: Uuid, team_fc: TeamForCreate) -> ServiceResult<Team> {
+        let txn = self.db_repo.conn().begin().await?;
+
         // Generate slug and check for naming conflicts
         let slug = self
-            .db_repo
-            .generate_slug(&team_fc.name, Some(team_fc.event_id), db_team::Entity)
+            .generate_slug(&txn, team_fc.event_id, &team_fc.name, None)
             .await?;
 
         let active_team = db_team::ActiveModel {
@@ -48,7 +53,7 @@ impl TeamService {
             ..Default::default()
         };
 
-        let team = active_team.insert(self.db_repo.conn()).await?;
+        let team = active_team.insert(&txn).await?;
 
         // Assign creator as team member
         let auth_result = self
@@ -60,10 +65,11 @@ impl TeamService {
             .await;
 
         if let Err(err) = auth_result {
-            // Rollback team creation
-            team.delete(self.db_repo.conn()).await?;
+            txn.rollback().await?;
             return Err(err);
         }
+
+        txn.commit().await?;
 
         let mut team = Team::from(team);
         self.inject_photo_url(&mut team).await?;
@@ -76,7 +82,7 @@ impl TeamService {
         event_id: Uuid,
         project_assignments_visible: bool,
     ) -> ServiceResult<Vec<Team>> {
-        let teams = self.db_repo.get_teams(event_id).await?;
+        let teams = TeamRepository::fetch_all_by_event_id(self.db_repo.conn(), event_id).await?;
         let mut teams = teams.into_iter().map(Team::from).collect::<Vec<_>>();
 
         for team in &mut teams {
@@ -97,7 +103,7 @@ impl TeamService {
         event_id: Uuid,
         project_assignments_visible: bool,
     ) -> ServiceResult<Vec<TeamInternal>> {
-        let teams = self.db_repo.get_teams(event_id).await?;
+        let teams = TeamRepository::fetch_all_by_event_id(self.db_repo.conn(), event_id).await?;
         let mut teams = teams
             .into_iter()
             .map(TeamInternal::from)
@@ -117,7 +123,7 @@ impl TeamService {
         team_id: Uuid,
         project_assignments_visible: bool,
     ) -> ServiceResult<Team> {
-        let team = self.db_repo.get_team(team_id).await?;
+        let team = TeamRepository::fetch_by_id(self.db_repo.conn(), team_id).await?;
         let mut team = Team::from(team);
 
         self.inject_photo_url(&mut team).await?;
@@ -134,7 +140,7 @@ impl TeamService {
         team_id: Uuid,
         project_assignments_visible: bool,
     ) -> ServiceResult<TeamInternal> {
-        let mut team = self.db_repo.get_team(team_id).await?;
+        let mut team = TeamRepository::fetch_by_id(self.db_repo.conn(), team_id).await?;
 
         if !project_assignments_visible {
             team.project_id = None;
@@ -149,7 +155,9 @@ impl TeamService {
         team_slug: &str,
         project_assignments_visible: bool,
     ) -> ServiceResult<Team> {
-        let team = self.db_repo.get_team_by_slug(event_slug, team_slug).await?;
+        let team =
+            TeamRepository::fetch_by_slug(self.db_repo.conn(), event_slug, team_slug).await?;
+
         let mut team = Team::from(team);
 
         self.inject_photo_url(&mut team).await?;
@@ -162,7 +170,9 @@ impl TeamService {
     }
 
     pub async fn update_team(&self, team_id: Uuid, team_fu: TeamForUpdate) -> ServiceResult<Team> {
-        let team = self.db_repo.get_team(team_id).await?;
+        let txn = self.db_repo.conn().begin().await?;
+
+        let team = TeamRepository::fetch_by_id(&txn, team_id).await?;
 
         // Store for later use
         let event_id = team.event_id;
@@ -172,8 +182,7 @@ impl TeamService {
         if let Some(name) = &team_fu.name {
             // Generate slug and check for naming conflicts
             let slug = self
-                .db_repo
-                .generate_slug(name, Some(event_id), db_team::Entity)
+                .generate_slug(&txn, event_id, name, Some(team_id))
                 .await?;
 
             active_team.name = Set(name.clone());
@@ -192,9 +201,11 @@ impl TeamService {
             }
         }
 
-        let team = active_team.update(self.db_repo.conn()).await?;
-        let mut team = Team::from(team);
+        let team = active_team.update(&txn).await?;
 
+        txn.commit().await?;
+
+        let mut team = Team::from(team);
         self.inject_photo_url(&mut team).await?;
 
         Ok(team)
@@ -205,7 +216,7 @@ impl TeamService {
         team_id: Uuid,
         team_fui: TeamForUpdateInternal,
     ) -> ServiceResult<TeamInternal> {
-        let team = self.db_repo.get_team(team_id).await?;
+        let team = TeamRepository::fetch_by_id(self.db_repo.conn(), team_id).await?;
         let mut active_team = team.into_active_model();
         if let Some(comment) = &team_fui.comment {
             active_team.comment = Set(Some(comment.clone()));
@@ -220,7 +231,7 @@ impl TeamService {
     /// Cascade deletes team role assignments and project preferences.
     /// Fails on any other related resources.
     pub async fn delete_team(&self, team_id: Uuid) -> ServiceResult<()> {
-        let team = self.db_repo.get_team(team_id).await?;
+        let team = TeamRepository::fetch_by_id(self.db_repo.conn(), team_id).await?;
 
         let txn = self.db_repo.conn().begin().await?;
 
@@ -255,7 +266,8 @@ impl TeamService {
     /// (Re)assigns the team indices (1-based) based on the ascending ordering of the team's `project_id` and `id`.
     /// Warning: This must only be called if the event has never left the REGISTRATION phase (e.g. since the VM domain depends on the team indices).
     pub async fn index_teams(&self, event_id: Uuid) -> ServiceResult<Vec<Team>> {
-        let mut teams = self.db_repo.get_teams(event_id).await?;
+        let mut teams =
+            TeamRepository::fetch_all_by_event_id(self.db_repo.conn(), event_id).await?;
         let mut new_teams = Vec::new();
 
         teams.sort_by(|a, b| {
@@ -286,7 +298,7 @@ impl TeamService {
         team_id: Uuid,
         project_id: Option<Uuid>,
     ) -> ServiceResult<Team> {
-        let team = self.db_repo.get_team(team_id).await?;
+        let team = TeamRepository::fetch_by_id(self.db_repo.conn(), team_id).await?;
         let mut active_team = team.into_active_model();
         active_team.project_id = Set(project_id);
 
@@ -296,7 +308,8 @@ impl TeamService {
     }
 
     pub async fn get_team_project_preferences(&self, team_id: Uuid) -> ServiceResult<Vec<Uuid>> {
-        let pps = self.db_repo.get_project_preferences(team_id).await?;
+        let pps =
+            ProjectPreferenceRepository::fetch_all_by_team_id(self.db_repo.conn(), team_id).await?;
 
         let pps = pps.into_iter().map(|pp| pp.project_id).collect();
 
@@ -348,7 +361,7 @@ impl TeamService {
     }
 
     pub async fn get_team_credentials(&self, team_id: Uuid) -> ServiceResult<TeamCredentials> {
-        let team = self.db_repo.get_team(team_id).await?;
+        let team = TeamRepository::fetch_by_id(self.db_repo.conn(), team_id).await?;
         Ok(TeamCredentials {
             vm_password: team.password,
             ai_api_key: team.ai_api_key,
@@ -360,7 +373,7 @@ impl TeamService {
         team_id: Uuid,
         credentials: TeamCredentials,
     ) -> ServiceResult<Team> {
-        let team = self.db_repo.get_team(team_id).await?;
+        let team = TeamRepository::fetch_by_id(self.db_repo.conn(), team_id).await?;
         let mut active_team = team.into_active_model();
         if credentials.vm_password.is_some() {
             active_team.password = Set(credentials.vm_password);
@@ -378,5 +391,24 @@ impl TeamService {
         self.upload_service
             .inject_url_opt(team.photo_url.as_mut())
             .await
+    }
+
+    async fn generate_slug<C: ConnectionTrait>(
+        &self,
+        db: &C,
+        event_id: Uuid,
+        name: &str,
+        current_team_id: Option<Uuid>,
+    ) -> ServiceResult<String> {
+        let slug = slugify(name);
+
+        let conflicting =
+            TeamRepository::count_conflicting_by_slug(db, &slug, event_id, current_team_id).await?;
+
+        if conflicting != 0 {
+            return Err(ServiceError::SlugNotUnique { slug });
+        }
+
+        Ok(slug)
     }
 }

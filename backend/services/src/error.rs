@@ -1,6 +1,6 @@
 use chrono::NaiveDateTime;
 use derive_more::From;
-use hackathon_portal_repositories::db::prelude::{EventPhase, MediaUsage};
+use hackathon_portal_repositories::db::{EventPhase, MediaUsage};
 use hackathon_portal_repositories::RepositoryError;
 use serde::Serialize;
 use serde_with::{serde_as, DisplayFromStr};
@@ -11,6 +11,10 @@ pub type ServiceResult<T> = Result<T, ServiceError>;
 #[serde_as]
 #[derive(Debug, Serialize, From)]
 pub enum ServiceError {
+    SlugNotUnique {
+        slug: String,
+    },
+
     ResourceStillInUse {
         resource: String,
         id: String,

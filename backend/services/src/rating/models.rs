@@ -1,4 +1,4 @@
-use hackathon_portal_repositories::db::prelude::{db_expert_rating, ExpertRatingCategory};
+use hackathon_portal_repositories::db::{db_expert_rating, ExpertRatingCategory};
 use sea_orm::FromQueryResult;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;

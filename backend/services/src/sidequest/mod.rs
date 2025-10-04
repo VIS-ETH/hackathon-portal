@@ -2,7 +2,6 @@ pub mod models;
 
 use crate::{ServiceError, ServiceResult};
 use chrono::{NaiveDateTime, Utc};
-use hackathon_portal_repositories::db::prelude::*;
 use hackathon_portal_repositories::DbRepository;
 use models::{AttemptForCreate, SidequestForCreate, SidequestForUpdate};
 use std::cmp::Ordering;
@@ -14,11 +13,16 @@ use crate::sidequest::models::{
     Attempt, AttemptForUpdate, Cooldown, HistoryEntry, Sidequest, TeamLeaderboardEntry,
     UserLeaderboardEntry,
 };
+use hackathon_portal_repositories::db::{
+    db_sidequest, db_sidequest_attempt, db_sidequest_score, db_team, EventPhase, EventRepository,
+    EventRole, SidequestAttemptRepository, SidequestRepository, TeamRepository, TeamRole,
+};
 use sea_orm::Set;
 use sea_orm::{
     prelude::*, FromQueryResult, IntoActiveModel, QueryOrder, QuerySelect, QueryTrait,
     TransactionTrait,
 };
+use slug::slugify;
 
 pub struct SidequestService {
     authorization_service: Arc<AuthorizationService>,
@@ -38,14 +42,10 @@ impl SidequestService {
         &self,
         sidequest_fc: SidequestForCreate,
     ) -> ServiceResult<Sidequest> {
-        // Generate slug and check for naming conflicts
+        let txn = self.db_repo.conn().begin().await?;
+
         let slug = self
-            .db_repo
-            .generate_slug(
-                &sidequest_fc.name,
-                Some(sidequest_fc.event_id),
-                db_sidequest::Entity,
-            )
+            .generate_slug(&txn, sidequest_fc.event_id, &sidequest_fc.name, None)
             .await?;
 
         let active_sidequest = db_sidequest::ActiveModel {
@@ -57,20 +57,23 @@ impl SidequestService {
             ..Default::default()
         };
 
-        let sidequest = active_sidequest.insert(self.db_repo.conn()).await?;
+        let sidequest = active_sidequest.insert(&txn).await?;
+
+        txn.commit().await?;
 
         Ok(sidequest.into())
     }
 
     pub async fn get_sidequests(&self, event_id: Uuid) -> ServiceResult<Vec<Sidequest>> {
-        let sidequests = self.db_repo.get_sidequests(event_id).await?;
+        let sidequests =
+            SidequestRepository::fetch_all_by_event_id(self.db_repo.conn(), event_id).await?;
         let sidequests = sidequests.into_iter().map(Sidequest::from).collect();
 
         Ok(sidequests)
     }
 
     pub async fn get_sidequest(&self, sidequest_id: Uuid) -> ServiceResult<Sidequest> {
-        let sidequest = self.db_repo.get_sidequest(sidequest_id).await?;
+        let sidequest = SidequestRepository::fetch_by_id(self.db_repo.conn(), sidequest_id).await?;
         Ok(sidequest.into())
     }
 
@@ -79,10 +82,9 @@ impl SidequestService {
         event_slug: &str,
         sidequest_slug: &str,
     ) -> ServiceResult<Sidequest> {
-        let sidequest = self
-            .db_repo
-            .get_sidequest_by_slug(event_slug, sidequest_slug)
-            .await?;
+        let sidequest =
+            SidequestRepository::fetch_by_slug(self.db_repo.conn(), event_slug, sidequest_slug)
+                .await?;
 
         Ok(sidequest.into())
     }
@@ -92,7 +94,9 @@ impl SidequestService {
         sidequest_id: Uuid,
         sidequest_fu: SidequestForUpdate,
     ) -> ServiceResult<Sidequest> {
-        let sidequest = self.db_repo.get_sidequest(sidequest_id).await?;
+        let txn = self.db_repo.conn().begin().await?;
+
+        let sidequest = SidequestRepository::fetch_by_id(&txn, sidequest_id).await?;
 
         // Store for later use
         let event_id = sidequest.event_id;
@@ -100,10 +104,8 @@ impl SidequestService {
         let mut active_sidequest = sidequest.into_active_model();
 
         if let Some(name) = sidequest_fu.name {
-            // Generate slug and check for naming conflicts
             let slug = self
-                .db_repo
-                .generate_slug(&name, Some(event_id), db_sidequest::Entity)
+                .generate_slug(&txn, event_id, &name, Some(sidequest_id))
                 .await?;
 
             active_sidequest.name = Set(name.clone());
@@ -118,13 +120,15 @@ impl SidequestService {
             active_sidequest.is_higher_result_better = Set(is_higher_result_better);
         }
 
-        let sidequest = active_sidequest.update(self.db_repo.conn()).await?;
+        let sidequest = active_sidequest.update(&txn).await?;
+
+        txn.commit().await?;
 
         Ok(sidequest.into())
     }
 
     pub async fn delete_sidequest(&self, sidequest_id: Uuid) -> ServiceResult<()> {
-        let sidequest = self.db_repo.get_sidequest(sidequest_id).await?;
+        let sidequest = SidequestRepository::fetch_by_id(self.db_repo.conn(), sidequest_id).await?;
 
         let txn = self.db_repo.conn().begin().await?;
 
@@ -147,9 +151,11 @@ impl SidequestService {
     }
 
     pub async fn create_attempt(&self, attempt_fc: AttemptForCreate) -> ServiceResult<Attempt> {
-        let sidequest = self.db_repo.get_sidequest(attempt_fc.sidequest_id).await?;
+        let sidequest =
+            SidequestRepository::fetch_by_id(self.db_repo.conn(), attempt_fc.sidequest_id).await?;
+
         let cooldown = self
-            .get_cooldown(attempt_fc.user_id, sidequest.event_id)
+            .get_cooldown(sidequest.event_id, attempt_fc.user_id)
             .await?;
 
         if let Some(next_attempt) = cooldown.next_attempt {
@@ -177,10 +183,14 @@ impl SidequestService {
         after: Option<NaiveDateTime>,
         before: Option<NaiveDateTime>,
     ) -> ServiceResult<Vec<Attempt>> {
-        let attempts = self
-            .db_repo
-            .get_sidequest_attempts(event_id, after, before)
-            .await?;
+        let attempts = SidequestAttemptRepository::fetch_all_by_event_id(
+            self.db_repo.conn(),
+            event_id,
+            after,
+            before,
+        )
+        .await?;
+
         let attempts = attempts.into_iter().map(Attempt::from).collect();
 
         Ok(attempts)
@@ -192,10 +202,14 @@ impl SidequestService {
         after: Option<NaiveDateTime>,
         before: Option<NaiveDateTime>,
     ) -> ServiceResult<Vec<Attempt>> {
-        let attempts = self
-            .db_repo
-            .get_sidequest_attempts_by_sidequest(sidequest_id, after, before)
-            .await?;
+        let attempts = SidequestAttemptRepository::fetch_all_by_sidequest_id(
+            self.db_repo.conn(),
+            sidequest_id,
+            after,
+            before,
+        )
+        .await?;
+
         let attempts = attempts.into_iter().map(Attempt::from).collect();
 
         Ok(attempts)
@@ -207,10 +221,14 @@ impl SidequestService {
         after: Option<NaiveDateTime>,
         before: Option<NaiveDateTime>,
     ) -> ServiceResult<Vec<Attempt>> {
-        let attempts = self
-            .db_repo
-            .get_sidequest_attempts_by_team(team_id, after, before)
-            .await?;
+        let attempts = SidequestAttemptRepository::fetch_all_by_team_id(
+            self.db_repo.conn(),
+            team_id,
+            after,
+            before,
+        )
+        .await?;
+
         let attempts = attempts.into_iter().map(Attempt::from).collect();
 
         Ok(attempts)
@@ -223,17 +241,23 @@ impl SidequestService {
         after: Option<NaiveDateTime>,
         before: Option<NaiveDateTime>,
     ) -> ServiceResult<Vec<Attempt>> {
-        let attempts = self
-            .db_repo
-            .get_sidequest_attempts_by_user(user_id, event_id, after, before)
-            .await?;
+        let attempts = SidequestAttemptRepository::fetch_all_by_event_user_id(
+            self.db_repo.conn(),
+            event_id,
+            user_id,
+            after,
+            before,
+        )
+        .await?;
+
         let attempts = attempts.into_iter().map(Attempt::from).collect();
 
         Ok(attempts)
     }
 
     pub async fn get_attempt(&self, attempt_id: Uuid) -> ServiceResult<Attempt> {
-        let attempt = self.db_repo.get_sidequest_attempt(attempt_id).await?;
+        let attempt =
+            SidequestAttemptRepository::fetch_by_id(self.db_repo.conn(), attempt_id).await?;
         Ok(attempt.into())
     }
 
@@ -242,7 +266,8 @@ impl SidequestService {
         attempt_id: Uuid,
         attempt_fu: AttemptForUpdate,
     ) -> ServiceResult<Attempt> {
-        let attempt = self.db_repo.get_sidequest_attempt(attempt_id).await?;
+        let attempt =
+            SidequestAttemptRepository::fetch_by_id(self.db_repo.conn(), attempt_id).await?;
         let mut active_attempt = attempt.into_active_model();
 
         if let Some(result) = attempt_fu.result {
@@ -255,19 +280,23 @@ impl SidequestService {
     }
 
     pub async fn delete_attempt(&self, attempt_id: Uuid) -> ServiceResult<()> {
-        let attempt = self.db_repo.get_sidequest_attempt(attempt_id).await?;
+        let attempt =
+            SidequestAttemptRepository::fetch_by_id(self.db_repo.conn(), attempt_id).await?;
         attempt.delete(self.db_repo.conn()).await?;
         Ok(())
     }
 
-    pub async fn get_cooldown(&self, user_id: Uuid, event_id: Uuid) -> ServiceResult<Cooldown> {
-        let event = self.db_repo.get_event(event_id).await?;
+    pub async fn get_cooldown(&self, event_id: Uuid, user_id: Uuid) -> ServiceResult<Cooldown> {
+        let event = EventRepository::fetch_by_id(self.db_repo.conn(), event_id).await?;
         let duration = chrono::Duration::minutes(i64::from(event.sidequest_cooldown));
 
-        let last_attempt = self
-            .db_repo
-            .get_latest_sidequest_attempt_by_user(user_id, event_id)
-            .await?;
+        let last_attempt = SidequestAttemptRepository::fetch_latest_by_event_user_id_opt(
+            self.db_repo.conn(),
+            event_id,
+            user_id,
+        )
+        .await?;
+
         let last_attempt = last_attempt.map(|attempt| attempt.attempted_at);
 
         let next_attempt = last_attempt.and_then(|last_attempt| {
@@ -353,7 +382,8 @@ impl SidequestService {
         &self,
         sidequest: &Sidequest,
     ) -> ServiceResult<HashMap<Uuid, f64>> {
-        let teams = self.db_repo.get_teams(sidequest.event_id).await?;
+        let teams =
+            TeamRepository::fetch_all_by_event_id(self.db_repo.conn(), sidequest.event_id).await?;
 
         let user_scores = self.aggregate_sidequest_scores_by_user(sidequest).await?;
         let mut team_scores = HashMap::new();
@@ -397,7 +427,7 @@ impl SidequestService {
 
     pub async fn run_aggregator(&self, event_id: Uuid) -> ServiceResult<HashMap<Uuid, f64>> {
         let now = Utc::now().naive_utc();
-        let event = self.db_repo.get_event(event_id).await?;
+        let event = EventRepository::fetch_by_id(self.db_repo.conn(), event_id).await?;
 
         if event.phase != EventPhase::Hacking {
             return Err(ServiceError::EventPhase {
@@ -428,7 +458,7 @@ impl SidequestService {
         &self,
         event_id: Uuid,
     ) -> ServiceResult<Vec<TeamLeaderboardEntry>> {
-        let teams = self.db_repo.get_teams(event_id).await?;
+        let teams = TeamRepository::fetch_all_by_event_id(self.db_repo.conn(), event_id).await?;
 
         let team_mapping = teams
             .iter()
@@ -481,7 +511,8 @@ impl SidequestService {
     ) -> ServiceResult<Vec<TeamLeaderboardEntry>> {
         let sidequest = self.get_sidequest(sidequest_id).await?;
 
-        let teams = self.db_repo.get_teams(sidequest.event_id).await?;
+        let teams =
+            TeamRepository::fetch_all_by_event_id(self.db_repo.conn(), sidequest.event_id).await?;
 
         let team_mapping = teams
             .into_iter()
@@ -576,5 +607,29 @@ impl SidequestService {
         });
 
         Ok(scores)
+    }
+
+    async fn generate_slug<C: ConnectionTrait>(
+        &self,
+        db: &C,
+        event_id: Uuid,
+        name: &str,
+        current_sidequest_id: Option<Uuid>,
+    ) -> ServiceResult<String> {
+        let slug = slugify(name);
+
+        let conflicting = SidequestRepository::count_conflicting_by_slug(
+            db,
+            &slug,
+            event_id,
+            current_sidequest_id,
+        )
+        .await?;
+
+        if conflicting != 0 {
+            return Err(ServiceError::SlugNotUnique { slug });
+        }
+
+        Ok(slug)
     }
 }
