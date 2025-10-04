@@ -1,5 +1,5 @@
 use chrono::NaiveDateTime;
-use hackathon_portal_repositories::db::prelude::{db_upload, MediaUsage};
+use hackathon_portal_repositories::db::{db_upload, MediaUsage};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use uuid::Uuid;

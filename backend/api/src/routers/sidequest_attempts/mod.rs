@@ -171,7 +171,7 @@ pub async fn get_sidequest_attempt_cooldown(
 
     let cooldown = state
         .sidequest_service
-        .get_cooldown(user_id, event.id)
+        .get_cooldown(event.id, user_id)
         .await?;
 
     Ok(Json(cooldown))

@@ -1,5 +1,5 @@
 use crate::user::fmt_user_name;
-use hackathon_portal_repositories::db::prelude::*;
+use hackathon_portal_repositories::db::{db_event_user_discord_id, db_user};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use uuid::Uuid;

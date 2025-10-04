@@ -1,5 +1,5 @@
 use crate::{ApiError, ApiResult};
-use hackathon_portal_repositories::db::prelude::{EventRole, TeamRole};
+use hackathon_portal_repositories::db::{EventRole, TeamRole};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use uuid::Uuid;

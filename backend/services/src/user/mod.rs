@@ -2,7 +2,9 @@ pub mod models;
 
 use crate::user::models::{User, UserForCreate, UserForUpdate};
 use crate::ServiceResult;
-use hackathon_portal_repositories::db::prelude::*;
+use hackathon_portal_repositories::db::{
+    db_event_user_discord_id, db_user, EventUserRepository, UserRepository,
+};
 use hackathon_portal_repositories::DbRepository;
 use sea_orm::prelude::*;
 use sea_orm::{IntoActiveModel, QuerySelect, SelectColumns, Set, TransactionTrait};
@@ -19,7 +21,7 @@ impl UserService {
     }
 
     pub async fn create_or_get_user(&self, auth_id: &str, name: &str) -> ServiceResult<User> {
-        let user = self.db_repo.get_user_by_auth_id(auth_id).await.ok();
+        let user = UserRepository::fetch_by_auth_id_opt(self.db_repo.conn(), auth_id).await?;
 
         if let Some(user) = user {
             if user.name != name {
@@ -56,12 +58,12 @@ impl UserService {
     }
 
     pub async fn get_user(&self, user_id: Uuid) -> ServiceResult<User> {
-        let user = self.db_repo.get_user(user_id).await?;
+        let user = UserRepository::fetch_by_id(self.db_repo.conn(), user_id).await?;
         Ok(user.into())
     }
 
     pub async fn update_user(&self, user_id: Uuid, _user_fu: UserForUpdate) -> ServiceResult<User> {
-        let user = self.db_repo.get_user(user_id).await?;
+        let user = UserRepository::fetch_by_id(self.db_repo.conn(), user_id).await?;
         let active_user = user.into_active_model();
 
         // Currently useless
@@ -75,7 +77,7 @@ impl UserService {
     /// If the name is already taken, the index will be set accordingly.
     pub async fn update_user_name(&self, user_id: Uuid, name: &str) -> ServiceResult<User> {
         let txn = self.db_repo.conn().begin().await?;
-        let user = self.db_repo.get_user_txn(user_id, &txn).await?;
+        let user = UserRepository::fetch_by_id(&txn, user_id).await?;
 
         if user.name == name {
             return Ok(user.into());
@@ -105,12 +107,10 @@ impl UserService {
         user_id: Uuid,
         event_id: Uuid,
     ) -> ServiceResult<Option<String>> {
-        let entry = self
-            .db_repo
-            .get_event_user_discord_id(event_id, user_id)
-            .await?;
+        let event_user =
+            EventUserRepository::fetch_by_id_opt(self.db_repo.conn(), event_id, user_id).await?;
 
-        Ok(entry.map(|e| e.discord_id))
+        Ok(event_user.map(|e| e.discord_id))
     }
 
     /// Links the user's Discord ID to their user account for a specific event.
@@ -120,10 +120,8 @@ impl UserService {
         event_id: Uuid,
         discord_id: String,
     ) -> ServiceResult<()> {
-        let existing = self
-            .db_repo
-            .get_event_user_discord_id(event_id, user_id)
-            .await?;
+        let existing =
+            EventUserRepository::fetch_by_id_opt(self.db_repo.conn(), event_id, user_id).await?;
 
         if let Some(existing) = existing {
             // Update existing record

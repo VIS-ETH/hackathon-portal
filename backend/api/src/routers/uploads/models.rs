@@ -1,4 +1,4 @@
-use hackathon_portal_repositories::db::prelude::MediaUsage;
+use hackathon_portal_repositories::db::MediaUsage;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use uuid::Uuid;

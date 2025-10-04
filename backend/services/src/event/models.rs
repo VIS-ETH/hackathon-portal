@@ -1,6 +1,5 @@
 use chrono::NaiveDateTime;
-use hackathon_portal_repositories::db::prelude::*;
-use hackathon_portal_repositories::db::sea_orm_active_enums::EventVisibility;
+use hackathon_portal_repositories::db::{db_event, EventPhase, EventVisibility};
 use sea_orm::prelude::DateTime;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;

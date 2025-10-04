@@ -21,6 +21,7 @@ tracing-appender = "0.2.3"
 tracing-subscriber = { version = "0.3.19", features = ["env-filter", "json", "registry", "fmt"] }
 utoipa = { workspace = true }
 uuid = { workspace = true }
+slug = "0.1.6"
 
 [lints]
 workspace = true

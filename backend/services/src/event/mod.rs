@@ -6,12 +6,14 @@ use crate::rating::RatingService;
 use crate::sidequest::SidequestService;
 use crate::user::models::{ReducedUser, UserForCreate};
 use crate::user::UserService;
-use crate::ServiceResult;
-use hackathon_portal_repositories::db::prelude::{db_event, EventPhase, EventRole};
-use hackathon_portal_repositories::db::sea_orm_active_enums::EventVisibility;
+use crate::{ServiceError, ServiceResult};
+use hackathon_portal_repositories::db::{
+    db_event, EventPhase, EventRepository, EventRole, EventVisibility, TeamRepository,
+};
 use hackathon_portal_repositories::DbRepository;
 use sea_orm::prelude::*;
-use sea_orm::{ActiveModelTrait, IntoActiveModel, Set};
+use sea_orm::{ActiveModelTrait, IntoActiveModel, Set, TransactionTrait};
+use slug::slugify;
 use std::cmp::Ordering;
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
@@ -48,11 +50,9 @@ impl EventService {
         creator: Uuid,
         event_fc: EventForCreate,
     ) -> ServiceResult<Event> {
-        // Generate slug and check for naming conflicts
-        let slug = self
-            .db_repo
-            .generate_slug(&event_fc.name, None, db_event::Entity)
-            .await?;
+        let txn = self.db_repo.conn().begin().await?;
+
+        let slug = self.generate_slug(&txn, &event_fc.name, None).await?;
 
         let active_event = db_event::ActiveModel {
             name: Set(event_fc.name),
@@ -69,7 +69,7 @@ impl EventService {
         };
 
         let event = db_event::Entity::insert(active_event)
-            .exec_with_returning(self.db_repo.conn())
+            .exec_with_returning(&txn)
             .await?;
 
         // Assign creator as event admin
@@ -80,23 +80,25 @@ impl EventService {
             )
             .await?;
 
+        txn.commit().await?;
+
         Ok(event.into())
     }
 
     pub async fn get_events(&self) -> ServiceResult<Vec<Event>> {
-        let events = self.db_repo.get_events().await?;
+        let events = EventRepository::fetch_all(self.db_repo.conn()).await?;
         let events = events.into_iter().map(Event::from).collect();
 
         Ok(events)
     }
 
     pub async fn get_event(&self, event_id: Uuid) -> ServiceResult<Event> {
-        let event = self.db_repo.get_event(event_id).await?;
+        let event = EventRepository::fetch_by_id(self.db_repo.conn(), event_id).await?;
         Ok(event.into())
     }
 
     pub async fn get_event_by_slug(&self, event_slug: &str) -> ServiceResult<Event> {
-        let event = self.db_repo.get_event_by_slug(event_slug).await?;
+        let event = EventRepository::fetch_by_slug(self.db_repo.conn(), event_slug).await?;
         Ok(event.into())
     }
 
@@ -105,15 +107,13 @@ impl EventService {
         event_id: Uuid,
         event_fu: EventForUpdate,
     ) -> ServiceResult<Event> {
-        let event = self.db_repo.get_event(event_id).await?;
+        let txn = self.db_repo.conn().begin().await?;
+
+        let event = EventRepository::fetch_by_id(&txn, event_id).await?;
         let mut active_event = event.into_active_model();
 
         if let Some(name) = &event_fu.name {
-            // Generate slug and check for naming conflicts
-            let slug = self
-                .db_repo
-                .generate_slug(name, None, db_event::Entity)
-                .await?;
+            let slug = self.generate_slug(&txn, name, Some(event_id)).await?;
 
             active_event.name = Set(name.clone());
             active_event.slug = Set(slug);
@@ -175,7 +175,9 @@ impl EventService {
             active_event.phase = Set(phase);
         }
 
-        let event = active_event.update(self.db_repo.conn()).await?;
+        let event = active_event.update(&txn).await?;
+
+        txn.commit().await?;
 
         Ok(event.into())
     }
@@ -210,7 +212,7 @@ impl EventService {
     }
 
     pub async fn get_leaderboard(&self, event_id: Uuid) -> ServiceResult<Vec<Uuid>> {
-        let teams = self.db_repo.get_teams(event_id).await?;
+        let teams = TeamRepository::fetch_all_by_event_id(self.db_repo.conn(), event_id).await?;
         let expert_leaderboard = self.rating_service.get_expert_leaderboard(event_id).await?;
         let sidequest_leaderboard = self.sidequest_service.get_leaderboard(event_id).await?;
 
@@ -252,5 +254,23 @@ impl EventService {
         }
 
         Ok(merged)
+    }
+
+    async fn generate_slug<C: ConnectionTrait>(
+        &self,
+        db: &C,
+        name: &str,
+        current_event_id: Option<Uuid>,
+    ) -> ServiceResult<String> {
+        let slug = slugify(name);
+
+        let conflicting =
+            EventRepository::count_conflicting_by_slug(db, &slug, current_event_id).await?;
+
+        if conflicting != 0 {
+            return Err(ServiceError::SlugNotUnique { slug });
+        }
+
+        Ok(slug)
     }
 }

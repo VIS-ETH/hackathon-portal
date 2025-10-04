@@ -2,11 +2,15 @@ mod matching;
 pub mod models;
 use crate::project::models::{Project, ProjectForCreate, ProjectForUpdate};
 use crate::{ServiceError, ServiceResult};
-use hackathon_portal_repositories::db::prelude::*;
+use hackathon_portal_repositories::db::{
+    db_project, db_team, EventRepository, ProjectPreferenceRepository, ProjectRepository,
+    TeamRepository,
+};
 use hackathon_portal_repositories::DbRepository;
 use matching::GroupAssignment;
 use sea_orm::prelude::*;
 use sea_orm::{ActiveModelTrait, IntoActiveModel, Set, TransactionTrait};
+use slug::slugify;
 use std::collections::HashMap;
 
 #[derive(Clone)]
@@ -21,14 +25,10 @@ impl ProjectService {
     }
 
     pub async fn create_project(&self, project_fc: ProjectForCreate) -> ServiceResult<Project> {
-        // Generate slug and check for naming conflicts
+        let txn = self.db_repo.conn().begin().await?;
+
         let slug = self
-            .db_repo
-            .generate_slug(
-                &project_fc.name,
-                Some(project_fc.event_id),
-                db_project::Entity,
-            )
+            .generate_slug(&txn, project_fc.event_id, &project_fc.name, None)
             .await?;
 
         let active_project = db_project::ActiveModel {
@@ -39,20 +39,24 @@ impl ProjectService {
             ..Default::default()
         };
 
-        let project = active_project.insert(self.db_repo.conn()).await?;
+        let project = active_project.insert(&txn).await?;
+
+        txn.commit().await?;
 
         Ok(project.into())
     }
 
     pub async fn get_projects(&self, event_id: Uuid) -> ServiceResult<Vec<Project>> {
-        let projects = self.db_repo.get_projects(event_id).await?;
+        let projects =
+            ProjectRepository::fetch_all_by_event_id(self.db_repo.conn(), event_id).await?;
+
         let projects = projects.into_iter().map(Project::from).collect();
 
         Ok(projects)
     }
 
     pub async fn get_project(&self, project_id: Uuid) -> ServiceResult<Project> {
-        let project = self.db_repo.get_project(project_id).await?;
+        let project = ProjectRepository::fetch_by_id(self.db_repo.conn(), project_id).await?;
         Ok(project.into())
     }
 
@@ -61,10 +65,8 @@ impl ProjectService {
         event_slug: &str,
         project_slug: &str,
     ) -> ServiceResult<Project> {
-        let project = self
-            .db_repo
-            .get_project_by_slug(event_slug, project_slug)
-            .await?;
+        let project =
+            ProjectRepository::fetch_by_slug(self.db_repo.conn(), event_slug, project_slug).await?;
 
         Ok(project.into())
     }
@@ -74,7 +76,9 @@ impl ProjectService {
         project_id: Uuid,
         project_fu: ProjectForUpdate,
     ) -> ServiceResult<Project> {
-        let project = self.db_repo.get_project(project_id).await?;
+        let txn = self.db_repo.conn().begin().await?;
+
+        let project = ProjectRepository::fetch_by_id(&txn, project_id).await?;
 
         // Store for later use
         let event_id = project.event_id;
@@ -84,8 +88,7 @@ impl ProjectService {
         if let Some(name) = &project_fu.name {
             // Generate slug and check for naming conflicts
             let slug = self
-                .db_repo
-                .generate_slug(name, Some(event_id), db_project::Entity)
+                .generate_slug(&txn, event_id, name, Some(project_id))
                 .await?;
 
             active_project.name = Set(name.clone());
@@ -96,14 +99,16 @@ impl ProjectService {
             active_project.content = Set(content.clone());
         }
 
-        let project = active_project.update(self.db_repo.conn()).await?;
+        let project = active_project.update(&txn).await?;
+
+        txn.commit().await?;
 
         Ok(project.into())
     }
 
     /// Fails if the project is still assigned to a team.
     pub async fn delete_project(&self, project_id: Uuid) -> ServiceResult<()> {
-        let project = self.db_repo.get_project(project_id).await?;
+        let project = ProjectRepository::fetch_by_id(self.db_repo.conn(), project_id).await?;
 
         let txn = self.db_repo.conn().begin().await?;
 
@@ -126,17 +131,21 @@ impl ProjectService {
     }
 
     pub async fn get_matching(&self, event_id: Uuid) -> ServiceResult<HashMap<Uuid, Uuid>> {
-        let projects = self.db_repo.get_projects(event_id).await?;
-        let event = self.db_repo.get_event(event_id).await?;
+        let projects =
+            ProjectRepository::fetch_all_by_event_id(self.db_repo.conn(), event_id).await?;
+        let event = EventRepository::fetch_by_id(self.db_repo.conn(), event_id).await?;
         let project_ids = projects.into_iter().map(|p| p.id).collect::<Vec<_>>();
 
-        let teams = self.db_repo.get_teams(event_id).await?;
+        let teams = TeamRepository::fetch_all_by_event_id(self.db_repo.conn(), event_id).await?;
         let team_ids = teams.iter().map(|t| t.id).collect::<Vec<_>>();
 
         // Mapping from team_id -> project_id -> preference
         let mut preference = HashMap::<Uuid, HashMap<Uuid, i32>>::new();
         for team in teams {
-            let team_pref = self.db_repo.get_project_preferences(team.id).await?;
+            let team_pref =
+                ProjectPreferenceRepository::fetch_all_by_team_id(self.db_repo.conn(), team.id)
+                    .await?;
+
             let team_pref =
                 team_pref
                     .into_iter()
@@ -171,5 +180,25 @@ impl ProjectService {
                 message: ("problem is unbounded.".to_string()),
             }),
         }
+    }
+
+    async fn generate_slug<C: ConnectionTrait>(
+        &self,
+        db: &C,
+        event_id: Uuid,
+        name: &str,
+        current_project_id: Option<Uuid>,
+    ) -> ServiceResult<String> {
+        let slug = slugify(name);
+
+        let conflicting =
+            ProjectRepository::count_conflicting_by_slug(db, &slug, event_id, current_project_id)
+                .await?;
+
+        if conflicting != 0 {
+            return Err(ServiceError::SlugNotUnique { slug });
+        }
+
+        Ok(slug)
     }
 }

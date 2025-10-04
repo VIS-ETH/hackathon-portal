@@ -2,7 +2,7 @@ pub mod models;
 
 use crate::appointment::models::{Appointment, AppointmentForCreate, AppointmentForUpdate};
 use crate::ServiceResult;
-use hackathon_portal_repositories::db::prelude::*;
+use hackathon_portal_repositories::db::{db_appointment, AppointmentRepository};
 use hackathon_portal_repositories::DbRepository;
 use sea_orm::prelude::*;
 use sea_orm::{ActiveModelTrait, IntoActiveModel, Set};
@@ -38,14 +38,17 @@ impl AppointmentService {
     }
 
     pub async fn get_appointments(&self, event_id: Uuid) -> ServiceResult<Vec<Appointment>> {
-        let appointments = self.db_repo.get_appointments(event_id).await?;
+        let appointments =
+            AppointmentRepository::fetch_all_by_event_id(self.db_repo.conn(), event_id).await?;
+
         let appointments = appointments.into_iter().map(Appointment::from).collect();
 
         Ok(appointments)
     }
 
     pub async fn get_appointment(&self, appointment_id: Uuid) -> ServiceResult<Appointment> {
-        let appointment = self.db_repo.get_appointment(appointment_id).await?;
+        let appointment =
+            AppointmentRepository::fetch_by_id(self.db_repo.conn(), appointment_id).await?;
         Ok(appointment.into())
     }
 
@@ -54,7 +57,8 @@ impl AppointmentService {
         appointment_id: Uuid,
         appointment_fu: AppointmentForUpdate,
     ) -> ServiceResult<Appointment> {
-        let appointment = self.db_repo.get_appointment(appointment_id).await?;
+        let appointment =
+            AppointmentRepository::fetch_by_id(self.db_repo.conn(), appointment_id).await?;
         let mut active_appointment = appointment.into_active_model();
 
         if let Some(title) = appointment_fu.title {
@@ -95,7 +99,8 @@ impl AppointmentService {
     }
 
     pub async fn delete_appointment(&self, appointment_id: Uuid) -> ServiceResult<()> {
-        let appointment = self.db_repo.get_appointment(appointment_id).await?;
+        let appointment =
+            AppointmentRepository::fetch_by_id(self.db_repo.conn(), appointment_id).await?;
         appointment.delete(self.db_repo.conn()).await?;
 
         Ok(())

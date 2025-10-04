@@ -10,6 +10,5 @@ pub mod sidequest;
 pub mod team;
 pub mod upload;
 pub mod user;
-mod utils;
 
 pub use error::{ServiceError, ServiceResult};

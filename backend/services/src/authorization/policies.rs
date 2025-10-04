@@ -1,6 +1,5 @@
 use crate::authorization::groups::Groups;
-use hackathon_portal_repositories::db::prelude::EventPhase;
-use hackathon_portal_repositories::db::sea_orm_active_enums::EventVisibility;
+use hackathon_portal_repositories::db::{EventPhase, EventVisibility};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
@@ -94,7 +93,7 @@ impl Policies {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use hackathon_portal_repositories::db::prelude::{EventRole, TeamRole};
+    use hackathon_portal_repositories::db::{EventRole, TeamRole};
     use itertools::{iproduct, Itertools};
     use strum::VariantArray;
 
