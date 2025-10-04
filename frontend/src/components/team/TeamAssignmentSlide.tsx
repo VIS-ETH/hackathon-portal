@@ -24,7 +24,7 @@ type TeamAssignmentSlideProps = {
 const TeamAssignmentSlide = ({ team }: TeamAssignmentSlideProps) => {
   const { data: project } = useGetProject(team.project_id ?? "", {
     query: {
-      enabled: !!team,
+      enabled: !!team.project_id
     },
   });
 
