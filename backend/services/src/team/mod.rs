@@ -55,6 +55,8 @@ impl TeamService {
 
         let team = active_team.insert(&txn).await?;
 
+        txn.commit().await?;
+
         // Assign creator as team member
         let auth_result = self
             .authorization_service
@@ -65,11 +67,10 @@ impl TeamService {
             .await;
 
         if let Err(err) = auth_result {
-            txn.rollback().await?;
+            // Rollback team creation
+            team.delete(self.db_repo.conn()).await?;
             return Err(err);
         }
-
-        txn.commit().await?;
 
         let mut team = Team::from(team);
         self.inject_photo_url(&mut team).await?;
