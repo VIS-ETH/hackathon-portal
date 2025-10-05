@@ -13,7 +13,7 @@ import { Group, SimpleGrid, Stack, Title } from "@mantine/core";
 const Team = () => {
   const { event, team, refetchTeam, policies } = useResolveParams();
   const { data: project } = useGetProject(team?.project_id ?? "", {
-    query: { enabled: !!team && policies?.can_view_project },
+    query: { enabled: !!team?.project_id && policies?.can_view_project },
   });
 
   if (!event || !team || !policies) {

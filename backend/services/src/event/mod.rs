@@ -72,6 +72,8 @@ impl EventService {
             .exec_with_returning(&txn)
             .await?;
 
+        txn.commit().await?;
+
         // Assign creator as event admin
         self.authorization_service
             .assign_event_roles(
@@ -79,8 +81,6 @@ impl EventService {
                 HashMap::from([(creator, HashSet::from([EventRole::Admin]))]),
             )
             .await?;
-
-        txn.commit().await?;
 
         Ok(event.into())
     }

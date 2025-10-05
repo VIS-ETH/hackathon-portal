@@ -24,7 +24,7 @@ type TeamAssignmentSlideProps = {
 const TeamAssignmentSlide = ({ team }: TeamAssignmentSlideProps) => {
   const { data: project } = useGetProject(team.project_id ?? "", {
     query: {
-      enabled: !!team.project_id
+      enabled: !!team.project_id,
     },
   });
 
@@ -87,7 +87,7 @@ const TeamAssignmentSlide = ({ team }: TeamAssignmentSlideProps) => {
       <Center h="100%">
         <Stack gap={50} align="center">
           <Title>{team.name}</Title>
-          {projectSection && mentorsSection && membersSection && (
+          {(projectSection || mentorsSection || membersSection) && (
             <Card {...cardProps} w={500}>
               {projectSection}
               {mentorsSection}

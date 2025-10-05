@@ -42,7 +42,7 @@ const TeamDetailsCard = ({
 }: TeamDetailsCardProps) => {
   const { data: event } = useGetEvent(team.event_id);
   const { data: project } = useGetProject(team?.project_id ?? "", {
-    query: { enabled: !!team && canViewProject },
+    query: { enabled: !!team?.project_id && canViewProject },
   });
 
   const { data: credentials } = useGetTeamCredentials(team?.id ?? "", {
