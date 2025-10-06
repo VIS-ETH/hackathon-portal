@@ -10,7 +10,7 @@ mod uploads;
 mod users;
 
 use crate::api_state::ApiState;
-use crate::mw::{mw_map_response, mw_require_auth, mw_resolve_ctx};
+use crate::mw::{mw_require_auth, mw_resolve_ctx};
 use crate::routers::docs::Docs;
 use axum::{middleware, Router};
 use utoipa::OpenApi;
@@ -31,7 +31,6 @@ pub fn get_router(state: ApiState) -> Router {
         .nest("/appointments", appointments::get_router(&state))
         .nest("/uploads", uploads::get_router(&state))
         .route_layer(middleware::from_fn(mw_require_auth))
-        .layer(middleware::map_response(mw_map_response))
         .layer(middleware::from_fn_with_state(state, mw_resolve_ctx))
 }
 
