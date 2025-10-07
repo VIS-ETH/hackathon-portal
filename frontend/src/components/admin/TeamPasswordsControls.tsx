@@ -1,4 +1,4 @@
-import { useGetTeams, useUpdateTeamCredentials } from "@/api/gen";
+import { useGetTeams, useUpdateTeam } from "@/api/gen";
 import { Event } from "@/api/gen/schemas";
 import {
   cardProps,
@@ -34,7 +34,7 @@ const TeamPasswordsControls = ({ event }: TeamPasswordsControlsProps) => {
     event_id: event.id,
   });
 
-  const updateTeamCredentialsMutation = useUpdateTeamCredentials();
+  const updateTeamMutation = useUpdateTeam();
 
   const indicesAreUnique =
     teams?.length === new Set(teams?.map((team) => team.index)).size;
@@ -133,10 +133,10 @@ const TeamPasswordsControls = ({ event }: TeamPasswordsControlsProps) => {
     }
 
     for (const payload of payloads) {
-      await updateTeamCredentialsMutation.mutateAsync({
+      await updateTeamMutation.mutateAsync({
         teamId: payload.id as string,
         data: {
-          vm_password: payload.password?.toString(),
+          password: payload.password?.toString(),
           ai_api_key: payload.ai_api_key?.toString(),
         },
       });

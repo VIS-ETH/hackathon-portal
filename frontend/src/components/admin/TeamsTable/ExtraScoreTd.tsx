@@ -1,15 +1,15 @@
-import { useUpdateTeamInternal } from "@/api/gen";
-import { TeamInternal } from "@/api/gen/schemas";
+import { useUpdateTeam } from "@/api/gen";
+import { AdminTeam } from "@/api/gen/schemas";
 
 import { NumberInput, Table, Textarea } from "@mantine/core";
 
 type ActionsTdProps = {
-  team: TeamInternal;
+  team: AdminTeam;
   refetch?: () => void;
 };
 
 const ExtraScoreTd = ({ team, refetch }: ActionsTdProps) => {
-  const updateMutation = useUpdateTeamInternal();
+  const updateMutation = useUpdateTeam();
 
   const handleUpdate = async (
     comment: string | undefined,

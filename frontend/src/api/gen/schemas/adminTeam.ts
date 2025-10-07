@@ -5,7 +5,9 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface TeamInternal {
+export interface AdminTeam {
+  /** @nullable */
+  ai_api_key?: string | null;
   /** @nullable */
   comment?: string | null;
   event_id: string;
@@ -14,6 +16,10 @@ export interface TeamInternal {
   id: string;
   index: number;
   name: string;
+  /** @nullable */
+  password?: string | null;
+  /** @nullable */
+  photo_url?: string | null;
   /** @nullable */
   project_id?: string | null;
   slug: string;

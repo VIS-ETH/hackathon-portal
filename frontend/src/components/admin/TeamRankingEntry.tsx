@@ -4,7 +4,7 @@ import {
   useGetExpertRatingsLeaderboard,
   useGetSidequestsLeaderboard,
 } from "@/api/gen";
-import { TeamInternal } from "@/api/gen/schemas";
+import { AdminTeam } from "@/api/gen/schemas";
 import { cardProps } from "@/styles/common";
 
 import {
@@ -18,7 +18,7 @@ import {
 } from "@mantine/core";
 
 type TeamRankingEntryProps = {
-  team: TeamInternal;
+  team: AdminTeam;
   rank: number;
 };
 

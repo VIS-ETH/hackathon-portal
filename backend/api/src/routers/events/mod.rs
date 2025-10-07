@@ -21,7 +21,6 @@ use hackathon_portal_services::rating::models::ExpertRatingLeaderboardEntry;
 use hackathon_portal_services::sidequest::models::{
     HistoryEntry, TeamLeaderboardEntry, UserLeaderboardEntry,
 };
-use hackathon_portal_services::team::models::Team;
 use hackathon_portal_services::user::models::ReducedUser;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
@@ -323,7 +322,7 @@ pub async fn get_event_affiliates(
     post,
     path = "/api/events/{event_id}/teams/index",
     responses(
-        (status = StatusCode::OK, body = Vec<Team>),
+        (status = StatusCode::OK, body = ()),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     )
 )]
@@ -331,7 +330,7 @@ pub async fn index_teams(
     ctx: Ctx,
     State(state): State<ApiState>,
     Path(event_id): Path<Uuid>,
-) -> ApiJsonVec<Team> {
+) -> ApiResult<()> {
     let event = state.event_service.get_event(event_id).await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
@@ -341,9 +340,9 @@ pub async fn index_teams(
         });
     }
 
-    let res = state.team_service.index_teams(event_id).await?;
+    state.team_service.index_teams(event_id).await?;
 
-    Ok(Json(res))
+    Ok(())
 }
 
 #[utoipa::path(

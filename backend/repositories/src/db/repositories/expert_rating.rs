@@ -26,6 +26,6 @@ impl ExpertRatingRepository {
         expert_rating::Entity::find_by_id(id)
             .one(db)
             .await?
-            .or_fail(expert_rating::Entity, id)
+            .or_fail(expert_rating::Entity.table_name(), id)
     }
 }

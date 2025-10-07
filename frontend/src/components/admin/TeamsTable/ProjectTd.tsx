@@ -1,8 +1,10 @@
-import { useUpdateTeamProject } from "@/api/gen";
+import { useUpdateTeam } from "@/api/gen";
 import { Team } from "@/api/gen/schemas";
 import ProjectSelect from "@/components/select/ProjectSelect";
 
 import { Table } from "@mantine/core";
+
+import { NIL } from "uuid";
 
 type ProjectTdProps = {
   team: Team;
@@ -11,13 +13,13 @@ type ProjectTdProps = {
 };
 
 const ProjectTd = ({ team, ro, refetch }: ProjectTdProps) => {
-  const updateProjectMutation = useUpdateTeamProject();
+  const updateTeamMutation = useUpdateTeam();
 
   const handleUpdate = async (projectId: string | undefined) => {
-    await updateProjectMutation.mutateAsync({
+    await updateTeamMutation.mutateAsync({
       teamId: team.id,
       data: {
-        project_id: projectId,
+        project_id: projectId ?? NIL,
       },
     });
 

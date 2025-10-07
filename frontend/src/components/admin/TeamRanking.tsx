@@ -1,6 +1,6 @@
 import TeamRankingEntry from "./TeamRankingEntry";
 
-import { useGetLeaderboard, useGetTeamsInternal } from "@/api/gen";
+import { useGetAdminTeams, useGetLeaderboard } from "@/api/gen";
 import { Team } from "@/api/gen/schemas";
 
 import { Stack } from "@mantine/core";
@@ -11,7 +11,7 @@ type TeamRankingProps = {
 
 const TeamRanking = ({ eventId }: TeamRankingProps) => {
   const { data: leaderboardIds = [] } = useGetLeaderboard(eventId);
-  const { data: teams = [] } = useGetTeamsInternal({
+  const { data: teams = [] } = useGetAdminTeams({
     event_id: eventId,
   });
 

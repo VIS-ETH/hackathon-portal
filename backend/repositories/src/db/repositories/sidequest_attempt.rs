@@ -95,7 +95,7 @@ impl SidequestAttemptRepository {
         sidequest_attempt::Entity::find_by_id(id)
             .one(db)
             .await?
-            .or_fail(sidequest_attempt::Entity, id)
+            .or_fail(sidequest_attempt::Entity.table_name(), id)
     }
 
     pub async fn fetch_latest_by_event_user_id_opt<C: ConnectionTrait>(

@@ -5,7 +5,7 @@ use crate::ctx::Ctx;
 use crate::error::{ApiJson, ApiJsonVec};
 use crate::models::AffectedRows;
 use crate::routers::events::models::EventIdQuery;
-use crate::routers::teams::models::ProjectIdDTO;
+use crate::routers::teams::models::{AdminTeam, Team, TeamCredentials};
 use crate::routers::users::models::TeamRoleOptQuery;
 use crate::ApiError;
 use axum::extract::{Path, Query, State};
@@ -14,9 +14,7 @@ use axum::{Json, Router};
 use hackathon_portal_repositories::db::{ExpertRatingCategory, TeamRole};
 use hackathon_portal_services::authorization::groups::Groups;
 use hackathon_portal_services::authorization::models::{TeamAffiliate, TeamRoles, TeamRolesMap};
-use hackathon_portal_services::team::models::{
-    Team, TeamCredentials, TeamForCreate, TeamForUpdate, TeamForUpdateInternal, TeamInternal,
-};
+use hackathon_portal_services::team::models::{TeamForCreate, TeamForUpdate};
 use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
 
@@ -24,19 +22,17 @@ pub fn get_router(state: &ApiState) -> Router {
     Router::new()
         .route("/", post(create_team))
         .route("/", get(get_teams))
-        .route("/internal", get(get_teams_internal))
+        .route("/admin", get(get_admin_teams))
         .route("/roles", get(get_teams_roles))
         .route("/slug/:event_slug/:team_slug", get(get_team_by_slug))
         .route("/:team_id", get(get_team))
         .route("/:team_id", patch(update_team))
         .route("/:team_id", delete(delete_team))
-        .route("/:team_id/internal", get(get_team_internal))
-        .route("/:team_id/internal", patch(update_team_internal))
+        .route("/:team_id/admin", get(get_admin_team))
         .route("/:team_id/roles", get(get_team_roles))
         .route("/:team_id/roles", put(put_team_roles))
         .route("/:team_id/roles", delete(delete_team_roles))
         .route("/:team_id/affiliates", get(get_team_affiliates))
-        .route("/:team_id/project", patch(update_team_project))
         .route(
             "/:team_id/project-preferences",
             get(get_team_project_preferences),
@@ -46,7 +42,6 @@ pub fn get_router(state: &ApiState) -> Router {
             patch(update_team_project_preferences),
         )
         .route("/:team_id/credentials", get(get_team_credentials))
-        .route("/:team_id/credentials", patch(update_team_credentials))
         .route("/:team_id/expert-ratings", get(get_team_expert_ratings))
         .with_state(state.clone())
 }
@@ -75,7 +70,7 @@ pub async fn create_team(
 
     let team = state.team_service.create_team(ctx.user().id, body).await?;
 
-    Ok(Json(team))
+    Ok(Json(Team::from((team, false))))
 }
 
 #[utoipa::path(
@@ -111,28 +106,31 @@ pub async fn get_teams(
 
     let teams = state
         .team_service
-        .get_teams(event.id, can_view_project_assignment)
-        .await?;
+        .get_teams(event.id)
+        .await?
+        .into_iter()
+        .map(|team| Team::from((team, can_view_project_assignment)))
+        .collect();
 
     Ok(Json(teams))
 }
 
 #[utoipa::path(
     get,
-    path = "/api/teams/internal",
+    path = "/api/teams/admin",
     responses(
-        (status = StatusCode::OK, body = Vec<TeamInternal>),
+        (status = StatusCode::OK, body = Vec<AdminTeam>),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
     params(
         ("event_id"= Uuid, Query, description = "Filter by event id"),
     )
 )]
-pub async fn get_teams_internal(
+pub async fn get_admin_teams(
     ctx: Ctx,
     State(state): State<ApiState>,
     Query(query): Query<EventIdQuery>,
-) -> ApiJsonVec<TeamInternal> {
+) -> ApiJsonVec<AdminTeam> {
     let event = state.event_service.get_event(query.event_id).await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
@@ -142,16 +140,13 @@ pub async fn get_teams_internal(
         });
     }
 
-    let can_view_project_assignment = groups.can_view_project_assignment(
-        event.visibility,
-        event.projects_visible,
-        event.project_assignments_visible,
-    );
-
     let teams = state
         .team_service
-        .get_teams_internal(event.id, can_view_project_assignment)
-        .await?;
+        .get_teams(event.id)
+        .await?
+        .into_iter()
+        .map(AdminTeam::from)
+        .collect();
 
     Ok(Json(teams))
 }
@@ -185,7 +180,7 @@ pub async fn get_teams_roles(
     let all_roles = ctx.roles().team.clone();
 
     // TODO: inefficient
-    let teams = state.team_service.get_teams(event.id, false).await?;
+    let teams = state.team_service.get_teams(event.id).await?;
 
     for team in teams {
         if let Some(team_roles) = all_roles.get(&team.id) {
@@ -226,10 +221,10 @@ pub async fn get_team_by_slug(
 
     let team = state
         .team_service
-        .get_team_by_slug(&event_slug, &team_slug, can_view_project_assignment)
+        .get_team_by_slug(&event_slug, &team_slug)
         .await?;
 
-    Ok(Json(team))
+    Ok(Json(Team::from((team, can_view_project_assignment))))
 }
 
 #[utoipa::path(
@@ -245,7 +240,7 @@ pub async fn get_team(
     State(state): State<ApiState>,
     Path(team_id): Path<Uuid>,
 ) -> ApiJson<Team> {
-    let team = state.team_service.get_team(team_id, false).await?;
+    let team = state.team_service.get_team(team_id).await?;
     let event = state.event_service.get_event(team.event_id).await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
@@ -261,29 +256,25 @@ pub async fn get_team(
         event.project_assignments_visible,
     );
 
-    let team = state
-        .team_service
-        .get_team(team_id, can_view_project_assignment)
-        .await?;
+    let team = state.team_service.get_team(team_id).await?;
 
-    Ok(Json(team))
+    Ok(Json(Team::from((team, can_view_project_assignment))))
 }
 
 #[utoipa::path(
     get,
-    path = "/api/teams/{team_id}/internal",
+    path = "/api/teams/{team_id}/admin",
     responses(
-        (status = StatusCode::OK, body = TeamInternal),
+        (status = StatusCode::OK, body = AdminTeam),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
 )]
-pub async fn get_team_internal(
+pub async fn get_admin_team(
     ctx: Ctx,
     State(state): State<ApiState>,
     Path(team_id): Path<Uuid>,
-) -> ApiJson<TeamInternal> {
-    // project_assignments_visible=true since this endpoint requires manage_event anyway
-    let team = state.team_service.get_team_internal(team_id, true).await?;
+) -> ApiJson<AdminTeam> {
+    let team = state.team_service.get_team(team_id).await?;
     let event = state.event_service.get_event(team.event_id).await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
@@ -293,7 +284,7 @@ pub async fn get_team_internal(
         });
     }
 
-    Ok(Json(team))
+    Ok(Json(AdminTeam::from(team)))
 }
 
 #[utoipa::path(
@@ -310,7 +301,7 @@ pub async fn update_team(
     Path(team_id): Path<Uuid>,
     Json(body): Json<TeamForUpdate>,
 ) -> ApiJson<Team> {
-    let team = state.team_service.get_team(team_id, false).await?;
+    let team = state.team_service.get_team(team_id).await?;
     let event = state.event_service.get_event(team.event_id).await?;
     let groups = Groups::from_event_and_team(ctx.roles(), event.id, team.id);
 
@@ -330,41 +321,27 @@ pub async fn update_team(
         });
     }
 
-    let team = state.team_service.update_team(team_id, body).await?;
-
-    Ok(Json(team))
-}
-
-#[utoipa::path(
-    patch,
-    path = "/api/teams/{team_id}/internal",
-    responses(
-        (status = StatusCode::OK, body = TeamInternal),
-        (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
-    ),
-)]
-pub async fn update_team_internal(
-    ctx: Ctx,
-    State(state): State<ApiState>,
-    Path(team_id): Path<Uuid>,
-    Json(body): Json<TeamForUpdateInternal>,
-) -> ApiJson<TeamInternal> {
-    let team = state.team_service.get_team(team_id, false).await?;
-    let event = state.event_service.get_event(team.event_id).await?;
-    let groups = Groups::from_event_and_team(ctx.roles(), event.id, team.id);
-
-    if !groups.can_manage_event() {
+    if (body.project_id.is_some()
+        || body.password.is_some()
+        || body.ai_api_key.is_some()
+        || body.comment.is_some()
+        || body.extra_score.is_some())
+        && !groups.can_manage_event()
+    {
         return Err(ApiError::Forbidden {
-            action: "edit the internal information of this team".to_string(),
+            action: "edit internal details of this team".to_string(),
         });
     }
 
-    let team = state
-        .team_service
-        .update_team_internal(team_id, body)
-        .await?;
+    let team = state.team_service.update_team(team_id, body).await?;
 
-    Ok(Json(team))
+    let can_view_project_assignment = groups.can_view_project_assignment(
+        event.visibility,
+        event.projects_visible,
+        event.project_assignments_visible,
+    );
+
+    Ok(Json(Team::from((team, can_view_project_assignment))))
 }
 
 #[utoipa::path(
@@ -380,7 +357,7 @@ pub async fn delete_team(
     State(state): State<ApiState>,
     Path(team_id): Path<Uuid>,
 ) -> ApiJson<Team> {
-    let team = state.team_service.get_team(team_id, false).await?;
+    let team = state.team_service.get_team(team_id).await?;
     let event = state.event_service.get_event(team.event_id).await?;
     let groups = Groups::from_event_and_team(ctx.roles(), event.id, team.id);
 
@@ -392,7 +369,13 @@ pub async fn delete_team(
 
     state.team_service.delete_team(team_id).await?;
 
-    Ok(Json(team))
+    let can_view_project_assignment = groups.can_view_project_assignment(
+        event.visibility,
+        event.projects_visible,
+        event.project_assignments_visible,
+    );
+
+    Ok(Json(Team::from((team, can_view_project_assignment))))
 }
 
 #[utoipa::path(
@@ -422,7 +405,7 @@ pub async fn put_team_roles(
     Path(team_id): Path<Uuid>,
     Json(body): Json<HashMap<Uuid, HashSet<TeamRole>>>,
 ) -> ApiJson<AffectedRows> {
-    let team = state.team_service.get_team(team_id, false).await?;
+    let team = state.team_service.get_team(team_id).await?;
     let event = state.event_service.get_event(team.event_id).await?;
     let groups = Groups::from_event_and_team(ctx.roles(), event.id, team.id);
 
@@ -477,7 +460,7 @@ pub async fn delete_team_roles(
     Path(team_id): Path<Uuid>,
     Json(body): Json<HashMap<Uuid, HashSet<TeamRole>>>,
 ) -> ApiJson<AffectedRows> {
-    let team = state.team_service.get_team(team_id, false).await?;
+    let team = state.team_service.get_team(team_id).await?;
     let event = state.event_service.get_event(team.event_id).await?;
     let groups = Groups::from_event_and_team(ctx.roles(), event.id, team.id);
 
@@ -535,7 +518,7 @@ pub async fn get_team_affiliates(
     Path(team_id): Path<Uuid>,
     Query(query): Query<TeamRoleOptQuery>,
 ) -> ApiJsonVec<TeamAffiliate> {
-    let team = state.team_service.get_team(team_id, false).await?;
+    let team = state.team_service.get_team(team_id).await?;
     let event = state.event_service.get_event(team.event_id).await?;
     let groups = Groups::from_event_and_team(ctx.roles(), event.id, team.id);
 
@@ -554,38 +537,6 @@ pub async fn get_team_affiliates(
 }
 
 #[utoipa::path(
-    patch,
-    path = "/api/teams/{team_id}/project",
-    responses(
-        (status = StatusCode::OK, body = Team),
-        (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
-    ),
-)]
-pub async fn update_team_project(
-    ctx: Ctx,
-    State(state): State<ApiState>,
-    Path(team_id): Path<Uuid>,
-    Json(body): Json<ProjectIdDTO>,
-) -> ApiJson<Team> {
-    let team = state.team_service.get_team(team_id, false).await?;
-    let event = state.event_service.get_event(team.event_id).await?;
-    let groups = Groups::from_event_and_team(ctx.roles(), event.id, team.id);
-
-    if !groups.can_manage_event() {
-        return Err(ApiError::Forbidden {
-            action: "update the project for this team".to_string(),
-        });
-    }
-
-    let team = state
-        .team_service
-        .update_team_project(team_id, body.project_id)
-        .await?;
-
-    Ok(Json(team))
-}
-
-#[utoipa::path(
     get,
     path = "/api/teams/{team_id}/project-preferences",
     responses(
@@ -598,7 +549,7 @@ pub async fn get_team_project_preferences(
     State(state): State<ApiState>,
     Path(team_id): Path<Uuid>,
 ) -> ApiJsonVec<Uuid> {
-    let team = state.team_service.get_team(team_id, false).await?;
+    let team = state.team_service.get_team(team_id).await?;
     let event = state.event_service.get_event(team.event_id).await?;
     let groups = Groups::from_event_and_team(ctx.roles(), event.id, team.id);
 
@@ -630,7 +581,7 @@ pub async fn update_team_project_preferences(
     Path(team_id): Path<Uuid>,
     Json(body): Json<Vec<Uuid>>,
 ) -> ApiJsonVec<Uuid> {
-    let team = state.team_service.get_team(team_id, false).await?;
+    let team = state.team_service.get_team(team_id).await?;
     let event = state.event_service.get_event(team.event_id).await?;
     let groups = Groups::from_event_and_team(ctx.roles(), event.id, team.id);
 
@@ -661,7 +612,7 @@ pub async fn get_team_credentials(
     State(state): State<ApiState>,
     Path(team_id): Path<Uuid>,
 ) -> ApiJson<TeamCredentials> {
-    let team = state.team_service.get_team(team_id, false).await?;
+    let team = state.team_service.get_team(team_id).await?;
     let event = state.event_service.get_event(team.event_id).await?;
     let groups = Groups::from_event_and_team(ctx.roles(), event.id, team.id);
 
@@ -671,41 +622,7 @@ pub async fn get_team_credentials(
         });
     }
 
-    let credentials = state.team_service.get_team_credentials(team_id).await?;
-
-    Ok(Json(credentials))
-}
-
-#[utoipa::path(
-    patch,
-    path = "/api/teams/{team_id}/credentials",
-    responses(
-        (status = StatusCode::OK, body = Team),
-        (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
-    ),
-)]
-pub async fn update_team_credentials(
-    ctx: Ctx,
-    State(state): State<ApiState>,
-    Path(team_id): Path<Uuid>,
-    Json(body): Json<TeamCredentials>,
-) -> ApiJson<Team> {
-    let team = state.team_service.get_team(team_id, false).await?;
-    let event = state.event_service.get_event(team.event_id).await?;
-    let groups = Groups::from_event_and_team(ctx.roles(), event.id, team.id);
-
-    if !groups.can_manage_event() {
-        return Err(ApiError::Forbidden {
-            action: "update the credentials for this team".to_string(),
-        });
-    }
-
-    let team = state
-        .team_service
-        .update_team_credentials(team_id, body)
-        .await?;
-
-    Ok(Json(team))
+    Ok(Json(TeamCredentials::from(team)))
 }
 
 #[utoipa::path(
@@ -721,7 +638,7 @@ pub async fn get_team_expert_ratings(
     State(state): State<ApiState>,
     Path(team_id): Path<Uuid>,
 ) -> ApiJson<HashMap<ExpertRatingCategory, f64>> {
-    let team = state.team_service.get_team(team_id, false).await?;
+    let team = state.team_service.get_team(team_id).await?;
     let event = state.event_service.get_event(team.event_id).await?;
     let groups = Groups::from_event_and_team(ctx.roles(), event.id, team.id);
 

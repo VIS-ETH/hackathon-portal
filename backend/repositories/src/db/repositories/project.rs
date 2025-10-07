@@ -26,7 +26,7 @@ impl ProjectRepository {
         project::Entity::find_by_id(id)
             .one(db)
             .await?
-            .or_fail(project::Entity, id)
+            .or_fail(project::Entity.table_name(), id)
     }
 
     pub async fn fetch_by_slug<C: ConnectionTrait>(
@@ -43,7 +43,10 @@ impl ProjectRepository {
             )
             .one(db)
             .await?
-            .or_fail(project::Entity, format!("{event_slug}/{project_slug}"))
+            .or_fail(
+                project::Entity.table_name(),
+                format!("{event_slug}/{project_slug}"),
+            )
     }
 
     pub async fn count_conflicting_by_slug<C: ConnectionTrait>(

@@ -22,7 +22,7 @@ impl EventRepository {
         event::Entity::find_by_id(id)
             .one(db)
             .await?
-            .or_fail(event::Entity, id)
+            .or_fail(event::Entity.table_name(), id)
     }
 
     pub async fn fetch_by_slug<C: ConnectionTrait>(
@@ -33,7 +33,7 @@ impl EventRepository {
             .filter(event::Column::Slug.eq(slug))
             .one(db)
             .await?
-            .or_fail(event::Entity, slug)
+            .or_fail(event::Entity.table_name(), slug)
     }
 
     pub async fn count_conflicting_by_slug<C: ConnectionTrait>(

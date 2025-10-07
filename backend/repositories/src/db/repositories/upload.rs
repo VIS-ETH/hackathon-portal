@@ -13,6 +13,6 @@ impl UploadRepository {
         upload::Entity::find_by_id(id)
             .one(db)
             .await?
-            .or_fail(upload::Entity, id)
+            .or_fail(upload::Entity.table_name(), id)
     }
 }
