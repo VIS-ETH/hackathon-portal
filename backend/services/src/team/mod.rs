@@ -1,6 +1,7 @@
 pub mod models;
 
 use crate::authorization::AuthorizationService;
+use crate::infrastructure::models::IngressConfig;
 use crate::team::models::{Team, TeamForCreate, TeamForUpdate};
 use crate::upload::UploadService;
 use crate::{ServiceError, ServiceResult};
@@ -79,6 +80,25 @@ impl TeamService {
         Ok(team)
     }
 
+    pub async fn get_all_teams(&self) -> ServiceResult<Vec<Team>> {
+        let events = EventRepository::fetch_all(self.db_repo.conn())
+            .await?
+            .into_iter()
+            .map(|e| (e.id, e))
+            .collect::<HashMap<_, _>>();
+
+        let teams = TeamRepository::fetch_all(self.db_repo.conn()).await?;
+
+        try_join_all(teams.into_iter().map(|team| {
+            let event = events
+                .get(&team.event_id)
+                .expect("Foreign key constraint ensures event exists");
+
+            self.assemble_team(team, event)
+        }))
+        .await
+    }
+
     pub async fn get_teams(&self, event_id: Uuid) -> ServiceResult<Vec<Team>> {
         let event = EventRepository::fetch_by_id(self.db_repo.conn(), event_id).await?;
         let teams = TeamRepository::fetch_all_by_event_id(self.db_repo.conn(), event_id).await?;
@@ -86,7 +106,7 @@ impl TeamService {
         try_join_all(
             teams
                 .into_iter()
-                .map(|team_model| self.assemble_team(team_model, &event)),
+                .map(|team| self.assemble_team(team, &event)),
         )
         .await
     }
@@ -169,6 +189,46 @@ impl TeamService {
 
         if let Some(extra_score) = &team_fu.extra_score {
             active_team.extra_score = Set(Some(*extra_score));
+        }
+
+        if let Some(managed_address_override) = &team_fu.managed_address_override {
+            if managed_address_override.is_empty() {
+                active_team.managed_address_override = Set(None);
+            } else {
+                active_team.managed_address_override = Set(Some(managed_address_override.clone()));
+            }
+        }
+
+        if let Some(direct_address_override) = &team_fu.direct_address_override {
+            if direct_address_override.is_empty() {
+                active_team.direct_address_override = Set(None);
+            } else {
+                active_team.direct_address_override = Set(Some(direct_address_override.clone()));
+            }
+        }
+
+        if let Some(private_address_override) = &team_fu.private_address_override {
+            if private_address_override.is_empty() {
+                active_team.private_address_override = Set(None);
+            } else {
+                active_team.private_address_override = Set(Some(private_address_override.clone()));
+            }
+        }
+
+        if let Some(ssh_config_override) = &team_fu.ssh_config_override {
+            if ssh_config_override.is_empty() {
+                active_team.ssh_config_override = Set(None);
+            } else {
+                active_team.ssh_config_override = Set(Some(ssh_config_override.clone()));
+            }
+        }
+
+        if let Some(ingress_enabled) = &team_fu.ingress_enabled {
+            active_team.ingress_enabled = Set(*ingress_enabled);
+        }
+
+        if let Some(ingress_config) = &team_fu.ingress_config {
+            active_team.ingress_config = Set(serde_json::to_value(ingress_config)?);
         }
 
         let team = active_team.update(&txn).await?;
@@ -297,10 +357,42 @@ impl TeamService {
     async fn assemble_team(
         &self,
         team_model: db_team::Model,
-        _: &db_event::Model,
+        event_model: &db_event::Model,
     ) -> ServiceResult<Team> {
         let photo_url = if let Some(photo_id) = team_model.photo_id {
             Some(self.upload_service.generate_download_url(photo_id).await?)
+        } else {
+            None
+        };
+
+        let managed_address = apply_override_and_template(
+            team_model.managed_address_override.as_deref(),
+            event_model.managed_address_template.as_deref(),
+            &team_model,
+        );
+
+        let direct_address = apply_override_and_template(
+            team_model.direct_address_override.as_deref(),
+            event_model.direct_address_template.as_deref(),
+            &team_model,
+        );
+
+        let private_address = apply_override_and_template(
+            team_model.private_address_override.as_deref(),
+            event_model.private_address_template.as_deref(),
+            &team_model,
+        );
+
+        let ssh_config = apply_override_and_template(
+            team_model.ssh_config_override.as_deref(),
+            event_model.ssh_config_template.as_deref(),
+            &team_model,
+        );
+
+        let ingress_config = serde_json::from_value::<IngressConfig>(team_model.ingress_config)?;
+
+        let ingress_url = if team_model.ingress_enabled {
+            ingress_config.assemble_url(managed_address.as_deref(), direct_address.as_deref())
         } else {
             None
         };
@@ -318,6 +410,17 @@ impl TeamService {
             ai_api_key: team_model.ai_api_key,
             extra_score: team_model.extra_score,
             comment: team_model.comment,
+            managed_address,
+            managed_address_override: team_model.managed_address_override,
+            direct_address,
+            direct_address_override: team_model.direct_address_override,
+            private_address,
+            private_address_override: team_model.private_address_override,
+            ssh_config,
+            ssh_config_override: team_model.ssh_config_override,
+            ingress_enabled: team_model.ingress_enabled,
+            ingress_config,
+            ingress_url,
         };
 
         Ok(team)
@@ -340,5 +443,28 @@ impl TeamService {
         }
 
         Ok(slug)
+    }
+}
+
+fn apply_template(template: &str, team: &db_team::Model) -> String {
+    // TODO: More robust/efficient templating
+
+    template
+        .replace("{team_id}", &team.id.to_string())
+        .replace("{team_name}", &team.name)
+        .replace("{team_slug}", &team.slug)
+        .replace("{team_index}", &team.index.to_string())
+        .replace("{team_index_padded}", &format!("{:02}", team.index))
+}
+
+fn apply_override_and_template(
+    override_value: Option<&str>,
+    template: Option<&str>,
+    team: &db_team::Model,
+) -> Option<String> {
+    match (override_value, template) {
+        (Some(overridden), _) => Some(overridden.to_string()),
+        (None, Some(template)) => Some(apply_template(template, team)),
+        (None, None) => None,
     }
 }

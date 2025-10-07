@@ -1,3 +1,4 @@
+use hackathon_portal_services::infrastructure::models::IngressConfig;
 use hackathon_portal_services::team::models::Team as TeamBO;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
@@ -17,6 +18,13 @@ pub struct Team {
     pub slug: String,
     pub index: i32,
     pub photo_url: Option<String>,
+    pub managed_address: Option<String>,
+    pub direct_address: Option<String>,
+    pub private_address: Option<String>,
+    pub ssh_config: Option<String>,
+    pub ingress_enabled: bool,
+    pub ingress_config: IngressConfig,
+    pub ingress_url: Option<String>,
 }
 
 impl From<(TeamBO, bool)> for Team {
@@ -37,6 +45,13 @@ impl From<(TeamBO, bool)> for Team {
             slug: team.slug,
             index: team.index,
             photo_url: team.photo_url,
+            managed_address: team.managed_address,
+            direct_address: team.direct_address,
+            private_address: team.private_address,
+            ssh_config: team.ssh_config,
+            ingress_enabled: team.ingress_enabled,
+            ingress_config: team.ingress_config,
+            ingress_url: team.ingress_url,
         }
     }
 }
@@ -54,6 +69,17 @@ pub struct AdminTeam {
     pub ai_api_key: Option<String>,
     pub extra_score: Option<f64>,
     pub comment: Option<String>,
+    pub managed_address: Option<String>,
+    pub managed_address_override: Option<String>,
+    pub direct_address: Option<String>,
+    pub direct_address_override: Option<String>,
+    pub private_address: Option<String>,
+    pub private_address_override: Option<String>,
+    pub ssh_config: Option<String>,
+    pub ssh_config_override: Option<String>,
+    pub ingress_enabled: bool,
+    pub ingress_config: IngressConfig,
+    pub ingress_url: Option<String>,
 }
 
 impl From<TeamBO> for AdminTeam {
@@ -70,6 +96,17 @@ impl From<TeamBO> for AdminTeam {
             ai_api_key: value.ai_api_key,
             extra_score: value.extra_score,
             comment: value.comment,
+            managed_address: value.managed_address,
+            managed_address_override: value.managed_address_override,
+            direct_address: value.direct_address,
+            direct_address_override: value.direct_address_override,
+            private_address: value.private_address,
+            private_address_override: value.private_address_override,
+            ssh_config: value.ssh_config,
+            ssh_config_override: value.ssh_config_override,
+            ingress_enabled: value.ingress_enabled,
+            ingress_config: value.ingress_config,
+            ingress_url: value.ingress_url,
         }
     }
 }

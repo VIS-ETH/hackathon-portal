@@ -151,6 +151,38 @@ impl EventService {
             active_event.sidequest_cooldown = Set(sidequest_cooldown as i32);
         }
 
+        if let Some(managed_address_template) = event_fu.managed_address_template {
+            if managed_address_template.is_empty() {
+                active_event.managed_address_template = Set(None);
+            } else {
+                active_event.managed_address_template = Set(Some(managed_address_template));
+            }
+        }
+
+        if let Some(direct_address_template) = event_fu.direct_address_template {
+            if direct_address_template.is_empty() {
+                active_event.direct_address_template = Set(None);
+            } else {
+                active_event.direct_address_template = Set(Some(direct_address_template));
+            }
+        }
+
+        if let Some(private_address_template) = event_fu.private_address_template {
+            if private_address_template.is_empty() {
+                active_event.private_address_template = Set(None);
+            } else {
+                active_event.private_address_template = Set(Some(private_address_template));
+            }
+        }
+
+        if let Some(ssh_config_template) = event_fu.ssh_config_template {
+            if ssh_config_template.is_empty() {
+                active_event.ssh_config_template = Set(None);
+            } else {
+                active_event.ssh_config_template = Set(Some(ssh_config_template));
+            }
+        }
+
         if let Some(read_only) = event_fu.read_only {
             active_event.read_only = Set(read_only);
         }

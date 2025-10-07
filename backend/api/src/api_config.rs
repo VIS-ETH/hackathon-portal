@@ -6,6 +6,7 @@ use dotenvy::dotenv;
 use hackathon_portal_repositories::db::DbConfig;
 use hackathon_portal_repositories::discord::DiscordConfig;
 use hackathon_portal_repositories::s3::S3Config;
+use hackathon_portal_services::infrastructure::InfrastructureConfig;
 use serde::{Deserialize, Serialize};
 use std::net::{IpAddr, Ipv4Addr};
 use std::path::Path;
@@ -44,6 +45,8 @@ impl ServerConfig {
 pub struct ApiConfig {
     pub server: ServerConfig,
     pub auth: AuthConfig,
+    #[serde(default = "ApiConfig::default_infrastructure")]
+    pub infrastructure: InfrastructureConfig,
     pub postgres: DbConfig,
     pub s3: S3Config,
     pub discord: DiscordConfig,
@@ -52,6 +55,10 @@ pub struct ApiConfig {
 }
 
 impl ApiConfig {
+    pub fn default_infrastructure() -> InfrastructureConfig {
+        InfrastructureConfig::default()
+    }
+
     pub fn default_dirs() -> ProjectDirs {
         ProjectDirs::from("", "vseth-1116-vis-kom-vc2-hackathon", "hackathon-portal")
             .expect("Failed to get project directories")
@@ -67,6 +74,10 @@ impl ApiConfig {
                     .separator("__")
                     .list_separator(",")
                     .with_list_parse_key("server.allowed_origins")
+                    .with_list_parse_key("infrastructure.traefik.entrypoints")
+                    .with_list_parse_key("infrastructure.traefik.default_middlewares")
+                    .with_list_parse_key("infrastructure.traefik.authentication_headers")
+                    .with_list_parse_key("infrastructure.traefik.authorization_headers")
                     .try_parsing(true),
             )
             .build()?;

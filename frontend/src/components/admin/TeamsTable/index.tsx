@@ -128,7 +128,16 @@ const TeamsTable = ({ event }: TeamsTableProps) => {
                       ))}
                     </>
                   )}
-                  {view == TableView.Password && (
+                  {view == TableView.Infra && (
+                    <>
+                      <Table.Th miw={200}>Managed Address</Table.Th>
+                      <Table.Th miw={200}>Direct Address</Table.Th>
+                      <Table.Th miw={200}>Private Address</Table.Th>
+                      <Table.Th miw={300}>SSH Config</Table.Th>
+                      <Table.Th miw={200}>Ingress Enabled</Table.Th>
+                    </>
+                  )}
+                  {view == TableView.Credentials && (
                     <>
                       <Table.Th miw={200}>VM Password</Table.Th>
                       <Table.Th miw={200}>ML Key</Table.Th>

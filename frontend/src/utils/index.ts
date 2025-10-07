@@ -25,3 +25,17 @@ export const resizeArray = <T>(
     return arr;
   }
 };
+
+export const parseIntStrict = (value: string | number): number | undefined => {
+  if (typeof value === "number") {
+    return Math.trunc(value);
+  }
+
+  const parsed = parseInt(value, 10);
+
+  if (isNaN(parsed)) {
+    return undefined;
+  }
+
+  return parsed;
+};

@@ -1,3 +1,5 @@
+import AccessDetailsModal from "./AccessDetailsModal";
+import NetworkConfigModal from "./NetworkConfigModal";
 import UploadTeamPhotoModal from "./UploadTeamPhotoModal";
 
 import { useUpdateTeam } from "@/api/gen";
@@ -8,7 +10,13 @@ import { Button, Menu } from "@mantine/core";
 
 import { useDisclosure } from "@mantine/hooks";
 
-import { IconChevronDown, IconTrash, IconUpload } from "@tabler/icons-react";
+import {
+  IconChevronDown,
+  IconKey,
+  IconNetwork,
+  IconTrash,
+  IconUpload,
+} from "@tabler/icons-react";
 import { NIL } from "uuid";
 
 type TeamMenuProps = {
@@ -19,6 +27,8 @@ type TeamMenuProps = {
 
 const TeamMenu = ({ team, refetchTeam, policies }: TeamMenuProps) => {
   const [uploadPhotoOpened, uploadPhotoHandles] = useDisclosure();
+  const [accessDetailsOpened, accessDetailsHandles] = useDisclosure();
+  const [networkConfigOpened, networkConfigHandles] = useDisclosure();
   const updateTeamMutation = useUpdateTeam();
 
   const handleDeletePhoto = async () => {
@@ -52,7 +62,37 @@ const TeamMenu = ({ team, refetchTeam, policies }: TeamMenuProps) => {
     </>
   );
 
-  if (!photoSection) {
+  const accessDetailsItem = policies.can_view_team_confidential && (
+    <>
+      <Menu.Item
+        leftSection={<IconKey {...iconProps} />}
+        onClick={accessDetailsHandles.open}
+      >
+        Access Details
+      </Menu.Item>
+    </>
+  );
+
+  const networkConfigItem = policies.can_update_team_ingress_config && (
+    <>
+      <Menu.Item
+        leftSection={<IconNetwork {...iconProps} />}
+        onClick={networkConfigHandles.open}
+      >
+        Network Configuration
+      </Menu.Item>
+    </>
+  );
+
+  const infrastructureSection = (accessDetailsItem || networkConfigItem) && (
+    <>
+      <Menu.Label>Infrastructure</Menu.Label>
+      {accessDetailsItem}
+      {networkConfigItem}
+    </>
+  );
+
+  if (!photoSection && !infrastructureSection) {
     return undefined;
   }
 
@@ -67,13 +107,27 @@ const TeamMenu = ({ team, refetchTeam, policies }: TeamMenuProps) => {
             Administration
           </Button>
         </Menu.Target>
-        <Menu.Dropdown miw={200}>{photoSection}</Menu.Dropdown>
+        <Menu.Dropdown miw={200}>
+          {photoSection}
+          {infrastructureSection}
+        </Menu.Dropdown>
       </Menu>
       <UploadTeamPhotoModal
         team={team}
         refetchTeam={refetchTeam}
         opened={uploadPhotoOpened}
         onClose={uploadPhotoHandles.close}
+      />
+      <AccessDetailsModal
+        team={team}
+        opened={accessDetailsOpened}
+        onClose={accessDetailsHandles.close}
+      />
+      <NetworkConfigModal
+        team={team}
+        opened={networkConfigOpened}
+        onClose={networkConfigHandles.close}
+        refetch={refetchTeam}
       />
     </>
   );

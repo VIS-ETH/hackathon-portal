@@ -7,6 +7,15 @@ use sea_orm::{Condition, QueryOrder};
 pub struct TeamRepository;
 
 impl TeamRepository {
+    pub async fn fetch_all<C: ConnectionTrait>(db: &C) -> RepositoryResult<Vec<team::Model>> {
+        team::Entity::find()
+            .order_by_asc(team::Column::Index)
+            .order_by_asc(team::Column::Name)
+            .all(db)
+            .await
+            .map_err(RepositoryError::from)
+    }
+
     pub async fn fetch_all_by_event_id<C: ConnectionTrait>(
         db: &C,
         event_id: Uuid,

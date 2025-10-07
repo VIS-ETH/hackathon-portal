@@ -4,6 +4,7 @@
  * hackathon-portal-api
  * OpenAPI spec version: 1.0.0
  */
+import type { TeamForUpdateIngressConfig } from "./teamForUpdateIngressConfig";
 
 export interface TeamForUpdate {
   /** @nullable */
@@ -11,7 +12,15 @@ export interface TeamForUpdate {
   /** @nullable */
   comment?: string | null;
   /** @nullable */
+  direct_address_override?: string | null;
+  /** @nullable */
   extra_score?: number | null;
+  /** @nullable */
+  ingress_config?: TeamForUpdateIngressConfig;
+  /** @nullable */
+  ingress_enabled?: boolean | null;
+  /** @nullable */
+  managed_address_override?: string | null;
   /** @nullable */
   name?: string | null;
   /** @nullable */
@@ -19,5 +28,9 @@ export interface TeamForUpdate {
   /** @nullable */
   photo_id?: string | null;
   /** @nullable */
+  private_address_override?: string | null;
+  /** @nullable */
   project_id?: string | null;
+  /** @nullable */
+  ssh_config_override?: string | null;
 }

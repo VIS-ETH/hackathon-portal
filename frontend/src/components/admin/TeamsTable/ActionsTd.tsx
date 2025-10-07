@@ -1,5 +1,5 @@
 import { useDeleteTeam } from "@/api/gen";
-import { Team } from "@/api/gen/schemas";
+import { AdminTeam } from "@/api/gen/schemas";
 import { iconProps, secondaryButtonProps } from "@/styles/common";
 
 import { Button, Group, Table } from "@mantine/core";
@@ -7,7 +7,7 @@ import { Button, Group, Table } from "@mantine/core";
 import { IconTrash } from "@tabler/icons-react";
 
 type ActionsTdProps = {
-  team: Team;
+  team: AdminTeam;
   refetch?: () => void;
 };
 

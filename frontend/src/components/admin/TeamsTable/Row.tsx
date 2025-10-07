@@ -1,20 +1,21 @@
 import ActionsTd from "./ActionsTd";
 import AffiliateTds from "./AffiliateTds";
+import CredentialsTd from "./CredentialsTd";
 import ExtraScoreTd from "./ExtraScoreTd";
+import InfrastructureTds from "./InfrastructureTds";
 import MatchingTds from "./MatchingTds";
 import NameTd from "./NameTd";
-import PasswordTd from "./PasswordTd";
 import ProjectTd from "./ProjectTd";
 import { TableView } from "./TableView";
 
-import { Event, Team, TeamRole } from "@/api/gen/schemas";
+import { AdminTeam, Event, TeamRole } from "@/api/gen/schemas";
 import { fmtTeamIndex } from "@/utils";
 
 import { Table, Text } from "@mantine/core";
 
 type TeamsTableRowProps = {
   event: Event;
-  team: Team;
+  team: AdminTeam;
   view: TableView;
   refetch?: () => void;
 };
@@ -34,7 +35,12 @@ const TeamsTableRow = ({ event, team, view, refetch }: TeamsTableRowProps) => {
         />
       )}
       {view == TableView.Projects && <MatchingTds team={team} />}
-      {view == TableView.Password && <PasswordTd team={team} />}
+      {view == TableView.Infra && (
+        <InfrastructureTds team={team} refetch={refetch} />
+      )}
+      {view == TableView.Credentials && (
+        <CredentialsTd team={team} refetch={refetch} />
+      )}
       {view == TableView.Members && (
         <AffiliateTds
           team={team}
@@ -45,10 +51,10 @@ const TeamsTableRow = ({ event, team, view, refetch }: TeamsTableRowProps) => {
       {view == TableView.Mentors && (
         <AffiliateTds team={team} role={TeamRole.Mentor} max={2} />
       )}
-      {view == TableView.General && <ActionsTd team={team} refetch={refetch} />}
       {view == TableView.Comments && (
         <ExtraScoreTd team={team} refetch={refetch} />
       )}
+      {view == TableView.General && <ActionsTd team={team} refetch={refetch} />}
     </Table.Tr>
   );
 };

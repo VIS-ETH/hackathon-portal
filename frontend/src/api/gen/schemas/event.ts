@@ -9,22 +9,30 @@ import type { EventVisibility } from "./eventVisibility";
 
 export interface Event {
   /** @nullable */
+  direct_address_template?: string | null;
+  /** @nullable */
   documentation_content?: string | null;
   end: string;
   feedback_visible: boolean;
   id: string;
+  /** @nullable */
+  managed_address_template?: string | null;
   /** @minimum 0 */
   max_team_size: number;
   /** @minimum 0 */
   max_teams_per_project: number;
   name: string;
   phase: EventPhase;
+  /** @nullable */
+  private_address_template?: string | null;
   project_assignments_visible: boolean;
   projects_visible: boolean;
   read_only: boolean;
   /** @minimum 0 */
   sidequest_cooldown: number;
   slug: string;
+  /** @nullable */
+  ssh_config_template?: string | null;
   start: string;
   visibility: EventVisibility;
   /** @nullable */

@@ -31,6 +31,14 @@ pub struct Model {
     pub projects_visible: bool,
     #[sea_orm(column_type = "Text", nullable)]
     pub discord_server_id: Option<String>,
+    #[sea_orm(column_type = "Text", nullable)]
+    pub managed_address_template: Option<String>,
+    #[sea_orm(column_type = "Text", nullable)]
+    pub direct_address_template: Option<String>,
+    #[sea_orm(column_type = "Text", nullable)]
+    pub private_address_template: Option<String>,
+    #[sea_orm(column_type = "Text", nullable)]
+    pub ssh_config_template: Option<String>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

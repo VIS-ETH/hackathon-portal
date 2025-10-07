@@ -1,11 +1,11 @@
 import { useUpdateTeam } from "@/api/gen";
-import { Team } from "@/api/gen/schemas";
+import { AdminTeam } from "@/api/gen/schemas";
 import { inputProps } from "@/styles/common";
 
 import { Table, TextInput, TextInputProps } from "@mantine/core";
 
 type NameTdProps = {
-  team: Team;
+  team: AdminTeam;
   ro?: boolean;
   refetch?: () => void;
 };
