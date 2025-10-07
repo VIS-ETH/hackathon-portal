@@ -5,7 +5,9 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface ProjectIdDTO {
-  /** @nullable */
-  project_id?: string | null;
-}
+export type GetAdminTeamsParams = {
+  /**
+   * Filter by event id
+   */
+  event_id: string;
+};

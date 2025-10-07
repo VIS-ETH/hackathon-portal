@@ -951,10 +951,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": { "$ref": "#/components/schemas/Team" }
-                }
+                "schema": { "default": null, "nullable": true }
               }
             }
           },
@@ -1867,10 +1864,10 @@
         }
       }
     },
-    "/api/teams/internal": {
+    "/api/teams/admin": {
       "get": {
         "tags": ["crate::routers::teams"],
-        "operationId": "get_teams_internal",
+        "operationId": "get_admin_teams",
         "parameters": [
           {
             "name": "event_id",
@@ -1887,7 +1884,7 @@
               "application/json": {
                 "schema": {
                   "type": "array",
-                  "items": { "$ref": "#/components/schemas/TeamInternal" }
+                  "items": { "$ref": "#/components/schemas/AdminTeam" }
                 }
               }
             }
@@ -2082,6 +2079,38 @@
         }
       }
     },
+    "/api/teams/{team_id}/admin": {
+      "get": {
+        "tags": ["crate::routers::teams"],
+        "operationId": "get_admin_team",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AdminTeam" }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/teams/{team_id}/affiliates": {
       "get": {
         "tags": ["crate::routers::teams"],
@@ -2157,45 +2186,6 @@
             }
           }
         }
-      },
-      "patch": {
-        "tags": ["crate::routers::teams"],
-        "operationId": "update_team_credentials",
-        "parameters": [
-          {
-            "name": "team_id",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "string", "format": "uuid" }
-          }
-        ],
-        "requestBody": {
-          "description": "",
-          "content": {
-            "application/json": {
-              "schema": { "$ref": "#/components/schemas/TeamCredentials" }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/Team" }
-              }
-            }
-          },
-          "500": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
-              }
-            }
-          }
-        }
       }
     },
     "/api/teams/{team_id}/expert-ratings": {
@@ -2222,118 +2212,6 @@
                     "format": "double"
                   }
                 }
-              }
-            }
-          },
-          "500": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/teams/{team_id}/internal": {
-      "get": {
-        "tags": ["crate::routers::teams"],
-        "operationId": "get_team_internal",
-        "parameters": [
-          {
-            "name": "team_id",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "string", "format": "uuid" }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/TeamInternal" }
-              }
-            }
-          },
-          "500": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
-              }
-            }
-          }
-        }
-      },
-      "patch": {
-        "tags": ["crate::routers::teams"],
-        "operationId": "update_team_internal",
-        "parameters": [
-          {
-            "name": "team_id",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "string", "format": "uuid" }
-          }
-        ],
-        "requestBody": {
-          "description": "",
-          "content": {
-            "application/json": {
-              "schema": { "$ref": "#/components/schemas/TeamForUpdateInternal" }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/TeamInternal" }
-              }
-            }
-          },
-          "500": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/teams/{team_id}/project": {
-      "patch": {
-        "tags": ["crate::routers::teams"],
-        "operationId": "update_team_project",
-        "parameters": [
-          {
-            "name": "team_id",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "string", "format": "uuid" }
-          }
-        ],
-        "requestBody": {
-          "description": "",
-          "content": {
-            "application/json": {
-              "schema": { "$ref": "#/components/schemas/ProjectIdDTO" }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/Team" }
               }
             }
           },
@@ -2687,6 +2565,31 @@
   },
   "components": {
     "schemas": {
+      "AdminTeam": {
+        "type": "object",
+        "required": ["id", "event_id", "name", "slug", "index"],
+        "properties": {
+          "ai_api_key": { "type": "string", "nullable": true },
+          "comment": { "type": "string", "nullable": true },
+          "event_id": { "type": "string", "format": "uuid" },
+          "extra_score": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "id": { "type": "string", "format": "uuid" },
+          "index": { "type": "integer", "format": "int32" },
+          "name": { "type": "string" },
+          "password": { "type": "string", "nullable": true },
+          "photo_url": { "type": "string", "nullable": true },
+          "project_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "slug": { "type": "string" }
+        }
+      },
       "AffectedRows": {
         "type": "object",
         "required": ["affected_rows"],
@@ -3057,10 +2960,6 @@
         }
       },
       "MediaUsage": { "type": "string", "enum": ["TeamPhoto"] },
-      "PasswordDTO": {
-        "type": "object",
-        "properties": { "password": { "type": "string", "nullable": true } }
-      },
       "Policies": {
         "type": "object",
         "required": [
@@ -3138,12 +3037,6 @@
         "properties": {
           "content": { "type": "string", "nullable": true },
           "name": { "type": "string", "nullable": true }
-        }
-      },
-      "ProjectIdDTO": {
-        "type": "object",
-        "properties": {
-          "project_id": { "type": "string", "format": "uuid", "nullable": true }
         }
       },
       "PublicError": {
@@ -3303,47 +3196,23 @@
       "TeamForUpdate": {
         "type": "object",
         "properties": {
-          "name": { "type": "string", "nullable": true },
-          "photo_id": { "type": "string", "format": "uuid", "nullable": true }
-        }
-      },
-      "TeamForUpdateInternal": {
-        "type": "object",
-        "properties": {
+          "ai_api_key": { "type": "string", "nullable": true },
           "comment": { "type": "string", "nullable": true },
           "extra_score": {
             "type": "number",
             "format": "double",
             "nullable": true
-          }
+          },
+          "name": { "type": "string", "nullable": true },
+          "password": { "type": "string", "nullable": true },
+          "photo_id": { "type": "string", "format": "uuid", "nullable": true },
+          "project_id": { "type": "string", "format": "uuid", "nullable": true }
         }
       },
       "TeamIdQuery": {
         "type": "object",
         "required": ["team_id"],
         "properties": { "team_id": { "type": "string", "format": "uuid" } }
-      },
-      "TeamInternal": {
-        "type": "object",
-        "required": ["id", "event_id", "name", "slug", "index"],
-        "properties": {
-          "comment": { "type": "string", "nullable": true },
-          "event_id": { "type": "string", "format": "uuid" },
-          "extra_score": {
-            "type": "number",
-            "format": "double",
-            "nullable": true
-          },
-          "id": { "type": "string", "format": "uuid" },
-          "index": { "type": "integer", "format": "int32" },
-          "name": { "type": "string" },
-          "project_id": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "slug": { "type": "string" }
-        }
       },
       "TeamLeaderboardEntry": {
         "type": "object",

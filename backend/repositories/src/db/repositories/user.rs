@@ -13,7 +13,7 @@ impl UserRepository {
         user::Entity::find_by_id(id)
             .one(db)
             .await?
-            .or_fail(user::Entity, id)
+            .or_fail(user::Entity.table_name(), id)
     }
 
     pub async fn fetch_by_auth_id_opt<C: ConnectionTrait>(

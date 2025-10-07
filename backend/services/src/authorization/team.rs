@@ -3,7 +3,7 @@ use crate::authorization::AuthorizationService;
 use crate::user::fmt_user_name;
 use crate::{ServiceError, ServiceResult};
 use hackathon_portal_repositories::db::{
-    db_team, db_team_role_assignment, db_user, EventRepository, TeamRepository, TeamRole,
+    db_team, db_team_role_assignment, db_user, TeamRepository, TeamRole,
     TeamRoleAssignmentRepository, TryInsertResultExt,
 };
 use sea_orm::prelude::*;
@@ -39,8 +39,8 @@ impl AuthorizationService {
         team_id: Uuid,
         roles: TeamRolesMap,
     ) -> ServiceResult<u64> {
-        let team = TeamRepository::fetch_by_id(self.db_repo.conn(), team_id).await?;
-        let event = EventRepository::fetch_by_id(self.db_repo.conn(), team.event_id).await?;
+        let (team, event) =
+            TeamRepository::fetch_by_id_with_event(self.db_repo.conn(), team_id).await?;
 
         let mut active_role_assignments = Vec::new();
 

@@ -37,7 +37,7 @@ pub async fn create_expert_rating(
     State(state): State<ApiState>,
     Json(body): Json<ExpertRatingForCreate>,
 ) -> ApiJson<ExpertRating> {
-    let team = state.team_service.get_team(body.team_id, false).await?;
+    let team = state.team_service.get_team(body.team_id).await?;
     let event = state.event_service.get_event(team.event_id).await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
@@ -71,7 +71,7 @@ pub async fn get_expert_ratings(
     State(state): State<ApiState>,
     Query(query): Query<TeamIdQuery>,
 ) -> ApiJsonVec<ExpertRating> {
-    let team = state.team_service.get_team(query.team_id, false).await?;
+    let team = state.team_service.get_team(query.team_id).await?;
     let event = state.event_service.get_event(team.event_id).await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
@@ -109,7 +109,7 @@ pub async fn get_expert_rating(
 ) -> ApiJson<ExpertRating> {
     // TODO: think about joins...
     let rating = state.rating_service.get_expert_rating(rating_id).await?;
-    let team = state.team_service.get_team(rating.team_id, false).await?;
+    let team = state.team_service.get_team(rating.team_id).await?;
     let event = state.event_service.get_event(team.event_id).await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
@@ -142,7 +142,7 @@ pub async fn update_expert_rating(
 ) -> ApiJson<ExpertRating> {
     let rating = state.rating_service.get_expert_rating(rating_id).await?;
 
-    let team = state.team_service.get_team(rating.team_id, false).await?;
+    let team = state.team_service.get_team(rating.team_id).await?;
     let event = state.event_service.get_event(team.event_id).await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
@@ -179,7 +179,7 @@ pub async fn delete_expert_rating(
 ) -> ApiJson<ExpertRating> {
     let rating = state.rating_service.get_expert_rating(rating_id).await?;
 
-    let team = state.team_service.get_team(rating.team_id, false).await?;
+    let team = state.team_service.get_team(rating.team_id).await?;
     let event = state.event_service.get_event(team.event_id).await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 

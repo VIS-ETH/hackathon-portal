@@ -5,7 +5,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface PasswordDTO {
-  /** @nullable */
-  password?: string | null;
-}
+/**
+ * @nullable
+ */
+export type IndexTeams200 = unknown | null;

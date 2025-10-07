@@ -1,4 +1,4 @@
-import { useGetTeamCredentials, useUpdateTeamCredentials } from "@/api/gen";
+import { useGetTeamCredentials, useUpdateTeam } from "@/api/gen";
 import { Team } from "@/api/gen/schemas";
 import { inputProps } from "@/styles/common";
 
@@ -12,16 +12,16 @@ const PasswordTd = ({ team }: PasswordTdProps) => {
   const { data: credentials, refetch: refetchCredentials } =
     useGetTeamCredentials(team.id);
 
-  const updatePasswordMutation = useUpdateTeamCredentials();
+  const updateTeamMutation = useUpdateTeam();
 
   const handleUpdate = async (
     password: string | undefined,
     ai_api_key: string | undefined,
   ) => {
-    await updatePasswordMutation.mutateAsync({
+    await updateTeamMutation.mutateAsync({
       teamId: team.id,
       data: {
-        vm_password: password,
+        password: password,
         ai_api_key: ai_api_key,
       },
     });

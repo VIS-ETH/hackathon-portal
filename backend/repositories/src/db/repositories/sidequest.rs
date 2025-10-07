@@ -26,7 +26,7 @@ impl SidequestRepository {
         sidequest::Entity::find_by_id(id)
             .one(db)
             .await?
-            .or_fail(sidequest::Entity, id)
+            .or_fail(sidequest::Entity.table_name(), id)
     }
 
     pub async fn fetch_by_slug<C: ConnectionTrait>(
@@ -43,7 +43,10 @@ impl SidequestRepository {
             )
             .one(db)
             .await?
-            .or_fail(sidequest::Entity, format!("{event_slug}/{sidequest_slug}"))
+            .or_fail(
+                sidequest::Entity.table_name(),
+                format!("{event_slug}/{sidequest_slug}"),
+            )
     }
 
     pub async fn count_conflicting_by_slug<C: ConnectionTrait>(

@@ -154,24 +154,12 @@ impl UploadService {
         Ok(())
     }
 
-    pub async fn inject_url(&self, value: &mut String) -> ServiceResult<()> {
-        let Some(id) = value.parse::<Uuid>().ok() else {
-            return Ok(());
-        };
-
-        *value = self
+    pub async fn generate_download_url(&self, id: Uuid) -> ServiceResult<String> {
+        let url = self
             .s3_repo
             .presign_get_object(&id.to_string(), Self::PRESIGNED_URL_EXPIRATION)
             .await?;
 
-        Ok(())
-    }
-
-    pub async fn inject_url_opt(&self, value: Option<&mut String>) -> ServiceResult<()> {
-        if let Some(value) = value {
-            self.inject_url(value).await?;
-        }
-
-        Ok(())
+        Ok(url)
     }
 }

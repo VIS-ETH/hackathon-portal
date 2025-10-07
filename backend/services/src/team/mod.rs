@@ -1,15 +1,15 @@
 pub mod models;
 
 use crate::authorization::AuthorizationService;
-use crate::team::models::{Team, TeamCredentials, TeamForCreate, TeamForUpdate};
+use crate::team::models::{Team, TeamForCreate, TeamForUpdate};
 use crate::upload::UploadService;
 use crate::{ServiceError, ServiceResult};
+use futures::future::try_join_all;
 use hackathon_portal_repositories::db::{
-    db_project_preference, db_sidequest_score, db_team, db_team_role_assignment, MediaUsage,
-    ProjectPreferenceRepository, TeamRepository, TeamRole,
+    db_event, db_project_preference, db_sidequest_score, db_team, db_team_role_assignment,
+    EventRepository, MediaUsage, ProjectPreferenceRepository, TeamRepository, TeamRole,
 };
 use hackathon_portal_repositories::DbRepository;
-use models::{TeamForUpdateInternal, TeamInternal};
 use sea_orm::prelude::*;
 use sea_orm::{ActiveModelTrait, IntoActiveModel, Set, TransactionTrait};
 use slug::slugify;
@@ -39,6 +39,8 @@ impl TeamService {
 
     pub async fn create_team(&self, creator: Uuid, team_fc: TeamForCreate) -> ServiceResult<Team> {
         let txn = self.db_repo.conn().begin().await?;
+
+        let event = EventRepository::fetch_by_id(&txn, team_fc.event_id).await?;
 
         // Generate slug and check for naming conflicts
         let slug = self
@@ -72,122 +74,61 @@ impl TeamService {
             return Err(err);
         }
 
-        let mut team = Team::from(team);
-        self.inject_photo_url(&mut team).await?;
+        let team = self.assemble_team(team, &event).await?;
 
         Ok(team)
     }
 
-    pub async fn get_teams(
-        &self,
-        event_id: Uuid,
-        project_assignments_visible: bool,
-    ) -> ServiceResult<Vec<Team>> {
+    pub async fn get_teams(&self, event_id: Uuid) -> ServiceResult<Vec<Team>> {
+        let event = EventRepository::fetch_by_id(self.db_repo.conn(), event_id).await?;
         let teams = TeamRepository::fetch_all_by_event_id(self.db_repo.conn(), event_id).await?;
-        let mut teams = teams.into_iter().map(Team::from).collect::<Vec<_>>();
 
-        for team in &mut teams {
-            self.inject_photo_url(team).await?;
-        }
-
-        if !project_assignments_visible {
-            for team in &mut teams {
-                team.project_id = None;
-            }
-        }
-
-        Ok(teams)
+        try_join_all(
+            teams
+                .into_iter()
+                .map(|team_model| self.assemble_team(team_model, &event)),
+        )
+        .await
     }
 
-    pub async fn get_teams_internal(
-        &self,
-        event_id: Uuid,
-        project_assignments_visible: bool,
-    ) -> ServiceResult<Vec<TeamInternal>> {
-        let teams = TeamRepository::fetch_all_by_event_id(self.db_repo.conn(), event_id).await?;
-        let mut teams = teams
-            .into_iter()
-            .map(TeamInternal::from)
-            .collect::<Vec<_>>();
+    pub async fn get_team(&self, team_id: Uuid) -> ServiceResult<Team> {
+        let (team, event) =
+            TeamRepository::fetch_by_id_with_event(self.db_repo.conn(), team_id).await?;
 
-        if !project_assignments_visible {
-            for team in &mut teams {
-                team.project_id = None;
-            }
-        }
-
-        Ok(teams)
+        self.assemble_team(team, &event).await
     }
 
-    pub async fn get_team(
-        &self,
-        team_id: Uuid,
-        project_assignments_visible: bool,
-    ) -> ServiceResult<Team> {
-        let team = TeamRepository::fetch_by_id(self.db_repo.conn(), team_id).await?;
-        let mut team = Team::from(team);
+    pub async fn get_team_by_slug(&self, event_slug: &str, team_slug: &str) -> ServiceResult<Team> {
+        let (team, event) =
+            TeamRepository::fetch_by_slug_with_event(self.db_repo.conn(), event_slug, team_slug)
+                .await?;
 
-        self.inject_photo_url(&mut team).await?;
-
-        if !project_assignments_visible {
-            team.project_id = None;
-        }
-
-        Ok(team)
-    }
-
-    pub async fn get_team_internal(
-        &self,
-        team_id: Uuid,
-        project_assignments_visible: bool,
-    ) -> ServiceResult<TeamInternal> {
-        let mut team = TeamRepository::fetch_by_id(self.db_repo.conn(), team_id).await?;
-
-        if !project_assignments_visible {
-            team.project_id = None;
-        }
-
-        Ok(team.into())
-    }
-
-    pub async fn get_team_by_slug(
-        &self,
-        event_slug: &str,
-        team_slug: &str,
-        project_assignments_visible: bool,
-    ) -> ServiceResult<Team> {
-        let team =
-            TeamRepository::fetch_by_slug(self.db_repo.conn(), event_slug, team_slug).await?;
-
-        let mut team = Team::from(team);
-
-        self.inject_photo_url(&mut team).await?;
-
-        if !project_assignments_visible {
-            team.project_id = None;
-        }
-
-        Ok(team)
+        self.assemble_team(team, &event).await
     }
 
     pub async fn update_team(&self, team_id: Uuid, team_fu: TeamForUpdate) -> ServiceResult<Team> {
         let txn = self.db_repo.conn().begin().await?;
 
-        let team = TeamRepository::fetch_by_id(&txn, team_id).await?;
-
-        // Store for later use
-        let event_id = team.event_id;
+        let (team, event) = TeamRepository::fetch_by_id_with_event(&txn, team_id).await?;
 
         let mut active_team = team.into_active_model();
 
         if let Some(name) = &team_fu.name {
             // Generate slug and check for naming conflicts
             let slug = self
-                .generate_slug(&txn, event_id, name, Some(team_id))
+                .generate_slug(&txn, event.id, name, Some(team_id))
                 .await?;
 
             active_team.name = Set(name.clone());
             active_team.slug = Set(slug);
+        }
+
+        if let Some(project_id) = &team_fu.project_id {
+            if project_id.is_nil() {
+                active_team.project_id = Set(None);
+            } else {
+                active_team.project_id = Set(Some(*project_id));
+            }
         }
 
         if let Some(photo_id) = &team_fu.photo_id {
@@ -202,31 +143,39 @@ impl TeamService {
             }
         }
 
+        if let Some(password) = &team_fu.password {
+            if password.is_empty() {
+                active_team.password = Set(None);
+            } else {
+                active_team.password = Set(Some(password.clone()));
+            }
+        }
+
+        if let Some(ai_api_key) = &team_fu.ai_api_key {
+            if ai_api_key.is_empty() {
+                active_team.ai_api_key = Set(None);
+            } else {
+                active_team.ai_api_key = Set(Some(ai_api_key.clone()));
+            }
+        }
+
+        if let Some(comment) = &team_fu.comment {
+            if comment.is_empty() {
+                active_team.comment = Set(None);
+            } else {
+                active_team.comment = Set(Some(comment.clone()));
+            }
+        }
+
+        if let Some(extra_score) = &team_fu.extra_score {
+            active_team.extra_score = Set(Some(*extra_score));
+        }
+
         let team = active_team.update(&txn).await?;
 
         txn.commit().await?;
 
-        let mut team = Team::from(team);
-        self.inject_photo_url(&mut team).await?;
-
-        Ok(team)
-    }
-
-    pub async fn update_team_internal(
-        &self,
-        team_id: Uuid,
-        team_fui: TeamForUpdateInternal,
-    ) -> ServiceResult<TeamInternal> {
-        let team = TeamRepository::fetch_by_id(self.db_repo.conn(), team_id).await?;
-        let mut active_team = team.into_active_model();
-        if let Some(comment) = &team_fui.comment {
-            active_team.comment = Set(Some(comment.clone()));
-        }
-        if let Some(extra_score) = &team_fui.extra_score {
-            active_team.extra_score = Set(Some(*extra_score));
-        }
-        let team = active_team.update(self.db_repo.conn()).await?;
-        Ok(team.into())
+        self.assemble_team(team, &event).await
     }
 
     /// Cascade deletes team role assignments and project preferences.
@@ -266,7 +215,7 @@ impl TeamService {
 
     /// (Re)assigns the team indices (1-based) based on the ascending ordering of the team's `project_id` and `id`.
     /// Warning: This must only be called if the event has never left the REGISTRATION phase (e.g. since the VM domain depends on the team indices).
-    pub async fn index_teams(&self, event_id: Uuid) -> ServiceResult<Vec<Team>> {
+    pub async fn index_teams(&self, event_id: Uuid) -> ServiceResult<()> {
         let mut teams =
             TeamRepository::fetch_all_by_event_id(self.db_repo.conn(), event_id).await?;
         let mut new_teams = Vec::new();
@@ -289,23 +238,7 @@ impl TeamService {
 
         txn.commit().await?;
 
-        let new_teams = new_teams.into_iter().map(Team::from).collect();
-
-        Ok(new_teams)
-    }
-
-    pub async fn update_team_project(
-        &self,
-        team_id: Uuid,
-        project_id: Option<Uuid>,
-    ) -> ServiceResult<Team> {
-        let team = TeamRepository::fetch_by_id(self.db_repo.conn(), team_id).await?;
-        let mut active_team = team.into_active_model();
-        active_team.project_id = Set(project_id);
-
-        let team = active_team.update(self.db_repo.conn()).await?;
-
-        Ok(team.into())
+        Ok(())
     }
 
     pub async fn get_team_project_preferences(&self, team_id: Uuid) -> ServiceResult<Vec<Uuid>> {
@@ -361,37 +294,33 @@ impl TeamService {
         Ok(pps)
     }
 
-    pub async fn get_team_credentials(&self, team_id: Uuid) -> ServiceResult<TeamCredentials> {
-        let team = TeamRepository::fetch_by_id(self.db_repo.conn(), team_id).await?;
-        Ok(TeamCredentials {
-            vm_password: team.password,
-            ai_api_key: team.ai_api_key,
-        })
-    }
-
-    pub async fn update_team_credentials(
+    async fn assemble_team(
         &self,
-        team_id: Uuid,
-        credentials: TeamCredentials,
+        team_model: db_team::Model,
+        _: &db_event::Model,
     ) -> ServiceResult<Team> {
-        let team = TeamRepository::fetch_by_id(self.db_repo.conn(), team_id).await?;
-        let mut active_team = team.into_active_model();
-        if credentials.vm_password.is_some() {
-            active_team.password = Set(credentials.vm_password);
-        }
-        if credentials.ai_api_key.is_some() {
-            active_team.ai_api_key = Set(credentials.ai_api_key);
-        }
+        let photo_url = if let Some(photo_id) = team_model.photo_id {
+            Some(self.upload_service.generate_download_url(photo_id).await?)
+        } else {
+            None
+        };
 
-        let team = active_team.update(self.db_repo.conn()).await?;
+        let team = Team {
+            id: team_model.id,
+            event_id: team_model.event_id,
+            project_id: team_model.project_id,
+            name: team_model.name,
+            slug: team_model.slug,
+            index: team_model.index,
+            photo_id: team_model.photo_id,
+            photo_url,
+            password: team_model.password,
+            ai_api_key: team_model.ai_api_key,
+            extra_score: team_model.extra_score,
+            comment: team_model.comment,
+        };
 
-        Ok(team.into())
-    }
-
-    async fn inject_photo_url(&self, team: &mut Team) -> ServiceResult<()> {
-        self.upload_service
-            .inject_url_opt(team.photo_url.as_mut())
-            .await
+        Ok(team)
     }
 
     async fn generate_slug<C: ConnectionTrait>(

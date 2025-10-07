@@ -27,16 +27,31 @@ impl TeamRepository {
         team::Entity::find_by_id(id)
             .one(db)
             .await?
-            .or_fail(team::Entity, id)
+            .or_fail(team::Entity.table_name(), id)
     }
 
-    pub async fn fetch_by_slug<C: ConnectionTrait>(
+    pub async fn fetch_by_id_with_event<C: ConnectionTrait>(
+        db: &C,
+        id: Uuid,
+    ) -> RepositoryResult<(team::Model, event::Model)> {
+        let (team, event) = team::Entity::find_by_id(id)
+            .find_also_related(event::Entity)
+            .one(db)
+            .await?
+            .or_fail(team::Entity.table_name(), id)?;
+
+        let event = event.expect("Foreign key constraint ensures event exists");
+
+        Ok((team, event))
+    }
+
+    pub async fn fetch_by_slug_with_event<C: ConnectionTrait>(
         db: &C,
         event_slug: &str,
         team_slug: &str,
-    ) -> RepositoryResult<team::Model> {
-        team::Entity::find()
-            .inner_join(event::Entity)
+    ) -> RepositoryResult<(team::Model, event::Model)> {
+        let (team, event) = team::Entity::find()
+            .find_also_related(event::Entity)
             .filter(
                 Condition::all()
                     .add(event::Column::Slug.eq(event_slug))
@@ -44,7 +59,14 @@ impl TeamRepository {
             )
             .one(db)
             .await?
-            .or_fail(team::Entity, format!("{event_slug}/{team_slug}"))
+            .or_fail(
+                team::Entity.table_name(),
+                format!("{event_slug}/{team_slug}"),
+            )?;
+
+        let event = event.expect("Foreign key constraint ensures event exists");
+
+        Ok((team, event))
     }
 
     pub async fn count_conflicting_by_slug<C: ConnectionTrait>(

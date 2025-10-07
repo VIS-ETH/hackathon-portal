@@ -26,6 +26,6 @@ impl AppointmentRepository {
         appointment::Entity::find_by_id(id)
             .one(db)
             .await?
-            .or_fail(appointment::Entity, id)
+            .or_fail(appointment::Entity.table_name(), id)
     }
 }
