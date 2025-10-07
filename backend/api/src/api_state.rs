@@ -8,6 +8,7 @@ use hackathon_portal_services::appointment::AppointmentService;
 use hackathon_portal_services::authorization::AuthorizationService;
 use hackathon_portal_services::event::EventService;
 use hackathon_portal_services::health::HealthService;
+use hackathon_portal_services::infrastructure::InfrastructureService;
 use hackathon_portal_services::project::ProjectService;
 use hackathon_portal_services::rating::RatingService;
 use hackathon_portal_services::sidequest::SidequestService;
@@ -31,6 +32,7 @@ pub struct ApiState {
     pub sidequest_service: Arc<SidequestService>,
     pub appointment_service: Arc<AppointmentService>,
     pub upload_service: Arc<UploadService>,
+    pub infrastructure_service: Arc<InfrastructureService>,
 }
 
 impl ApiState {
@@ -48,6 +50,7 @@ impl ApiState {
         sidequest_service: Arc<SidequestService>,
         appointment_service: Arc<AppointmentService>,
         upload_service: Arc<UploadService>,
+        infrastructure_service: Arc<InfrastructureService>,
     ) -> Self {
         Self {
             authenticator,
@@ -62,6 +65,7 @@ impl ApiState {
             sidequest_service,
             appointment_service,
             upload_service,
+            infrastructure_service,
         }
     }
 
@@ -83,6 +87,11 @@ impl ApiState {
             authorization_service.clone(),
             upload_service.clone(),
             db_repo.clone(),
+        ));
+
+        let infrastructure_service = Arc::new(InfrastructureService::new(
+            config.infrastructure.clone(),
+            team_service.clone(),
         ));
 
         let rating_service = Arc::new(RatingService::new(db_repo.clone()));
@@ -117,6 +126,7 @@ impl ApiState {
             sidequest_service,
             appointment_service,
             upload_service,
+            infrastructure_service,
         );
 
         Ok(state)

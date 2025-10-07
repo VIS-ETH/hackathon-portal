@@ -9,11 +9,15 @@ import type { EventForUpdateVisibility } from "./eventForUpdateVisibility";
 
 export interface EventForUpdate {
   /** @nullable */
+  direct_address_template?: string | null;
+  /** @nullable */
   documentation_content?: string | null;
   /** @nullable */
   end?: string | null;
   /** @nullable */
   feedback_visible?: boolean | null;
+  /** @nullable */
+  managed_address_template?: string | null;
   /**
    * @minimum 0
    * @nullable
@@ -29,6 +33,8 @@ export interface EventForUpdate {
   /** @nullable */
   phase?: EventForUpdatePhase;
   /** @nullable */
+  private_address_template?: string | null;
+  /** @nullable */
   project_assignments_visible?: boolean | null;
   /** @nullable */
   projects_visible?: boolean | null;
@@ -39,6 +45,8 @@ export interface EventForUpdate {
    * @nullable
    */
   sidequest_cooldown?: number | null;
+  /** @nullable */
+  ssh_config_template?: string | null;
   /** @nullable */
   start?: string | null;
   /** @nullable */

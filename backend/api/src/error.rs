@@ -246,10 +246,12 @@ impl From<&ServiceError> for PublicError {
             ),
             ServiceError::Repository(e) => return e.into(),
             ServiceError::Matching { message } => (StatusCode::BAD_REQUEST, message.clone()),
+            ServiceError::DependencyMissing { .. } |
             ServiceError::Io(_) |
             ServiceError::TracingSetGlobalDefault(_) |
             ServiceError::TracingAppenderRollingInit(_) |
-            ServiceError::SeaORM(_) => ise,
+            ServiceError::SeaORM(_) |
+            ServiceError::SerdeJson(_) => ise,
         };
 
         Self::new(status, message)

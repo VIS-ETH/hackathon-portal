@@ -1,5 +1,5 @@
 import { useUpdateTeam } from "@/api/gen";
-import { Team } from "@/api/gen/schemas";
+import { AdminTeam } from "@/api/gen/schemas";
 import ProjectSelect from "@/components/select/ProjectSelect";
 
 import { Table } from "@mantine/core";
@@ -7,7 +7,7 @@ import { Table } from "@mantine/core";
 import { NIL } from "uuid";
 
 type ProjectTdProps = {
-  team: Team;
+  team: AdminTeam;
   ro?: boolean;
   refetch?: () => void;
 };

@@ -30,6 +30,8 @@ import {
   Text,
   TextInput,
   TextInputProps,
+  Textarea,
+  TextareaProps,
 } from "@mantine/core";
 
 import { DateTimePicker, DateTimePickerProps } from "@mantine/dates";
@@ -48,6 +50,8 @@ const EventSettings = ({ event, refetch }: EventSettingsProps) => {
     mode: "controlled",
     transformValues: (values) =>
       produce(values, (draft) => {
+        // TODO: reconsider the correctness of this approach
+
         if (!draft.name) {
           delete draft.name;
         }
@@ -78,6 +82,24 @@ const EventSettings = ({ event, refetch }: EventSettingsProps) => {
 
         if (!draft.sidequest_cooldown && draft.sidequest_cooldown !== 0) {
           delete draft.sidequest_cooldown;
+        }
+
+        if (draft.read_only == event.read_only) {
+          delete draft.read_only;
+        }
+
+        if (draft.projects_visible == event.projects_visible) {
+          delete draft.projects_visible;
+        }
+
+        if (
+          draft.project_assignments_visible == event.project_assignments_visible
+        ) {
+          delete draft.project_assignments_visible;
+        }
+
+        if (draft.feedback_visible == event.feedback_visible) {
+          delete draft.feedback_visible;
         }
 
         return draft;
@@ -186,6 +208,38 @@ const EventSettings = ({ event, refetch }: EventSettingsProps) => {
               step={1}
             />
           </SimpleGrid>
+          <Divider label="Infrastructure" labelPosition="left" />
+          <SimpleGrid cols={{ xs: 1, md: 3 }}>
+            <TextInput
+              {...(inputProps as TextInputProps)}
+              {...form.getInputProps("managed_address_template")}
+              key={form.key("managed_address_template")}
+              label="Managed Address Template"
+              placeholder={event.managed_address_template || "N/A"}
+            />
+            <TextInput
+              {...(inputProps as TextInputProps)}
+              {...form.getInputProps("direct_address_template")}
+              key={form.key("direct_address_template")}
+              label="Direct Address Template"
+              placeholder={event.direct_address_template || "N/A"}
+            />
+            <TextInput
+              {...(inputProps as TextInputProps)}
+              {...form.getInputProps("private_address_template")}
+              key={form.key("private_address_template")}
+              label="Private Address Template"
+              placeholder={event.private_address_template || "N/A"}
+            />
+            <Textarea
+              {...(inputProps as TextareaProps)}
+              {...form.getInputProps("ssh_config_template")}
+              key={form.key("ssh_config_template")}
+              label="SSH Config Template"
+              placeholder={event.ssh_config_template || "N/A"}
+            />
+          </SimpleGrid>
+          <Divider label="Permissions" labelPosition="left" />
           <SimpleGrid cols={{ xs: 1, md: 3 }}>
             <Checkbox
               {...form.getInputProps("read_only", { type: "checkbox" })}

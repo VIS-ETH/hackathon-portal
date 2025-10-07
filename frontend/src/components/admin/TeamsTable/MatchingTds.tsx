@@ -3,13 +3,13 @@ import {
   useGetProjectsMatching,
   useGetTeamProjectPreferences,
 } from "@/api/gen";
-import { Team } from "@/api/gen/schemas";
+import { AdminTeam } from "@/api/gen/schemas";
 import { resizeArray } from "@/utils";
 
 import { Table, Text } from "@mantine/core";
 
 type MatchingTdsProps = {
-  team: Team;
+  team: AdminTeam;
 };
 
 const MatchingTds = ({ team }: MatchingTdsProps) => {

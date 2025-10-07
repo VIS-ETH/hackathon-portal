@@ -1,0 +1,13 @@
+.wrapper :global(.excalidraw) {
+  touch-action: none;
+  pointer-events: none;
+  font-family: sans-serif;
+}
+
+.wrapper :global(.App-toolbar) {
+  display: none;
+}
+
+.wrapper :global(.App-menu) {
+  display: none;
+}

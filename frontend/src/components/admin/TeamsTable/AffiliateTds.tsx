@@ -4,11 +4,11 @@ import {
   usePutTeamRoles,
 } from "@/api/gen";
 import {
+  AdminTeam,
   DeleteTeamRolesBody,
   EventAffiliate,
   EventRole,
   PutTeamRolesBody,
-  Team,
   TeamRole,
 } from "@/api/gen/schemas";
 import EventAffiliateSelect from "@/components/select/EventAffiliateSelect";
@@ -17,7 +17,7 @@ import { resizeArray } from "@/utils";
 import { Table } from "@mantine/core";
 
 type AffiliateTdsProps = {
-  team: Team;
+  team: AdminTeam;
   role: TeamRole;
   max: number;
 };

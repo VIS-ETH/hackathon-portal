@@ -24,6 +24,17 @@ pub struct Model {
     #[sea_orm(column_type = "Text", nullable)]
     pub ai_api_key: Option<String>,
     pub photo_id: Option<Uuid>,
+    #[sea_orm(column_type = "Text", nullable)]
+    pub managed_address_override: Option<String>,
+    #[sea_orm(column_type = "Text", nullable)]
+    pub direct_address_override: Option<String>,
+    #[sea_orm(column_type = "Text", nullable)]
+    pub private_address_override: Option<String>,
+    #[sea_orm(column_type = "Text", nullable)]
+    pub ssh_config_override: Option<String>,
+    pub ingress_enabled: bool,
+    #[sea_orm(column_type = "JsonBinary")]
+    pub ingress_config: Json,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

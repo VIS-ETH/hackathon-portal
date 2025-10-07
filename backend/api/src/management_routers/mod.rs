@@ -1,5 +1,6 @@
 mod docs;
 mod health;
+mod infrastructure;
 
 use crate::api_state::ApiState;
 use crate::mw::mw_resolve_ctx;
@@ -11,6 +12,7 @@ use utoipa_swagger_ui::SwaggerUi;
 pub fn get_router(state: ApiState) -> Router {
     Router::new()
         .nest("/health", health::get_router(&state))
+        .nest("/infrastructure", infrastructure::get_router(&state))
         .layer(middleware::from_fn_with_state(state, mw_resolve_ctx))
 }
 

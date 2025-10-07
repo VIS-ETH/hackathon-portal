@@ -2,7 +2,7 @@ import classes from "./UserMenu.module.css";
 
 import { useGetMe } from "@/api/gen";
 import { useDiscord } from "@/hooks/useDiscord";
-import { iconProps } from "@/styles/common";
+import { iconProps, menuProps } from "@/styles/common";
 
 import { Avatar, Group, Menu, Text, UnstyledButton } from "@mantine/core";
 
@@ -22,9 +22,8 @@ const UserMenu = () => {
 
   return (
     <Menu
+      {...menuProps}
       width={260}
-      position="bottom-end"
-      transitionProps={{ transition: "pop-top-right" }}
       onOpen={handles.open}
       onClose={handles.close}
       withinPortal

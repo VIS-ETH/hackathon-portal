@@ -4,15 +4,28 @@
  * hackathon-portal-api
  * OpenAPI spec version: 1.0.0
  */
+import type { IngressConfig } from "./ingressConfig";
 
 export interface Team {
+  /** @nullable */
+  direct_address?: string | null;
   event_id: string;
   id: string;
   index: number;
+  ingress_config: IngressConfig;
+  ingress_enabled: boolean;
+  /** @nullable */
+  ingress_url?: string | null;
+  /** @nullable */
+  managed_address?: string | null;
   name: string;
   /** @nullable */
   photo_url?: string | null;
   /** @nullable */
+  private_address?: string | null;
+  /** @nullable */
   project_id?: string | null;
   slug: string;
+  /** @nullable */
+  ssh_config?: string | null;
 }

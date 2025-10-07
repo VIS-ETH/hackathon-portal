@@ -11,6 +11,10 @@ pub type ServiceResult<T> = Result<T, ServiceError>;
 #[serde_as]
 #[derive(Debug, Serialize, From)]
 pub enum ServiceError {
+    DependencyMissing {
+        dependency: String,
+    },
+
     SlugNotUnique {
         slug: String,
     },
@@ -96,6 +100,9 @@ pub enum ServiceError {
 
     #[from]
     SeaORM(#[serde_as(as = "DisplayFromStr")] sea_orm::DbErr),
+
+    #[from]
+    SerdeJson(#[serde_as(as = "DisplayFromStr")] serde_json::Error),
     // endregion
 }
 

@@ -52,6 +52,10 @@ model event {
   max_team_size               Int
   max_teams_per_project       Int              @default(2) // max team per project
   sidequest_cooldown          Int // in minutes
+  managed_address_template    String?
+  direct_address_template     String?
+  private_address_template    String?
+  ssh_config_template         String?
   read_only                   Boolean          @default(true)
   projects_visible            Boolean          @default(false)
   project_assignments_visible Boolean          @default(false)
@@ -76,14 +80,20 @@ model team {
   project_id String? @db.Uuid
 
   // fields
-  name        String
-  slug        String
-  index       Int
-  password    String?
-  ai_api_key  String?
-  extra_score Float?
-  comment     String?
-  photo_id    String? @db.Uuid
+  name                     String
+  slug                     String
+  index                    Int
+  password                 String?
+  ai_api_key               String?
+  extra_score              Float?
+  comment                  String?
+  photo_id                 String? @db.Uuid
+  managed_address_override String?
+  direct_address_override  String?
+  private_address_override String?
+  ssh_config_override      String?
+  ingress_enabled          Boolean @default(false)
+  ingress_config           Json    @default("{\"version\":1,\"mode\":\"Managed\",\"config\":{\"server_port\":8080,\"access_control_mode\":\"AuthenticationAuthorization\"}}")
 
   // relations
   event   event    @relation(fields: [event_id], references: [id])

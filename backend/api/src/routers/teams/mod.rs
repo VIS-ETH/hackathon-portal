@@ -321,11 +321,24 @@ pub async fn update_team(
         });
     }
 
+    if body.ingress_config.is_some()
+        && !groups.can_update_team_ingress_config(event.visibility, event.phase, event.read_only)
+    {
+        return Err(ApiError::Forbidden {
+            action: "edit the ingress config of this team".to_string(),
+        });
+    }
+
     if (body.project_id.is_some()
         || body.password.is_some()
         || body.ai_api_key.is_some()
         || body.comment.is_some()
-        || body.extra_score.is_some())
+        || body.extra_score.is_some()
+        || body.managed_address_override.is_some()
+        || body.direct_address_override.is_some()
+        || body.private_address_override.is_some()
+        || body.ssh_config_override.is_some()
+        || body.ingress_enabled.is_some())
         && !groups.can_manage_event()
     {
         return Err(ApiError::Forbidden {
