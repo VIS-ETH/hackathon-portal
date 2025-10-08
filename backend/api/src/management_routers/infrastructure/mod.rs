@@ -15,8 +15,8 @@ pub fn get_router(state: &ApiState) -> Router {
     get,
     path = "/api/infrastructure/traefik",
     responses(
-        (status = StatusCode::OK, body = ()),
-        (status = StatusCode::INTERNAL_SERVER_ERROR, body = TraefikDynamicConfig),
+        (status = StatusCode::OK, body = TraefikDynamicConfig),
+        (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
 )]
 pub async fn get_traefik_dynamic_config(

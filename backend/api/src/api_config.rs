@@ -79,9 +79,8 @@ impl ApiConfig {
                     .list_separator(",")
                     .with_list_parse_key("server.allowed_origins")
                     .with_list_parse_key("infrastructure.traefik.entrypoints")
+                    .with_list_parse_key("infrastructure.traefik.auth_middlewares")
                     .with_list_parse_key("infrastructure.traefik.default_middlewares")
-                    .with_list_parse_key("infrastructure.traefik.authentication_headers")
-                    .with_list_parse_key("infrastructure.traefik.authorization_headers")
                     .try_parsing(true),
             )
             .build()?;

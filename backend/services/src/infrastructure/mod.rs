@@ -1,7 +1,6 @@
 use crate::infrastructure::models::{
-    AccessControlMode, IngressMode, ManagedIngressConfig, TraefikDynamicConfig,
-    TraefikForwardAuthConfig, TraefikHttpConfig, TraefikLoadBalancerConfig,
-    TraefikMiddlewareConfig, TraefikRouterConfig, TraefikServerConfig, TraefikServiceConfig,
+    AccessControlMode, IngressMode, ManagedIngressConfig, TraefikDynamicConfig, TraefikHttpConfig,
+    TraefikLoadBalancerConfig, TraefikRouterConfig, TraefikServerConfig, TraefikServiceConfig,
 };
 use crate::team::models::Team;
 use crate::team::TeamService;
@@ -19,13 +18,9 @@ pub mod models;
 pub struct TraefikConfig {
     #[serde(default = "TraefikConfig::default_entrypoints")]
     pub entrypoints: Vec<String>,
+    pub auth_middlewares: Vec<String>,
     #[serde(default = "TraefikConfig::default_default_middlewares")]
-    pub default_middlewares: Vec<String>,
-    pub authentication_endpoint: String,
-    pub authentication_headers: Vec<String>,
-    pub authorization_endpoint: String,
-    #[serde(default = "TraefikConfig::default_authorization_headers")]
-    pub authorization_headers: Vec<String>,
+    pub default_middlewares: Vec<String>, // applies after auth middlewares
 }
 
 impl TraefikConfig {
@@ -37,11 +32,6 @@ impl TraefikConfig {
     #[must_use]
     pub fn default_default_middlewares() -> Vec<String> {
         vec![]
-    }
-
-    #[must_use]
-    pub fn default_authorization_headers() -> Vec<String> {
-        vec!["X-User-Id".to_string(), "X-User-Name".to_string()]
     }
 }
 
@@ -58,9 +48,6 @@ pub struct InfrastructureService {
 }
 
 impl InfrastructureService {
-    const AUTHENTICATION_MIDDLEWARE_NAME: &'static str = "portal-forward-authentication";
-    const AUTHORIZATION_MIDDLEWARE_NAME: &'static str = "portal-forward-authorization";
-
     #[must_use]
     pub const fn new(config: InfrastructureConfig, team_service: Arc<TeamService>) -> Self {
         Self {
@@ -92,11 +79,11 @@ impl InfrastructureService {
         let mut services = HashMap::new();
 
         for (team, ingress_config) in teams_with_ingress_config {
-            let key = format!("portal-team-{}-{}", team.slug, team.id);
+            let key = format!("team-{}-{}", team.slug, team.id);
 
             let (Some(router), Some(service)) = (
                 Self::get_traefik_team_router(config, &key, &team, &ingress_config),
-                Self::get_traefik_team_service(&team),
+                Self::get_traefik_team_service(&team, &ingress_config),
             ) else {
                 continue;
             };
@@ -109,7 +96,7 @@ impl InfrastructureService {
             http: TraefikHttpConfig {
                 routers,
                 services,
-                middlewares: Self::get_traefik_middlewares(config),
+                middlewares: HashMap::new(),
             },
         };
 
@@ -130,18 +117,16 @@ impl InfrastructureService {
         let rule =
             format!("Host(`{managed_address}`) || Header(`X-Forwarded-Host`, `{managed_address}`)");
 
-        let mut middlewares = config.default_middlewares.clone();
+        let mut middlewares = if matches!(
+            ingress_config.access_control_mode,
+            AccessControlMode::AuthenticationAuthorization | AccessControlMode::Authentication
+        ) {
+            config.auth_middlewares.clone()
+        } else {
+            vec![]
+        };
 
-        match &ingress_config.access_control_mode {
-            AccessControlMode::AuthenticationAuthorization => middlewares.extend([
-                Self::AUTHENTICATION_MIDDLEWARE_NAME.to_string(),
-                Self::AUTHORIZATION_MIDDLEWARE_NAME.to_string(),
-            ]),
-            AccessControlMode::Authentication => {
-                middlewares.push(Self::AUTHENTICATION_MIDDLEWARE_NAME.to_string());
-            }
-            AccessControlMode::None => {}
-        }
+        middlewares.extend(config.default_middlewares.clone());
 
         let service = TraefikRouterConfig {
             rule,
@@ -153,7 +138,10 @@ impl InfrastructureService {
         Some(service)
     }
 
-    fn get_traefik_team_service(team: &Team) -> Option<TraefikServiceConfig> {
+    fn get_traefik_team_service(
+        team: &Team,
+        ingress_config: &ManagedIngressConfig,
+    ) -> Option<TraefikServiceConfig> {
         let Some(private_address) = team.private_address.as_deref() else {
             warn!(team = ?team.id, "Team has ingress enabled but no private address");
             return None;
@@ -162,30 +150,11 @@ impl InfrastructureService {
         let service = TraefikServiceConfig {
             load_balancer: TraefikLoadBalancerConfig {
                 servers: vec![TraefikServerConfig {
-                    url: format!("http://{private_address}"),
+                    url: format!("http://{private_address}:{}", ingress_config.server_port),
                 }],
             },
         };
 
         Some(service)
-    }
-
-    fn get_traefik_middlewares(config: &TraefikConfig) -> HashMap<String, TraefikMiddlewareConfig> {
-        HashMap::from([
-            (
-                Self::AUTHENTICATION_MIDDLEWARE_NAME.to_string(),
-                TraefikMiddlewareConfig::ForwardAuth(TraefikForwardAuthConfig {
-                    address: config.authentication_endpoint.clone(),
-                    auth_response_headers: Some(config.authentication_headers.clone()),
-                }),
-            ),
-            (
-                Self::AUTHORIZATION_MIDDLEWARE_NAME.to_string(),
-                TraefikMiddlewareConfig::ForwardAuth(TraefikForwardAuthConfig {
-                    address: config.authorization_endpoint.clone(),
-                    auth_response_headers: Some(config.authorization_headers.clone()),
-                }),
-            ),
-        ])
     }
 }

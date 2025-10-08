@@ -1,4 +1,4 @@
-use axum::http::header::InvalidHeaderValue;
+use axum::http::header::{InvalidHeaderValue, ToStrError};
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use axum::Json;
@@ -65,6 +65,9 @@ pub enum ApiError {
 
     #[from]
     Jwt(#[serde_as(as = "DisplayFromStr")] jsonwebtoken::errors::Error),
+
+    #[from]
+    ToStr(#[serde_as(as = "DisplayFromStr")] ToStrError),
     // endregion
 }
 
@@ -298,7 +301,8 @@ impl From<&ApiError> for PublicError {
             | ApiError::InvalidHeaderValue(_)
             | ApiError::JobScheduler(_)
             | ApiError::Reqwest(_)
-            | ApiError::Jwt(_) => ise,
+            | ApiError::Jwt(_)
+            | ApiError::ToStr(_) => ise,
         };
 
         Self::new(status, message)
