@@ -3,7 +3,9 @@
   "info": {
     "title": "hackathon-portal-api",
     "description": "",
-    "license": { "name": "" },
+    "license": {
+      "name": ""
+    },
     "version": "1.0.0"
   },
   "paths": {
@@ -17,7 +19,10 @@
             "in": "query",
             "description": "Filter by event id",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "responses": {
@@ -27,7 +32,9 @@
               "application/json": {
                 "schema": {
                   "type": "array",
-                  "items": { "$ref": "#/components/schemas/Appointment" }
+                  "items": {
+                    "$ref": "#/components/schemas/Appointment"
+                  }
                 }
               }
             }
@@ -36,7 +43,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -49,7 +58,9 @@
           "description": "",
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/AppointmentForCreate" }
+              "schema": {
+                "$ref": "#/components/schemas/AppointmentForCreate"
+              }
             }
           },
           "required": true
@@ -59,7 +70,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Appointment" }
+                "schema": {
+                  "$ref": "#/components/schemas/Appointment"
+                }
               }
             }
           },
@@ -67,7 +80,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -83,7 +98,10 @@
             "name": "appointment_id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "responses": {
@@ -91,7 +109,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Appointment" }
+                "schema": {
+                  "$ref": "#/components/schemas/Appointment"
+                }
               }
             }
           },
@@ -99,7 +119,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -113,7 +135,10 @@
             "name": "appointment_id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "responses": {
@@ -121,7 +146,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Appointment" }
+                "schema": {
+                  "$ref": "#/components/schemas/Appointment"
+                }
               }
             }
           },
@@ -129,7 +156,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -143,14 +172,19 @@
             "name": "appointment_id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "requestBody": {
           "description": "",
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/AppointmentForUpdate" }
+              "schema": {
+                "$ref": "#/components/schemas/AppointmentForUpdate"
+              }
             }
           },
           "required": true
@@ -160,7 +194,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Appointment" }
+                "schema": {
+                  "$ref": "#/components/schemas/Appointment"
+                }
               }
             }
           },
@@ -168,7 +204,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -186,7 +224,9 @@
               "application/json": {
                 "schema": {
                   "type": "array",
-                  "items": { "$ref": "#/components/schemas/Event" }
+                  "items": {
+                    "$ref": "#/components/schemas/Event"
+                  }
                 }
               }
             }
@@ -195,7 +235,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -215,7 +257,9 @@
                   "type": "object",
                   "additionalProperties": {
                     "type": "array",
-                    "items": { "$ref": "#/components/schemas/EventRole" },
+                    "items": {
+                      "$ref": "#/components/schemas/EventRole"
+                    },
                     "uniqueItems": true
                   }
                 }
@@ -226,7 +270,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -242,7 +288,9 @@
             "name": "event_slug",
             "in": "path",
             "required": true,
-            "schema": { "type": "string" }
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -250,7 +298,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Event" }
+                "schema": {
+                  "$ref": "#/components/schemas/Event"
+                }
               }
             }
           },
@@ -258,7 +308,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -274,7 +326,10 @@
             "name": "event_id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "responses": {
@@ -282,7 +337,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Event" }
+                "schema": {
+                  "$ref": "#/components/schemas/Event"
+                }
               }
             }
           },
@@ -290,7 +347,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -304,14 +363,19 @@
             "name": "event_id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "requestBody": {
           "description": "",
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/EventForUpdate" }
+              "schema": {
+                "$ref": "#/components/schemas/EventForUpdate"
+              }
             }
           },
           "required": true
@@ -321,7 +385,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Event" }
+                "schema": {
+                  "$ref": "#/components/schemas/Event"
+                }
               }
             }
           },
@@ -329,7 +395,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -347,7 +415,11 @@
             "description": "Filter by event role",
             "required": false,
             "schema": {
-              "allOf": [{ "$ref": "#/components/schemas/EventRole" }],
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/EventRole"
+                }
+              ],
               "nullable": true
             }
           },
@@ -355,7 +427,10 @@
             "name": "event_id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "responses": {
@@ -365,7 +440,9 @@
               "application/json": {
                 "schema": {
                   "type": "array",
-                  "items": { "$ref": "#/components/schemas/EventAffiliate" }
+                  "items": {
+                    "$ref": "#/components/schemas/EventAffiliate"
+                  }
                 }
               }
             }
@@ -374,7 +451,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -390,7 +469,10 @@
             "name": "event_id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "responses": {
@@ -408,7 +490,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           },
@@ -416,7 +500,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -430,14 +516,19 @@
             "name": "event_id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "requestBody": {
           "description": "",
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/DiscordOauthBody" }
+              "schema": {
+                "$ref": "#/components/schemas/DiscordOauthBody"
+              }
             }
           },
           "required": true
@@ -447,7 +538,10 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "default": null, "nullable": true }
+                "schema": {
+                  "default": null,
+                  "nullable": true
+                }
               }
             }
           },
@@ -455,7 +549,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           },
@@ -463,7 +559,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -479,7 +577,10 @@
             "name": "event_id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "responses": {
@@ -500,7 +601,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -516,14 +619,19 @@
             "name": "event_id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "requestBody": {
           "description": "",
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/InviteUsersDTO" }
+              "schema": {
+                "$ref": "#/components/schemas/InviteUsersDTO"
+              }
             }
           },
           "required": true
@@ -535,7 +643,9 @@
               "application/json": {
                 "schema": {
                   "type": "array",
-                  "items": { "$ref": "#/components/schemas/ReducedUser" }
+                  "items": {
+                    "$ref": "#/components/schemas/ReducedUser"
+                  }
                 }
               }
             }
@@ -544,7 +654,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -560,7 +672,10 @@
             "name": "event_id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "responses": {
@@ -570,7 +685,10 @@
               "application/json": {
                 "schema": {
                   "type": "array",
-                  "items": { "type": "string", "format": "uuid" }
+                  "items": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
                 }
               }
             }
@@ -579,7 +697,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -595,7 +715,10 @@
             "name": "event_id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "responses": {
@@ -605,7 +728,10 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": { "type": "string", "format": "uuid" }
+                  "additionalProperties": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
                 }
               }
             }
@@ -614,7 +740,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -630,7 +758,10 @@
             "name": "event_id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "responses": {
@@ -640,7 +771,9 @@
               "application/json": {
                 "schema": {
                   "type": "array",
-                  "items": { "$ref": "#/components/schemas/EventRole" },
+                  "items": {
+                    "$ref": "#/components/schemas/EventRole"
+                  },
                   "uniqueItems": true
                 }
               }
@@ -650,7 +783,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -664,7 +799,10 @@
             "name": "event_id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "requestBody": {
@@ -675,7 +813,9 @@
                 "type": "object",
                 "additionalProperties": {
                   "type": "array",
-                  "items": { "$ref": "#/components/schemas/EventRole" },
+                  "items": {
+                    "$ref": "#/components/schemas/EventRole"
+                  },
                   "uniqueItems": true
                 }
               }
@@ -688,7 +828,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/AffectedRows" }
+                "schema": {
+                  "$ref": "#/components/schemas/AffectedRows"
+                }
               }
             }
           },
@@ -696,7 +838,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -710,7 +854,10 @@
             "name": "event_id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "requestBody": {
@@ -721,7 +868,9 @@
                 "type": "object",
                 "additionalProperties": {
                   "type": "array",
-                  "items": { "$ref": "#/components/schemas/EventRole" },
+                  "items": {
+                    "$ref": "#/components/schemas/EventRole"
+                  },
                   "uniqueItems": true
                 }
               }
@@ -734,7 +883,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/AffectedRows" }
+                "schema": {
+                  "$ref": "#/components/schemas/AffectedRows"
+                }
               }
             }
           },
@@ -742,7 +893,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -780,7 +933,10 @@
             "name": "event_id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "responses": {
@@ -792,7 +948,9 @@
                   "type": "object",
                   "additionalProperties": {
                     "type": "array",
-                    "items": { "$ref": "#/components/schemas/HistoryEntry" }
+                    "items": {
+                      "$ref": "#/components/schemas/HistoryEntry"
+                    }
                   }
                 }
               }
@@ -802,7 +960,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -818,7 +978,10 @@
             "name": "event_id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "responses": {
@@ -839,7 +1002,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -856,13 +1021,19 @@
             "in": "query",
             "description": "Filter by sidequest id",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           },
           {
             "name": "event_id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "responses": {
@@ -883,7 +1054,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -900,13 +1073,19 @@
             "in": "query",
             "description": "Filter by sidequest id",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           },
           {
             "name": "event_id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "responses": {
@@ -927,7 +1106,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -943,7 +1124,10 @@
             "name": "event_id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "responses": {
@@ -951,7 +1135,10 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "default": null, "nullable": true }
+                "schema": {
+                  "default": null,
+                  "nullable": true
+                }
               }
             }
           },
@@ -959,7 +1146,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -976,7 +1165,10 @@
             "in": "query",
             "description": "Filter by team id",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "responses": {
@@ -986,7 +1178,9 @@
               "application/json": {
                 "schema": {
                   "type": "array",
-                  "items": { "$ref": "#/components/schemas/ExpertRating" }
+                  "items": {
+                    "$ref": "#/components/schemas/ExpertRating"
+                  }
                 }
               }
             }
@@ -995,7 +1189,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -1008,7 +1204,9 @@
           "description": "",
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/ExpertRatingForCreate" }
+              "schema": {
+                "$ref": "#/components/schemas/ExpertRatingForCreate"
+              }
             }
           },
           "required": true
@@ -1018,7 +1216,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ExpertRating" }
+                "schema": {
+                  "$ref": "#/components/schemas/ExpertRating"
+                }
               }
             }
           },
@@ -1026,7 +1226,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -1042,7 +1244,10 @@
             "name": "rating_id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "responses": {
@@ -1050,7 +1255,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ExpertRating" }
+                "schema": {
+                  "$ref": "#/components/schemas/ExpertRating"
+                }
               }
             }
           },
@@ -1058,7 +1265,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -1072,7 +1281,10 @@
             "name": "rating_id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "responses": {
@@ -1080,7 +1292,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ExpertRating" }
+                "schema": {
+                  "$ref": "#/components/schemas/ExpertRating"
+                }
               }
             }
           },
@@ -1088,7 +1302,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -1102,14 +1318,19 @@
             "name": "rating_id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "requestBody": {
           "description": "",
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/ExpertRatingForUpdate" }
+              "schema": {
+                "$ref": "#/components/schemas/ExpertRatingForUpdate"
+              }
             }
           },
           "required": true
@@ -1119,7 +1340,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ExpertRating" }
+                "schema": {
+                  "$ref": "#/components/schemas/ExpertRating"
+                }
               }
             }
           },
@@ -1127,7 +1350,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -1144,7 +1369,10 @@
             "in": "query",
             "description": "Filter by event id",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "responses": {
@@ -1154,7 +1382,9 @@
               "application/json": {
                 "schema": {
                   "type": "array",
-                  "items": { "$ref": "#/components/schemas/Project" }
+                  "items": {
+                    "$ref": "#/components/schemas/Project"
+                  }
                 }
               }
             }
@@ -1163,7 +1393,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -1176,7 +1408,9 @@
           "description": "",
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/ProjectForCreate" }
+              "schema": {
+                "$ref": "#/components/schemas/ProjectForCreate"
+              }
             }
           },
           "required": true
@@ -1186,7 +1420,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Project" }
+                "schema": {
+                  "$ref": "#/components/schemas/Project"
+                }
               }
             }
           },
@@ -1194,7 +1430,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -1210,13 +1448,17 @@
             "name": "event_slug",
             "in": "path",
             "required": true,
-            "schema": { "type": "string" }
+            "schema": {
+              "type": "string"
+            }
           },
           {
             "name": "project_slug",
             "in": "path",
             "required": true,
-            "schema": { "type": "string" }
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -1224,7 +1466,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Project" }
+                "schema": {
+                  "$ref": "#/components/schemas/Project"
+                }
               }
             }
           },
@@ -1232,7 +1476,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -1248,7 +1494,10 @@
             "name": "project_id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "responses": {
@@ -1256,7 +1505,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Project" }
+                "schema": {
+                  "$ref": "#/components/schemas/Project"
+                }
               }
             }
           },
@@ -1264,7 +1515,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -1278,7 +1531,10 @@
             "name": "project_id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "responses": {
@@ -1286,7 +1542,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Project" }
+                "schema": {
+                  "$ref": "#/components/schemas/Project"
+                }
               }
             }
           },
@@ -1294,7 +1552,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -1308,14 +1568,19 @@
             "name": "project_id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "requestBody": {
           "description": "",
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/ProjectForUpdate" }
+              "schema": {
+                "$ref": "#/components/schemas/ProjectForUpdate"
+              }
             }
           },
           "required": true
@@ -1325,7 +1590,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Appointment" }
+                "schema": {
+                  "$ref": "#/components/schemas/Appointment"
+                }
               }
             }
           },
@@ -1333,7 +1600,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -1350,28 +1619,43 @@
             "in": "query",
             "description": "Filter by event ID",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           },
           {
             "name": "sidequest_id",
             "in": "query",
             "description": "Filter by sidequest ID",
             "required": false,
-            "schema": { "type": "string", "format": "uuid", "nullable": true }
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "nullable": true
+            }
           },
           {
             "name": "team_id",
             "in": "query",
             "description": "Filter by team ID",
             "required": false,
-            "schema": { "type": "string", "format": "uuid", "nullable": true }
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "nullable": true
+            }
           },
           {
             "name": "user_id",
             "in": "query",
             "description": "Filter by user ID",
             "required": false,
-            "schema": { "type": "string", "format": "uuid", "nullable": true }
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "nullable": true
+            }
           },
           {
             "name": "after",
@@ -1403,7 +1687,9 @@
               "application/json": {
                 "schema": {
                   "type": "array",
-                  "items": { "$ref": "#/components/schemas/Attempt" }
+                  "items": {
+                    "$ref": "#/components/schemas/Attempt"
+                  }
                 }
               }
             }
@@ -1412,7 +1698,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -1425,7 +1713,9 @@
           "description": "",
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/AttemptForCreate" }
+              "schema": {
+                "$ref": "#/components/schemas/AttemptForCreate"
+              }
             }
           },
           "required": true
@@ -1435,7 +1725,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Attempt" }
+                "schema": {
+                  "$ref": "#/components/schemas/Attempt"
+                }
               }
             }
           },
@@ -1443,7 +1735,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -1460,14 +1754,21 @@
             "in": "query",
             "description": "Filter by event ID",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           },
           {
             "name": "user_id",
             "in": "query",
             "description": "Filter by user ID. Leave empty to use the current user.",
             "required": false,
-            "schema": { "type": "string", "format": "uuid", "nullable": true }
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "nullable": true
+            }
           }
         ],
         "responses": {
@@ -1475,7 +1776,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Cooldown" }
+                "schema": {
+                  "$ref": "#/components/schemas/Cooldown"
+                }
               }
             }
           },
@@ -1483,7 +1786,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -1499,7 +1804,10 @@
             "name": "sidequest_attempt_id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "responses": {
@@ -1507,7 +1815,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Attempt" }
+                "schema": {
+                  "$ref": "#/components/schemas/Attempt"
+                }
               }
             }
           },
@@ -1515,7 +1825,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -1529,7 +1841,10 @@
             "name": "sidequest_attempt_id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "responses": {
@@ -1537,7 +1852,10 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "default": null, "nullable": true }
+                "schema": {
+                  "default": null,
+                  "nullable": true
+                }
               }
             }
           },
@@ -1545,7 +1863,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -1559,14 +1879,19 @@
             "name": "sidequest_attempt_id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "requestBody": {
           "description": "",
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/AttemptForUpdate" }
+              "schema": {
+                "$ref": "#/components/schemas/AttemptForUpdate"
+              }
             }
           },
           "required": true
@@ -1576,7 +1901,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Attempt" }
+                "schema": {
+                  "$ref": "#/components/schemas/Attempt"
+                }
               }
             }
           },
@@ -1584,7 +1911,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -1601,7 +1930,10 @@
             "in": "query",
             "description": "Filter by event ID",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "responses": {
@@ -1611,7 +1943,9 @@
               "application/json": {
                 "schema": {
                   "type": "array",
-                  "items": { "$ref": "#/components/schemas/Sidequest" }
+                  "items": {
+                    "$ref": "#/components/schemas/Sidequest"
+                  }
                 }
               }
             }
@@ -1620,7 +1954,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -1633,7 +1969,9 @@
           "description": "",
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/SidequestForCreate" }
+              "schema": {
+                "$ref": "#/components/schemas/SidequestForCreate"
+              }
             }
           },
           "required": true
@@ -1643,7 +1981,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/SidequestForCreate" }
+                "schema": {
+                  "$ref": "#/components/schemas/SidequestForCreate"
+                }
               }
             }
           },
@@ -1651,7 +1991,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -1667,13 +2009,17 @@
             "name": "event_slug",
             "in": "path",
             "required": true,
-            "schema": { "type": "string" }
+            "schema": {
+              "type": "string"
+            }
           },
           {
             "name": "sidequest_slug",
             "in": "path",
             "required": true,
-            "schema": { "type": "string" }
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -1681,7 +2027,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Sidequest" }
+                "schema": {
+                  "$ref": "#/components/schemas/Sidequest"
+                }
               }
             }
           },
@@ -1689,7 +2037,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -1705,7 +2055,10 @@
             "name": "sidequest_id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "responses": {
@@ -1713,7 +2066,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Sidequest" }
+                "schema": {
+                  "$ref": "#/components/schemas/Sidequest"
+                }
               }
             }
           },
@@ -1721,7 +2076,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -1735,7 +2092,10 @@
             "name": "sidequest_id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "responses": {
@@ -1743,7 +2103,10 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "default": null, "nullable": true }
+                "schema": {
+                  "default": null,
+                  "nullable": true
+                }
               }
             }
           },
@@ -1751,7 +2114,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -1765,14 +2130,19 @@
             "name": "sidequest_id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "requestBody": {
           "description": "",
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/SidequestForUpdate" }
+              "schema": {
+                "$ref": "#/components/schemas/SidequestForUpdate"
+              }
             }
           },
           "required": true
@@ -1782,7 +2152,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Sidequest" }
+                "schema": {
+                  "$ref": "#/components/schemas/Sidequest"
+                }
               }
             }
           },
@@ -1790,7 +2162,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -1807,7 +2181,10 @@
             "in": "query",
             "description": "Filter by event id",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "responses": {
@@ -1817,7 +2194,9 @@
               "application/json": {
                 "schema": {
                   "type": "array",
-                  "items": { "$ref": "#/components/schemas/Team" }
+                  "items": {
+                    "$ref": "#/components/schemas/Team"
+                  }
                 }
               }
             }
@@ -1826,7 +2205,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -1839,7 +2220,9 @@
           "description": "",
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/TeamForCreate" }
+              "schema": {
+                "$ref": "#/components/schemas/TeamForCreate"
+              }
             }
           },
           "required": true
@@ -1849,7 +2232,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Team" }
+                "schema": {
+                  "$ref": "#/components/schemas/Team"
+                }
               }
             }
           },
@@ -1857,7 +2242,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -1874,7 +2261,10 @@
             "in": "query",
             "description": "Filter by event id",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "responses": {
@@ -1884,7 +2274,9 @@
               "application/json": {
                 "schema": {
                   "type": "array",
-                  "items": { "$ref": "#/components/schemas/AdminTeam" }
+                  "items": {
+                    "$ref": "#/components/schemas/AdminTeam"
+                  }
                 }
               }
             }
@@ -1893,7 +2285,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -1910,7 +2304,10 @@
             "in": "query",
             "description": "Filter by event id",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "responses": {
@@ -1922,7 +2319,9 @@
                   "type": "object",
                   "additionalProperties": {
                     "type": "array",
-                    "items": { "$ref": "#/components/schemas/TeamRole" },
+                    "items": {
+                      "$ref": "#/components/schemas/TeamRole"
+                    },
                     "uniqueItems": true
                   }
                 }
@@ -1933,7 +2332,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -1949,13 +2350,17 @@
             "name": "event_slug",
             "in": "path",
             "required": true,
-            "schema": { "type": "string" }
+            "schema": {
+              "type": "string"
+            }
           },
           {
             "name": "team_slug",
             "in": "path",
             "required": true,
-            "schema": { "type": "string" }
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -1963,7 +2368,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Team" }
+                "schema": {
+                  "$ref": "#/components/schemas/Team"
+                }
               }
             }
           },
@@ -1971,7 +2378,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -1987,7 +2396,10 @@
             "name": "team_id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "responses": {
@@ -1995,7 +2407,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Team" }
+                "schema": {
+                  "$ref": "#/components/schemas/Team"
+                }
               }
             }
           },
@@ -2003,7 +2417,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -2017,7 +2433,10 @@
             "name": "team_id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "responses": {
@@ -2025,7 +2444,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Team" }
+                "schema": {
+                  "$ref": "#/components/schemas/Team"
+                }
               }
             }
           },
@@ -2033,7 +2454,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -2047,14 +2470,19 @@
             "name": "team_id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "requestBody": {
           "description": "",
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/TeamForUpdate" }
+              "schema": {
+                "$ref": "#/components/schemas/TeamForUpdate"
+              }
             }
           },
           "required": true
@@ -2064,7 +2492,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Team" }
+                "schema": {
+                  "$ref": "#/components/schemas/Team"
+                }
               }
             }
           },
@@ -2072,7 +2502,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -2088,7 +2520,10 @@
             "name": "team_id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "responses": {
@@ -2096,7 +2531,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/AdminTeam" }
+                "schema": {
+                  "$ref": "#/components/schemas/AdminTeam"
+                }
               }
             }
           },
@@ -2104,7 +2541,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -2122,7 +2561,11 @@
             "description": "Filter by team role",
             "required": false,
             "schema": {
-              "allOf": [{ "$ref": "#/components/schemas/TeamRole" }],
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/TeamRole"
+                }
+              ],
               "nullable": true
             }
           },
@@ -2130,7 +2573,10 @@
             "name": "team_id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "responses": {
@@ -2140,7 +2586,9 @@
               "application/json": {
                 "schema": {
                   "type": "array",
-                  "items": { "$ref": "#/components/schemas/TeamAffiliate" }
+                  "items": {
+                    "$ref": "#/components/schemas/TeamAffiliate"
+                  }
                 }
               }
             }
@@ -2149,7 +2597,60 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/teams/{team_id}/ai-api-keys": {
+      "post": {
+        "tags": ["crate::routers::teams"],
+        "operationId": "create_team_ai_api_key",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTeamAPIKey"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "default": null,
+                  "nullable": true
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -2165,7 +2666,10 @@
             "name": "team_id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "responses": {
@@ -2173,7 +2677,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/TeamCredentials" }
+                "schema": {
+                  "$ref": "#/components/schemas/TeamCredentials"
+                }
               }
             }
           },
@@ -2181,7 +2687,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -2197,7 +2705,10 @@
             "name": "team_id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "responses": {
@@ -2219,7 +2730,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -2235,7 +2748,10 @@
             "name": "team_id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "responses": {
@@ -2245,7 +2761,10 @@
               "application/json": {
                 "schema": {
                   "type": "array",
-                  "items": { "type": "string", "format": "uuid" }
+                  "items": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
                 }
               }
             }
@@ -2254,7 +2773,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -2268,7 +2789,10 @@
             "name": "team_id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "requestBody": {
@@ -2277,7 +2801,10 @@
             "application/json": {
               "schema": {
                 "type": "array",
-                "items": { "type": "string", "format": "uuid" }
+                "items": {
+                  "type": "string",
+                  "format": "uuid"
+                }
               }
             }
           },
@@ -2290,7 +2817,10 @@
               "application/json": {
                 "schema": {
                   "type": "array",
-                  "items": { "type": "string", "format": "uuid" }
+                  "items": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
                 }
               }
             }
@@ -2299,7 +2829,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -2315,7 +2847,10 @@
             "name": "team_id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "responses": {
@@ -2325,7 +2860,9 @@
               "application/json": {
                 "schema": {
                   "type": "array",
-                  "items": { "$ref": "#/components/schemas/TeamRole" },
+                  "items": {
+                    "$ref": "#/components/schemas/TeamRole"
+                  },
                   "uniqueItems": true
                 }
               }
@@ -2335,7 +2872,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -2349,7 +2888,10 @@
             "name": "team_id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "requestBody": {
@@ -2360,7 +2902,9 @@
                 "type": "object",
                 "additionalProperties": {
                   "type": "array",
-                  "items": { "$ref": "#/components/schemas/TeamRole" },
+                  "items": {
+                    "$ref": "#/components/schemas/TeamRole"
+                  },
                   "uniqueItems": true
                 }
               }
@@ -2373,7 +2917,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/AffectedRows" }
+                "schema": {
+                  "$ref": "#/components/schemas/AffectedRows"
+                }
               }
             }
           },
@@ -2381,7 +2927,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -2395,7 +2943,10 @@
             "name": "team_id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "requestBody": {
@@ -2406,7 +2957,9 @@
                 "type": "object",
                 "additionalProperties": {
                   "type": "array",
-                  "items": { "$ref": "#/components/schemas/TeamRole" },
+                  "items": {
+                    "$ref": "#/components/schemas/TeamRole"
+                  },
                   "uniqueItems": true
                 }
               }
@@ -2419,7 +2972,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/AffectedRows" }
+                "schema": {
+                  "$ref": "#/components/schemas/AffectedRows"
+                }
               }
             }
           },
@@ -2427,7 +2982,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -2442,7 +2999,9 @@
           "description": "",
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/CreateUploadDTO" }
+              "schema": {
+                "$ref": "#/components/schemas/CreateUploadDTO"
+              }
             }
           },
           "required": true
@@ -2452,7 +3011,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/UploadUrl" }
+                "schema": {
+                  "$ref": "#/components/schemas/UploadUrl"
+                }
               }
             }
           },
@@ -2460,7 +3021,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -2476,7 +3039,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/User" }
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
               }
             }
           },
@@ -2484,7 +3049,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -2497,7 +3064,9 @@
           "description": "",
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/UserForUpdate" }
+              "schema": {
+                "$ref": "#/components/schemas/UserForUpdate"
+              }
             }
           },
           "required": true
@@ -2507,7 +3076,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/User" }
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
               }
             }
           },
@@ -2515,7 +3086,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -2532,14 +3105,22 @@
             "in": "query",
             "description": "Get policies for this event",
             "required": false,
-            "schema": { "type": "string", "format": "uuid", "nullable": true }
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "nullable": true
+            }
           },
           {
             "name": "team_id",
             "in": "query",
             "description": "Get policies for this team",
             "required": false,
-            "schema": { "type": "string", "format": "uuid", "nullable": true }
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "nullable": true
+            }
           }
         ],
         "responses": {
@@ -2547,7 +3128,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Policies" }
+                "schema": {
+                  "$ref": "#/components/schemas/Policies"
+                }
               }
             }
           },
@@ -2555,7 +3138,9 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
+                "schema": {
+                  "$ref": "#/components/schemas/PublicError"
+                }
               }
             }
           }
@@ -2581,36 +3166,92 @@
           "ingress_config"
         ],
         "properties": {
-          "ai_api_key": { "type": "string", "nullable": true },
-          "comment": { "type": "string", "nullable": true },
-          "direct_address": { "type": "string", "nullable": true },
-          "direct_address_override": { "type": "string", "nullable": true },
-          "event_id": { "type": "string", "format": "uuid" },
+          "ai_api_key": {
+            "type": "string",
+            "nullable": true
+          },
+          "comment": {
+            "type": "string",
+            "nullable": true
+          },
+          "direct_address": {
+            "type": "string",
+            "nullable": true
+          },
+          "direct_address_override": {
+            "type": "string",
+            "nullable": true
+          },
+          "event_id": {
+            "type": "string",
+            "format": "uuid"
+          },
           "extra_score": {
             "type": "number",
             "format": "double",
             "nullable": true
           },
-          "id": { "type": "string", "format": "uuid" },
-          "index": { "type": "integer", "format": "int32" },
-          "ingress_config": { "$ref": "#/components/schemas/IngressConfig" },
-          "ingress_enabled": { "type": "boolean" },
-          "ingress_url": { "type": "string", "nullable": true },
-          "managed_address": { "type": "string", "nullable": true },
-          "managed_address_override": { "type": "string", "nullable": true },
-          "name": { "type": "string" },
-          "password": { "type": "string", "nullable": true },
-          "photo_url": { "type": "string", "nullable": true },
-          "private_address": { "type": "string", "nullable": true },
-          "private_address_override": { "type": "string", "nullable": true },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "index": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ingress_config": {
+            "$ref": "#/components/schemas/IngressConfig"
+          },
+          "ingress_enabled": {
+            "type": "boolean"
+          },
+          "ingress_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "managed_address": {
+            "type": "string",
+            "nullable": true
+          },
+          "managed_address_override": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string",
+            "nullable": true
+          },
+          "photo_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "private_address": {
+            "type": "string",
+            "nullable": true
+          },
+          "private_address_override": {
+            "type": "string",
+            "nullable": true
+          },
           "project_id": {
             "type": "string",
             "format": "uuid",
             "nullable": true
           },
-          "slug": { "type": "string" },
-          "ssh_config": { "type": "string", "nullable": true },
-          "ssh_config_override": { "type": "string", "nullable": true }
+          "slug": {
+            "type": "string"
+          },
+          "ssh_config": {
+            "type": "string",
+            "nullable": true
+          },
+          "ssh_config_override": {
+            "type": "string",
+            "nullable": true
+          }
         }
       },
       "AffectedRows": {
@@ -2628,72 +3269,156 @@
         "type": "object",
         "required": ["id", "event_id", "title", "start"],
         "properties": {
-          "content": { "type": "string", "nullable": true },
-          "description": { "type": "string", "nullable": true },
-          "end": { "type": "string", "format": "date-time", "nullable": true },
-          "event_id": { "type": "string", "format": "uuid" },
-          "id": { "type": "string", "format": "uuid" },
-          "start": { "type": "string", "format": "date-time" },
-          "title": { "type": "string" }
+          "content": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "end": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "event_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "start": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "title": {
+            "type": "string"
+          }
         }
       },
       "AppointmentForCreate": {
         "type": "object",
         "required": ["event_id", "title", "start"],
         "properties": {
-          "content": { "type": "string", "nullable": true },
-          "description": { "type": "string", "nullable": true },
-          "end": { "type": "string", "format": "date-time", "nullable": true },
-          "event_id": { "type": "string", "format": "uuid" },
-          "start": { "type": "string", "format": "date-time" },
-          "title": { "type": "string" }
+          "content": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "end": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "event_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "start": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "title": {
+            "type": "string"
+          }
         }
       },
       "AppointmentForUpdate": {
         "type": "object",
         "properties": {
-          "content": { "type": "string", "nullable": true },
-          "description": { "type": "string", "nullable": true },
-          "end": { "type": "string", "format": "date-time", "nullable": true },
+          "content": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "end": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
           "start": {
             "type": "string",
             "format": "date-time",
             "nullable": true
           },
-          "title": { "type": "string", "nullable": true }
+          "title": {
+            "type": "string",
+            "nullable": true
+          }
         }
       },
       "Attempt": {
         "type": "object",
         "required": ["id", "sidequest_id", "user_id", "result", "attempted_at"],
         "properties": {
-          "attempted_at": { "type": "string", "format": "date-time" },
-          "id": { "type": "string", "format": "uuid" },
-          "result": { "type": "number", "format": "double" },
-          "sidequest_id": { "type": "string", "format": "uuid" },
-          "user_id": { "type": "string", "format": "uuid" }
+          "attempted_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "result": {
+            "type": "number",
+            "format": "double"
+          },
+          "sidequest_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid"
+          }
         }
       },
       "AttemptForCreate": {
         "type": "object",
         "required": ["sidequest_id", "user_id", "result"],
         "properties": {
-          "result": { "type": "number", "format": "double" },
-          "sidequest_id": { "type": "string", "format": "uuid" },
-          "user_id": { "type": "string", "format": "uuid" }
+          "result": {
+            "type": "number",
+            "format": "double"
+          },
+          "sidequest_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid"
+          }
         }
       },
       "AttemptForUpdate": {
         "type": "object",
         "properties": {
-          "result": { "type": "number", "format": "double", "nullable": true }
+          "result": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          }
         }
       },
       "Cooldown": {
         "type": "object",
         "required": ["duration"],
         "properties": {
-          "duration": { "type": "integer", "format": "int32", "minimum": 0 },
+          "duration": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
           "last_attempt": {
             "type": "string",
             "format": "date-time",
@@ -2706,22 +3431,48 @@
           }
         }
       },
+      "CreateTeamAPIKey": {
+        "type": "object",
+        "required": ["budget"],
+        "properties": {
+          "budget": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
       "CreateUploadDTO": {
         "type": "object",
         "required": ["event_id", "usage", "content_length", "content_type"],
         "properties": {
-          "content_length": { "type": "integer", "format": "int64" },
-          "content_type": { "type": "string" },
-          "event_id": { "type": "string", "format": "uuid" },
-          "usage": { "$ref": "#/components/schemas/MediaUsage" }
+          "content_length": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "content_type": {
+            "type": "string"
+          },
+          "event_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "usage": {
+            "$ref": "#/components/schemas/MediaUsage"
+          }
         }
       },
       "CustomIngressConfig": {
         "type": "object",
         "required": ["server_port", "server_protocol"],
         "properties": {
-          "server_port": { "type": "integer", "format": "int32", "minimum": 0 },
-          "server_protocol": { "$ref": "#/components/schemas/ServerProtocol" }
+          "server_port": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "server_protocol": {
+            "$ref": "#/components/schemas/ServerProtocol"
+          }
         },
         "additionalProperties": false
       },
@@ -2729,8 +3480,12 @@
         "type": "object",
         "required": ["code", "redirect_uri"],
         "properties": {
-          "code": { "type": "string" },
-          "redirect_uri": { "type": "string" }
+          "code": {
+            "type": "string"
+          },
+          "redirect_uri": {
+            "type": "string"
+          }
         }
       },
       "Event": {
@@ -2752,12 +3507,29 @@
           "phase"
         ],
         "properties": {
-          "direct_address_template": { "type": "string", "nullable": true },
-          "documentation_content": { "type": "string", "nullable": true },
-          "end": { "type": "string", "format": "date-time" },
-          "feedback_visible": { "type": "boolean" },
-          "id": { "type": "string", "format": "uuid" },
-          "managed_address_template": { "type": "string", "nullable": true },
+          "direct_address_template": {
+            "type": "string",
+            "nullable": true
+          },
+          "documentation_content": {
+            "type": "string",
+            "nullable": true
+          },
+          "end": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "feedback_visible": {
+            "type": "boolean"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "managed_address_template": {
+            "type": "string",
+            "nullable": true
+          },
           "max_team_size": {
             "type": "integer",
             "format": "int32",
@@ -2768,40 +3540,76 @@
             "format": "int32",
             "minimum": 0
           },
-          "name": { "type": "string" },
-          "phase": { "$ref": "#/components/schemas/EventPhase" },
-          "private_address_template": { "type": "string", "nullable": true },
-          "project_assignments_visible": { "type": "boolean" },
-          "projects_visible": { "type": "boolean" },
-          "read_only": { "type": "boolean" },
+          "name": {
+            "type": "string"
+          },
+          "phase": {
+            "$ref": "#/components/schemas/EventPhase"
+          },
+          "private_address_template": {
+            "type": "string",
+            "nullable": true
+          },
+          "project_assignments_visible": {
+            "type": "boolean"
+          },
+          "projects_visible": {
+            "type": "boolean"
+          },
+          "read_only": {
+            "type": "boolean"
+          },
           "sidequest_cooldown": {
             "type": "integer",
             "format": "int32",
             "minimum": 0
           },
-          "slug": { "type": "string" },
-          "ssh_config_template": { "type": "string", "nullable": true },
-          "start": { "type": "string", "format": "date-time" },
-          "visibility": { "$ref": "#/components/schemas/EventVisibility" },
-          "welcome_content": { "type": "string", "nullable": true }
+          "slug": {
+            "type": "string"
+          },
+          "ssh_config_template": {
+            "type": "string",
+            "nullable": true
+          },
+          "start": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "visibility": {
+            "$ref": "#/components/schemas/EventVisibility"
+          },
+          "welcome_content": {
+            "type": "string",
+            "nullable": true
+          }
         }
       },
       "EventAffiliate": {
         "type": "object",
         "required": ["id", "name", "roles"],
         "properties": {
-          "id": { "type": "string", "format": "uuid" },
-          "name": { "type": "string" },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
           "roles": {
             "type": "array",
-            "items": { "$ref": "#/components/schemas/EventRole" }
+            "items": {
+              "$ref": "#/components/schemas/EventRole"
+            }
           }
         }
       },
       "EventDiscordResponse": {
         "type": "object",
         "properties": {
-          "discord_user_id": { "type": "string", "nullable": true }
+          "discord_user_id": {
+            "type": "string",
+            "nullable": true
+          }
         }
       },
       "EventForCreate": {
@@ -2814,29 +3622,57 @@
           "sidequest_cooldown"
         ],
         "properties": {
-          "end": { "type": "string", "format": "date-time" },
+          "end": {
+            "type": "string",
+            "format": "date-time"
+          },
           "max_team_size": {
             "type": "integer",
             "format": "int32",
             "minimum": 0
           },
-          "name": { "type": "string" },
+          "name": {
+            "type": "string"
+          },
           "sidequest_cooldown": {
             "type": "integer",
             "format": "int32",
             "minimum": 0
           },
-          "start": { "type": "string", "format": "date-time" }
+          "start": {
+            "type": "string",
+            "format": "date-time"
+          }
         }
       },
       "EventForUpdate": {
         "type": "object",
         "properties": {
-          "direct_address_template": { "type": "string", "nullable": true },
-          "documentation_content": { "type": "string", "nullable": true },
-          "end": { "type": "string", "format": "date-time", "nullable": true },
-          "feedback_visible": { "type": "boolean", "nullable": true },
-          "managed_address_template": { "type": "string", "nullable": true },
+          "direct_address_template": {
+            "type": "string",
+            "nullable": true
+          },
+          "documentation_content": {
+            "type": "string",
+            "nullable": true
+          },
+          "end": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "feedback_visible": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "managed_address_template": {
+            "type": "string",
+            "nullable": true
+          },
+          "master_ai_api_key": {
+            "type": "string",
+            "nullable": true
+          },
           "max_team_size": {
             "type": "integer",
             "format": "int32",
@@ -2849,41 +3685,72 @@
             "nullable": true,
             "minimum": 0
           },
-          "name": { "type": "string", "nullable": true },
-          "phase": {
-            "allOf": [{ "$ref": "#/components/schemas/EventPhase" }],
+          "name": {
+            "type": "string",
             "nullable": true
           },
-          "private_address_template": { "type": "string", "nullable": true },
+          "phase": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EventPhase"
+              }
+            ],
+            "nullable": true
+          },
+          "private_address_template": {
+            "type": "string",
+            "nullable": true
+          },
           "project_assignments_visible": {
             "type": "boolean",
             "nullable": true
           },
-          "projects_visible": { "type": "boolean", "nullable": true },
-          "read_only": { "type": "boolean", "nullable": true },
+          "projects_visible": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "read_only": {
+            "type": "boolean",
+            "nullable": true
+          },
           "sidequest_cooldown": {
             "type": "integer",
             "format": "int32",
             "nullable": true,
             "minimum": 0
           },
-          "ssh_config_template": { "type": "string", "nullable": true },
+          "ssh_config_template": {
+            "type": "string",
+            "nullable": true
+          },
           "start": {
             "type": "string",
             "format": "date-time",
             "nullable": true
           },
           "visibility": {
-            "allOf": [{ "$ref": "#/components/schemas/EventVisibility" }],
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EventVisibility"
+              }
+            ],
             "nullable": true
           },
-          "welcome_content": { "type": "string", "nullable": true }
+          "welcome_content": {
+            "type": "string",
+            "nullable": true
+          }
         }
       },
       "EventIdQuery": {
         "type": "object",
         "required": ["event_id"],
-        "properties": { "event_id": { "type": "string", "format": "uuid" } }
+        "properties": {
+          "event_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
       },
       "EventPhase": {
         "type": "string",
@@ -2903,7 +3770,11 @@
         "type": "object",
         "properties": {
           "role": {
-            "allOf": [{ "$ref": "#/components/schemas/EventRole" }],
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EventRole"
+              }
+            ],
             "nullable": true
           }
         }
@@ -2916,11 +3787,25 @@
         "type": "object",
         "required": ["id", "user_id", "team_id", "category", "rating"],
         "properties": {
-          "category": { "$ref": "#/components/schemas/ExpertRatingCategory" },
-          "id": { "type": "string", "format": "uuid" },
-          "rating": { "type": "number", "format": "double" },
-          "team_id": { "type": "string", "format": "uuid" },
-          "user_id": { "type": "string", "format": "uuid" }
+          "category": {
+            "$ref": "#/components/schemas/ExpertRatingCategory"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "rating": {
+            "type": "number",
+            "format": "double"
+          },
+          "team_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid"
+          }
         }
       },
       "ExpertRatingCategory": {
@@ -2931,15 +3816,27 @@
         "type": "object",
         "required": ["team_id", "category", "rating"],
         "properties": {
-          "category": { "$ref": "#/components/schemas/ExpertRatingCategory" },
-          "rating": { "type": "number", "format": "double" },
-          "team_id": { "type": "string", "format": "uuid" }
+          "category": {
+            "$ref": "#/components/schemas/ExpertRatingCategory"
+          },
+          "rating": {
+            "type": "number",
+            "format": "double"
+          },
+          "team_id": {
+            "type": "string",
+            "format": "uuid"
+          }
         }
       },
       "ExpertRatingForUpdate": {
         "type": "object",
         "properties": {
-          "rating": { "type": "number", "format": "double", "nullable": true }
+          "rating": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          }
         }
       },
       "ExpertRatingLeaderboardEntry": {
@@ -2948,10 +3845,19 @@
         "properties": {
           "categories": {
             "type": "object",
-            "additionalProperties": { "type": "number", "format": "double" }
+            "additionalProperties": {
+              "type": "number",
+              "format": "double"
+            }
           },
-          "rating": { "type": "number", "format": "double" },
-          "team_id": { "type": "string", "format": "uuid" }
+          "rating": {
+            "type": "number",
+            "format": "double"
+          },
+          "team_id": {
+            "type": "string",
+            "format": "uuid"
+          }
         }
       },
       "Group": {
@@ -2973,25 +3879,39 @@
       },
       "Groups": {
         "type": "array",
-        "items": { "$ref": "#/components/schemas/Group" },
+        "items": {
+          "$ref": "#/components/schemas/Group"
+        },
         "uniqueItems": true
       },
       "HistoryEntry": {
         "type": "object",
         "required": ["date", "score"],
         "properties": {
-          "date": { "type": "string", "format": "date-time" },
-          "score": { "type": "number", "format": "double" }
+          "date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "score": {
+            "type": "number",
+            "format": "double"
+          }
         }
       },
       "IngressConfig": {
         "allOf": [
-          { "$ref": "#/components/schemas/IngressMode" },
+          {
+            "$ref": "#/components/schemas/IngressMode"
+          },
           {
             "type": "object",
             "required": ["version"],
             "properties": {
-              "version": { "type": "integer", "format": "int32", "minimum": 0 }
+              "version": {
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0
+              }
             }
           }
         ]
@@ -3002,20 +3922,32 @@
             "type": "object",
             "required": ["mode", "config"],
             "properties": {
-              "config": { "$ref": "#/components/schemas/ManagedIngressConfig" },
-              "mode": { "type": "string", "enum": ["Managed"] }
+              "config": {
+                "$ref": "#/components/schemas/ManagedIngressConfig"
+              },
+              "mode": {
+                "type": "string",
+                "enum": ["Managed"]
+              }
             }
           },
           {
             "type": "object",
             "required": ["mode", "config"],
             "properties": {
-              "config": { "$ref": "#/components/schemas/CustomIngressConfig" },
-              "mode": { "type": "string", "enum": ["Custom"] }
+              "config": {
+                "$ref": "#/components/schemas/CustomIngressConfig"
+              },
+              "mode": {
+                "type": "string",
+                "enum": ["Custom"]
+              }
             }
           }
         ],
-        "discriminator": { "propertyName": "mode" }
+        "discriminator": {
+          "propertyName": "mode"
+        }
       },
       "InviteUsersDTO": {
         "type": "object",
@@ -3023,12 +3955,16 @@
         "properties": {
           "roles": {
             "type": "array",
-            "items": { "$ref": "#/components/schemas/EventRole" },
+            "items": {
+              "$ref": "#/components/schemas/EventRole"
+            },
             "uniqueItems": true
           },
           "users": {
             "type": "array",
-            "items": { "$ref": "#/components/schemas/UserForCreate" }
+            "items": {
+              "$ref": "#/components/schemas/UserForCreate"
+            }
           }
         }
       },
@@ -3039,11 +3975,18 @@
           "access_control_mode": {
             "$ref": "#/components/schemas/AccessControlMode"
           },
-          "server_port": { "type": "integer", "format": "int32", "minimum": 0 }
+          "server_port": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          }
         },
         "additionalProperties": false
       },
-      "MediaUsage": { "type": "string", "enum": ["TeamPhoto"] },
+      "MediaUsage": {
+        "type": "string",
+        "enum": ["TeamPhoto"]
+      },
       "Policies": {
         "type": "object",
         "required": [
@@ -3069,79 +4012,166 @@
           "can_create_upload"
         ],
         "properties": {
-          "can_create_team": { "type": "boolean" },
-          "can_create_upload": { "type": "boolean" },
-          "can_manage_event": { "type": "boolean" },
-          "can_manage_expert_rating": { "type": "boolean" },
-          "can_manage_project": { "type": "boolean" },
-          "can_manage_sidequest": { "type": "boolean" },
-          "can_manage_sidequest_attempt": { "type": "boolean" },
-          "can_manage_team": { "type": "boolean" },
-          "can_update_team_ingress_config": { "type": "boolean" },
-          "can_update_team_name": { "type": "boolean" },
-          "can_update_team_photo": { "type": "boolean" },
-          "can_view_event": { "type": "boolean" },
-          "can_view_event_feedback": { "type": "boolean" },
-          "can_view_event_internal": { "type": "boolean" },
-          "can_view_project": { "type": "boolean" },
-          "can_view_project_assignment": { "type": "boolean" },
-          "can_view_sidequest": { "type": "boolean" },
-          "can_view_sidequest_attempt": { "type": "boolean" },
-          "can_view_team_confidential": { "type": "boolean" },
-          "can_view_team_feedback": { "type": "boolean" }
+          "can_create_team": {
+            "type": "boolean"
+          },
+          "can_create_upload": {
+            "type": "boolean"
+          },
+          "can_manage_event": {
+            "type": "boolean"
+          },
+          "can_manage_expert_rating": {
+            "type": "boolean"
+          },
+          "can_manage_project": {
+            "type": "boolean"
+          },
+          "can_manage_sidequest": {
+            "type": "boolean"
+          },
+          "can_manage_sidequest_attempt": {
+            "type": "boolean"
+          },
+          "can_manage_team": {
+            "type": "boolean"
+          },
+          "can_update_team_ingress_config": {
+            "type": "boolean"
+          },
+          "can_update_team_name": {
+            "type": "boolean"
+          },
+          "can_update_team_photo": {
+            "type": "boolean"
+          },
+          "can_view_event": {
+            "type": "boolean"
+          },
+          "can_view_event_feedback": {
+            "type": "boolean"
+          },
+          "can_view_event_internal": {
+            "type": "boolean"
+          },
+          "can_view_project": {
+            "type": "boolean"
+          },
+          "can_view_project_assignment": {
+            "type": "boolean"
+          },
+          "can_view_sidequest": {
+            "type": "boolean"
+          },
+          "can_view_sidequest_attempt": {
+            "type": "boolean"
+          },
+          "can_view_team_confidential": {
+            "type": "boolean"
+          },
+          "can_view_team_feedback": {
+            "type": "boolean"
+          }
         }
       },
       "PoliciesQuery": {
         "type": "object",
         "properties": {
-          "event_id": { "type": "string", "format": "uuid", "nullable": true },
-          "team_id": { "type": "string", "format": "uuid", "nullable": true }
+          "event_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "team_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
         }
       },
       "Project": {
         "type": "object",
         "required": ["id", "event_id", "name", "slug", "content"],
         "properties": {
-          "content": { "type": "string" },
-          "event_id": { "type": "string", "format": "uuid" },
-          "id": { "type": "string", "format": "uuid" },
-          "name": { "type": "string" },
-          "slug": { "type": "string" }
+          "content": {
+            "type": "string"
+          },
+          "event_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          }
         }
       },
       "ProjectForCreate": {
         "type": "object",
         "required": ["event_id", "name", "content"],
         "properties": {
-          "content": { "type": "string" },
-          "event_id": { "type": "string", "format": "uuid" },
-          "name": { "type": "string" }
+          "content": {
+            "type": "string"
+          },
+          "event_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          }
         }
       },
       "ProjectForUpdate": {
         "type": "object",
         "properties": {
-          "content": { "type": "string", "nullable": true },
-          "name": { "type": "string", "nullable": true }
+          "content": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          }
         }
       },
       "PublicError": {
         "type": "object",
         "required": ["status", "message"],
         "properties": {
-          "message": { "type": "string" },
-          "status": { "type": "integer", "format": "int32", "minimum": 0 }
+          "message": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          }
         }
       },
       "ReducedUser": {
         "type": "object",
         "required": ["id", "name"],
         "properties": {
-          "id": { "type": "string", "format": "uuid" },
-          "name": { "type": "string" }
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          }
         }
       },
-      "ServerProtocol": { "type": "string", "enum": ["Http", "Https"] },
+      "ServerProtocol": {
+        "type": "string",
+        "enum": ["Http", "Https"]
+      },
       "Sidequest": {
         "type": "object",
         "required": [
@@ -3153,20 +4183,41 @@
           "is_higher_result_better"
         ],
         "properties": {
-          "description": { "type": "string" },
-          "event_id": { "type": "string", "format": "uuid" },
-          "id": { "type": "string", "format": "uuid" },
-          "is_higher_result_better": { "type": "boolean" },
-          "name": { "type": "string" },
-          "slug": { "type": "string" }
+          "description": {
+            "type": "string"
+          },
+          "event_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "is_higher_result_better": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          }
         }
       },
       "SidequestAttemptsCooldownQuery": {
         "type": "object",
         "required": ["event_id"],
         "properties": {
-          "event_id": { "type": "string", "format": "uuid" },
-          "user_id": { "type": "string", "format": "uuid", "nullable": true }
+          "event_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
         }
       },
       "SidequestAttemptsQuery": {
@@ -3183,14 +4234,25 @@
             "format": "date-time",
             "nullable": true
           },
-          "event_id": { "type": "string", "format": "uuid" },
+          "event_id": {
+            "type": "string",
+            "format": "uuid"
+          },
           "sidequest_id": {
             "type": "string",
             "format": "uuid",
             "nullable": true
           },
-          "team_id": { "type": "string", "format": "uuid", "nullable": true },
-          "user_id": { "type": "string", "format": "uuid", "nullable": true }
+          "team_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
         }
       },
       "SidequestForCreate": {
@@ -3202,24 +4264,47 @@
           "is_higher_result_better"
         ],
         "properties": {
-          "description": { "type": "string" },
-          "event_id": { "type": "string", "format": "uuid" },
-          "is_higher_result_better": { "type": "boolean" },
-          "name": { "type": "string" }
+          "description": {
+            "type": "string"
+          },
+          "event_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "is_higher_result_better": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          }
         }
       },
       "SidequestForUpdate": {
         "type": "object",
         "properties": {
-          "description": { "type": "string", "nullable": true },
-          "is_higher_result_better": { "type": "boolean", "nullable": true },
-          "name": { "type": "string", "nullable": true }
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "is_higher_result_better": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          }
         }
       },
       "SidequestIdQuery": {
         "type": "object",
         "required": ["sidequest_id"],
-        "properties": { "sidequest_id": { "type": "string", "format": "uuid" } }
+        "properties": {
+          "sidequest_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
       },
       "SidequestsHistoryQuery": {
         "type": "object",
@@ -3248,103 +4333,328 @@
           "ingress_config"
         ],
         "properties": {
-          "direct_address": { "type": "string", "nullable": true },
-          "event_id": { "type": "string", "format": "uuid" },
-          "id": { "type": "string", "format": "uuid" },
-          "index": { "type": "integer", "format": "int32" },
-          "ingress_config": { "$ref": "#/components/schemas/IngressConfig" },
-          "ingress_enabled": { "type": "boolean" },
-          "ingress_url": { "type": "string", "nullable": true },
-          "managed_address": { "type": "string", "nullable": true },
-          "name": { "type": "string" },
-          "photo_url": { "type": "string", "nullable": true },
-          "private_address": { "type": "string", "nullable": true },
+          "direct_address": {
+            "type": "string",
+            "nullable": true
+          },
+          "event_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "index": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ingress_config": {
+            "$ref": "#/components/schemas/IngressConfig"
+          },
+          "ingress_enabled": {
+            "type": "boolean"
+          },
+          "ingress_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "managed_address": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string"
+          },
+          "photo_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "private_address": {
+            "type": "string",
+            "nullable": true
+          },
           "project_id": {
             "type": "string",
             "format": "uuid",
             "nullable": true
           },
-          "slug": { "type": "string" },
-          "ssh_config": { "type": "string", "nullable": true }
+          "slug": {
+            "type": "string"
+          },
+          "ssh_config": {
+            "type": "string",
+            "nullable": true
+          }
         }
       },
       "TeamAffiliate": {
         "type": "object",
         "required": ["id", "name", "roles"],
         "properties": {
-          "id": { "type": "string", "format": "uuid" },
-          "name": { "type": "string" },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
           "roles": {
             "type": "array",
-            "items": { "$ref": "#/components/schemas/TeamRole" }
+            "items": {
+              "$ref": "#/components/schemas/TeamRole"
+            }
           }
         }
       },
       "TeamCredentials": {
         "type": "object",
         "properties": {
-          "ai_api_key": { "type": "string", "nullable": true },
-          "vm_password": { "type": "string", "nullable": true }
+          "ai_api_key": {
+            "type": "string",
+            "nullable": true
+          },
+          "vm_password": {
+            "type": "string",
+            "nullable": true
+          }
         }
       },
       "TeamForCreate": {
         "type": "object",
         "required": ["event_id", "name"],
         "properties": {
-          "event_id": { "type": "string", "format": "uuid" },
-          "name": { "type": "string" }
+          "event_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          }
         }
       },
       "TeamForUpdate": {
         "type": "object",
         "properties": {
-          "ai_api_key": { "type": "string", "nullable": true },
-          "comment": { "type": "string", "nullable": true },
-          "direct_address_override": { "type": "string", "nullable": true },
+          "ai_api_key": {
+            "type": "string",
+            "nullable": true
+          },
+          "comment": {
+            "type": "string",
+            "nullable": true
+          },
+          "direct_address_override": {
+            "type": "string",
+            "nullable": true
+          },
           "extra_score": {
             "type": "number",
             "format": "double",
             "nullable": true
           },
           "ingress_config": {
-            "allOf": [{ "$ref": "#/components/schemas/IngressConfig" }],
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/IngressConfig"
+              }
+            ],
             "nullable": true
           },
-          "ingress_enabled": { "type": "boolean", "nullable": true },
-          "managed_address_override": { "type": "string", "nullable": true },
-          "name": { "type": "string", "nullable": true },
-          "password": { "type": "string", "nullable": true },
-          "photo_id": { "type": "string", "format": "uuid", "nullable": true },
-          "private_address_override": { "type": "string", "nullable": true },
+          "ingress_enabled": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "managed_address_override": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "password": {
+            "type": "string",
+            "nullable": true
+          },
+          "photo_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "private_address_override": {
+            "type": "string",
+            "nullable": true
+          },
           "project_id": {
             "type": "string",
             "format": "uuid",
             "nullable": true
           },
-          "ssh_config_override": { "type": "string", "nullable": true }
+          "ssh_config_override": {
+            "type": "string",
+            "nullable": true
+          }
         }
       },
       "TeamIdQuery": {
         "type": "object",
         "required": ["team_id"],
-        "properties": { "team_id": { "type": "string", "format": "uuid" } }
+        "properties": {
+          "team_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
       },
       "TeamLeaderboardEntry": {
         "type": "object",
         "required": ["team_id", "team_name", "score"],
         "properties": {
-          "score": { "type": "number", "format": "double" },
-          "team_id": { "type": "string", "format": "uuid" },
-          "team_name": { "type": "string" }
+          "score": {
+            "type": "number",
+            "format": "double"
+          },
+          "team_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "team_name": {
+            "type": "string"
+          }
         }
       },
-      "TeamRole": { "type": "string", "enum": ["Mentor", "Member"] },
+      "TeamRole": {
+        "type": "string",
+        "enum": ["Mentor", "Member"]
+      },
       "TeamRoleOptQuery": {
         "type": "object",
         "properties": {
           "role": {
-            "allOf": [{ "$ref": "#/components/schemas/TeamRole" }],
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TeamRole"
+              }
+            ],
             "nullable": true
+          }
+        }
+      },
+      "TraefikDynamicConfig": {
+        "type": "object",
+        "required": ["http"],
+        "properties": {
+          "http": {
+            "$ref": "#/components/schemas/TraefikHttpConfig"
+          }
+        }
+      },
+      "TraefikForwardAuthConfig": {
+        "type": "object",
+        "required": ["address"],
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "authResponseHeaders": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          }
+        }
+      },
+      "TraefikHttpConfig": {
+        "type": "object",
+        "required": ["routers", "services", "middlewares"],
+        "properties": {
+          "middlewares": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/TraefikMiddlewareConfig"
+            }
+          },
+          "routers": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/TraefikRouterConfig"
+            }
+          },
+          "services": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/TraefikServiceConfig"
+            }
+          }
+        }
+      },
+      "TraefikLoadBalancerConfig": {
+        "type": "object",
+        "required": ["servers"],
+        "properties": {
+          "servers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TraefikServerConfig"
+            }
+          }
+        }
+      },
+      "TraefikMiddlewareConfig": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": ["forwardAuth"],
+            "properties": {
+              "forwardAuth": {
+                "$ref": "#/components/schemas/TraefikForwardAuthConfig"
+              }
+            }
+          }
+        ]
+      },
+      "TraefikRouterConfig": {
+        "type": "object",
+        "required": ["rule", "service", "entryPoints"],
+        "properties": {
+          "entryPoints": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "middlewares": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "rule": {
+            "type": "string"
+          },
+          "service": {
+            "type": "string"
+          }
+        }
+      },
+      "TraefikServerConfig": {
+        "type": "object",
+        "required": ["url"],
+        "properties": {
+          "url": {
+            "type": "string"
+          }
+        }
+      },
+      "TraefikServiceConfig": {
+        "type": "object",
+        "required": ["loadBalancer"],
+        "properties": {
+          "loadBalancer": {
+            "$ref": "#/components/schemas/TraefikLoadBalancerConfig"
           }
         }
       },
@@ -3359,17 +4669,33 @@
           "requested_at"
         ],
         "properties": {
-          "content_length": { "type": "integer", "format": "int64" },
-          "content_type": { "type": "string" },
-          "id": { "type": "string", "format": "uuid" },
-          "requested_at": { "type": "string", "format": "date-time" },
+          "content_length": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "content_type": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requested_at": {
+            "type": "string",
+            "format": "date-time"
+          },
           "uploaded_at": {
             "type": "string",
             "format": "date-time",
             "nullable": true
           },
-          "usage": { "$ref": "#/components/schemas/MediaUsage" },
-          "user_id": { "type": "string", "format": "uuid" },
+          "usage": {
+            "$ref": "#/components/schemas/MediaUsage"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
           "validated_at": {
             "type": "string",
             "format": "date-time",
@@ -3381,17 +4707,29 @@
         "type": "object",
         "required": ["id", "url"],
         "properties": {
-          "id": { "type": "string", "format": "uuid" },
-          "url": { "type": "string" }
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "url": {
+            "type": "string"
+          }
         }
       },
       "User": {
         "type": "object",
         "required": ["id", "auth_id", "name"],
         "properties": {
-          "auth_id": { "type": "string" },
-          "id": { "type": "string", "format": "uuid" },
-          "name": { "type": "string" }
+          "auth_id": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          }
         }
       },
       "UserDiscordIds": {
@@ -3404,8 +4742,13 @@
               "type": "array",
               "items": {
                 "allOf": [
-                  { "type": "string", "format": "uuid" },
-                  { "type": "string" }
+                  {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  {
+                    "type": "string"
+                  }
                 ]
               }
             }
@@ -3416,19 +4759,38 @@
         "type": "object",
         "required": ["auth_id"],
         "properties": {
-          "auth_id": { "type": "string" },
-          "name": { "type": "string", "nullable": true }
+          "auth_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          }
         }
       },
-      "UserForUpdate": { "type": "object" },
+      "UserForUpdate": {
+        "type": "object"
+      },
       "UserLeaderboardEntry": {
         "type": "object",
         "required": ["user_id", "user_name", "score", "result"],
         "properties": {
-          "result": { "type": "number", "format": "double" },
-          "score": { "type": "integer", "format": "int64", "minimum": 0 },
-          "user_id": { "type": "string", "format": "uuid" },
-          "user_name": { "type": "string" }
+          "result": {
+            "type": "number",
+            "format": "double"
+          },
+          "score": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "user_name": {
+            "type": "string"
+          }
         }
       }
     }

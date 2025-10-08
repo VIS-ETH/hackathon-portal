@@ -4,12 +4,14 @@ version = "1.0.0"
 edition = "2021"
 
 [dependencies]
+aes-gcm = "0.10.3"
 aws-smithy-types-convert = { version = "0.60.9", features = ["convert-chrono"] }
 chrono = { workspace = true }
 derive_more = { workspace = true }
 directories = { workspace = true }
 futures = "0.3.31"
 hackathon-portal-repositories = { workspace = true }
+hex = "0.4.3"
 itertools = { workspace = true }
 mime = { workspace = true }
 minilp = "0.2.2"

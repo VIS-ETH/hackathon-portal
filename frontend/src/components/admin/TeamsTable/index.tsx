@@ -1,3 +1,4 @@
+import GenerateAPIKeys from "../GenerateAPIKeys";
 import TeamsTableRow from "./Row";
 import { TableView } from "./TableView";
 
@@ -98,6 +99,7 @@ const TeamsTable = ({ event }: TeamsTableProps) => {
             >
               Index Teams
             </Button>
+
             <SegmentedControl
               {...(segmentedControlProps as SegmentedControlProps)}
               data={Object.values(TableView)}
@@ -140,7 +142,12 @@ const TeamsTable = ({ event }: TeamsTableProps) => {
                   {view == TableView.Credentials && (
                     <>
                       <Table.Th miw={200}>VM Password</Table.Th>
-                      <Table.Th miw={200}>ML Key</Table.Th>
+                      <Table.Th miw={200}>
+                        <Group justify="space-between">
+                          <Text>ML Key</Text>
+                          <GenerateAPIKeys teams={teams} />
+                        </Group>
+                      </Table.Th>
                     </>
                   )}
                   {view == TableView.Members &&

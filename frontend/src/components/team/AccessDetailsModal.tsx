@@ -6,12 +6,16 @@ import {
   textareaProps,
   tooltipProps,
 } from "@/styles/common";
+import { getKeyInfo } from "@/utils";
+
+import { useEffect, useState } from "react";
 
 import {
   Center,
   Modal,
   PasswordInput,
   PasswordInputProps,
+  Progress,
   Stack,
   Text,
   TextInput,
@@ -32,6 +36,18 @@ const AccessDetailsModal = ({
   onClose,
 }: AccessDetailsModalProps) => {
   const { data: credentials } = useGetTeamCredentials(team.id);
+
+  const [usedBudget, setUsedBudget] = useState<number | null>(null);
+  const [maxBudget, setMaxBudget] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (credentials?.ai_api_key) {
+      getKeyInfo(credentials.ai_api_key).then(({ usedBudget, maxBudget }) => {
+        setUsedBudget(usedBudget);
+        setMaxBudget(maxBudget);
+      });
+    }
+  }, [credentials]);
 
   const managedAddressComponent = team.managed_address && (
     <Tooltip
@@ -90,13 +106,22 @@ const AccessDetailsModal = ({
   );
 
   const aiApiKeyComponent = credentials?.ai_api_key && (
-    <PasswordInput
-      {...(inputProps as PasswordInputProps)}
-      size="sm"
-      label="AI API Key"
-      value={credentials.ai_api_key}
-      readOnly
-    />
+    <>
+      <PasswordInput
+        {...(inputProps as PasswordInputProps)}
+        size="sm"
+        label="AI API Key"
+        value={credentials.ai_api_key}
+        readOnly
+      />
+      <Text size="sm" mb={-5} c="dimmed">
+        Usage: {(usedBudget ?? 0).toFixed(3)} / {maxBudget ?? "?"} USD
+      </Text>
+      <Progress
+        value={maxBudget ? ((usedBudget ?? 0) / maxBudget) * 100 : 0}
+        size="sm"
+      />
+    </>
   );
 
   const stack = (managedAddressComponent ||

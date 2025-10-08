@@ -5,7 +5,7 @@ use crate::ctx::Ctx;
 use crate::error::{ApiJson, ApiJsonVec};
 use crate::models::AffectedRows;
 use crate::routers::events::models::EventIdQuery;
-use crate::routers::teams::models::{AdminTeam, Team, TeamCredentials};
+use crate::routers::teams::models::{AdminTeam, CreateTeamAPIKey, Team, TeamCredentials};
 use crate::routers::users::models::TeamRoleOptQuery;
 use crate::ApiError;
 use axum::extract::{Path, Query, State};
@@ -43,6 +43,7 @@ pub fn get_router(state: &ApiState) -> Router {
         )
         .route("/:team_id/credentials", get(get_team_credentials))
         .route("/:team_id/expert-ratings", get(get_team_expert_ratings))
+        .route("/:team_id/ai-api-keys", post(create_team_ai_api_key))
         .with_state(state.clone())
 }
 
@@ -667,4 +668,36 @@ pub async fn get_team_expert_ratings(
         .await?;
 
     Ok(Json(ratings))
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/teams/{team_id}/ai-api-keys",
+    responses(
+        (status = StatusCode::OK, body = ()),
+        (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
+    ),
+)]
+pub async fn create_team_ai_api_key(
+    ctx: Ctx,
+    State(state): State<ApiState>,
+    Path(team_id): Path<Uuid>,
+    Json(body): Json<CreateTeamAPIKey>,
+) -> ApiJson<String> {
+    let team = state.team_service.get_team(team_id).await?;
+    let event = state.event_service.get_event(team.event_id).await?;
+    let groups = Groups::from_event_and_team(ctx.roles(), event.id, team.id);
+
+    if !groups.can_manage_event() {
+        return Err(ApiError::Forbidden {
+            action: "create an AI API key for this team".to_string(),
+        });
+    }
+
+    let key = state
+        .team_service
+        .create_team_ai_api_key(team_id, body.budget, event.id)
+        .await?;
+
+    Ok(Json(key))
 }

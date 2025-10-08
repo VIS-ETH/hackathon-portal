@@ -1,6 +1,7 @@
 pub mod db;
 pub mod discord;
 pub mod error;
+pub mod lite_llm;
 pub mod s3;
 
 pub use db::DbRepository;

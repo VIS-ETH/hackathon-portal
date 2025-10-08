@@ -44,7 +44,6 @@ const CreateAppointmentDrawer = ({
       produce(values, (draft) => {
         draft.title = values.title;
         draft.event_id = eventId;
-        console.log("type of start", typeof values.start);
         draft.start = new Date(values.start).toISOString().replace("Z", "");
         if (values.end) {
           draft.end = new Date(values.end).toISOString().replace("Z", "");

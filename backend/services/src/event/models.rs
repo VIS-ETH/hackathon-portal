@@ -85,4 +85,5 @@ pub struct EventForUpdate {
     pub feedback_visible: Option<bool>,
     pub visibility: Option<EventVisibility>,
     pub phase: Option<EventPhase>,
+    pub master_ai_api_key: Option<String>,
 }

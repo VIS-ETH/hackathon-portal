@@ -5,7 +5,9 @@ use directories::ProjectDirs;
 use dotenvy::dotenv;
 use hackathon_portal_repositories::db::DbConfig;
 use hackathon_portal_repositories::discord::DiscordConfig;
+use hackathon_portal_repositories::lite_llm::LiteLLMConfig;
 use hackathon_portal_repositories::s3::S3Config;
+use hackathon_portal_services::crypto::CryptoConfig;
 use hackathon_portal_services::infrastructure::InfrastructureConfig;
 use serde::{Deserialize, Serialize};
 use std::net::{IpAddr, Ipv4Addr};
@@ -50,6 +52,8 @@ pub struct ApiConfig {
     pub postgres: DbConfig,
     pub s3: S3Config,
     pub discord: DiscordConfig,
+    pub litellm: LiteLLMConfig,
+    pub crypto: CryptoConfig,
     #[serde(skip, default = "ApiConfig::default_dirs")]
     pub dirs: ProjectDirs,
 }

@@ -17,6 +17,10 @@ pub enum RepositoryError {
         message: String,
     },
 
+    Parsing {
+        message: String,
+    },
+
     // region: external library errors
     #[from]
     SeaORM(#[serde_as(as = "DisplayFromStr")] sea_orm::DbErr),
@@ -58,6 +62,15 @@ pub enum RepositoryError {
         #[serde_as(as = "DisplayFromStr")]
         aws_sdk_s3::error::SdkError<aws_sdk_s3::operation::put_bucket_cors::PutBucketCorsError>,
     ),
+
+    #[from]
+    RequestError(#[serde_as(as = "DisplayFromStr")] reqwest::Error),
+
+    #[from]
+    SerdeJson(#[serde_as(as = "DisplayFromStr")] serde_json::Error),
+
+    #[from]
+    Cryptography(#[serde_as(as = "DisplayFromStr")] aes_gcm::Error),
     // endregion
 }
 

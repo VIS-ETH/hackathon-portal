@@ -18,6 +18,7 @@ export interface EventForUpdate {
   feedback_visible?: boolean | null;
   /** @nullable */
   managed_address_template?: string | null;
+  master_ai_api_key?: string | null;
   /**
    * @minimum 0
    * @nullable

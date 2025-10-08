@@ -15,6 +15,8 @@ import type {
   AttemptForCreate,
   AttemptForUpdate,
   Cooldown,
+  CreateTeamAPIKey,
+  CreateTeamAiApiKey200,
   CreateUploadDTO,
   DeleteEventRolesBody,
   DeleteSidequest200,
@@ -7309,6 +7311,90 @@ export function useGetTeamAffiliates<
 
   return query;
 }
+
+export const createTeamAiApiKey = (
+  teamId: string,
+  createTeamAPIKey: CreateTeamAPIKey,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<CreateTeamAiApiKey200>(
+    {
+      url: `/api/teams/${teamId}/ai-api-keys`,
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      data: createTeamAPIKey,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getCreateTeamAiApiKeyMutationOptions = <
+  TError = PublicError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createTeamAiApiKey>>,
+    TError,
+    { teamId: string; data: CreateTeamAPIKey },
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createTeamAiApiKey>>,
+  TError,
+  { teamId: string; data: CreateTeamAPIKey },
+  TContext
+> => {
+  const mutationKey = ["createTeamAiApiKey"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createTeamAiApiKey>>,
+    { teamId: string; data: CreateTeamAPIKey }
+  > = (props) => {
+    const { teamId, data } = props ?? {};
+
+    return createTeamAiApiKey(teamId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateTeamAiApiKeyMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createTeamAiApiKey>>
+>;
+export type CreateTeamAiApiKeyMutationBody = CreateTeamAPIKey;
+export type CreateTeamAiApiKeyMutationError = PublicError;
+
+export const useCreateTeamAiApiKey = <TError = PublicError, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof createTeamAiApiKey>>,
+      TError,
+      { teamId: string; data: CreateTeamAPIKey },
+      TContext
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof createTeamAiApiKey>>,
+  TError,
+  { teamId: string; data: CreateTeamAPIKey },
+  TContext
+> => {
+  const mutationOptions = getCreateTeamAiApiKeyMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
 
 export const getTeamCredentials = (
   teamId: string,

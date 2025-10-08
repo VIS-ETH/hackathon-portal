@@ -1,6 +1,7 @@
 pub mod models;
 
 use crate::authorization::AuthorizationService;
+use crate::crypto::CryptoService;
 use crate::event::models::{Event, EventForCreate, EventForUpdate};
 use crate::rating::RatingService;
 use crate::sidequest::SidequestService;
@@ -24,6 +25,7 @@ pub struct EventService {
     user_service: Arc<UserService>,
     sidequest_service: Arc<SidequestService>,
     rating_service: Arc<RatingService>,
+    crypto_service: Arc<CryptoService>,
     db_repo: DbRepository,
 }
 
@@ -34,6 +36,7 @@ impl EventService {
         user_service: Arc<UserService>,
         sidequest_service: Arc<SidequestService>,
         rating_service: Arc<RatingService>,
+        crypto_service: Arc<CryptoService>,
         db_repo: DbRepository,
     ) -> Self {
         Self {
@@ -41,6 +44,7 @@ impl EventService {
             user_service,
             sidequest_service,
             rating_service,
+            crypto_service,
             db_repo,
         }
     }
@@ -207,9 +211,12 @@ impl EventService {
             active_event.phase = Set(phase);
         }
 
-        let event = active_event.update(&txn).await?;
+        if let Some(master_ai_api_key) = event_fu.master_ai_api_key {
+            let enc_key = self.crypto_service.encrypt(&master_ai_api_key)?;
+            active_event.master_ai_api_key = Set(Some(enc_key));
+        }
 
-        txn.commit().await?;
+        let event = active_event.update(self.db_repo.conn()).await?;
 
         Ok(event.into())
     }

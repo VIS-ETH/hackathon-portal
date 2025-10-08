@@ -119,8 +119,14 @@ const EventSettings = ({ event, refetch }: EventSettingsProps) => {
   }, [form.setValues, event]);
 
   const handleSubmit = async (data: EventForUpdate) => {
+    const dataToPrint = { ...data };
+    if (dataToPrint.master_ai_api_key) {
+      dataToPrint.master_ai_api_key =
+        dataToPrint.master_ai_api_key.slice(0, 6) + "****";
+    }
+
     const confirmation = confirm(
-      `WARNING - READ THIS: Are you sure that you want to submit the following patch for ${event.name}?\n\nIf you are not 100% sure of the implications, CANCEL and ASK FOR HELP.\n\n${stringify(data)}`,
+      `WARNING - READ THIS: Are you sure that you want to submit the following patch for ${event.name}?\n\nIf you are not 100% sure of the implications, CANCEL and ASK FOR HELP.\n\n${stringify(dataToPrint)}`,
     );
 
     if (!confirmation) {
@@ -206,6 +212,13 @@ const EventSettings = ({ event, refetch }: EventSettingsProps) => {
               placeholder={event.max_teams_per_project.toString()}
               min={0}
               step={1}
+            />
+            <TextInput
+              {...(inputProps as TextInputProps)}
+              {...form.getInputProps("master_ai_api_key")}
+              key={form.key("master_ai_api_key")}
+              label="Master AI API Key"
+              type="password"
             />
           </SimpleGrid>
           <Divider label="Infrastructure" labelPosition="left" />
