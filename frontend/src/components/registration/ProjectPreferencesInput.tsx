@@ -79,26 +79,28 @@ const ProjectPreferencesInput = ({
       <SimpleGrid cols={{ xs: 1, sm: 3 }}>
         {Array.from({ length: N_PREFERENCES }).map((_, index) => (
           <Card {...highlightedCardProps} key={index} ta="center">
-            <Text>
-              {index == 0 ? "Highest Project Priority" : "Project Priority"}
-            </Text>
-            <Title mt="sm" order={2}>
-              {index + 1}
-            </Title>
-            <Select
-              {...(inputProps as SelectProps)}
-              mt="md"
-              data={projects?.map((project) => ({
-                label: project.name,
-                value: project.id,
-              }))}
-              value={localPPS[index]}
-              onChange={(value) => {
-                if (value) {
-                  handleSave(index, value);
-                }
-              }}
-            />
+            <>
+              <Text>
+                {index == 0 ? "Highest Project Priority" : "Project Priority"}
+              </Text>
+              <Title mt="sm" order={2}>
+                {index + 1}
+              </Title>
+              <Select
+                {...(inputProps as SelectProps)}
+                mt="md"
+                data={projects?.map((project) => ({
+                  label: project.name,
+                  value: project.id,
+                }))}
+                value={localPPS[index]}
+                onChange={(value) => {
+                  if (value) {
+                    handleSave(index, value);
+                  }
+                }}
+              />
+            </>
           </Card>
         ))}
       </SimpleGrid>
