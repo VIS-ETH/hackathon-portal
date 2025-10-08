@@ -15,14 +15,10 @@ pub struct Model {
     #[sea_orm(column_type = "Text")]
     pub slug: String,
     pub index: i32,
-    #[sea_orm(column_type = "Text", nullable)]
-    pub password: Option<String>,
     #[sea_orm(column_type = "Double", nullable)]
     pub extra_score: Option<f64>,
     #[sea_orm(column_type = "Text", nullable)]
     pub comment: Option<String>,
-    #[sea_orm(column_type = "Text", nullable)]
-    pub ai_api_key: Option<String>,
     pub photo_id: Option<Uuid>,
     #[sea_orm(column_type = "Text", nullable)]
     pub managed_address_override: Option<String>,
@@ -35,6 +31,10 @@ pub struct Model {
     pub ingress_enabled: bool,
     #[sea_orm(column_type = "JsonBinary")]
     pub ingress_config: Json,
+    #[sea_orm(column_type = "VarBinary(StringLen::None)", nullable)]
+    pub password: Option<Vec<u8>>,
+    #[sea_orm(column_type = "VarBinary(StringLen::None)", nullable)]
+    pub ai_api_key: Option<Vec<u8>>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

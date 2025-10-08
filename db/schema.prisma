@@ -60,6 +60,7 @@ model event {
   projects_visible            Boolean          @default(false)
   project_assignments_visible Boolean          @default(false)
   feedback_visible            Boolean          @default(false)
+  master_ai_api_key           Bytes?
   visibility                  event_visibility
   phase                       event_phase
 
@@ -83,8 +84,8 @@ model team {
   name                     String
   slug                     String
   index                    Int
-  password                 String?
-  ai_api_key               String?
+  password                 Bytes?
+  ai_api_key               Bytes?
   extra_score              Float?
   comment                  String?
   photo_id                 String? @db.Uuid

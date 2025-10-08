@@ -1,6 +1,7 @@
 pub mod models;
 
 use crate::authorization::AuthorizationService;
+use crate::crypto::CryptoService;
 use crate::infrastructure::models::IngressConfig;
 use crate::team::models::{Team, TeamForCreate, TeamForUpdate};
 use crate::upload::UploadService;
@@ -10,6 +11,7 @@ use hackathon_portal_repositories::db::{
     db_event, db_project_preference, db_sidequest_score, db_team, db_team_role_assignment,
     EventRepository, MediaUsage, ProjectPreferenceRepository, TeamRepository, TeamRole,
 };
+use hackathon_portal_repositories::lite_llm::LiteLLMRepository;
 use hackathon_portal_repositories::DbRepository;
 use sea_orm::prelude::*;
 use sea_orm::{ActiveModelTrait, IntoActiveModel, Set, TransactionTrait};
@@ -21,7 +23,9 @@ use std::sync::Arc;
 pub struct TeamService {
     authorization_service: Arc<AuthorizationService>,
     upload_service: Arc<UploadService>,
+    crypto_service: Arc<CryptoService>,
     db_repo: DbRepository,
+    lite_llm_repo: LiteLLMRepository,
 }
 
 impl TeamService {
@@ -29,12 +33,16 @@ impl TeamService {
     pub fn new(
         authorization_service: Arc<AuthorizationService>,
         upload_service: Arc<UploadService>,
+        crypto_service: Arc<CryptoService>,
         db_repo: DbRepository,
+        lite_llm_repo: LiteLLMRepository,
     ) -> Self {
         Self {
             authorization_service,
             upload_service,
+            crypto_service,
             db_repo,
+            lite_llm_repo,
         }
     }
 
@@ -167,7 +175,7 @@ impl TeamService {
             if password.is_empty() {
                 active_team.password = Set(None);
             } else {
-                active_team.password = Set(Some(password.clone()));
+                active_team.password = Set(Some(self.crypto_service.encrypt(&password.clone())?));
             }
         }
 
@@ -175,7 +183,8 @@ impl TeamService {
             if ai_api_key.is_empty() {
                 active_team.ai_api_key = Set(None);
             } else {
-                active_team.ai_api_key = Set(Some(ai_api_key.clone()));
+                active_team.ai_api_key =
+                    Set(Some(self.crypto_service.encrypt(&ai_api_key.clone())?));
             }
         }
 
@@ -396,6 +405,16 @@ impl TeamService {
         } else {
             None
         };
+        let password = team_model
+            .password
+            .as_ref()
+            .map(|p| self.crypto_service.decrypt(p))
+            .transpose()?;
+        let ai_api_key = team_model
+            .ai_api_key
+            .as_ref()
+            .map(|k| self.crypto_service.decrypt(k))
+            .transpose()?;
 
         let team = Team {
             id: team_model.id,
@@ -406,8 +425,8 @@ impl TeamService {
             index: team_model.index,
             photo_id: team_model.photo_id,
             photo_url,
-            password: team_model.password,
-            ai_api_key: team_model.ai_api_key,
+            password,
+            ai_api_key,
             extra_score: team_model.extra_score,
             comment: team_model.comment,
             managed_address,
@@ -443,6 +462,37 @@ impl TeamService {
         }
 
         Ok(slug)
+    }
+
+    pub async fn create_team_ai_api_key(
+        &self,
+        team_id: Uuid,
+        budget: f64,
+        event_id: Uuid,
+    ) -> ServiceResult<String> {
+        let event: db_event::Model =
+            EventRepository::fetch_by_id(self.db_repo.conn(), event_id).await?;
+        let team = TeamRepository::fetch_by_id(self.db_repo.conn(), team_id).await?;
+
+        let master_api_key = event
+            .master_ai_api_key
+            .ok_or(ServiceError::MissingMasterAIAPIKey)?;
+
+        let api_key = self.crypto_service.decrypt(&master_api_key)?;
+
+        let generated_key = self
+            .lite_llm_repo
+            .generate_team_key(team.index, budget, &api_key)
+            .await
+            .map_err(ServiceError::Repository)?;
+
+        let mut active_team = team.into_active_model();
+        let enc_key = self.crypto_service.encrypt(&generated_key)?;
+        active_team.ai_api_key = Set(Some(enc_key));
+
+        active_team.update(self.db_repo.conn()).await?;
+
+        Ok(generated_key)
     }
 }
 

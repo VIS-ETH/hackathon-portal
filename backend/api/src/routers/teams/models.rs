@@ -125,3 +125,8 @@ impl From<TeamBO> for TeamCredentials {
         }
     }
 }
+
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+pub struct CreateTeamAPIKey {
+    pub budget: f64,
+}

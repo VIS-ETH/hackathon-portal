@@ -39,6 +39,8 @@ pub struct Model {
     pub private_address_template: Option<String>,
     #[sea_orm(column_type = "Text", nullable)]
     pub ssh_config_template: Option<String>,
+    #[sea_orm(column_type = "VarBinary(StringLen::None)", nullable)]
+    pub master_ai_api_key: Option<Vec<u8>>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

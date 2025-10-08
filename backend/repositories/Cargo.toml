@@ -4,11 +4,15 @@ version = "1.0.0"
 edition = "2021"
 
 [dependencies]
+aes-gcm = "0.10.3"
 aws-sdk-s3 = { version = "1.79.0", features = ["behavior-version-latest"] }
 derive_more = { workspace = true }
+hex = "0.4.3"
 mime = { workspace = true }
+reqwest = "0.12.23"
 sea-orm = { workspace = true }
 serde = { workspace = true }
+serde_json.workspace = true
 serde_with = { workspace = true }
 slug = "0.1.6"
 strum = { workspace = true }

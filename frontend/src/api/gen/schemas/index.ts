@@ -15,6 +15,8 @@ export * from "./attempt";
 export * from "./attemptForCreate";
 export * from "./attemptForUpdate";
 export * from "./cooldown";
+export * from "./createTeamAPIKey";
+export * from "./createTeamAiApiKey200";
 export * from "./createUploadDTO";
 export * from "./customIngressConfig";
 export * from "./deleteEventRolesBody";

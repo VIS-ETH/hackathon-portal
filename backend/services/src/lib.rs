@@ -1,5 +1,6 @@
 pub mod appointment;
 pub mod authorization;
+pub mod crypto;
 pub mod error;
 pub mod event;
 pub mod health;

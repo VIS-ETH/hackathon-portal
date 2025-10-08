@@ -2,10 +2,12 @@ use crate::api_config::ApiConfig;
 use crate::auth::Authenticator;
 use crate::ApiResult;
 use hackathon_portal_repositories::discord::DiscordConfig;
+use hackathon_portal_repositories::lite_llm::LiteLLMRepository;
 use hackathon_portal_repositories::s3::S3Repository;
 use hackathon_portal_repositories::DbRepository;
 use hackathon_portal_services::appointment::AppointmentService;
 use hackathon_portal_services::authorization::AuthorizationService;
+use hackathon_portal_services::crypto::CryptoService;
 use hackathon_portal_services::event::EventService;
 use hackathon_portal_services::health::HealthService;
 use hackathon_portal_services::infrastructure::InfrastructureService;
@@ -77,6 +79,9 @@ impl ApiState {
         let s3_repo = S3Repository::from_config(&config.s3);
 
         let discord_config = Arc::new(config.discord.clone());
+        let lite_llm_repo = LiteLLMRepository::from_config(&config.litellm);
+
+        let crypto_service = Arc::new(CryptoService::from_config(&config.crypto)?);
 
         let health_service = Arc::new(HealthService::new(db_repo.clone()));
         let authorization_service = Arc::new(AuthorizationService::new(db_repo.clone()));
@@ -86,7 +91,9 @@ impl ApiState {
         let team_service = Arc::new(TeamService::new(
             authorization_service.clone(),
             upload_service.clone(),
+            crypto_service.clone(),
             db_repo.clone(),
+            lite_llm_repo,
         ));
 
         let infrastructure_service = Arc::new(InfrastructureService::new(
@@ -110,6 +117,7 @@ impl ApiState {
             user_service.clone(),
             sidequest_service.clone(),
             rating_service.clone(),
+            crypto_service.clone(),
             db_repo,
         ));
 

@@ -79,6 +79,12 @@ pub enum ServiceError {
         actual: MediaUsage,
     },
 
+    MissingMasterAIAPIKey,
+
+    Parsing {
+        message: String,
+    },
+
     // region: external library errors
     #[from]
     Repository(RepositoryError),
@@ -103,6 +109,9 @@ pub enum ServiceError {
 
     #[from]
     SerdeJson(#[serde_as(as = "DisplayFromStr")] serde_json::Error),
+
+    #[from]
+    Crypto(#[serde_as(as = "DisplayFromStr")] aes_gcm::Error),
     // endregion
 }
 

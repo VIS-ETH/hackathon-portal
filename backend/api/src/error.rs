@@ -149,7 +149,10 @@ impl From<&RepositoryError> for PublicError {
             | RepositoryError::S3GetObject(_)
             | RepositoryError::S3PutObject(_)
             | RepositoryError::S3GetBucketCors(_)
+            | RepositoryError::Parsing { message: _ }
             | RepositoryError::S3PutBucketCors(_) => ise,
+            RepositoryError::RequestError(_) | RepositoryError::SerdeJson(_) => ise,
+            RepositoryError::Cryptography(_) => ise,
         };
 
         Self::new(status, message)
@@ -166,7 +169,7 @@ impl From<&ServiceError> for PublicError {
         let (status, message) = match value {
             ServiceError::SlugNotUnique { slug } => {
                 (StatusCode::CONFLICT, format!("Slug '{slug}' is not unique"))
-            },
+            }
             ServiceError::ResourceStillInUse { resource, id } => (
                 StatusCode::CONFLICT,
                 format!("{resource} '{id}' is still in use"),
@@ -226,7 +229,7 @@ impl From<&ServiceError> for PublicError {
                         "File ({size:.1} MB) exceeds the size limit of {limit:.1} MB"
                     ),
                 )
-            },
+            }
             ServiceError::UploadRateLimitExceeded => (
                 StatusCode::FORBIDDEN,
                 "You have uploaded too many files in a short period of time. Please wait and try again later.".to_string()
@@ -250,8 +253,14 @@ impl From<&ServiceError> for PublicError {
             ServiceError::Io(_) |
             ServiceError::TracingSetGlobalDefault(_) |
             ServiceError::TracingAppenderRollingInit(_) |
-            ServiceError::SeaORM(_) |
-            ServiceError::SerdeJson(_) => ise,
+            ServiceError::Crypto(_) |
+            ServiceError::SeaORM(_) => ise,
+            ServiceError::MissingMasterAIAPIKey => (
+                StatusCode::BAD_REQUEST,
+                "The master AI API key is missing".to_string(),
+            ),
+            ServiceError::Parsing { message } => (StatusCode::BAD_REQUEST, message.clone()),
+            ServiceError::SerdeJson(error) => (StatusCode::BAD_REQUEST, error.to_string()),
         };
 
         Self::new(status, message)
