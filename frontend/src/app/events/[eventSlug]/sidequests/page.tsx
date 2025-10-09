@@ -10,12 +10,33 @@ import SidequestsList from "@/components/sidequest/SidequestsList";
 import { useResolveParams } from "@/hooks/useResolveParams";
 import { iconProps } from "@/styles/common";
 
+import { useEffect, useState } from "react";
+
 import { Stack, Tabs } from "@mantine/core";
 
 import { IconStopwatch, IconTicTac, IconTrophy } from "@tabler/icons-react";
 
 const Sidequests = () => {
   const { event, roles, policies } = useResolveParams();
+  const [activeTab, setActiveTab] = useState<string>("leaderboard");
+
+  useEffect(() => {
+    const hash = window.location.hash.slice(1);
+    if (
+      hash === "leaderboard" ||
+      hash === "sidequests" ||
+      hash === "attempts"
+    ) {
+      setActiveTab(hash);
+    }
+  }, []);
+
+  const handleTabChange = (value: string | null) => {
+    if (value) {
+      setActiveTab(value);
+      window.history.replaceState(null, "", `#${value}`);
+    }
+  };
 
   if (!event || !roles || !policies) {
     return <PageSkeleton />;
@@ -26,7 +47,7 @@ const Sidequests = () => {
     isParticipant || policies.can_manage_sidequest_attempt;
 
   return (
-    <Tabs defaultValue="leaderboard" mt="-md">
+    <Tabs value={activeTab} onChange={handleTabChange} mt="-md">
       <Tabs.List>
         <Tabs.Tab
           value="leaderboard"
