@@ -155,24 +155,27 @@ impl DiscordClient {
         // Add team channels
         let teams = api_state.team_service.get_teams(event_id).await?;
         for team in teams {
-            let team_channel_name = format!("{:02}-{}", team.index, team.name);
-            let slug_name = team_channel_name.to_lowercase().replace(' ', "-");
-            team_channels_by_index.insert(team.index, slug_name.clone());
+            // Only do that if indexes have been assigned
+            if team.index > 0 {
+                let team_channel_name = format!("{:02}-{}", team.index, team.name);
+                let slug_name = team_channel_name.to_lowercase().replace(' ', "-");
+                team_channels_by_index.insert(team.index, slug_name.clone());
 
-            channels.push(ChannelConfig {
-                name: slug_name,
-                category: "teams".to_string(),
-                voice: false,
-                visible_to: PermissionTarget::Multiple(vec![
-                    PermissionRole::Admin,
-                    PermissionRole::Team(team.index),
-                ]),
-                writable_by: PermissionTarget::Multiple(vec![
-                    PermissionRole::Admin,
-                    PermissionRole::Team(team.index),
-                ]),
-                default_notification: NotificationSetting::All,
-            });
+                channels.push(ChannelConfig {
+                    name: slug_name,
+                    category: "teams".to_string(),
+                    voice: false,
+                    visible_to: PermissionTarget::Multiple(vec![
+                        PermissionRole::Admin,
+                        PermissionRole::Team(team.index),
+                    ]),
+                    writable_by: PermissionTarget::Multiple(vec![
+                        PermissionRole::Admin,
+                        PermissionRole::Team(team.index),
+                    ]),
+                    default_notification: NotificationSetting::All,
+                });
+            }
         }
 
         // Fix other channel names to slug format
