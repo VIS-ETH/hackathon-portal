@@ -111,9 +111,10 @@ pub struct TraefikDynamicConfig {
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct TraefikHttpConfig {
+    #[serde(skip_serializing_if = "HashMap::is_empty")]
     pub routers: HashMap<String, TraefikRouterConfig>,
+    #[serde(skip_serializing_if = "HashMap::is_empty")]
     pub services: HashMap<String, TraefikServiceConfig>,
-    pub middlewares: HashMap<String, TraefikMiddlewareConfig>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
@@ -121,8 +122,10 @@ pub struct TraefikHttpConfig {
 pub struct TraefikRouterConfig {
     pub rule: String,
     pub service: String,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     pub entry_points: Vec<String>,
-    pub middlewares: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub middlewares: Vec<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
@@ -134,6 +137,7 @@ pub struct TraefikServiceConfig {
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct TraefikLoadBalancerConfig {
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     pub servers: Vec<TraefikServerConfig>,
 }
 
@@ -141,19 +145,6 @@ pub struct TraefikLoadBalancerConfig {
 #[serde(rename_all = "camelCase")]
 pub struct TraefikServerConfig {
     pub url: String,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
-#[serde(rename_all = "camelCase")]
-pub struct TraefikForwardAuthConfig {
-    pub address: String,
-    pub auth_response_headers: Option<Vec<String>>,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
-#[serde(rename_all = "camelCase")]
-pub enum TraefikMiddlewareConfig {
-    ForwardAuth(TraefikForwardAuthConfig),
 }
 
 #[cfg(test)]

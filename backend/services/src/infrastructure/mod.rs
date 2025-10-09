@@ -93,11 +93,7 @@ impl InfrastructureService {
         }
 
         let dynamic_config = TraefikDynamicConfig {
-            http: TraefikHttpConfig {
-                routers,
-                services,
-                middlewares: HashMap::new(),
-            },
+            http: TraefikHttpConfig { routers, services },
         };
 
         Ok(dynamic_config)
@@ -132,7 +128,7 @@ impl InfrastructureService {
             rule,
             service: key.to_string(),
             entry_points: config.entrypoints.clone(),
-            middlewares: Some(middlewares),
+            middlewares,
         };
 
         Some(service)
