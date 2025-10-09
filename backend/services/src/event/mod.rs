@@ -216,7 +216,19 @@ impl EventService {
             active_event.master_ai_api_key = Set(Some(enc_key));
         }
 
-        let event = active_event.update(self.db_repo.conn()).await?;
+        if let Some(discord_server_id) = event_fu.discord_server_id {
+            if !discord_server_id.is_empty() {
+                active_event.discord_server_id = Set(Some(discord_server_id));
+            }
+        }
+
+        if let Some(discord_config) = event_fu.discord_config {
+            if !discord_config.is_empty() {
+                active_event.discord_config = Set(Some(discord_config));
+            }
+        }
+
+        let event = active_event.update(&txn).await?;
 
         Ok(event.into())
     }

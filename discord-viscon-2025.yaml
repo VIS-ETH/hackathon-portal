@@ -1,0 +1,155 @@
+# Discord Configuration for VIScon 2025
+# This configuration file defines roles, channels, categories, and default permissions for the Discord server.
+# It is used by the backend to synchronize the Discord server with the defined structure.
+# last modified 2025-10-07 DAC
+
+
+# Sets up the @everyone role
+# By default setup sets everything to false so you need to enable what you want
+# Consult: https://serenity-rs.github.io/poise/current/serenity/model/permissions/struct.Permissions.html and use snake_case here.
+default_permissions:
+  create_guild_expressions: true    # disable it if people can't behave
+  read_message_history: true        # should be alright to have
+  view_channel: true                # needed to see any channel
+  add_reactions: true               # needed to react to messages
+  connect: true                     # needed to join voice channels
+  speak: true                       # needed to speak in voice channels
+  use_external_emojis: true         # needed to use emojis from other servers (for ex vis)
+  use_vad: true                     # needed to use voice activation in voice channels
+  create_public_threads: true       # needed to create threads
+  send_messages_in_threads: true    # needed that people can send messages in threads
+  stream: true                      # allow people to stream if they want to 
+  embed_links: true                 # i mean why not
+  use_embedded_activities: true     # i mean why not
+  send_polls: true                  # i mean why not
+
+# Roles Definition
+# These roles can be assigned to users and used to manage permissions
+# The "special" field is used to link roles to specific functionalities
+# The higher the role in the list, the higher its priority
+
+roles:
+  - name: Tech
+    slug: admin
+    special: admin
+    color: "#FF0000" # red
+    show_in_roster: true
+  - name: Sidequest Master
+    slug: sidequest_master
+    special: sidequest_master
+    color: "#FFFF00" # yellow
+    show_in_roster: true
+  - name: Mentor
+    slug: mentor
+    special: mentor
+    color: "#8A2BE2" # violet
+    show_in_roster: true
+  - name: Stakeholder
+    slug: stakeholder
+    special: stakeholder
+    color: "#08a4a7" # blue
+    show_in_roster: true
+  - name: Participant
+    slug: participant
+    special: participant
+    color: "#ACACAC" # grey
+    show_in_roster: true
+
+# Channels and Categories
+# Categories can be used to group channels
+
+categories:
+  - slug: orga
+    name: "🛡️ Organizers"
+    writable_by: 
+      - admin
+  - slug: official
+    name: "📢  Official"
+  - slug: registration
+    name: "📝  Registration / Team-Up"
+    writable_by:
+      - all
+  - slug: sidequests
+    name: "🎮  Sidequest Hand-in"
+    writable_by:
+      - all
+  - slug: fun
+    name: "🥳  Voice & Fun"
+    writable_by:
+      - all
+  - slug: teams
+    name: "🏆  Team Channels"
+    special: "teams"
+
+channels:
+  # Orga Channels
+  - name: "👨🏻‍💻-tech"
+    category: orga
+    visible_to: 
+      - admin
+    writable_by: 
+      - admin
+
+  - name: "👔-stakeholders"
+    category: orga
+    visible_to: 
+      - admin
+      - stakeholder
+    writable_by: 
+      - admin
+      - stakeholder
+
+  - name: "👩🏻‍🏫-mentors"
+    category: orga
+    visible_to: 
+      - admin
+      - mentor
+    writable_by: 
+      - admin
+      - mentor
+
+  - name: "🐝-sidequestmasters"
+    category: orga
+    visible_to: 
+      - admin
+      - sidequest_master
+    writable_by: 
+      - admin
+      - sidequest_master
+  
+   # Official Channels
+  - name: "🔊-announcements"
+    category: official
+    writable_by: admin
+  - name: "👨‍💻-tech-support"
+    category: official
+    writable_by: all
+
+  # Registration / Team-Up Channels
+  - name: "👥-who-is-who"
+    category: registration
+    writable_by: all
+
+  - name: "🧑🏻‍🤝‍🧑🏻-looking-for-team"
+    category: registration
+    writable_by: all
+
+  # Sidequest Channels
+  - name: "👀-sq-placeholder"
+    category: sidequests
+    writable_by: all
+
+  # - name: "✈️-flight-sidequest"
+  #   category: sidequests
+  #   writable_by: all
+
+  # Voice & Fun Channels
+  - name: "🛋️-lounge"
+    category: fun
+    voice: true
+  
+  - name: "💭-anything"
+    category: fun
+    writable_by: all
+
+  # Team Channels are created dynamically

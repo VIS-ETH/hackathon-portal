@@ -77,7 +77,20 @@ pub async fn get_events(ctx: Ctx, State(state): State<ApiState>) -> ApiJsonVec<E
 
     let events = events
         .into_iter()
-        .filter(|event| Groups::from_event(ctx.roles(), event.id).can_view_event(event.visibility))
+        .filter_map(|mut event| {
+            let groups = Groups::from_event(ctx.roles(), event.id);
+
+            if !groups.can_view_event(event.visibility) {
+                return None;
+            }
+
+            if !groups.can_manage_event() {
+                event.discord_config = None;
+                event.discord_server_id = None;
+            }
+
+            Some(event)
+        })
         .collect::<Vec<_>>();
 
     Ok(Json(events))
@@ -118,6 +131,17 @@ pub async fn get_event_by_slug(
         });
     }
 
+    // Remove discord config and discord server id if the user is not an admin
+    let event = if groups.can_manage_event() {
+        event
+    } else {
+        Event {
+            discord_config: None,
+            discord_server_id: None,
+            ..event
+        }
+    };
+
     Ok(Json(event))
 }
 
@@ -142,6 +166,17 @@ pub async fn get_event(
             action: "view this event".to_string(),
         });
     }
+
+    // Remove discord config and discord server id if the user is not an admin
+    let event = if groups.can_manage_event() {
+        event
+    } else {
+        Event {
+            discord_config: None,
+            discord_server_id: None,
+            ..event
+        }
+    };
 
     Ok(Json(event))
 }
@@ -632,14 +667,19 @@ pub async fn post_event_discord_oauth(
     let event = state.event_service.get_event(event_id).await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
-    // TODO: temporary restriction until the Discord config is event-specific
-    if !groups.can_view_event(event.visibility) || !event.slug.contains("viscon-2025") {
+    if !groups.can_view_event(event.visibility) {
         return Err(ApiError::Forbidden {
             action: "join this event on Discord".to_string(),
         });
     }
 
     // TODO: move out of the handler at some point
+
+    let Some(discord_server_id) = event.discord_server_id else {
+        return Err(ApiError::BadRequest {
+            reason: "Event does not have a Discord server ID configured".to_string(),
+        })?;
+    };
 
     let client = Client::new();
     let params = [
@@ -671,8 +711,7 @@ pub async fn post_event_discord_oauth(
     client
         .put(format!(
             "https://discord.com/api/guilds/{}/members/{}",
-            state.discord_config.guild_id, // FIXME hardcoded guild id,
-            user_info.id
+            discord_server_id, user_info.id
         ))
         .header(
             "Authorization",
