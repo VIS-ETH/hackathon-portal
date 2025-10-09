@@ -39,7 +39,7 @@ import {
   IconX,
 } from "@tabler/icons-react";
 import CodeMirror from "@uiw/react-codemirror";
-import Ajv, { JSONSchemaType } from "ajv";
+import Ajv from "ajv";
 import YAML from "js-yaml";
 
 // ----- Types -----
@@ -282,7 +282,10 @@ const resolvePermission = (
   return permission;
 };
 
-const getDefaultValue = (value: unknown, defaultValue: unknown) => {
+const getDefaultValue = <T,>(
+  value: T | null | undefined,
+  defaultValue: T,
+): T => {
   return value !== undefined && value !== null ? value : defaultValue;
 };
 
