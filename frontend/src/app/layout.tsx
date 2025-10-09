@@ -22,6 +22,7 @@ const Layout = ({ children }: Readonly<PropsWithChildren>) => {
   return (
     <html lang="en">
       <head>
+        <title>VIScon Hackathon Portal</title>
         {/* Prevent color scheme flashes */}
         <ColorSchemeScript />
         <link
