@@ -11,6 +11,10 @@ export interface Event {
   /** @nullable */
   direct_address_template?: string | null;
   /** @nullable */
+  discord_config?: string | null;
+  /** @nullable */
+  discord_server_id?: string | null;
+  /** @nullable */
   documentation_content?: string | null;
   end: string;
   feedback_visible: boolean;

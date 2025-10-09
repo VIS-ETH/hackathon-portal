@@ -1,0 +1,131 @@
+{
+  "type": "object",
+  "properties": {
+    "default_permissions": {
+      "type": "object",
+      "additionalProperties": { "type": "boolean" }
+    },
+    "roles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "slug": { "type": "string" },
+          "special": {
+            "type": "string",
+            "enum": ["admin", "mentor", "stakeholder", "sidequest_master", "participant"]
+          },
+          "color": { "type": "string" },
+          "show_in_roster": { "type": "boolean", "nullable": true, "default": true },
+          "mentionable": { "type": "boolean", "nullable": true, "default": true }
+        },
+        "required": ["name", "slug", "color"],
+        "additionalProperties": false
+      }
+    },
+    "categories": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "slug": { "type": "string" },
+          "name": { "type": "string" },
+          "special": { "type": "string", "nullable": true },
+          "visible_to": {
+            "oneOf": [
+              {
+                "type": "string",
+                "enum": ["admin", "mentor", "stakeholder", "sidequest_master", "all"]
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["admin", "mentor", "stakeholder", "sidequest_master", "all"]
+                }
+              },
+              { "type": "null" }
+            ],
+            "default": "all"
+          },
+          "writable_by": {
+            "oneOf": [
+              {
+                "type": "string",
+                "enum": ["admin", "mentor", "stakeholder", "sidequest_master", "all"]
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["admin", "mentor", "stakeholder", "sidequest_master", "all"]
+                }
+              },
+              { "type": "null" }
+            ],
+            "default": "admin"
+          }
+        },
+        "required": ["slug", "name"],
+        "additionalProperties": false
+      }
+    },
+    "channels": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "category": { "type": "string" },
+          "visible_to": {
+            "oneOf": [
+              {
+                "type": "string",
+                "enum": ["admin", "mentor", "stakeholder", "sidequest_master", "all"],
+                "nullable": true
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["admin", "mentor", "stakeholder", "sidequest_master", "all"]
+                }
+              },
+              { "type": "null" }
+            ],
+            "default": "all"
+          },
+          "writable_by": {
+            "oneOf": [
+              {
+                "type": "string",
+                "enum": ["admin", "mentor", "stakeholder", "sidequest_master", "all"]
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["admin", "mentor", "stakeholder", "sidequest_master", "all"]
+                }
+              },
+              { "type": "null" }
+            ],
+            "default": "admin"
+          },
+          "default_notification": {
+            "type": "string",
+            "enum": ["all", "mentions", "none"],
+            "nullable": true,
+            "default": "none"
+          },
+          "voice": { "type": "boolean", "nullable": true, "default": false }
+        },
+        "required": ["name", "category"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["categories", "channels", "default_permissions", "roles"],
+  "additionalProperties": false
+}

@@ -4,6 +4,7 @@ use tokio_cron_scheduler::JobScheduler;
 use tracing::info;
 
 mod aggregator;
+mod discord;
 
 pub struct Workers {
     scheduler: JobScheduler,
@@ -15,6 +16,10 @@ impl Workers {
 
         scheduler
             .add(aggregator::create_job(api_state.clone())?)
+            .await?;
+
+        scheduler
+            .add(discord::create_job(api_state.clone())?)
             .await?;
 
         Ok(Self { scheduler })

@@ -65,6 +65,7 @@ model event {
   phase                       event_phase
 
   discord_server_id String?
+  discord_config    String? @db.Text
 
   // related models
   team                  team[]

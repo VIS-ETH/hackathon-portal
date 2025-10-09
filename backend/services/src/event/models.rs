@@ -27,6 +27,8 @@ pub struct Event {
     pub feedback_visible: bool,
     pub visibility: EventVisibility,
     pub phase: EventPhase,
+    pub discord_server_id: Option<String>,
+    pub discord_config: Option<String>,
 }
 
 impl From<db_event::Model> for Event {
@@ -52,6 +54,8 @@ impl From<db_event::Model> for Event {
             feedback_visible: value.feedback_visible,
             visibility: value.visibility,
             phase: value.phase,
+            discord_server_id: value.discord_server_id,
+            discord_config: value.discord_config,
         }
     }
 }
@@ -85,5 +89,7 @@ pub struct EventForUpdate {
     pub feedback_visible: Option<bool>,
     pub visibility: Option<EventVisibility>,
     pub phase: Option<EventPhase>,
+    pub discord_server_id: Option<String>,
+    pub discord_config: Option<String>,
     pub master_ai_api_key: Option<String>,
 }

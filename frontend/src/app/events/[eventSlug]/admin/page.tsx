@@ -1,6 +1,7 @@
 "use client";
 
 import PageSkeleton from "@/components/PageSkeleton";
+import DiscordControls from "@/components/admin/DiscordControls";
 import DocumentationContentControls from "@/components/admin/DocumentationContentControls";
 import EventAffiliatesTable from "@/components/admin/EventAffiliatesTable";
 import EventSettings from "@/components/admin/EventSettings";
@@ -18,6 +19,7 @@ import { Stack, Tabs } from "@mantine/core";
 
 import {
   IconAlignJustified,
+  IconBrandDiscord,
   IconSettings,
   IconShieldHalf,
   IconTrophy,
@@ -59,6 +61,12 @@ const Admin = () => {
         >
           Documentation Content
         </Tabs.Tab>
+        <Tabs.Tab
+          value="discord"
+          leftSection={<IconBrandDiscord {...iconProps} />}
+        >
+          Discord
+        </Tabs.Tab>
       </Tabs.List>
 
       <Tabs.Panel value="general" mt="md">
@@ -89,6 +97,10 @@ const Admin = () => {
 
       <Tabs.Panel value="documentation" mt="md">
         <DocumentationContentControls event={event} refetch={refetchEvent} />
+      </Tabs.Panel>
+
+      <Tabs.Panel value="discord" mt="md">
+        <DiscordControls event={event} refetch={refetchEvent} />
       </Tabs.Panel>
     </Tabs>
   );
