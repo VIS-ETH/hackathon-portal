@@ -34,6 +34,7 @@
     "@tiptap/starter-kit": "^2.14.0",
     "@types/object-hash": "^3.0.6",
     "@uiw/react-codemirror": "^4.25.2",
+    "ajv": "^8.17.1",
     "apexcharts": "^4.7.0",
     "axios": "^1.9.0",
     "dayjs": "^1.11.13",
@@ -57,6 +58,7 @@
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
+    "@types/js-yaml": "^4.0.9",
     "@types/lodash": "^4.17.20",
     "@types/node": "^24",
     "@types/react": "^19",

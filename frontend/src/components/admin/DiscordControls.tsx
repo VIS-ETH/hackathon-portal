@@ -82,7 +82,7 @@ interface DiscordConfig {
 }
 
 // ----- JSON Schema -----
-const discordSchema: JSONSchemaType<DiscordConfig> = {
+const discordSchema: object = {
   type: "object",
   properties: {
     default_permissions: {
@@ -331,8 +331,8 @@ const useYamlValidation = (yamlInput: string) => {
           validate.errors
             ?.map((error) => {
               console.log(error);
-              const path = error.dataPath
-                ? `at path "${error.dataPath}": `
+              const path = error.instancePath
+                ? `at path "${error.instancePath}": `
                 : "";
               return `• ${path}${error.message} (${JSON.stringify(error.params)})`;
             })
