@@ -37,6 +37,7 @@ const Teams = () => {
   }
 
   const myTeams = teams.filter((team) => teamsRoles[team.id]);
+  const otherTeams = teams.filter((team) => !teamsRoles[team.id]);
 
   return (
     <Stack>
@@ -45,7 +46,7 @@ const Teams = () => {
         <TeamCard key={team.id} team={team} highlight />
       ))}
       <Divider />
-      {teams.map((team) => (
+      {otherTeams.map((team) => (
         <TeamCard key={team.id} team={team} />
       ))}
     </Stack>

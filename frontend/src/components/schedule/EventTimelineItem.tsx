@@ -5,9 +5,10 @@ import { useDeleteAppointment } from "@/api/gen";
 import { Appointment } from "@/api/gen/schemas";
 import { cardProps, iconProps, secondaryButtonProps } from "@/styles/common";
 
+import { useState } from "react";
 import { FormattedDate, FormattedDateTimeRange } from "react-intl";
 
-import { Button, Card, Group, Spoiler, Text, Timeline } from "@mantine/core";
+import { Button, Card, Group, Text, Timeline } from "@mantine/core";
 
 import { useDisclosure } from "@mantine/hooks";
 
@@ -25,7 +26,10 @@ const EventTimelineItem = ({
   refetch,
 }: EventTimelineItemProps) => {
   const [opened, handles] = useDisclosure();
+  const [showFullContent, setShowFullContent] = useState(false);
   const deleteMutation = useDeleteAppointment();
+
+  const contentLength = 170;
 
   const handleDelete = async () => {
     const confirm = window.confirm(
@@ -66,19 +70,37 @@ const EventTimelineItem = ({
             {appointment.description}
           </Text>
           {appointment.content && (
-            <Spoiler
-              mt="sm"
-              maxHeight={0}
-              showLabel="Show more"
-              hideLabel="Hide"
-              styles={{
-                control: {
-                  textDecoration: "none",
-                },
-              }}
-            >
-              <Markdown content={appointment.content} />
-            </Spoiler>
+            <>
+              <Text size="sm" component="div" m={0}>
+                <Markdown
+                  content={
+                    showFullContent ||
+                    appointment.content.length <= contentLength
+                      ? appointment.content
+                      : appointment.content.substring(0, contentLength) + "..."
+                  }
+                />
+              </Text>
+              {appointment.content.length > contentLength && (
+                <Text ta="left">
+                  <Button
+                    variant="subtle"
+                    size="xs"
+                    mt="xs"
+                    p={0}
+                    h="auto"
+                    onClick={() => setShowFullContent(!showFullContent)}
+                    styles={{
+                      root: {
+                        textDecoration: "none",
+                      },
+                    }}
+                  >
+                    {showFullContent ? "Show less" : "Show more"}
+                  </Button>
+                </Text>
+              )}
+            </>
           )}
         </Card>
         {manage && (

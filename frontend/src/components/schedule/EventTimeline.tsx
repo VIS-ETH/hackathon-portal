@@ -4,6 +4,7 @@ import { Appointment } from "@/api/gen/schemas";
 import { cardProps } from "@/styles/common";
 
 import { useState } from "react";
+import { FormattedDate } from "react-intl";
 
 import { Card, Switch, Text, Timeline } from "@mantine/core";
 
@@ -33,6 +34,57 @@ const EventTimeline = ({
     return showAll || !isInPast(appointment.end ?? appointment.start);
   });
 
+  // Group appointments by day
+  const groupedAppointments = filteredAppointments.reduce(
+    (groups, appointment) => {
+      const date = new Date(`${appointment.start}Z`);
+      const dateKey = date.toDateString();
+
+      if (!groups[dateKey]) {
+        groups[dateKey] = [];
+      }
+      groups[dateKey].push(appointment);
+
+      return groups;
+    },
+    {} as Record<string, Appointment[]>,
+  );
+
+  const sortedDates = Object.keys(groupedAppointments).sort((a, b) => {
+    return new Date(a).getTime() - new Date(b).getTime();
+  });
+
+  const renderDayTimelines = () => {
+    return sortedDates.map((dateKey, dayIndex) => {
+      const appointmentsForDay = groupedAppointments[dateKey];
+      const date = new Date(dateKey);
+
+      return (
+        <div key={dateKey}>
+          <Text size="xl" fw={600} mb="md" mt={dayIndex > 0 ? "xl" : undefined}>
+            <FormattedDate
+              value={date}
+              weekday="long"
+              day="numeric"
+              month="long"
+            />
+          </Text>
+
+          <Timeline lineWidth={2} mb="xl">
+            {appointmentsForDay.map((appointment) => (
+              <EventTimelineItem
+                key={appointment.id}
+                appointment={appointment}
+                manage={manage}
+                refetch={refetch}
+              />
+            ))}
+          </Timeline>
+        </div>
+      );
+    });
+  };
+
   return (
     <>
       <Switch
@@ -41,16 +93,7 @@ const EventTimeline = ({
         onChange={(event) => setShowAll(event.currentTarget.checked)}
       />
       {filteredAppointments.length ? (
-        <Timeline lineWidth={2}>
-          {filteredAppointments.map((appointment) => (
-            <EventTimelineItem
-              key={appointment.id}
-              appointment={appointment}
-              manage={manage}
-              refetch={refetch}
-            />
-          ))}
-        </Timeline>
+        <div>{renderDayTimelines()}</div>
       ) : (
         <Card {...cardProps} style={{ borderStyle: "dashed" }}>
           <Text>No appointments found</Text>
