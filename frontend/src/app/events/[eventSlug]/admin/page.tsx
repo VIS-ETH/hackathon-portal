@@ -13,7 +13,7 @@ import WelcomeContentControls from "@/components/admin/WelcomeContentControls";
 import { useResolveParams } from "@/hooks/useResolveParams";
 import { iconProps } from "@/styles/common";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Stack, Tabs } from "@mantine/core";
 
@@ -28,14 +28,37 @@ import {
 
 const Admin = () => {
   const { event, refetchEvent } = useResolveParams();
-  const [activeTab, setActiveTab] = useState<string | null>();
+  const [activeTab, setActiveTab] = useState<string>("general");
+
+  useEffect(() => {
+    const hash = window.location.hash.slice(1);
+    const validTabs = [
+      "general",
+      "roles",
+      "teams",
+      "ranking",
+      "welcome",
+      "documentation",
+      "discord",
+    ];
+    if (validTabs.includes(hash)) {
+      setActiveTab(hash);
+    }
+  }, []);
+
+  const handleTabChange = (value: string | null) => {
+    if (value) {
+      setActiveTab(value);
+      window.history.replaceState(null, "", `#${value}`);
+    }
+  };
 
   if (!event) {
     return <PageSkeleton />;
   }
 
   return (
-    <Tabs defaultValue="general" mt="-md" onChange={setActiveTab}>
+    <Tabs value={activeTab} onChange={handleTabChange} mt="-md">
       <Tabs.List>
         <Tabs.Tab value="general" leftSection={<IconSettings {...iconProps} />}>
           General
