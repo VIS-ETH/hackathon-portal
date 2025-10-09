@@ -24,6 +24,11 @@ const Layout = ({ children }: Readonly<PropsWithChildren>) => {
       <head>
         {/* Prevent color scheme flashes */}
         <ColorSchemeScript />
+        <link
+          rel="icon"
+          type="image/svg+xml"
+          href="/assets/viscon-logo.svg"
+        ></link>
       </head>
       <body>
         <ErrorContextProvider>
