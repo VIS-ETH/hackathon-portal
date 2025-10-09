@@ -6,11 +6,10 @@ use axum::http::{HeaderMap, HeaderValue};
 use axum::routing::get;
 use axum::Router;
 use hackathon_portal_repositories::db::{EventRole, TeamRole};
-use hackathon_portal_services::infrastructure::models::{
-    AccessControlMode, IngressMode,
-};
+use hackathon_portal_services::infrastructure::models::{AccessControlMode, IngressMode};
 use std::collections::HashMap;
-use tracing::warn;
+use std::sync::Arc;
+use tracing::{info, warn};
 
 pub fn get_router(state: &ApiState) -> Router {
     Router::new()
@@ -38,24 +37,32 @@ pub async fn check_authorization(
         })?
         .to_str()?;
 
-    // TODO: cache
     let host_to_team = state
-        .team_service
-        .get_all_teams()
-        .await?
-        .into_iter()
-        .filter_map(|t| {
-            if !t.ingress_enabled {
-                return None;
-            }
+        .host_to_team_cache
+        .try_get_with::<_, ApiError>((), async {
+            info!("Refreshing host to team cache");
 
-            let Some(managed_address) = t.managed_address.clone() else {
-                return None;
-            };
+            let map = state
+                .team_service
+                .get_all_teams()
+                .await?
+                .into_iter()
+                .filter_map(|t| {
+                    if !t.ingress_enabled {
+                        return None;
+                    }
 
-            Some((managed_address, t))
+                    let Some(managed_address) = t.managed_address.clone() else {
+                        return None;
+                    };
+
+                    Some((managed_address, t))
+                })
+                .collect::<HashMap<_, _>>();
+
+            Ok(Arc::new(map))
         })
-        .collect::<HashMap<_, _>>();
+        .await?;
 
     let Some(team) = host_to_team.get(host) else {
         return Err(ApiError::Forbidden {

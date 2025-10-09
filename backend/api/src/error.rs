@@ -45,6 +45,9 @@ pub enum ApiError {
 
     #[from]
     Repository(RepositoryError),
+
+    #[from]
+    Arc(Arc<Self>),
     // endregion
 
     // region: external library errors
@@ -296,6 +299,7 @@ impl From<&ApiError> for PublicError {
             ),
             ApiError::Service(e) => return e.into(),
             ApiError::Repository(e) => return e.into(),
+            ApiError::Arc(e) => return e.as_ref().into(),
             ApiError::Config(_)
             | ApiError::Io(_)
             | ApiError::InvalidHeaderValue(_)

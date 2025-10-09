@@ -14,10 +14,14 @@ use hackathon_portal_services::infrastructure::InfrastructureService;
 use hackathon_portal_services::project::ProjectService;
 use hackathon_portal_services::rating::RatingService;
 use hackathon_portal_services::sidequest::SidequestService;
+use hackathon_portal_services::team::models::Team;
 use hackathon_portal_services::team::TeamService;
 use hackathon_portal_services::upload::UploadService;
 use hackathon_portal_services::user::UserService;
+use moka::future::Cache;
+use std::collections::HashMap;
 use std::sync::Arc;
+use std::time::Duration;
 
 #[derive(Clone)]
 #[allow(clippy::struct_field_names)]
@@ -35,6 +39,7 @@ pub struct ApiState {
     pub appointment_service: Arc<AppointmentService>,
     pub upload_service: Arc<UploadService>,
     pub infrastructure_service: Arc<InfrastructureService>,
+    pub host_to_team_cache: Cache<(), Arc<HashMap<String, Team>>>,
 }
 
 impl ApiState {
@@ -53,6 +58,7 @@ impl ApiState {
         appointment_service: Arc<AppointmentService>,
         upload_service: Arc<UploadService>,
         infrastructure_service: Arc<InfrastructureService>,
+        host_to_team_cache: Cache<(), Arc<HashMap<String, Team>>>,
     ) -> Self {
         Self {
             authenticator,
@@ -68,6 +74,7 @@ impl ApiState {
             appointment_service,
             upload_service,
             infrastructure_service,
+            host_to_team_cache,
         }
     }
 
@@ -121,6 +128,11 @@ impl ApiState {
             db_repo,
         ));
 
+        let host_to_team_cache = Cache::builder()
+            .time_to_live(Duration::from_secs(10))
+            .name("host_to_team_cache")
+            .build();
+
         let state = Self::new(
             authenticator,
             discord_config,
@@ -135,6 +147,7 @@ impl ApiState {
             appointment_service,
             upload_service,
             infrastructure_service,
+            host_to_team_cache,
         );
 
         Ok(state)
