@@ -14,10 +14,8 @@ use serenity::all::CreateChannel;
 use serenity::all::EditChannel;
 use serenity::all::PermissionOverwrite;
 use serenity::all::PermissionOverwriteType;
-use serenity::async_trait;
 use serenity::builder::EditRole;
-use serenity::client::{Client, Context, EventHandler};
-use serenity::model::gateway::Ready;
+use serenity::client::Client;
 use serenity::model::guild::Role;
 use serenity::model::id::RoleId;
 use serenity::model::permissions::Permissions;
@@ -39,20 +37,9 @@ impl DiscordClient {
 
         let intents = GatewayIntents::GUILDS;
 
-        let client = Client::builder(&token, intents)
-            .event_handler(Handler)
-            .await?;
+        let client = Client::builder(&token, intents).await?;
 
         Ok(Self { client })
-    }
-
-    pub async fn start(&mut self) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-        // This starts the connection and will run the ready event handler
-        if let Err(why) = self.client.start().await {
-            Err(Box::new(why))
-        } else {
-            Ok(())
-        }
     }
 
     pub async fn check_guild_membership(
@@ -1157,11 +1144,4 @@ impl DiscordClient {
             _ => None,
         }
     }
-}
-
-struct Handler;
-
-#[async_trait]
-impl EventHandler for Handler {
-    async fn ready(&self, _ctx: Context, _ready: Ready) {}
 }
