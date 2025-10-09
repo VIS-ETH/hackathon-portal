@@ -66,7 +66,7 @@ pub async fn check_authorization(
 
     let Some(team) = host_to_team.get(host) else {
         return Err(ApiError::Forbidden {
-            action: format!("Access the host {host} as it does not match known host"),
+            action: format!("access the host {host} as it does not match known host"),
         });
     };
 
@@ -74,7 +74,7 @@ pub async fn check_authorization(
         IngressMode::Managed(c) => c,
         IngressMode::Custom(_) => {
             return Err(ApiError::Forbidden {
-                action: format!("Access the host {host} as it does not match known host"),
+                action: format!("access the host {host} as it does not match known host"),
             });
         }
     };
@@ -101,7 +101,7 @@ pub async fn check_authorization(
 
             if !has_event_permissions && !has_team_permissions {
                 return Err(ApiError::Forbidden {
-                    action: format!("Access the host {host} as you do not have the required roles"),
+                    action: format!("access the host {host} as you do not have the required roles"),
                 });
             }
         }
