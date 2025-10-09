@@ -230,6 +230,8 @@ impl EventService {
 
         let event = active_event.update(&txn).await?;
 
+        txn.commit().await?;
+
         Ok(event.into())
     }
 
