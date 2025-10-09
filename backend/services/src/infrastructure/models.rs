@@ -105,6 +105,7 @@ impl Default for IngressConfig {
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct TraefikDynamicConfig {
+    #[serde(skip_serializing_if = "TraefikHttpConfig::is_empty")]
     pub http: TraefikHttpConfig,
 }
 
@@ -115,6 +116,13 @@ pub struct TraefikHttpConfig {
     pub routers: HashMap<String, TraefikRouterConfig>,
     #[serde(skip_serializing_if = "HashMap::is_empty")]
     pub services: HashMap<String, TraefikServiceConfig>,
+}
+
+impl TraefikHttpConfig {
+    #[must_use]
+    pub fn is_empty(&self) -> bool {
+        self.routers.is_empty() && self.services.is_empty()
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
