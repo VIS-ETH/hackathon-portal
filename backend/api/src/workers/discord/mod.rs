@@ -43,7 +43,7 @@ pub async fn run(api_state: ApiState) -> ServiceResult<()> {
 
     // Launch Client here
     match DiscordClient::new(&api_state).await {
-        Ok(mut client) => {
+        Ok(client) => {
             info!("Discord client created successfully");
 
             // Get all events
@@ -86,11 +86,6 @@ pub async fn run(api_state: ApiState) -> ServiceResult<()> {
                 } else {
                     info!("Event does not have a Discord server ID configured.");
                 }
-            }
-
-            // Start the client (this will run the event handler)
-            if let Err(e) = client.start().await {
-                error!("Failed to start Discord client: {}", e);
             }
         }
         Err(e) => {
