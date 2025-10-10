@@ -9,9 +9,11 @@ type ProjectSlideProps = {
 };
 
 const ProjectSlide = ({ project }: ProjectSlideProps) => {
+  const content = `# ${project.name}\n\n${project.content}`;
+
   return (
     <Container>
-      <MarkdownCard content={project.content} />
+      <MarkdownCard content={content} />
     </Container>
   );
 };
