@@ -291,7 +291,10 @@ impl Groups {
         }
 
         if self == &Group::TeamMember {
-            return matches!(event_phase, EventPhase::Registration | EventPhase::Hacking);
+            return matches!(
+                event_phase,
+                EventPhase::Registration | EventPhase::Hacking | EventPhase::Grading
+            );
         }
 
         false
@@ -456,8 +459,6 @@ impl Groups {
         event_visibility: EventVisibility,
         finalists_visible: bool,
     ) -> bool {
-
-
         if let Some(decision) = self.default_can_view_policy(event_visibility) {
             return decision;
         }
