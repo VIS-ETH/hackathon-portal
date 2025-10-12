@@ -411,7 +411,7 @@ impl SidequestService {
     }
 
     /// `event_id` -> (`team_id` -> `score`)
-    async fn aggregate_scores(&self, event_id: Uuid) -> ServiceResult<HashMap<Uuid, f64>> {
+    pub async fn aggregate_scores(&self, event_id: Uuid) -> ServiceResult<HashMap<Uuid, f64>> {
         let sidequests = self.get_sidequests(event_id).await?;
         let mut scores = HashMap::new();
 

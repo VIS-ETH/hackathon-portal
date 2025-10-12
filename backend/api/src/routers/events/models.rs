@@ -34,3 +34,21 @@ pub struct DiscordOauthBody {
 pub struct EventDiscordResponse {
     pub discord_user_id: Option<String>, // or U64 depending on your DB schema
 }
+
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+pub struct CreateTechnicalQuestionDTO {
+    pub question: String,
+    pub description: Option<String>,
+    pub min_points: i32,
+    pub max_points: i32,
+    pub binary: bool,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+pub struct UpdateTechnicalQuestionDTO {
+    pub question: Option<String>,
+    pub description: Option<String>,
+    pub min_points: Option<i32>,
+    pub max_points: Option<i32>,
+    pub binary: Option<bool>,
+}

@@ -586,6 +586,41 @@
         }
       }
     },
+    "/api/events/{event_id}/leaderboard-detailed": {
+      "get": {
+        "tags": ["crate::routers::events"],
+        "operationId": "get_leaderboard_detailed",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/ScoreNormalized" }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/events/{event_id}/projects/matching": {
       "get": {
         "tags": ["crate::routers::events"],
@@ -966,15 +1001,14 @@
         }
       }
     },
-    "/api/expert-ratings": {
+    "/api/events/{event_id}/technical-questions": {
       "get": {
-        "tags": ["crate::routers::expert_ratings"],
-        "operationId": "get_expert_ratings",
+        "tags": ["crate::routers::events"],
+        "operationId": "get_technical_questions",
         "parameters": [
           {
-            "name": "team_id",
-            "in": "query",
-            "description": "Filter by team id",
+            "name": "event_id",
+            "in": "path",
             "required": true,
             "schema": { "type": "string", "format": "uuid" }
           }
@@ -986,7 +1020,7 @@
               "application/json": {
                 "schema": {
                   "type": "array",
-                  "items": { "$ref": "#/components/schemas/ExpertRating" }
+                  "items": { "$ref": "#/components/schemas/TechnicalQuestion" }
                 }
               }
             }
@@ -1002,13 +1036,23 @@
         }
       },
       "post": {
-        "tags": ["crate::routers::expert_ratings"],
-        "operationId": "create_expert_rating",
+        "tags": ["crate::routers::events"],
+        "operationId": "create_technical_questions",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
         "requestBody": {
           "description": "",
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/ExpertRatingForCreate" }
+              "schema": {
+                "$ref": "#/components/schemas/CreateTechnicalQuestionDTO"
+              }
             }
           },
           "required": true
@@ -1018,7 +1062,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ExpertRating" }
+                "schema": { "$ref": "#/components/schemas/TechnicalQuestion" }
               }
             }
           },
@@ -1033,24 +1077,41 @@
         }
       }
     },
-    "/api/expert-ratings/{rating_id}": {
-      "get": {
-        "tags": ["crate::routers::expert_ratings"],
-        "operationId": "get_expert_rating",
+    "/api/events/{event_id}/technical-questions/{question_id}": {
+      "put": {
+        "tags": ["crate::routers::events"],
+        "operationId": "update_technical_questions",
         "parameters": [
           {
-            "name": "rating_id",
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "question_id",
             "in": "path",
             "required": true,
             "schema": { "type": "string", "format": "uuid" }
           }
         ],
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTechnicalQuestionDTO"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ExpertRating" }
+                "schema": { "$ref": "#/components/schemas/TechnicalQuestion" }
               }
             }
           },
@@ -1065,11 +1126,17 @@
         }
       },
       "delete": {
-        "tags": ["crate::routers::expert_ratings"],
-        "operationId": "delete_expert_rating",
+        "tags": ["crate::routers::events"],
+        "operationId": "delete_technical_questions",
         "parameters": [
           {
-            "name": "rating_id",
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "question_id",
             "in": "path",
             "required": true,
             "schema": { "type": "string", "format": "uuid" }
@@ -1080,46 +1147,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ExpertRating" }
-              }
-            }
-          },
-          "500": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
-              }
-            }
-          }
-        }
-      },
-      "patch": {
-        "tags": ["crate::routers::expert_ratings"],
-        "operationId": "update_expert_rating",
-        "parameters": [
-          {
-            "name": "rating_id",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "string", "format": "uuid" }
-          }
-        ],
-        "requestBody": {
-          "description": "",
-          "content": {
-            "application/json": {
-              "schema": { "$ref": "#/components/schemas/ExpertRatingForUpdate" }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/ExpertRating" }
+                "schema": { "$ref": "#/components/schemas/AffectedRows" }
               }
             }
           },
@@ -1326,6 +1354,362 @@
             "content": {
               "application/json": {
                 "schema": { "$ref": "#/components/schemas/Appointment" }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ratings/expert": {
+      "get": {
+        "tags": ["crate::routers::ratings::expert"],
+        "operationId": "get_expert_ratings",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "query",
+            "description": "Filter by team id",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/ExpertRating" }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["crate::routers::ratings::expert"],
+        "operationId": "create_expert_rating",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ExpertRatingForCreate" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ExpertRating" }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ratings/expert/{rating_id}": {
+      "get": {
+        "tags": ["crate::routers::ratings::expert"],
+        "operationId": "get_expert_rating",
+        "parameters": [
+          {
+            "name": "rating_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ExpertRating" }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["crate::routers::ratings::expert"],
+        "operationId": "delete_expert_rating",
+        "parameters": [
+          {
+            "name": "rating_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ExpertRating" }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["crate::routers::ratings::expert"],
+        "operationId": "update_expert_rating",
+        "parameters": [
+          {
+            "name": "rating_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ExpertRatingForUpdate" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ExpertRating" }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ratings/public": {
+      "get": {
+        "tags": ["crate::routers::ratings::public"],
+        "operationId": "get_my_votes",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "query",
+            "description": "Filter by event id",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/PublicVote" }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["crate::routers::ratings::public"],
+        "operationId": "set_my_vote",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "query",
+            "description": "Chose event to vote in",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Vote" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Vote" }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ratings/public/{team_id}": {
+      "get": {
+        "tags": ["crate::routers::ratings::public"],
+        "operationId": "get_team_votes",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicVoteAggregated"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ratings/technical/{team_id}": {
+      "get": {
+        "tags": ["crate::routers::ratings::technical"],
+        "operationId": "get_technical_team_rating",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TechnicalQuestionResult"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["crate::routers::ratings::technical"],
+        "operationId": "set_technical_team_rating",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/SetTechnicalRating" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TechnicalQuestionResult"
+                }
               }
             }
           },
@@ -2347,6 +2731,41 @@
         }
       }
     },
+    "/api/teams/{team_id}/rating": {
+      "get": {
+        "tags": ["crate::routers::teams"],
+        "operationId": "get_team_rating",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [{ "$ref": "#/components/schemas/ScoreNormalized" }],
+                  "nullable": true
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/teams/{team_id}/roles": {
       "get": {
         "tags": ["crate::routers::teams"],
@@ -2619,7 +3038,8 @@
           "slug",
           "index",
           "ingress_enabled",
-          "ingress_config"
+          "ingress_config",
+          "finalist"
         ],
         "properties": {
           "ai_api_key": { "type": "string", "nullable": true },
@@ -2632,6 +3052,7 @@
             "format": "double",
             "nullable": true
           },
+          "finalist": { "type": "boolean" },
           "id": { "type": "string", "format": "uuid" },
           "index": { "type": "integer", "format": "int32" },
           "ingress_config": { "$ref": "#/components/schemas/IngressConfig" },
@@ -2752,6 +3173,35 @@
         "required": ["budget"],
         "properties": { "budget": { "type": "number", "format": "double" } }
       },
+      "CreateTechnicalQuestion": {
+        "type": "object",
+        "required": [
+          "event_id",
+          "question",
+          "min_points",
+          "max_points",
+          "binary"
+        ],
+        "properties": {
+          "binary": { "type": "boolean" },
+          "description": { "type": "string", "nullable": true },
+          "event_id": { "type": "string", "format": "uuid" },
+          "max_points": { "type": "integer", "format": "int32" },
+          "min_points": { "type": "integer", "format": "int32" },
+          "question": { "type": "string" }
+        }
+      },
+      "CreateTechnicalQuestionDTO": {
+        "type": "object",
+        "required": ["question", "min_points", "max_points", "binary"],
+        "properties": {
+          "binary": { "type": "boolean" },
+          "description": { "type": "string", "nullable": true },
+          "max_points": { "type": "integer", "format": "int32" },
+          "min_points": { "type": "integer", "format": "int32" },
+          "question": { "type": "string" }
+        }
+      },
       "CreateUploadDTO": {
         "type": "object",
         "required": ["event_id", "usage", "content_length", "content_type"],
@@ -2795,7 +3245,9 @@
           "project_assignments_visible",
           "feedback_visible",
           "visibility",
-          "phase"
+          "phase",
+          "vote_enabled",
+          "finalists_visible"
         ],
         "properties": {
           "direct_address_template": { "type": "string", "nullable": true },
@@ -2804,6 +3256,7 @@
           "documentation_content": { "type": "string", "nullable": true },
           "end": { "type": "string", "format": "date-time" },
           "feedback_visible": { "type": "boolean" },
+          "finalists_visible": { "type": "boolean" },
           "id": { "type": "string", "format": "uuid" },
           "managed_address_template": { "type": "string", "nullable": true },
           "max_team_size": {
@@ -2831,6 +3284,7 @@
           "ssh_config_template": { "type": "string", "nullable": true },
           "start": { "type": "string", "format": "date-time" },
           "visibility": { "$ref": "#/components/schemas/EventVisibility" },
+          "vote_enabled": { "type": "boolean" },
           "welcome_content": { "type": "string", "nullable": true }
         }
       },
@@ -2886,6 +3340,7 @@
           "documentation_content": { "type": "string", "nullable": true },
           "end": { "type": "string", "format": "date-time", "nullable": true },
           "feedback_visible": { "type": "boolean", "nullable": true },
+          "finalists_visible": { "type": "boolean", "nullable": true },
           "managed_address_template": { "type": "string", "nullable": true },
           "master_ai_api_key": { "type": "string", "nullable": true },
           "max_team_size": {
@@ -2928,6 +3383,7 @@
             "allOf": [{ "$ref": "#/components/schemas/EventVisibility" }],
             "nullable": true
           },
+          "vote_enabled": { "type": "boolean", "nullable": true },
           "welcome_content": { "type": "string", "nullable": true }
         }
       },
@@ -2976,7 +3432,7 @@
       },
       "ExpertRatingCategory": {
         "type": "string",
-        "enum": ["Functionality", "Ux", "Presentation"]
+        "enum": ["Product", "Presentation"]
       },
       "ExpertRatingForCreate": {
         "type": "object",
@@ -3002,6 +3458,31 @@
             "additionalProperties": { "type": "number", "format": "double" }
           },
           "rating": { "type": "number", "format": "double" },
+          "team_id": { "type": "string", "format": "uuid" }
+        }
+      },
+      "ExpertScore": {
+        "type": "object",
+        "required": [
+          "score_normalized",
+          "score",
+          "presentation_score",
+          "product_score",
+          "category_rank"
+        ],
+        "properties": {
+          "category_rank": { "type": "integer", "format": "int32" },
+          "presentation_score": { "type": "number", "format": "double" },
+          "product_score": { "type": "number", "format": "double" },
+          "score": { "type": "number", "format": "double" },
+          "score_normalized": { "type": "number", "format": "double" }
+        }
+      },
+      "FinalistStatus": {
+        "type": "object",
+        "required": ["team_id", "finalist"],
+        "properties": {
+          "finalist": { "type": "boolean" },
           "team_id": { "type": "string", "format": "uuid" }
         }
       },
@@ -3117,7 +3598,9 @@
           "can_manage_sidequest",
           "can_view_sidequest_attempt",
           "can_manage_sidequest_attempt",
-          "can_create_upload"
+          "can_create_upload",
+          "can_public_vote",
+          "can_view_finalist"
         ],
         "properties": {
           "can_create_team": { "type": "boolean" },
@@ -3128,12 +3611,14 @@
           "can_manage_sidequest": { "type": "boolean" },
           "can_manage_sidequest_attempt": { "type": "boolean" },
           "can_manage_team": { "type": "boolean" },
+          "can_public_vote": { "type": "boolean" },
           "can_update_team_ingress_config": { "type": "boolean" },
           "can_update_team_name": { "type": "boolean" },
           "can_update_team_photo": { "type": "boolean" },
           "can_view_event": { "type": "boolean" },
           "can_view_event_feedback": { "type": "boolean" },
           "can_view_event_internal": { "type": "boolean" },
+          "can_view_finalist": { "type": "boolean" },
           "can_view_project": { "type": "boolean" },
           "can_view_project_assignment": { "type": "boolean" },
           "can_view_sidequest": { "type": "boolean" },
@@ -3184,6 +3669,26 @@
           "status": { "type": "integer", "format": "int32", "minimum": 0 }
         }
       },
+      "PublicVote": {
+        "type": "object",
+        "required": ["team_id", "user_id", "rank"],
+        "properties": {
+          "rank": { "type": "integer", "format": "int32" },
+          "team_id": { "type": "string", "format": "uuid" },
+          "user_id": { "type": "string", "format": "uuid" }
+        }
+      },
+      "PublicVoteAggregated": {
+        "type": "object",
+        "required": ["team_id", "num_votes_per_rank"],
+        "properties": {
+          "num_votes_per_rank": {
+            "type": "object",
+            "additionalProperties": { "type": "integer", "format": "int32" }
+          },
+          "team_id": { "type": "string", "format": "uuid" }
+        }
+      },
       "ReducedUser": {
         "type": "object",
         "required": ["id", "name"],
@@ -3192,7 +3697,46 @@
           "name": { "type": "string" }
         }
       },
+      "ScoreNormalized": {
+        "type": "object",
+        "required": ["team_id", "extra_score", "final_score"],
+        "properties": {
+          "expert_score": {
+            "allOf": [{ "$ref": "#/components/schemas/ExpertScore" }],
+            "nullable": true
+          },
+          "extra_score": { "type": "number", "format": "double" },
+          "final_score": { "type": "number", "format": "double" },
+          "max_final_score": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "rank": { "type": "integer", "format": "int32", "nullable": true },
+          "sidequest_score": {
+            "allOf": [{ "$ref": "#/components/schemas/SidequestScore" }],
+            "nullable": true
+          },
+          "team_id": { "type": "string", "format": "uuid" },
+          "tech_score": {
+            "allOf": [{ "$ref": "#/components/schemas/TechnicalScore" }],
+            "nullable": true
+          },
+          "voting_score": {
+            "allOf": [{ "$ref": "#/components/schemas/VotingScore" }],
+            "nullable": true
+          }
+        }
+      },
       "ServerProtocol": { "type": "string", "enum": ["Http", "Https"] },
+      "SetTechnicalRating": {
+        "type": "object",
+        "required": ["question_id", "score"],
+        "properties": {
+          "question_id": { "type": "string", "format": "uuid" },
+          "score": { "type": "number", "format": "double" }
+        }
+      },
       "Sidequest": {
         "type": "object",
         "required": [
@@ -3272,6 +3816,15 @@
         "required": ["sidequest_id"],
         "properties": { "sidequest_id": { "type": "string", "format": "uuid" } }
       },
+      "SidequestScore": {
+        "type": "object",
+        "required": ["score_normalized", "score", "category_rank"],
+        "properties": {
+          "category_rank": { "type": "integer", "format": "int32" },
+          "score": { "type": "number", "format": "double" },
+          "score_normalized": { "type": "number", "format": "double" }
+        }
+      },
       "SidequestsHistoryQuery": {
         "type": "object",
         "properties": {
@@ -3301,6 +3854,7 @@
         "properties": {
           "direct_address": { "type": "string", "nullable": true },
           "event_id": { "type": "string", "format": "uuid" },
+          "finalist": { "type": "boolean", "nullable": true },
           "id": { "type": "string", "format": "uuid" },
           "index": { "type": "integer", "format": "int32" },
           "ingress_config": { "$ref": "#/components/schemas/IngressConfig" },
@@ -3357,6 +3911,7 @@
             "format": "double",
             "nullable": true
           },
+          "finalist": { "type": "boolean", "nullable": true },
           "ingress_config": {
             "allOf": [{ "$ref": "#/components/schemas/IngressConfig" }],
             "nullable": true
@@ -3399,35 +3954,58 @@
           }
         }
       },
+      "TechnicalQuestion": {
+        "type": "object",
+        "required": [
+          "id",
+          "event_id",
+          "question",
+          "min_points",
+          "max_points",
+          "binary"
+        ],
+        "properties": {
+          "binary": { "type": "boolean" },
+          "description": { "type": "string", "nullable": true },
+          "event_id": { "type": "string", "format": "uuid" },
+          "id": { "type": "string", "format": "uuid" },
+          "max_points": { "type": "integer", "format": "int32" },
+          "min_points": { "type": "integer", "format": "int32" },
+          "question": { "type": "string" }
+        }
+      },
+      "TechnicalQuestionResult": {
+        "type": "object",
+        "required": ["question"],
+        "properties": {
+          "points": { "type": "number", "format": "double", "nullable": true },
+          "question": { "$ref": "#/components/schemas/TechnicalQuestion" }
+        }
+      },
+      "TechnicalScore": {
+        "type": "object",
+        "required": [
+          "score_normalized",
+          "score",
+          "category_rank",
+          "all_answered"
+        ],
+        "properties": {
+          "all_answered": { "type": "boolean" },
+          "category_rank": { "type": "integer", "format": "int32" },
+          "score": { "type": "number", "format": "double" },
+          "score_normalized": { "type": "number", "format": "double" }
+        }
+      },
       "TraefikDynamicConfig": {
         "type": "object",
-        "required": ["http"],
         "properties": {
           "http": { "$ref": "#/components/schemas/TraefikHttpConfig" }
         }
       },
-      "TraefikForwardAuthConfig": {
-        "type": "object",
-        "required": ["address"],
-        "properties": {
-          "address": { "type": "string" },
-          "authResponseHeaders": {
-            "type": "array",
-            "items": { "type": "string" },
-            "nullable": true
-          }
-        }
-      },
       "TraefikHttpConfig": {
         "type": "object",
-        "required": ["routers", "services", "middlewares"],
         "properties": {
-          "middlewares": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/TraefikMiddlewareConfig"
-            }
-          },
           "routers": {
             "type": "object",
             "additionalProperties": {
@@ -3444,7 +4022,6 @@
       },
       "TraefikLoadBalancerConfig": {
         "type": "object",
-        "required": ["servers"],
         "properties": {
           "servers": {
             "type": "array",
@@ -3452,29 +4029,12 @@
           }
         }
       },
-      "TraefikMiddlewareConfig": {
-        "oneOf": [
-          {
-            "type": "object",
-            "required": ["forwardAuth"],
-            "properties": {
-              "forwardAuth": {
-                "$ref": "#/components/schemas/TraefikForwardAuthConfig"
-              }
-            }
-          }
-        ]
-      },
       "TraefikRouterConfig": {
         "type": "object",
-        "required": ["rule", "service", "entryPoints"],
+        "required": ["rule", "service"],
         "properties": {
           "entryPoints": { "type": "array", "items": { "type": "string" } },
-          "middlewares": {
-            "type": "array",
-            "items": { "type": "string" },
-            "nullable": true
-          },
+          "middlewares": { "type": "array", "items": { "type": "string" } },
           "rule": { "type": "string" },
           "service": { "type": "string" }
         }
@@ -3491,6 +4051,44 @@
           "loadBalancer": {
             "$ref": "#/components/schemas/TraefikLoadBalancerConfig"
           }
+        }
+      },
+      "UpdateTechnicalQuestion": {
+        "type": "object",
+        "required": ["id"],
+        "properties": {
+          "binary": { "type": "boolean", "nullable": true },
+          "description": { "type": "string", "nullable": true },
+          "id": { "type": "string", "format": "uuid" },
+          "max_points": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "min_points": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "question": { "type": "string", "nullable": true }
+        }
+      },
+      "UpdateTechnicalQuestionDTO": {
+        "type": "object",
+        "properties": {
+          "binary": { "type": "boolean", "nullable": true },
+          "description": { "type": "string", "nullable": true },
+          "max_points": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "min_points": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "question": { "type": "string", "nullable": true }
         }
       },
       "Upload": {
@@ -3574,6 +4172,27 @@
           "score": { "type": "integer", "format": "int64", "minimum": 0 },
           "user_id": { "type": "string", "format": "uuid" },
           "user_name": { "type": "string" }
+        }
+      },
+      "Vote": {
+        "type": "object",
+        "required": ["team_id", "place"],
+        "properties": {
+          "place": { "type": "integer", "format": "int32" },
+          "team_id": { "type": "string", "format": "uuid" }
+        }
+      },
+      "VotingScore": {
+        "type": "object",
+        "required": ["score_normalized", "category_rank", "score", "votes"],
+        "properties": {
+          "category_rank": { "type": "integer", "format": "int32" },
+          "score": { "type": "number", "format": "double" },
+          "score_normalized": { "type": "number", "format": "double" },
+          "votes": {
+            "type": "object",
+            "additionalProperties": { "type": "integer", "format": "int32" }
+          }
         }
       }
     }

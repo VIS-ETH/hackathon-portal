@@ -108,14 +108,18 @@ impl ApiState {
             team_service.clone(),
         ));
 
-        let rating_service = Arc::new(RatingService::new(db_repo.clone()));
-
-        let project_service = Arc::new(ProjectService::new(db_repo.clone()));
-
         let sidequest_service = Arc::new(SidequestService::new(
             authorization_service.clone(),
             db_repo.clone(),
         ));
+
+        let rating_service = Arc::new(RatingService::new(
+            db_repo.clone(),
+            sidequest_service.clone(),
+            team_service.clone(),
+        ));
+
+        let project_service = Arc::new(ProjectService::new(db_repo.clone()));
 
         let appointment_service = Arc::new(AppointmentService::new(db_repo.clone()));
 

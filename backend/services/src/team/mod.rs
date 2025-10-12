@@ -240,11 +240,26 @@ impl TeamService {
             active_team.ingress_config = Set(serde_json::to_value(ingress_config)?);
         }
 
+        if let Some(finalist) = &team_fu.finalist {
+            active_team.finalist = Set(*finalist);
+        }
+
         let team = active_team.update(&txn).await?;
 
         txn.commit().await?;
 
         self.assemble_team(team, &event).await
+    }
+
+    pub async fn get_finalists(&self, event_id: Uuid) -> ServiceResult<Vec<Uuid>> {
+        let teams = TeamRepository::fetch_all_by_event_id(self.db_repo.conn(), event_id).await?;
+
+        let finalists = teams
+            .into_iter()
+            .filter(|t| t.finalist)
+            .map(|t| t.id)
+            .collect();
+        Ok(finalists)
     }
 
     /// Cascade deletes team role assignments and project preferences.
@@ -440,6 +455,7 @@ impl TeamService {
             ingress_enabled: team_model.ingress_enabled,
             ingress_config,
             ingress_url,
+            finalist: team_model.finalist,
         };
 
         Ok(team)

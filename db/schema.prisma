@@ -30,8 +30,7 @@ enum team_role {
 }
 
 enum expert_rating_category {
-  FUNCTIONALITY
-  UX
+  PRODUCT
   PRESENTATION
 }
 
@@ -59,7 +58,9 @@ model event {
   read_only                   Boolean          @default(true)
   projects_visible            Boolean          @default(false)
   project_assignments_visible Boolean          @default(false)
+  voting_open                 Boolean          @default(false)
   feedback_visible            Boolean          @default(false)
+  finalists_visible           Boolean          @default(false)
   master_ai_api_key           Bytes?
   visibility                  event_visibility
   phase                       event_phase
@@ -74,6 +75,7 @@ model event {
   appointment           appointment[]
   event_role_assignment event_role_assignment[]
   event_user_discord_id event_user_discord_id[]
+  technical_question    technical_question[]
 }
 
 model team {
@@ -90,6 +92,7 @@ model team {
   extra_score              Float?
   comment                  String?
   photo_id                 String? @db.Uuid
+  finalist                 Boolean @default(false)
   managed_address_override String?
   direct_address_override  String?
   private_address_override String?
@@ -107,6 +110,8 @@ model team {
   project_preference   project_preference[]
   sidequest_score      sidequest_score[]
   expert_rating        expert_rating[]
+  technical_rating     technical_rating[]
+  vote                 vote[]
 
   // meta
   @@unique([event_id, name])
@@ -128,6 +133,7 @@ model user {
   expert_rating         expert_rating[]
   upload                upload[]
   event_user_discord_id event_user_discord_id[]
+  vote                  vote[]
 
   // meta
   @@unique([name, index])
@@ -224,6 +230,21 @@ model expert_rating {
   @@unique([team_id, user_id, category])
 }
 
+model vote {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  // fields
+  rank    Int
+  team_id String @db.Uuid
+  user_id String @db.Uuid
+
+  team team @relation(fields: [team_id], references: [id])
+  user user @relation(fields: [user_id], references: [id])
+
+  // meta
+  @@unique([team_id, user_id, rank])
+}
+
 model sidequest {
   id       String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   event_id String @db.Uuid
@@ -303,4 +324,35 @@ model upload {
 
   // related models
   team team[]
+}
+
+model technical_question {
+  id       String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  event_id String @db.Uuid
+
+  // fields
+  question    String
+  description String?
+  min_points  Int
+  max_points  Int
+  binary      Boolean
+
+  // relations
+  event            event              @relation(fields: [event_id], references: [id])
+  technical_rating technical_rating[]
+}
+
+model technical_rating {
+  technical_question_id String @db.Uuid
+  team_id               String @db.Uuid
+
+  // fields
+
+  score Float
+
+  // relations
+  team               team               @relation(fields: [team_id], references: [id])
+  technical_question technical_question @relation(fields: [technical_question_id], references: [id])
+
+  @@id([technical_question_id, team_id])
 }

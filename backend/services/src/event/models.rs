@@ -29,6 +29,8 @@ pub struct Event {
     pub phase: EventPhase,
     pub discord_server_id: Option<String>,
     pub discord_config: Option<String>,
+    pub vote_enabled: bool,
+    pub finalists_visible: bool,
 }
 
 impl From<db_event::Model> for Event {
@@ -56,6 +58,8 @@ impl From<db_event::Model> for Event {
             phase: value.phase,
             discord_server_id: value.discord_server_id,
             discord_config: value.discord_config,
+            vote_enabled: value.voting_open,
+            finalists_visible: value.finalists_visible,
         }
     }
 }
@@ -92,4 +96,6 @@ pub struct EventForUpdate {
     pub discord_server_id: Option<String>,
     pub discord_config: Option<String>,
     pub master_ai_api_key: Option<String>,
+    pub vote_enabled: Option<bool>,
+    pub finalists_visible: Option<bool>,
 }

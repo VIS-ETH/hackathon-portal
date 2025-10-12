@@ -5,8 +5,8 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface TraefikForwardAuthConfig {
-  address: string;
-  /** @nullable */
-  authResponseHeaders?: string[] | null;
+export interface SidequestScore {
+  category_rank: number;
+  score: number;
+  score_normalized: number;
 }

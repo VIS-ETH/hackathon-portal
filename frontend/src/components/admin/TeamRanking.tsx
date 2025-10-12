@@ -1,28 +1,42 @@
 import TeamRankingEntry from "./TeamRankingEntry";
 
-import { useGetAdminTeams, useGetLeaderboard } from "@/api/gen";
-import { Team } from "@/api/gen/schemas";
+import { useGetLeaderboardDetailed } from "@/api/gen";
 
-import { Stack } from "@mantine/core";
+import { Button, Group, Skeleton, Stack } from "@mantine/core";
 
 type TeamRankingProps = {
   eventId: string;
 };
 
 const TeamRanking = ({ eventId }: TeamRankingProps) => {
-  const { data: leaderboardIds = [] } = useGetLeaderboard(eventId);
-  const { data: teams = [] } = useGetAdminTeams({
-    event_id: eventId,
-  });
+  const {
+    data: leaderboardEntry = [],
+    isLoading,
+    refetch,
+  } = useGetLeaderboardDetailed(eventId);
 
-  const leaderboardTeams = leaderboardIds
-    .map((teamId) => teams.find((team) => team.id === teamId))
-    .filter((team) => team) as Team[];
+  const refreshButton = (
+    <Group justify="flex-end" w={"100%"}>
+      {isLoading}
+      <Button onClick={() => refetch()}>Refresh</Button>
+    </Group>
+  );
 
+  if (isLoading) {
+    return (
+      <Stack pt={"md"}>
+        {refreshButton}
+        {Array.from({ length: 11 }, (_, i) => (
+          <Skeleton key={i} height={60} radius="md" />
+        ))}
+      </Stack>
+    );
+  }
   return (
-    <Stack>
-      {leaderboardTeams.map((team, index) => (
-        <TeamRankingEntry key={team.id} team={team} rank={index + 1} />
+    <Stack pt={"md"}>
+      {refreshButton}
+      {leaderboardEntry.map((entry) => (
+        <TeamRankingEntry key={entry.team_id} info={entry} />
       ))}
     </Stack>
   );

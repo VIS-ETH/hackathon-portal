@@ -35,6 +35,7 @@ pub struct Model {
     pub password: Option<Vec<u8>>,
     #[sea_orm(column_type = "VarBinary(StringLen::None)", nullable)]
     pub ai_api_key: Option<Vec<u8>>,
+    pub finalist: bool,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
@@ -63,6 +64,8 @@ pub enum Relation {
     SidequestScore,
     #[sea_orm(has_many = "super::team_role_assignment::Entity")]
     TeamRoleAssignment,
+    #[sea_orm(has_many = "super::technical_rating::Entity")]
+    TechnicalRating,
     #[sea_orm(
         belongs_to = "super::upload::Entity",
         from = "Column::PhotoId",
@@ -71,6 +74,8 @@ pub enum Relation {
         on_delete = "SetNull"
     )]
     Upload,
+    #[sea_orm(has_many = "super::vote::Entity")]
+    Vote,
 }
 
 impl Related<super::event::Entity> for Entity {
@@ -103,9 +108,21 @@ impl Related<super::team_role_assignment::Entity> for Entity {
     }
 }
 
+impl Related<super::technical_rating::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::TechnicalRating.def()
+    }
+}
+
 impl Related<super::upload::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Upload.def()
+    }
+}
+
+impl Related<super::vote::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::Vote.def()
     }
 }
 
@@ -115,6 +132,15 @@ impl Related<super::project::Entity> for Entity {
     }
     fn via() -> Option<RelationDef> {
         Some(super::project_preference::Relation::Team.def().rev())
+    }
+}
+
+impl Related<super::technical_question::Entity> for Entity {
+    fn to() -> RelationDef {
+        super::technical_rating::Relation::TechnicalQuestion.def()
+    }
+    fn via() -> Option<RelationDef> {
+        Some(super::technical_rating::Relation::Team.def().rev())
     }
 }
 

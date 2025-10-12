@@ -177,82 +177,82 @@ impl From<&ServiceError> for PublicError {
                 (StatusCode::CONFLICT, format!("Slug '{slug}' is not unique"))
             }
             ServiceError::ResourceStillInUse { resource, id } => (
-                StatusCode::CONFLICT,
-                format!("{resource} '{id}' is still in use"),
-            ),
+                                        StatusCode::CONFLICT,
+                                        format!("{resource} '{id}' is still in use"),
+                                    ),
             ServiceError::UserIsAlreadyMemberOfAnotherTeam { name } => (
-                StatusCode::BAD_REQUEST,
-                format!("User '{name}' is already a member of another team"),
-            ),
+                                        StatusCode::BAD_REQUEST,
+                                        format!("User '{name}' is already a member of another team"),
+                                    ),
             ServiceError::TeamSizeExceeded { expected, actual } => (
-                StatusCode::BAD_REQUEST,
-                format!("Team size is {actual} which exceeds the limit of {expected}"),
-            ),
+                                        StatusCode::BAD_REQUEST,
+                                        format!("Team size is {actual} which exceeds the limit of {expected}"),
+                                    ),
             ServiceError::CannotUnassignAllAdmins { resource, id } => (
-                StatusCode::BAD_REQUEST,
-                format!("Cannot unassign all admins from {resource} '{id}'"),
-            ),
+                                        StatusCode::BAD_REQUEST,
+                                        format!("Cannot unassign all admins from {resource} '{id}'"),
+                                    ),
             ServiceError::Forbidden {
-                resource,
-                id,
-                action,
-            } => (
-                StatusCode::FORBIDDEN,
-                format!("You do not have permission to {action} {resource} '{id}'"),
-            ),
+                                        resource,
+                                        id,
+                                        action,
+                                    } => (
+                                        StatusCode::FORBIDDEN,
+                                        format!("You do not have permission to {action} {resource} '{id}'"),
+                                    ),
             ServiceError::ProjectPreferenceDuplicate => (
-                StatusCode::BAD_REQUEST,
-                "Project preferences must be unique".to_string(),
-            ),
+                                        StatusCode::BAD_REQUEST,
+                                        "Project preferences must be unique".to_string(),
+                                    ),
             ServiceError::ProjectPreferenceWrongCount { expected, actual } => (
-                StatusCode::BAD_REQUEST,
-                format!("Wrong number of project preferences, expected {expected}, got {actual}"),
-            ),
+                                        StatusCode::BAD_REQUEST,
+                                        format!("Wrong number of project preferences, expected {expected}, got {actual}"),
+                                    ),
             ServiceError::SidequestCooldown { expires_at } => {
-                let expires_at_local = Zurich.from_utc_datetime(expires_at);
-                let expires_at_str = expires_at_local.format("%H:%M");
+                                        let expires_at_local = Zurich.from_utc_datetime(expires_at);
+                                        let expires_at_str = expires_at_local.format("%H:%M");
 
-                (
-                    StatusCode::FORBIDDEN,
-                    format!("Wait until {expires_at_str} before attempting another sidequest"),
-                )
-            }
+                                        (
+                                            StatusCode::FORBIDDEN,
+                                            format!("Wait until {expires_at_str} before attempting another sidequest"),
+                                        )
+                                    }
             ServiceError::EventPhase { current_phase } => (
-                StatusCode::FORBIDDEN,
-                format!("This action is not allowed in the phase {current_phase}"),
-            ),
+                                        StatusCode::FORBIDDEN,
+                                        format!("This action is not allowed in the phase {current_phase}"),
+                                    ),
             ServiceError::UploadContentTypeNotAllowed => (
-                StatusCode::BAD_REQUEST,
-                "You may not upload files of this type".to_string(),
-            ),
+                                        StatusCode::BAD_REQUEST,
+                                        "You may not upload files of this type".to_string(),
+                                    ),
             ServiceError::UploadContentLengthExceeded { size, limit } => {
-                let size = (*size as f64) / 2f64.powf(20f64);
-                let limit = (*limit as f64) / 2f64.powf(20f64);
+                                        let size = (*size as f64) / 2f64.powf(20f64);
+                                        let limit = (*limit as f64) / 2f64.powf(20f64);
 
-                (
-                    StatusCode::BAD_REQUEST,
-                    format!(
-                        "File ({size:.1} MB) exceeds the size limit of {limit:.1} MB"
-                    ),
-                )
-            }
+                                        (
+                                            StatusCode::BAD_REQUEST,
+                                            format!(
+                                                "File ({size:.1} MB) exceeds the size limit of {limit:.1} MB"
+                                            ),
+                                        )
+                                    },
             ServiceError::UploadRateLimitExceeded => (
-                StatusCode::FORBIDDEN,
-                "You have uploaded too many files in a short period of time. Please wait and try again later.".to_string()
-            ),
+                                        StatusCode::FORBIDDEN,
+                                        "You have uploaded too many files in a short period of time. Please wait and try again later.".to_string()
+                                    ),
             ServiceError::UploadIsAlreadyValidated => (
-                StatusCode::FORBIDDEN,
-                "This upload has already been validated and cannot be reused".to_string(),
-            ),
+                                        StatusCode::FORBIDDEN,
+                                        "This upload has already been validated and cannot be reused".to_string(),
+                                    ),
             ServiceError::UploadMediaUsageMismatch {
-                expected,
-                actual,
-            } => (
-                StatusCode::FORBIDDEN,
-                format!(
-                    "Upload media usage mismatch: expected '{expected}', got '{actual}'"
-                ),
-            ),
+                                        expected,
+                                        actual,
+                                    } => (
+                                        StatusCode::FORBIDDEN,
+                                        format!(
+                                            "Upload media usage mismatch: expected '{expected}', got '{actual}'"
+                                        ),
+                                    ),
             ServiceError::Repository(e) => return e.into(),
             ServiceError::Matching { message } => (StatusCode::BAD_REQUEST, message.clone()),
             ServiceError::DependencyMissing { .. } |
@@ -267,7 +267,24 @@ impl From<&ServiceError> for PublicError {
             ),
             ServiceError::Parsing { message } => (StatusCode::BAD_REQUEST, message.clone()),
             ServiceError::SerdeJson(error) => (StatusCode::BAD_REQUEST, error.to_string()),
-        };
+            ServiceError::WrongTechnicalQuestionPoints { given_score, allowed_scores } => {
+                                (
+                                    StatusCode::BAD_REQUEST,
+                                    format!(
+                                        "Wrong technical question points: given score {given_score}, allowed scores are {allowed_scores}"
+                                    ),
+                                )
+                            },
+            ServiceError::ScoreCalculationError { message } => (
+                                            StatusCode::INTERNAL_SERVER_ERROR,
+                                            format!("Score calculation error: {message}"),
+                                        ),
+            ServiceError::WrongVotingRank { given_rank, allowed_ranks } => (
+                                        StatusCode::BAD_REQUEST,
+                                        format!(
+                                            "Wrong voting rank: given rank {given_rank}, allowed ranks are {allowed_ranks}"
+            )),
+                                        };
 
         Self::new(status, message)
     }

@@ -1,12 +1,13 @@
 "use client";
 
 import IconTextGroup from "../IconTextGroup";
+import TeamImage from "./TeamImage";
 
 import { useGetEvent, useGetProject } from "@/api/gen";
 import { Team } from "@/api/gen/schemas";
 import { cardProps, cardSectionProps } from "@/styles/common";
 
-import { Card, Image, Stack, Text } from "@mantine/core";
+import { Card, Stack, Text } from "@mantine/core";
 
 import { IconListDetails, IconWorld } from "@tabler/icons-react";
 import Link from "next/link";
@@ -57,17 +58,16 @@ const TeamDetailsCard = ({ team, canViewProject }: TeamDetailsCardProps) => {
 
   return (
     <Card {...cardProps}>
-      {team.photo_url && (
-        <Card.Section {...cardSectionProps} p={0}>
-          <Image
-            src={team.photo_url}
-            alt="Team Photo"
-            w="100%"
-            mah={400}
-            fit="cover"
-          />
-        </Card.Section>
-      )}
+      <Card.Section {...cardSectionProps} p={0}>
+        <TeamImage
+          url={team.photo_url}
+          alt="Team Photo"
+          width="100%"
+          height={300}
+          fit="cover"
+        />
+      </Card.Section>
+
       <Card.Section {...cardSectionProps}>
         <Stack gap="sm" justify="space-between" h="100%">
           <Stack gap="sm">

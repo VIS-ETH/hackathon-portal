@@ -7,5 +7,5 @@
 import type { TraefikServerConfig } from "./traefikServerConfig";
 
 export interface TraefikLoadBalancerConfig {
-  servers: TraefikServerConfig[];
+  servers?: TraefikServerConfig[];
 }

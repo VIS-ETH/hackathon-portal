@@ -53,6 +53,13 @@ const Navbar = () => {
       visible: policies?.can_create_team,
     },
     {
+      label: "Rating",
+      path: `/events/${event?.slug}/rating`,
+      visible:
+        (policies?.can_manage_expert_rating && event?.phase === "Grading") ||
+        policies?.can_public_vote,
+    },
+    {
       label: "Teams",
       path: `/events/${event?.slug}/teams`,
       visible: true,

@@ -451,6 +451,40 @@ impl Groups {
         false
     }
 
+    pub fn can_view_finalists(
+        &self,
+        event_visibility: EventVisibility,
+        finalists_visible: bool,
+    ) -> bool {
+
+
+        if let Some(decision) = self.default_can_view_policy(event_visibility) {
+            return decision;
+        }
+
+        if self == &Group::EventAffiliate {
+            return finalists_visible;
+        }
+        false
+    }
+
+    pub fn can_public_vote(
+        &self,
+        event_visibility: EventVisibility,
+        public_voting_enabled: bool,
+        event_read_only: bool,
+    ) -> bool {
+        if let Some(decision) = self.default_can_manage_policy(event_visibility, event_read_only) {
+            return decision;
+        }
+
+        if public_voting_enabled {
+            return true;
+        }
+
+        false
+    }
+
     /// Additional authorization checks (e.g. rate limiting and size constraints)
     /// are required and implemented by the media service. This serves as a coarse-grained check.
     #[must_use]

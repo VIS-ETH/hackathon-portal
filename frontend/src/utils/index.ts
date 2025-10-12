@@ -1,6 +1,7 @@
 import { IntlShape } from "react-intl";
 
 export const fmtTeamIndex = (index: number) => String(index).padStart(2, "0");
+export const fmtScore = (score: number) => score.toFixed(2);
 
 export const fmtDateWeekdayTime = (value: string, intl: IntlShape) =>
   intl.formatDate(value, {

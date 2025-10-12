@@ -51,6 +51,11 @@ pub enum ServiceError {
         actual: usize,
     },
 
+    WrongVotingRank {
+        given_rank: i32,
+        allowed_ranks: String,
+    },
+
     SidequestCooldown {
         expires_at: NaiveDateTime,
     },
@@ -82,6 +87,14 @@ pub enum ServiceError {
     MissingMasterAIAPIKey,
 
     Parsing {
+        message: String,
+    },
+    WrongTechnicalQuestionPoints {
+        given_score: f64,
+        allowed_scores: String,
+    },
+
+    ScoreCalculationError {
         message: String,
     },
 

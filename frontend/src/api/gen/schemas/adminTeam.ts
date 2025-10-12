@@ -18,6 +18,7 @@ export interface AdminTeam {
   event_id: string;
   /** @nullable */
   extra_score?: number | null;
+  finalist: boolean;
   id: string;
   index: number;
   ingress_config: IngressConfig;

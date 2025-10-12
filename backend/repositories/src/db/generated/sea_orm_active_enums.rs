@@ -102,10 +102,8 @@ pub enum EventVisibility {
     enum_name = "expert_rating_category"
 )]
 pub enum ExpertRatingCategory {
-    #[sea_orm(string_value = "FUNCTIONALITY")]
-    Functionality,
-    #[sea_orm(string_value = "UX")]
-    Ux,
+    #[sea_orm(string_value = "PRODUCT")]
+    Product,
     #[sea_orm(string_value = "PRESENTATION")]
     Presentation,
 }

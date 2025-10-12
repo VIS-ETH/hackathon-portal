@@ -6,9 +6,8 @@
  */
 
 export interface TraefikRouterConfig {
-  entryPoints: string[];
-  /** @nullable */
-  middlewares?: string[] | null;
+  entryPoints?: string[];
+  middlewares?: string[];
   rule: string;
   service: string;
 }
