@@ -1,5 +1,3 @@
-pub mod models;
-
 use crate::api_state::ApiState;
 use crate::ctx::Ctx;
 use crate::error::{ApiJson, ApiJsonVec};
@@ -26,7 +24,7 @@ pub fn get_router(state: &ApiState) -> Router {
 
 #[utoipa::path(
     post,
-    path = "/api/expert-ratings",
+    path = "/api/ratings/expert",
     responses(
         (status = StatusCode::OK, body = ExpertRating),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
@@ -57,7 +55,7 @@ pub async fn create_expert_rating(
 
 #[utoipa::path(
     get,
-    path = "/api/expert-ratings",
+    path = "/api/ratings/expert",
     responses(
         (status = StatusCode::OK, body = Vec<ExpertRating>),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
@@ -96,7 +94,7 @@ pub async fn get_expert_ratings(
 
 #[utoipa::path(
     get,
-    path = "/api/expert-ratings/{rating_id}",
+    path = "/api/ratings/expert/{rating_id}",
     responses(
         (status = StatusCode::OK, body = ExpertRating),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
@@ -128,7 +126,7 @@ pub async fn get_expert_rating(
 
 #[utoipa::path(
     patch,
-    path = "/api/expert-ratings/{rating_id}",
+    path = "/api/ratings/expert/{rating_id}",
     responses(
         (status = StatusCode::OK, body = ExpertRating),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
@@ -166,7 +164,7 @@ pub async fn update_expert_rating(
 
 #[utoipa::path(
     delete,
-    path = "/api/expert-ratings/{rating_id}",
+    path = "/api/ratings/expert/{rating_id}",
     responses(
         (status = StatusCode::OK, body = ExpertRating),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),

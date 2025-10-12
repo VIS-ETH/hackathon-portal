@@ -14,6 +14,7 @@ use axum::{Json, Router};
 use hackathon_portal_repositories::db::{ExpertRatingCategory, TeamRole};
 use hackathon_portal_services::authorization::groups::Groups;
 use hackathon_portal_services::authorization::models::{TeamAffiliate, TeamRoles, TeamRolesMap};
+use hackathon_portal_services::rating::models::ScoreNormalized;
 use hackathon_portal_services::team::models::{TeamForCreate, TeamForUpdate};
 use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
@@ -43,6 +44,7 @@ pub fn get_router(state: &ApiState) -> Router {
         )
         .route("/:team_id/credentials", get(get_team_credentials))
         .route("/:team_id/expert-ratings", get(get_team_expert_ratings))
+        .route("/:team_id/rating", get(get_team_rating))
         .route("/:team_id/ai-api-keys", post(create_team_ai_api_key))
         .with_state(state.clone())
 }
@@ -71,7 +73,7 @@ pub async fn create_team(
 
     let team = state.team_service.create_team(ctx.user().id, body).await?;
 
-    Ok(Json(Team::from((team, false))))
+    Ok(Json(Team::from((team, false, false))))
 }
 
 #[utoipa::path(
@@ -105,12 +107,14 @@ pub async fn get_teams(
         event.project_assignments_visible,
     );
 
+    let can_view_finalists = groups.can_view_finalists(event.visibility, event.finalists_visible);
+
     let teams = state
         .team_service
         .get_teams(event.id)
         .await?
         .into_iter()
-        .map(|team| Team::from((team, can_view_project_assignment)))
+        .map(|team| Team::from((team, can_view_project_assignment, can_view_finalists)))
         .collect();
 
     Ok(Json(teams))
@@ -220,12 +224,18 @@ pub async fn get_team_by_slug(
         event.project_assignments_visible,
     );
 
+    let can_view_finalists = groups.can_view_finalists(event.visibility, event.finalists_visible);
+
     let team = state
         .team_service
         .get_team_by_slug(&event_slug, &team_slug)
         .await?;
 
-    Ok(Json(Team::from((team, can_view_project_assignment))))
+    Ok(Json(Team::from((
+        team,
+        can_view_project_assignment,
+        can_view_finalists,
+    ))))
 }
 
 #[utoipa::path(
@@ -257,9 +267,15 @@ pub async fn get_team(
         event.project_assignments_visible,
     );
 
+    let can_view_finalists = groups.can_view_finalists(event.visibility, event.finalists_visible);
+
     let team = state.team_service.get_team(team_id).await?;
 
-    Ok(Json(Team::from((team, can_view_project_assignment))))
+    Ok(Json(Team::from((
+        team,
+        can_view_project_assignment,
+        can_view_finalists,
+    ))))
 }
 
 #[utoipa::path(
@@ -339,7 +355,8 @@ pub async fn update_team(
         || body.direct_address_override.is_some()
         || body.private_address_override.is_some()
         || body.ssh_config_override.is_some()
-        || body.ingress_enabled.is_some())
+        || body.ingress_enabled.is_some()
+        || body.finalist.is_some())
         && !groups.can_manage_event()
     {
         return Err(ApiError::Forbidden {
@@ -355,7 +372,13 @@ pub async fn update_team(
         event.project_assignments_visible,
     );
 
-    Ok(Json(Team::from((team, can_view_project_assignment))))
+    let can_view_finalists = groups.can_view_finalists(event.visibility, event.finalists_visible);
+
+    Ok(Json(Team::from((
+        team,
+        can_view_project_assignment,
+        can_view_finalists,
+    ))))
 }
 
 #[utoipa::path(
@@ -389,7 +412,13 @@ pub async fn delete_team(
         event.project_assignments_visible,
     );
 
-    Ok(Json(Team::from((team, can_view_project_assignment))))
+    let can_view_finalists = groups.can_view_finalists(event.visibility, event.finalists_visible);
+
+    Ok(Json(Team::from((
+        team,
+        can_view_project_assignment,
+        can_view_finalists,
+    ))))
 }
 
 #[utoipa::path(
@@ -687,7 +716,6 @@ pub async fn create_team_ai_api_key(
     let team = state.team_service.get_team(team_id).await?;
     let event = state.event_service.get_event(team.event_id).await?;
     let groups = Groups::from_event_and_team(ctx.roles(), event.id, team.id);
-
     if !groups.can_manage_event() {
         return Err(ApiError::Forbidden {
             action: "create an AI API key for this team".to_string(),
@@ -700,4 +728,36 @@ pub async fn create_team_ai_api_key(
         .await?;
 
     Ok(Json(key))
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/teams/{team_id}/rating",
+    responses(
+        (status = StatusCode::OK, body = Option<ScoreNormalized>),
+        (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
+    ),
+)]
+pub async fn get_team_rating(
+    ctx: Ctx,
+    State(state): State<ApiState>,
+    Path(team_id): Path<Uuid>,
+) -> ApiJson<Option<ScoreNormalized>> {
+    let team = state.team_service.get_team(team_id).await?;
+    let event = state.event_service.get_event(team.event_id).await?;
+    let groups = Groups::from_event_and_team(ctx.roles(), event.id, team.id);
+
+    if !groups.can_view_team_feedback(event.visibility, event.phase, event.feedback_visible) {
+        return Err(ApiError::Forbidden {
+            action: "view feedback for this team".to_string(),
+        });
+    }
+
+    let full_ranking = state
+        .rating_service
+        .get_complete_scores(team.event_id)
+        .await?;
+    let team_ranking = full_ranking.into_iter().find(|r| r.team_id == team_id);
+
+    Ok(Json(team_ranking))
 }

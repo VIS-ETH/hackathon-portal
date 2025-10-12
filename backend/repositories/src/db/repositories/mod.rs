@@ -9,8 +9,10 @@ mod sidequest;
 mod sidequest_attempt;
 mod team;
 mod team_role_assignment;
+mod technical_question;
 mod upload;
 mod user;
+mod vote;
 
 pub use appointment::AppointmentRepository;
 pub use event::EventRepository;
@@ -23,5 +25,7 @@ pub use sidequest::SidequestRepository;
 pub use sidequest_attempt::SidequestAttemptRepository;
 pub use team::TeamRepository;
 pub use team_role_assignment::TeamRoleAssignmentRepository;
+pub use technical_question::TechnicalQuestionRepository;
 pub use upload::UploadRepository;
 pub use user::UserRepository;
+pub use vote::VoteRepository;

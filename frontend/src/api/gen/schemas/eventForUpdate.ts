@@ -21,6 +21,8 @@ export interface EventForUpdate {
   /** @nullable */
   feedback_visible?: boolean | null;
   /** @nullable */
+  finalists_visible?: boolean | null;
+  /** @nullable */
   managed_address_template?: string | null;
   /** @nullable */
   master_ai_api_key?: string | null;
@@ -57,6 +59,8 @@ export interface EventForUpdate {
   start?: string | null;
   /** @nullable */
   visibility?: EventForUpdateVisibility;
+  /** @nullable */
+  vote_enabled?: boolean | null;
   /** @nullable */
   welcome_content?: string | null;
 }

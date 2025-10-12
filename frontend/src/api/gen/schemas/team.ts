@@ -10,6 +10,8 @@ export interface Team {
   /** @nullable */
   direct_address?: string | null;
   event_id: string;
+  /** @nullable */
+  finalist?: boolean | null;
   id: string;
   index: number;
   ingress_config: IngressConfig;

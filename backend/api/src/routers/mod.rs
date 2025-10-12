@@ -1,8 +1,8 @@
 mod appointments;
 mod docs;
 mod events;
-mod expert_ratings;
 mod projects;
+mod ratings;
 mod sidequest_attempts;
 mod sidequests;
 mod teams;
@@ -21,7 +21,7 @@ pub fn get_router(state: ApiState) -> Router {
         .nest("/users", users::get_router(&state))
         .nest("/events", events::get_router(&state))
         .nest("/teams", teams::get_router(&state))
-        .nest("/expert-ratings", expert_ratings::get_router(&state))
+        .nest("/ratings", ratings::get_router(&state))
         .nest("/projects", projects::get_router(&state))
         .nest("/sidequests", sidequests::get_router(&state))
         .nest(

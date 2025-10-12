@@ -207,6 +207,14 @@ impl EventService {
             active_event.visibility = Set(visibility);
         }
 
+        if let Some(voting_enabled) = event_fu.vote_enabled {
+            active_event.voting_open = Set(voting_enabled);
+        }
+
+        if let Some(finalists_visible) = event_fu.finalists_visible {
+            active_event.finalists_visible = Set(finalists_visible);
+        }
+
         if let Some(phase) = event_fu.phase {
             active_event.phase = Set(phase);
         }

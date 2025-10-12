@@ -1,19 +1,22 @@
 "use client";
 
-import { useGetProject } from "@/api/gen";
+import { useGetTeamRating } from "@/api/gen";
 import PageSkeleton from "@/components/PageSkeleton";
-import ExpertRatingCard from "@/components/team/ExpertRatingCard";
+import RatingFeedbackCard from "@/components/team/RatingFeedbackCard";
 import TeamAffiliatesCard from "@/components/team/TeamAffiliatesCard";
 import TeamDetailsCard from "@/components/team/TeamDetailsCard";
 import TeamMenu from "@/components/team/TeamMenu";
 import { useResolveParams } from "@/hooks/useResolveParams";
+import { badgeProps } from "@/styles/common";
 
-import { Group, SimpleGrid, Stack, Title } from "@mantine/core";
+import { Badge, Group, SimpleGrid, Stack, Title } from "@mantine/core";
 
 const Team = () => {
   const { event, team, refetchTeam, policies } = useResolveParams();
-  const { data: project } = useGetProject(team?.project_id ?? "", {
-    query: { enabled: !!team?.project_id && policies?.can_view_project },
+  const { data: rating } = useGetTeamRating(team?.id ?? "", {
+    query: {
+      enabled: (!!team?.id && policies?.can_view_team_feedback) ?? false,
+    },
   });
 
   if (!event || !team || !policies) {
@@ -23,7 +26,10 @@ const Team = () => {
   return (
     <Stack>
       <Group justify="space-between">
-        <Title order={2}>{team.name}</Title>
+        <Group>
+          <Title order={2}>{team.name}</Title>
+          {team.finalist && <Badge {...badgeProps}>Finalist</Badge>}
+        </Group>
         <TeamMenu team={team} refetchTeam={refetchTeam} policies={policies} />
       </Group>
       <SimpleGrid
@@ -37,11 +43,9 @@ const Team = () => {
           <TeamAffiliatesCard teamId={team.id} />
         )}
       </SimpleGrid>
-      {policies.can_manage_expert_rating && (
-        <ExpertRatingCard teamId={team.id} project={project} />
-      )}
-      {policies.can_view_team_feedback && (
-        <ExpertRatingCard teamId={team.id} feedbackOnly />
+
+      {policies.can_view_team_feedback && rating && (
+        <RatingFeedbackCard rating={rating} limitedView={false} />
       )}
     </Stack>
   );

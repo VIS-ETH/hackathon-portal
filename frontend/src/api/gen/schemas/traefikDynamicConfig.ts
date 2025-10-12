@@ -7,5 +7,5 @@
 import type { TraefikHttpConfig } from "./traefikHttpConfig";
 
 export interface TraefikDynamicConfig {
-  http: TraefikHttpConfig;
+  http?: TraefikHttpConfig;
 }

@@ -59,6 +59,9 @@ const TeamCard = ({ team, highlight }: TeamCardProps) => {
               </IconTextGroup>
             </Grid.Col>
           )}
+          <Grid.Col span={2}>
+            {team.finalist && <Badge {...badgeProps}>Finalist</Badge>}
+          </Grid.Col>
           <Grid.Col span={3}>
             <Group justify="end">
               {teamRoles &&

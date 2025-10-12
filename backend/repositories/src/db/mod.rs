@@ -25,8 +25,11 @@ pub use generated::sidequest_attempt as db_sidequest_attempt;
 pub use generated::sidequest_score as db_sidequest_score;
 pub use generated::team as db_team;
 pub use generated::team_role_assignment as db_team_role_assignment;
+pub use generated::technical_question as db_technical_question;
+pub use generated::technical_rating as db_technical_rating;
 pub use generated::upload as db_upload;
 pub use generated::user as db_user;
+pub use generated::vote as db_vote;
 
 pub use generated::sea_orm_active_enums::{
     EventPhase, EventRole, EventVisibility, ExpertRatingCategory, MediaUsage, TeamRole,

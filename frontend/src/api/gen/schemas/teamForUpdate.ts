@@ -16,6 +16,8 @@ export interface TeamForUpdate {
   /** @nullable */
   extra_score?: number | null;
   /** @nullable */
+  finalist?: boolean | null;
+  /** @nullable */
   ingress_config?: TeamForUpdateIngressConfig;
   /** @nullable */
   ingress_enabled?: boolean | null;

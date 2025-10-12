@@ -89,6 +89,8 @@ pub async fn get_my_policies(
         event.projects_visible,
         event.project_assignments_visible,
         event.feedback_visible,
+        event.vote_enabled,
+        event.finalists_visible,
     );
 
     Ok(Json(policies))

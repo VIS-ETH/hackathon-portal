@@ -25,14 +25,21 @@ pub struct Team {
     pub ingress_enabled: bool,
     pub ingress_config: IngressConfig,
     pub ingress_url: Option<String>,
+    pub finalist: Option<bool>,
 }
 
-impl From<(TeamBO, bool)> for Team {
-    fn from(value: (TeamBO, bool)) -> Self {
-        let (team, can_view_project_assignment) = value;
+impl From<(TeamBO, bool, bool)> for Team {
+    fn from(value: (TeamBO, bool, bool)) -> Self {
+        let (team, can_view_project_assignment, can_view_finalists) = value;
 
         let project_id = if can_view_project_assignment {
             team.project_id
+        } else {
+            None
+        };
+
+        let finalist = if can_view_finalists {
+            Some(team.finalist)
         } else {
             None
         };
@@ -52,6 +59,7 @@ impl From<(TeamBO, bool)> for Team {
             ingress_enabled: team.ingress_enabled,
             ingress_config: team.ingress_config,
             ingress_url: team.ingress_url,
+            finalist: finalist,
         }
     }
 }
@@ -80,6 +88,7 @@ pub struct AdminTeam {
     pub ingress_enabled: bool,
     pub ingress_config: IngressConfig,
     pub ingress_url: Option<String>,
+    pub finalist: bool,
 }
 
 impl From<TeamBO> for AdminTeam {
@@ -107,6 +116,7 @@ impl From<TeamBO> for AdminTeam {
             ingress_enabled: value.ingress_enabled,
             ingress_config: value.ingress_config,
             ingress_url: value.ingress_url,
+            finalist: value.finalist,
         }
     }
 }

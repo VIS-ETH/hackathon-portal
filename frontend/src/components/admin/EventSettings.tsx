@@ -272,6 +272,20 @@ const EventSettings = ({ event, refetch }: EventSettingsProps) => {
               label="Project assignments visible"
             />
             <Checkbox
+              {...form.getInputProps("finalists_visible", {
+                type: "checkbox",
+              })}
+              key={form.key("finalists_visible")}
+              label="Finalists visible"
+            />
+            <Checkbox
+              {...form.getInputProps("vote_enabled", {
+                type: "checkbox",
+              })}
+              key={form.key("vote_enabled")}
+              label="Vote open"
+            />
+            <Checkbox
               {...form.getInputProps("feedback_visible", {
                 type: "checkbox",
               })}

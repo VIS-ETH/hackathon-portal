@@ -43,6 +43,8 @@ pub struct Model {
     pub discord_config: Option<String>,
     #[sea_orm(column_type = "VarBinary(StringLen::None)", nullable)]
     pub master_ai_api_key: Option<Vec<u8>>,
+    pub finalists_visible: bool,
+    pub voting_open: bool,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
@@ -59,6 +61,8 @@ pub enum Relation {
     Sidequest,
     #[sea_orm(has_many = "super::team::Entity")]
     Team,
+    #[sea_orm(has_many = "super::technical_question::Entity")]
+    TechnicalQuestion,
 }
 
 impl Related<super::appointment::Entity> for Entity {
@@ -94,6 +98,12 @@ impl Related<super::sidequest::Entity> for Entity {
 impl Related<super::team::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Team.def()
+    }
+}
+
+impl Related<super::technical_question::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::TechnicalQuestion.def()
     }
 }
 

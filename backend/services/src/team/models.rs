@@ -28,6 +28,7 @@ pub struct Team {
     pub ingress_enabled: bool,
     pub ingress_config: IngressConfig,
     pub ingress_url: Option<String>,
+    pub finalist: bool,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
@@ -51,4 +52,5 @@ pub struct TeamForUpdate {
     pub ssh_config_override: Option<String>,
     pub ingress_enabled: Option<bool>,
     pub ingress_config: Option<IngressConfig>,
+    pub finalist: Option<bool>,
 }

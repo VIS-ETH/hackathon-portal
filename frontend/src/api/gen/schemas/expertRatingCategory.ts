@@ -10,7 +10,6 @@ export type ExpertRatingCategory =
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const ExpertRatingCategory = {
-  Functionality: "Functionality",
-  Ux: "Ux",
+  Product: "Product",
   Presentation: "Presentation",
 } as const;

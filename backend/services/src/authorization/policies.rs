@@ -26,6 +26,8 @@ pub struct Policies {
     pub can_view_sidequest_attempt: bool,
     pub can_manage_sidequest_attempt: bool,
     pub can_create_upload: bool,
+    pub can_public_vote: bool,
+    pub can_view_finalist: bool,
 }
 
 impl Policies {
@@ -38,6 +40,8 @@ impl Policies {
         event_projects_visible: bool,
         event_project_assignments_visible: bool,
         event_feedback_visible: bool,
+        event_vote_enabled: bool,
+        event_finalists_visible: bool,
     ) -> Self {
         Self {
             can_view_event: groups.can_view_event(event_visibility),
@@ -92,6 +96,8 @@ impl Policies {
                 event_ro,
             ),
             can_create_upload: groups.can_create_upload(event_visibility, event_phase, event_ro),
+            can_public_vote: groups.can_public_vote(event_visibility, event_vote_enabled, event_ro),
+            can_view_finalist: groups.can_view_finalists(event_visibility, event_finalists_visible),
         }
     }
 }
@@ -113,6 +119,8 @@ mod tests {
         let event_projects_visible = [true, false].iter();
         let event_project_assignments_visible = [true, false].iter();
         let event_feedback_is_visible = [true, false].iter();
+        let event_vote_enabled = [true, false].iter();
+        let event_finalists_visible = [true, false].iter();
 
         let inputs = iproduct!(
             event_roles,
@@ -122,7 +130,9 @@ mod tests {
             event_is_ro,
             event_projects_visible,
             event_project_assignments_visible,
-            event_feedback_is_visible
+            event_feedback_is_visible,
+            event_vote_enabled,
+            event_finalists_visible,
         );
 
         for (idx, input) in inputs.enumerate() {
@@ -137,6 +147,8 @@ mod tests {
                 *input.5,
                 *input.6,
                 *input.7,
+                *input.8,
+                *input.9,
             );
 
             println!("{idx}: {input:?} => {policies:?}");

@@ -18,6 +18,7 @@ export interface Event {
   documentation_content?: string | null;
   end: string;
   feedback_visible: boolean;
+  finalists_visible: boolean;
   id: string;
   /** @nullable */
   managed_address_template?: string | null;
@@ -39,6 +40,7 @@ export interface Event {
   ssh_config_template?: string | null;
   start: string;
   visibility: EventVisibility;
+  vote_enabled: boolean;
   /** @nullable */
   welcome_content?: string | null;
 }

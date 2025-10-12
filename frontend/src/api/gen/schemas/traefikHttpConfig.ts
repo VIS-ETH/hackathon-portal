@@ -4,12 +4,10 @@
  * hackathon-portal-api
  * OpenAPI spec version: 1.0.0
  */
-import type { TraefikHttpConfigMiddlewares } from "./traefikHttpConfigMiddlewares";
 import type { TraefikHttpConfigRouters } from "./traefikHttpConfigRouters";
 import type { TraefikHttpConfigServices } from "./traefikHttpConfigServices";
 
 export interface TraefikHttpConfig {
-  middlewares: TraefikHttpConfigMiddlewares;
-  routers: TraefikHttpConfigRouters;
-  services: TraefikHttpConfigServices;
+  routers?: TraefikHttpConfigRouters;
+  services?: TraefikHttpConfigServices;
 }
