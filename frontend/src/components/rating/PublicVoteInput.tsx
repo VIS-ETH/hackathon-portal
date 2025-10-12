@@ -228,14 +228,15 @@ const PublicVoteInput = () => {
         <Title order={4}>Finalists</Title>
       </Center>
       <Flex gap="md" justify="center" align="center" wrap="wrap">
-        { finalists
-            .filter(
-              (team) =>
-                ![firstPlace, secondPlace, thirdPlace].includes(team.id) && !(team.id === my_team?.id)
-            )
-            .map((team) => (
-              <SelectCard key={team.id} team={team} choose={choose} />
-            ))}
+        {finalists
+          .filter(
+            (team) =>
+              ![firstPlace, secondPlace, thirdPlace].includes(team.id) &&
+              !(team.id === my_team?.id),
+          )
+          .map((team) => (
+            <SelectCard key={team.id} team={team} choose={choose} />
+          ))}
       </Flex>
     </Stack>
   );

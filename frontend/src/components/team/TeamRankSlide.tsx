@@ -46,7 +46,7 @@ const TeamRankSlide = ({ teamId, rank, isActive }: TeamRankSlideProps) => {
 
   const photoCard = team.photo_url && (
     <Card {...cardProps} w={600}>
-      <Card.Section {...cardSectionProps} p={0}>
+      <Card.Section {...cardSectionProps} p={0} mah="50vh">
         <Image src={team.photo_url} alt="Team Photo" fit="cover" />
       </Card.Section>
     </Card>

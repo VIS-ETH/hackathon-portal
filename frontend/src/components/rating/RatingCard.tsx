@@ -8,7 +8,6 @@ import { ExpertRatingCategory, Team } from "@/api/gen/schemas";
 import { useResolveParams } from "@/hooks/useResolveParams";
 import { cardProps, cardSectionProps } from "@/styles/common";
 
-
 import { Accordion, Button, Card, Group, Stack, Title } from "@mantine/core";
 
 type ExpertRatingCardProps = {
@@ -35,7 +34,7 @@ const ExpertRatingCard = ({ team }: ExpertRatingCardProps) => {
   return (
     <Card {...cardProps}>
       <Stack gap={"xs"}>
-          <Title order={4}>{team.name}</Title>
+        <Title order={4}>{team.name}</Title>
         <Group justify="center">
           <TeamDetailsCard team={team} canViewProject={true} />
         </Group>
