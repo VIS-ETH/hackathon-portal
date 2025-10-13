@@ -115,6 +115,8 @@ const EventSettings = ({ event, refetch }: EventSettingsProps) => {
       "project_assignments_visible",
       event.project_assignments_visible,
     );
+    form.setFieldValue("finalists_visible", event.finalists_visible);
+    form.setFieldValue("vote_enabled", event.vote_enabled);
     form.setFieldValue("feedback_visible", event.feedback_visible);
   }, [form.setValues, event]);
 
