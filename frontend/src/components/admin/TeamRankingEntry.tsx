@@ -34,16 +34,8 @@ const TeamRankingEntry = ({ info }: TeamRankingEntryProps) => {
 
   const updateTeamMutation = useUpdateTeam();
 
-  const [finalist, setFinalist] = useState<boolean | undefined | null>();
-
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    setFinalist(team?.finalist);
-  }, [team]);
 
   const changeFinalist = async (newFinalist: boolean) => {
-    setLoading(true);
     await updateTeamMutation.mutate({
       teamId: info.team_id,
       data: {
@@ -51,8 +43,6 @@ const TeamRankingEntry = ({ info }: TeamRankingEntryProps) => {
       },
     });
 
-    setLoading(false);
-    setFinalist(newFinalist);
     refetch();
   };
 
@@ -60,16 +50,15 @@ const TeamRankingEntry = ({ info }: TeamRankingEntryProps) => {
     return <Loader />;
   }
 
-  const publicUrl = `${fmtTeamIndex(team.index)}.viscon-hackathon.ch`;
-  const teamWebpage = (
+  const teamWebpage = team.ingress_url && (
     <IconTextGroup Icon={IconWorld}>
       <Link
-        href={`https://${publicUrl}`}
+        href={team.ingress_url}
         passHref
         referrerPolicy="no-referrer"
         target="_blank"
       >
-        <Text>{publicUrl}</Text>
+        <Text>{team.ingress_url}</Text>
       </Link>
     </IconTextGroup>
   );
@@ -124,13 +113,13 @@ const TeamRankingEntry = ({ info }: TeamRankingEntryProps) => {
                   )}
                 </Grid.Col>
                 <Grid.Col span={2}>
-                  {loading ? (
+                  {updateTeamMutation.isPending ? (
                     <Loader color="blue" />
                   ) : (
                     <Switch
                       size="md"
                       description="Finalist"
-                      checked={finalist ?? false}
+                      checked={team.finalist ?? false}
                       onChange={(event) =>
                         changeFinalist(event.currentTarget.checked)
                       }
