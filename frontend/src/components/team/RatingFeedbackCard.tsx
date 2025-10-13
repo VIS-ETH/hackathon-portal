@@ -6,19 +6,17 @@ import ScoreDisplay from "./ScoreDisplay";
 import { useGetTeam, useGetTechnicalTeamRating } from "@/api/gen";
 import { ScoreNormalized } from "@/api/gen/schemas";
 import { useResolveParams } from "@/hooks/useResolveParams";
-import { cardProps } from "@/styles/common";
+import {
+  cardHeaderTextProps,
+  cardProps,
+  cardSectionProps,
+} from "@/styles/common";
 import { fmtScore } from "@/utils";
 
 import {
-  Box,
   Card,
-  Divider,
-  Flex,
-  Grid,
   Group,
   Loader,
-  SimpleGrid,
-  Stack,
   Text,
   Title,
 } from "@mantine/core";
@@ -39,20 +37,14 @@ const CategoryTitle = ({
   normalized_score,
 }: CategoryTitleProps) => {
   return (
-    <Grid w={"100%"} mb={"md"}>
-      <Grid.Col span={4}>
-        <Title order={4}>{title}</Title>
-      </Grid.Col>
-      <Grid.Col span={2}>
-        <Text>Rank: {rank}</Text>
-      </Grid.Col>
-      <Grid.Col span={2}>
-        <Text>Score: {fmtScore(score)}</Text>
-      </Grid.Col>
-      <Grid.Col span={4}>
-        <Text>Normalized Score: {fmtScore(normalized_score)}</Text>
-      </Grid.Col>
-    </Grid>
+    <Group justify="space-between">
+      <Text {...cardHeaderTextProps}>{title}</Text>
+      <Group>
+        <Text c="dimmed">Rank</Text> #{rank}
+        <Text c="dimmed">Score</Text> {fmtScore(score)}
+        <Text c="dimmed">Normalized Score</Text> {fmtScore(normalized_score)}
+      </Group>
+    </Group>
   );
 };
 
@@ -84,17 +76,17 @@ const RatingFeedbackCard = ({
     <>
       <Group>
         {!limitedView && (
-          <>
+          <Group w="100%" justify="space-between">
             <Title order={3}>Feedback</Title>
             <Group gap={0}>
-              <IconTrophy />
-              <Text fz="xl" fw={700}>
-                #{rating.rank}
-              </Text>
+              <Title order={3} c="dimmed">
+                Overall Rank #{rating.rank}
+              </Title>
             </Group>
-          </>
+          </Group>
         )}
       </Group>
+
       {!limitedView && (
         <ScoreDisplay
           technical_score={rating.tech_score?.score_normalized ?? 0}
@@ -108,98 +100,100 @@ const RatingFeedbackCard = ({
 
       {rating.tech_score && (
         <Card {...cardProps}>
-          <Group justify="center">
+          <Card.Section {...cardSectionProps}>
             <CategoryTitle
               title="Technical Ranking"
               rank={rating.tech_score.category_rank}
               score={rating.tech_score.score}
               normalized_score={rating.tech_score.score_normalized}
             />
-          </Group>
-          <Stack gap={0}>
-            {questions &&
-              questions.map((q, i) => (
-                <Box key={q.question.id}>
-                  <TechnicalQuestionEntry
-                    key={q.question.id}
-                    q={q.question}
-                    teamId={rating.team_id}
-                    s={q.points ?? undefined}
-                    mode="feedback"
-                    eventId={event.id}
-                  />
-                  {i < questions.length - 1 && <Divider />}
-                </Box>
-              ))}
-          </Stack>
+          </Card.Section>
+          {questions &&
+            questions.map((q) => (
+              <Card.Section key={q.question.id} {...cardSectionProps}>
+                <TechnicalQuestionEntry
+                  key={q.question.id}
+                  q={q.question}
+                  teamId={rating.team_id}
+                  s={q.points ?? undefined}
+                  mode="feedback"
+                  eventId={event.id}
+                />
+              </Card.Section>
+            ))}
         </Card>
       )}
 
       {rating.expert_score && (
         <Card {...cardProps}>
-          <Group justify="center">
+          <Card.Section {...cardSectionProps}>
             <CategoryTitle
               title="Expert Ranking"
               rank={rating.expert_score.category_rank}
               score={rating.expert_score.score}
               normalized_score={rating.expert_score.score_normalized}
             />
-          </Group>
-          <SimpleGrid cols={2}>
-            <Group>
-              <ExpertRating
-                category="Presentation"
-                rating={rating.expert_score.presentation_score}
-                feedbackOnly
-              />
-            </Group>
-            <Group>
-              <ExpertRating
-                category="Product"
-                rating={rating.expert_score.product_score}
-                feedbackOnly
-              />
-            </Group>
-          </SimpleGrid>
+          </Card.Section>
+          <Card.Section {...cardSectionProps}>
+            <ExpertRating
+              category="Presentation"
+              rating={rating.expert_score.presentation_score}
+              feedbackOnly
+            />
+          </Card.Section>
+          <Card.Section {...cardSectionProps}>
+            <ExpertRating
+              category="Product"
+              rating={rating.expert_score.product_score}
+              feedbackOnly
+            />
+          </Card.Section>
         </Card>
       )}
 
       {rating.sidequest_score && (
         <Card {...cardProps}>
-          <Group justify="center">
+          <Card.Section {...cardSectionProps}>
             <CategoryTitle
               title="Sidequest Ranking"
               rank={rating.sidequest_score.category_rank}
               score={rating.sidequest_score.score}
               normalized_score={rating.sidequest_score.score_normalized}
             />
-          </Group>
-          {!limitedView && <OverviewLeaderboardTable eventId={event.id} />}
+          </Card.Section>
+          {!limitedView && (
+            <Card.Section {...cardSectionProps}>
+              <OverviewLeaderboardTable eventId={event.id} />
+            </Card.Section>
+          )}
         </Card>
       )}
+
       {team.finalist && rating.voting_score && (
         <Card {...cardProps}>
-          <Group justify="center">
+          <Card.Section {...cardSectionProps}>
             <CategoryTitle
               title="Public Voting Ranking"
               rank={rating.voting_score.category_rank}
               score={rating.voting_score.score}
               normalized_score={rating.voting_score.score_normalized}
             />
-          </Group>
-          <Flex justify="space-between" w="100%">
-            {placements.map(({ id, place, icon }) => (
-              <Group key={id}>
-                {icon}
-                <Text fw={600} size="lg">
-                  {rating.voting_score?.votes[id] || 0}
-                </Text>
-                <Text c="dimmed" size="sm">
-                  {place} place votes
-                </Text>
-              </Group>
-            ))}
-          </Flex>
+          </Card.Section>
+          <Card.Section {...cardSectionProps}>
+            <Group justify="space-between">
+              {placements.map(({ id, place, icon }) => (
+                <Group key={id}>
+                  {icon}
+                  <Text fw={600} size="lg">
+                    {rating.voting_score?.votes[id] || 0}
+                  </Text>
+                  <Text c="dimmed" size="sm">
+                    {place} place votes
+                  </Text>
+                </Group>
+              ))}
+            </Group>
+          </Card.Section>
         </Card>
       )}
     </>

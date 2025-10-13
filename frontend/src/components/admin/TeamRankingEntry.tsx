@@ -8,8 +8,6 @@ import { ScoreNormalized } from "@/api/gen/schemas";
 import { cardProps } from "@/styles/common";
 import { fmtTeamIndex } from "@/utils";
 
-import { useEffect, useState } from "react";
-
 import {
   Accordion,
   Card,
@@ -33,7 +31,6 @@ const TeamRankingEntry = ({ info }: TeamRankingEntryProps) => {
   const { data: team, refetch } = useGetTeam(info.team_id);
 
   const updateTeamMutation = useUpdateTeam();
-
 
   const changeFinalist = async (newFinalist: boolean) => {
     await updateTeamMutation.mutate({
