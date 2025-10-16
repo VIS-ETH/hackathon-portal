@@ -17,7 +17,7 @@
 1. `public` > Import/Export > Export with pg_dump:
 
     * Statements: Inserts with columns
-    * Database: portal
+    * Database: portal/app (or equivalent)
     * Schemas: public
     * Tables to dump: (empty)
     * Checkboxes: Data only
@@ -31,3 +31,31 @@
 
 5. Copy the output to the top of `db/migrations/x_name/migration.sql`
 6. If the data is sensitive, ensure the migration folder is git-ignored
+
+### Recovery
+
+@dackermann
+
+#### Locally (tested)
+
+1. Untar the tar file in an own directory: `tar -xf data.tar`
+2. Delete `backup_label`
+3. Empty Custom Cluster Configs (there are two!): `echo > override.conf` and `echo > custom.conf`
+4. Reset Write-Ahead-Log (if snapshot was taken while DB was running) - if you miss that Postgres will PANIC on start
+5. `docker run --rm  -v ./PATH_TO_BACKUP:/var/lib/postgresql/data postgres:17 bash -c "su postgres -c 'pg_resetwal -f /var/lib/postgresql/data'"`
+6. You should now be able to spin up the Postgres docker using the `PATH_TO_BACKUP` as bind volume , i.e.
+    ```yaml
+    volumes:
+      - ./PATH_TO_BACKUP/:/var/lib/postgresql/data
+    ```
+
+
+#### On Cluster (untested)
+
+Probably skip step 3 or replace the files with the files from a clean/reset db on the cluster.
+
+It might also be easier to
+
+1. restoring a backup locally using the guide above
+2. export the data from locally restored db with pg_dump (just the app database) to an sql file
+3. run the file from pg_dump against a new / empty db on the cluster
