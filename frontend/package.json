@@ -42,7 +42,7 @@
     "immer": "^10.1.1",
     "lodash": "^4.17.21",
     "mermaid": "^11.12.0",
-    "next": "^15.3.3",
+    "next": "^15.5.9",
     "object-hash": "^3.0.0",
     "react": "^19",
     "react-apexcharts": "^1.7.0",
