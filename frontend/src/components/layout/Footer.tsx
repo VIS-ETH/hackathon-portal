@@ -1,7 +1,10 @@
 import classes from "./Footer.module.css";
 
-import { Container, Flex, Image, SimpleGrid, Stack } from "@mantine/core";
+import { iconProps } from "@/styles/common";
 
+import { Container, Flex, Image, SimpleGrid, Stack, Text } from "@mantine/core";
+
+import { IconHeartFilled } from "@tabler/icons-react";
 import Link from "next/link";
 
 const Footer = () => {
@@ -37,14 +40,37 @@ const Footer = () => {
               </Link>
             </Flex>
             <Flex align="center" justify={{ base: "center", md: "flex-end" }}>
-              <Link href="https://vseth.ethz.ch">
-                <Image
-                  h={60}
-                  w="auto"
-                  src="/assets/logos/vseth/vseth_Logo_bylines_Fachverein.png"
-                  alt="VSETH"
-                />
-              </Link>
+              <Text size="xs" c="dimmed" ta={{ base: "center", md: "right" }}>
+                Made with{" "}
+                <IconHeartFilled
+                  {...iconProps}
+                  style={{ position: "relative", top: 4 }}
+                  color="red"
+                />{" "}
+                by volunteers at{" "}
+                <Link
+                  href="https://vis.ethz.ch"
+                  target="_blank"
+                  style={{
+                    textDecoration: "underline",
+                    textDecorationStyle: "dotted",
+                  }}
+                >
+                  VIS
+                </Link>
+                <br />
+                Source code available on{" "}
+                <Link
+                  href="https://github.com/VIS-ETH/hackathon-portal"
+                  target="_blank"
+                  style={{
+                    textDecoration: "underline",
+                    textDecorationStyle: "dotted",
+                  }}
+                >
+                  GitHub
+                </Link>
+              </Text>
             </Flex>
           </SimpleGrid>
         </Stack>

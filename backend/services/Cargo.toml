@@ -2,6 +2,7 @@
 name = "hackathon-portal-services"
 version = "1.0.0"
 edition = "2021"
+license = "AGPL-3.0-or-later"
 
 [dependencies]
 aes-gcm = "0.10.3"
