@@ -14,14 +14,14 @@
       "matchUpdateTypes": [
         "patch"
       ],
-      "groupName": "all patch updates",
+      "groupName": "all patch",
       "automerge": true
     },
     {
       "matchUpdateTypes": [
         "minor"
       ],
-      "groupName": "all minor updates"
+      "groupName": "all minor"
     },
     {
       "matchManagers": [
