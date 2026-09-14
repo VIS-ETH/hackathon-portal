@@ -29,11 +29,11 @@ serenity = "0.12.4"
 strum = { workspace = true }
 tokio = { workspace = true }
 tokio-cron-scheduler = "0.15.0"
-tower-http = { version = "0.6.6", features = ["cors"] }
+tower-http = { version = "0.7.0", features = ["cors"] }
 tracing = { workspace = true }
 utoipa = { workspace = true }
 utoipa-swagger-ui = { version = "7.1.0", features = ["axum"] }
-utoipauto = "0.2.0"
+utoipauto = "0.3.0"
 uuid = { workspace = true }
 
 [lints]
