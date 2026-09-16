@@ -77,8 +77,8 @@ const ExpertRatingCard = ({ team }: ExpertRatingCardProps) => {
                   teamId={team.id}
                   eventId={event.id}
                   mode="grading"
-                  q={rating.question}
-                  s={rating.points || undefined}
+                  technicalQuestion={rating.question}
+                  initialScore={rating.points || undefined}
                 />
               ))}
             </Stack>

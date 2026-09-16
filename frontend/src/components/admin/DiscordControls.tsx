@@ -2,7 +2,7 @@ import { useUpdateEvent } from "@/api/gen";
 import { Event } from "@/api/gen/schemas";
 import { iconProps, largeIconProps } from "@/styles/common";
 
-import React, { useEffect, useState } from "react";
+import React, { useMemo, useState } from "react";
 
 import {
   Accordion,
@@ -47,11 +47,7 @@ interface Role {
   name: string;
   slug: string;
   special:
-    | "admin"
-    | "mentor"
-    | "stakeholder"
-    | "sidequest_master"
-    | "participant";
+    "admin" | "mentor" | "stakeholder" | "sidequest_master" | "participant";
   color: string;
   show_in_roster?: boolean;
   mentionable?: boolean;
@@ -291,44 +287,34 @@ const getDefaultValue = <T,>(
 
 // ----- Validation Hook -----
 const useYamlValidation = (yamlInput: string) => {
-  const [validationState, setValidationState] = useState<{
+  const [debouncedYaml] = useDebouncedValue(yamlInput, 500);
+
+  const validationState = useMemo<{
     isValid: boolean | null;
     error: string | null;
     data: DiscordConfig | null;
     isLoading: boolean;
-  }>({
-    isValid: null,
-    error: null,
-    data: null,
-    isLoading: false,
-  });
-
-  const [debouncedYaml] = useDebouncedValue(yamlInput, 500);
-
-  useEffect(() => {
+  }>(() => {
     if (!debouncedYaml.trim()) {
-      setValidationState({
+      return {
         isValid: null,
         error: null,
         data: null,
         isLoading: false,
-      });
-      return;
+      };
     }
-
-    setValidationState((prev) => ({ ...prev, isLoading: true }));
 
     try {
       const data = YAML.load(debouncedYaml) as DiscordConfig;
       const isValid = validate(data);
 
       if (isValid) {
-        setValidationState({
+        return {
           isValid: true,
           error: null,
           data,
           isLoading: false,
-        });
+        };
       } else {
         const formattedErrors =
           validate.errors
@@ -341,20 +327,20 @@ const useYamlValidation = (yamlInput: string) => {
             })
             .join("\n") || "Unknown validation error";
 
-        setValidationState({
+        return {
           isValid: false,
           error: formattedErrors,
           data: null,
           isLoading: false,
-        });
+        };
       }
     } catch (err: unknown) {
-      setValidationState({
+      return {
         isValid: false,
         error: `YAML Syntax Error: ${err instanceof Error ? err.message : String(err)}`,
         data: null,
         isLoading: false,
-      });
+      };
     }
   }, [debouncedYaml]);
 

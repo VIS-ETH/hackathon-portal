@@ -27,6 +27,7 @@ const Sidequests = () => {
       hash === "sidequests" ||
       hash === "attempts"
     ) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- window.location.hash is a browser-only API unavailable during SSR render
       setActiveTab(hash);
     }
   }, []);

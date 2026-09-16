@@ -42,6 +42,7 @@ const Admin = () => {
       "discord",
     ];
     if (validTabs.includes(hash)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- window.location.hash is a browser-only API unavailable during SSR render
       setActiveTab(hash);
     }
   }, []);

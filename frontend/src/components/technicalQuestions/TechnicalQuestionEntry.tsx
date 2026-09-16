@@ -10,44 +10,57 @@ import {
 } from "@/api/gen";
 import { TechnicalQuestion as TechnicalQuestionType } from "@/api/gen/schemas";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { Center, Grid } from "@mantine/core";
 
 type TechnicalQuestionEntryProps = {
-  q?: TechnicalQuestionType;
-  s?: number;
+  technicalQuestion?: TechnicalQuestionType;
+  initialScore?: number;
   mode: "view" | "edit" | "grading" | "feedback" | "create";
   eventId: string;
   teamId?: string;
 };
 
 const TechnicalQuestionEntry = ({
-  q,
+  technicalQuestion,
   mode,
-  s,
+  initialScore,
   eventId,
   teamId,
 }: TechnicalQuestionEntryProps) => {
-  const [question, setQuestion] = useState(q?.question || "");
-  const [description, setDescription] = useState(q?.description || "");
-  const [minPoints, setMinPoints] = useState(q?.min_points || 0);
-  const [maxPoints, setMaxPoints] = useState(q?.max_points || 10);
-  const [binary, setBinary] = useState(q?.binary || false);
-  const [score, setScore] = useState<number | undefined>(s);
+  const [question, setQuestion] = useState(technicalQuestion?.question || "");
+  const [description, setDescription] = useState(
+    technicalQuestion?.description || "",
+  );
+  const [minPoints, setMinPoints] = useState(
+    technicalQuestion?.min_points || 0,
+  );
+  const [maxPoints, setMaxPoints] = useState(
+    technicalQuestion?.max_points || 10,
+  );
+  const [binary, setBinary] = useState(technicalQuestion?.binary || false);
+  const [score, setScore] = useState<number | undefined>(initialScore);
+  const [prevTechnicalQuestion, setPrevTechnicalQuestion] =
+    useState(technicalQuestion);
+  const [prevInitialScore, setPrevInitialScore] = useState(initialScore);
 
-  useEffect(() => {
-    if (q) {
-      setQuestion(q.question);
-      setDescription(q.description || "");
-      setMinPoints(q.min_points || 0);
-      setMaxPoints(q.max_points || 10);
-      setBinary(q.binary || false);
+  if (technicalQuestion !== prevTechnicalQuestion) {
+    setPrevTechnicalQuestion(technicalQuestion);
+    if (technicalQuestion) {
+      setQuestion(technicalQuestion.question);
+      setDescription(technicalQuestion.description || "");
+      setMinPoints(technicalQuestion.min_points || 0);
+      setMaxPoints(technicalQuestion.max_points || 10);
+      setBinary(technicalQuestion.binary || false);
     }
-    if (s !== undefined) {
-      setScore(s);
+  }
+  if (initialScore !== prevInitialScore) {
+    setPrevInitialScore(initialScore);
+    if (initialScore !== undefined) {
+      setScore(initialScore);
     }
-  }, [q, s]);
+  }
 
   // API calls would go here
 
@@ -72,18 +85,18 @@ const TechnicalQuestionEntry = ({
   };
 
   const deleteMutation = async () => {
-    if (mode !== "edit" || !q) return;
+    if (mode !== "edit" || !technicalQuestion) return;
     await deleteEndpoint.mutate({
       eventId: eventId,
-      questionId: q.id,
+      questionId: technicalQuestion.id,
     });
   };
 
   const updateMutation = async () => {
-    if (mode !== "edit" || !q) return;
+    if (mode !== "edit" || !technicalQuestion) return;
     await updateEndpoint.mutate({
       eventId: eventId,
-      questionId: q.id,
+      questionId: technicalQuestion.id,
       data: {
         question,
         description,
@@ -94,14 +107,14 @@ const TechnicalQuestionEntry = ({
     });
   };
 
-  const scoreMutation = async (s: number) => {
-    if (mode !== "grading" || !q || !teamId) return;
-    setScore(s);
+  const scoreMutation = async (newScore: number) => {
+    if (mode !== "grading" || !technicalQuestion || !teamId) return;
+    setScore(newScore);
     await scoreEndpoint.mutate({
       teamId: teamId,
       data: {
-        question_id: q.id,
-        score: s,
+        question_id: technicalQuestion.id,
+        score: newScore,
       },
     });
   };

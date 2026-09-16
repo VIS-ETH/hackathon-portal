@@ -9,7 +9,7 @@ import {
   primaryButtonProps,
 } from "@/styles/common";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import {
   Button,
@@ -26,13 +26,15 @@ type TeamNameInputProps = {
 };
 
 const TeamNameInput = ({ team, refetch }: TeamNameInputProps) => {
-  const [localName, setLocalName] = useState("");
+  const [localName, setLocalName] = useState(team.name);
+  const [prevTeam, setPrevTeam] = useState(team);
 
   const updateTeamMutation = useUpdateTeam();
 
-  useEffect(() => {
+  if (team !== prevTeam) {
+    setPrevTeam(team);
     setLocalName(team.name);
-  }, [team]);
+  }
 
   const handleSave = async () => {
     const newName = localName.trim();

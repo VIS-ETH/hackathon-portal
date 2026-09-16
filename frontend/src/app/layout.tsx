@@ -10,7 +10,7 @@ import { MantineContextProvider } from "@/contexts/MantineContext";
 import { PropsWithChildren } from "react";
 import { IntlProvider } from "react-intl";
 
-import { ColorSchemeScript } from "@mantine/core";
+import { ColorSchemeScript, mantineHtmlProps } from "@mantine/core";
 import "@mantine/core/styles.css";
 
 import "@mantine/carousel/styles.css";
@@ -20,7 +20,7 @@ import "@mantine/notifications/styles.css";
 
 const Layout = ({ children }: Readonly<PropsWithChildren>) => {
   return (
-    <html lang="en">
+    <html lang="en" {...mantineHtmlProps}>
       <head>
         <title>VIScon Hackathon Portal</title>
         {/* Prevent color scheme flashes */}

@@ -52,7 +52,7 @@ const TechnicalQuestionList = ({ eventId }: TechnicalQuestionListProps) => {
         {questions.map((q) => (
           <TechnicalQuestionEntry
             key={q.id}
-            q={q}
+            technicalQuestion={q}
             eventId={eventId}
             mode={editMode ? "edit" : "view"}
           />

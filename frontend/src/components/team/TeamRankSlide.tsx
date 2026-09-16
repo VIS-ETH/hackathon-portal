@@ -17,16 +17,18 @@ type TeamRankSlideProps = TeamIdWithRank & {
 const TeamRankSlide = ({ teamId, rank, isActive }: TeamRankSlideProps) => {
   const { data: team } = useGetTeam(teamId);
   const [showTeam, setShowTeam] = useState(false);
+  const [prevIsActive, setPrevIsActive] = useState(isActive);
   const [debouncedIsActive] = useDebouncedValue(isActive, 50); // ensure slide isn't flashed before fully transitioning
 
   const onShowTeam = () => {
     setShowTeam(true);
   };
 
-  useEffect(() => {
+  if (isActive !== prevIsActive) {
     // Reset showTeam when slide becomes inactive
+    setPrevIsActive(isActive);
     setShowTeam(false);
-  }, [isActive]);
+  }
 
   useEffect(() => {
     if (!team?.photo_url) {

@@ -43,6 +43,7 @@ export const useDiscord = () => {
     if (event && discord) {
       const dismissed = localStorage.getItem(localStorageKey!);
       // Show banner if no discord_user_id and not dismissed
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- localStorage is a browser-only API unavailable during SSR render
       setShowBanner(!discord.discord_user_id && !dismissed);
     }
   }, [event, discord, localStorageKey]);

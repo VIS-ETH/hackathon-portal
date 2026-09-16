@@ -7,7 +7,7 @@ import { Team } from "@/api/gen/schemas";
 import { useResolveParams } from "@/hooks/useResolveParams";
 import { cardProps } from "@/styles/common";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import {
   Button,
@@ -167,12 +167,14 @@ const PublicVoteInput = () => {
   const [thirdPlace, setThirdPlace] = useState<string | null>(
     my_votes?.find((v) => v.rank === 3)?.team_id ?? null,
   );
+  const [prevMyVotes, setPrevMyVotes] = useState(my_votes);
 
-  useEffect(() => {
+  if (my_votes !== prevMyVotes) {
+    setPrevMyVotes(my_votes);
     setFirstPlace(my_votes?.find((v) => v.rank === 1)?.team_id ?? null);
     setSecondPlace(my_votes?.find((v) => v.rank === 2)?.team_id ?? null);
     setThirdPlace(my_votes?.find((v) => v.rank === 3)?.team_id ?? null);
-  }, [my_votes]);
+  }
 
   const choose = (place: number, teamId: string) => {
     if (!event) return;

@@ -6,7 +6,7 @@ import {
 import { Team } from "@/api/gen/schemas";
 import { highlightedCardProps, inputProps } from "@/styles/common";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import {
   Card,
@@ -40,12 +40,14 @@ const ProjectPreferencesInput = ({
   const [localPPS, setLocalPPS] = useState<(string | undefined)[]>(
     Array(N_PREFERENCES).fill(undefined),
   );
+  const [prevRemotePPS, setPrevRemotePPS] = useState(remotePPS);
 
-  useEffect(() => {
+  if (remotePPS !== prevRemotePPS) {
+    setPrevRemotePPS(remotePPS);
     if (remotePPS?.length == N_PREFERENCES) {
       setLocalPPS(remotePPS);
     }
-  }, [remotePPS]);
+  }
 
   const validatePPS = (pps: (string | undefined)[]) => {
     const wellDefined = pps.every((pp) => pp !== undefined);

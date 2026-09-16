@@ -17,7 +17,7 @@ import {
 } from "@/api/gen/schemas";
 import { inputProps, primaryButtonProps } from "@/styles/common";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import {
   Button,
@@ -45,6 +45,7 @@ const CreateAttemptDrawer = ({
   const [user, setUser] = useState<TeamAffiliate | undefined>();
   const [sidequest, setSidequest] = useState<Sidequest | undefined>();
   const [result, setResult] = useState<number>(0);
+  const [prevOpened, setPrevOpened] = useState(opened);
 
   const { data: cooldown, refetch: refetchCooldown } =
     useGetSidequestAttemptCooldown(
@@ -61,16 +62,17 @@ const CreateAttemptDrawer = ({
 
   const createAttemptMutation = useCreateSidequestAttempt();
 
-  useEffect(() => {
-    reset();
-  }, [opened]);
-
   const reset = () => {
     setTeam(undefined);
     setUser(undefined);
     setSidequest(undefined);
     setResult(0);
   };
+
+  if (opened !== prevOpened) {
+    setPrevOpened(opened);
+    reset();
+  }
 
   const handleSubmit = async () => {
     if (!team || !user || !sidequest) {

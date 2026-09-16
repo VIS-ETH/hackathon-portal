@@ -13,13 +13,7 @@ import {
 } from "@/styles/common";
 import { fmtScore } from "@/utils";
 
-import {
-  Card,
-  Group,
-  Loader,
-  Text,
-  Title,
-} from "@mantine/core";
+import { Card, Group, Loader, Text, Title } from "@mantine/core";
 
 import { IconTrophy } from "@tabler/icons-react";
 
@@ -113,9 +107,9 @@ const RatingFeedbackCard = ({
               <Card.Section key={q.question.id} {...cardSectionProps}>
                 <TechnicalQuestionEntry
                   key={q.question.id}
-                  q={q.question}
+                  technicalQuestion={q.question}
                   teamId={rating.team_id}
-                  s={q.points ?? undefined}
+                  initialScore={q.points ?? undefined}
                   mode="feedback"
                   eventId={event.id}
                 />
