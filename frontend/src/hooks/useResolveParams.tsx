@@ -22,25 +22,30 @@ export const useResolveParams = () => {
 
   const { data: event, refetch: refetchEvent } = useGetEventBySlug(
     eventSlug ?? "",
+    { query: { enabled: !!eventSlug } },
   );
 
   const { data: roles, refetch: refetchRoles } = useGetEventRoles(
     event?.id ?? "",
+    { query: { enabled: !!event?.id } },
   );
 
   const { data: team, refetch: refetchTeam } = useGetTeamBySlug(
     eventSlug ?? "",
     teamSlug ?? "",
+    { query: { enabled: !!eventSlug && !!teamSlug } },
   );
 
   const { data: project, refetch: refetchProject } = useGetProjectBySlug(
     eventSlug ?? "",
     projectSlug ?? "",
+    { query: { enabled: !!eventSlug && !!projectSlug } },
   );
 
   const { data: sidequest, refetch: refetchSidequest } = useGetSidequestBySlug(
     eventSlug ?? "",
     sidequestSlug ?? "",
+    { query: { enabled: !!eventSlug && !!sidequestSlug } },
   );
 
   const { data: policies, refetch: refetchPolicies } = useGetMyPolicies(
