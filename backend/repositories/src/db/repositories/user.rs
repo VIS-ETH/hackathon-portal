@@ -26,4 +26,15 @@ impl UserRepository {
             .await
             .map_err(RepositoryError::from)
     }
+
+    pub async fn fetch_all_by_auth_ids<C: ConnectionTrait>(
+        db: &C,
+        auth_ids: &[String],
+    ) -> RepositoryResult<Vec<user::Model>> {
+        user::Entity::find()
+            .filter(user::Column::AuthId.is_in(auth_ids.iter().map(String::as_str)))
+            .all(db)
+            .await
+            .map_err(RepositoryError::from)
+    }
 }

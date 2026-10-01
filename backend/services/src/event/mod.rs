@@ -254,7 +254,7 @@ impl EventService {
 
         let new_users = self
             .user_service
-            .create_users(users)
+            .create_or_get_users(&users)
             .await?
             .into_iter()
             .map(ReducedUser::from)

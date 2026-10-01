@@ -7,6 +7,7 @@ use axum::extract::State;
 use axum::http::{Method, Uri};
 use axum::middleware::Next;
 use axum::response::Response;
+use hackathon_portal_services::user::models::UserForCreate;
 use std::sync::Arc;
 use tracing::{info, warn};
 use uuid::Uuid;
@@ -32,7 +33,10 @@ pub async fn mw_resolve_ctx(
 
     let Ok(user) = state
         .user_service
-        .create_or_get_user(&auth_result.auth_id, &auth_result.name)
+        .create_or_get_user(UserForCreate {
+            auth_id: auth_result.auth_id,
+            name: Some(auth_result.name),
+        })
         .await
     else {
         return next.run(req).await;
