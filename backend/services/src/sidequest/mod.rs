@@ -5,7 +5,7 @@ use chrono::{NaiveDateTime, Utc};
 use hackathon_portal_repositories::DbRepository;
 use models::{AttemptForCreate, SidequestForCreate, SidequestForUpdate};
 use std::cmp::Ordering;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::sync::Arc;
 
 use crate::authorization::AuthorizationService;
@@ -19,7 +19,9 @@ use hackathon_portal_repositories::db::{
 };
 use sea_orm::Set;
 use sea_orm::{
-    prelude::*, FromQueryResult, IntoActiveModel, QueryOrder, QuerySelect, QueryTrait,
+    prelude::*,
+    sea_query::{Func, IntoCondition, SimpleExpr},
+    FromQueryResult, IntoActiveModel, JoinType, QueryOrder, QuerySelect, QueryTrait,
     TransactionTrait,
 };
 use slug::slugify;
@@ -458,49 +460,55 @@ impl SidequestService {
         &self,
         event_id: Uuid,
     ) -> ServiceResult<Vec<TeamLeaderboardEntry>> {
-        let teams = TeamRepository::fetch_all_by_event_id(self.db_repo.conn(), event_id).await?;
+        let latest_valid_at: Option<NaiveDateTime> = db_sidequest_score::Entity::find()
+            .select_only()
+            .column_as(
+                Expr::col((
+                    db_sidequest_score::Entity,
+                    db_sidequest_score::Column::ValidAt,
+                ))
+                .max(),
+                "valid_at",
+            )
+            .inner_join(db_team::Entity)
+            .filter(db_team::Column::EventId.eq(event_id))
+            .into_tuple()
+            .one(self.db_repo.conn())
+            .await?
+            .flatten();
 
-        let team_mapping = teams
-            .iter()
-            .map(|team| (team.id, team))
-            .collect::<HashMap<_, _>>();
+        // teams without a score in the latest snapshot get 0
+        // (if there is no snapshot at all, `valid_at = NULL` matches nothing)
+        let score: SimpleExpr = Func::coalesce([
+            Expr::col((
+                db_sidequest_score::Entity,
+                db_sidequest_score::Column::Score,
+            ))
+            .into(),
+            Expr::val(0.0).into(),
+        ])
+        .into();
 
-        let scores = self.aggregate_scores(event_id).await?;
-
-        let mut seen = HashSet::new();
-        let mut entries = Vec::new();
-
-        for (team_id, team_score) in scores {
-            let Some(team) = team_mapping.get(&team_id) else {
-                continue;
-            };
-
-            let entry = TeamLeaderboardEntry {
-                team_id,
-                team_name: team.name.clone(),
-                score: team_score,
-            };
-
-            seen.insert(team_id);
-            entries.push(entry);
-        }
-
-        for team in teams {
-            if seen.contains(&team.id) {
-                continue;
-            }
-
-            let entry = TeamLeaderboardEntry {
-                team_id: team.id,
-                team_name: team.name.clone(),
-                score: 0.0,
-            };
-
-            seen.insert(team.id);
-            entries.push(entry);
-        }
-
-        entries.sort_by(|a, b| b.score.partial_cmp(&a.score).unwrap_or(Ordering::Equal));
+        let entries = db_team::Entity::find()
+            .select_only()
+            .column_as(db_team::Column::Id, "team_id")
+            .column_as(db_team::Column::Name, "team_name")
+            .column_as(score.clone(), "score")
+            .join(
+                JoinType::LeftJoin,
+                db_team::Relation::SidequestScore
+                    .def()
+                    .on_condition(move |_team, score| {
+                        Expr::col((score, db_sidequest_score::Column::ValidAt))
+                            .eq(latest_valid_at)
+                            .into_condition()
+                    }),
+            )
+            .filter(db_team::Column::EventId.eq(event_id))
+            .order_by_desc(score)
+            .into_model::<TeamLeaderboardEntry>()
+            .all(self.db_repo.conn())
+            .await?;
 
         Ok(entries)
     }

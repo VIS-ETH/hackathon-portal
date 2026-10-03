@@ -1,5 +1,6 @@
 use chrono::NaiveDateTime;
 use hackathon_portal_repositories::db::{db_sidequest, db_sidequest_attempt};
+use sea_orm::FromQueryResult;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use uuid::Uuid;
@@ -82,7 +83,7 @@ pub struct Cooldown {
     pub next_attempt: Option<NaiveDateTime>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema, FromQueryResult)]
 pub struct TeamLeaderboardEntry {
     pub team_id: Uuid,
     pub team_name: String,

@@ -6,6 +6,7 @@
  */
 import type { ExpertScore } from "./expertScore";
 import type { SidequestScore } from "./sidequestScore";
+import type { Team } from "./team";
 import type { TechnicalScore } from "./technicalScore";
 import type { VotingScore } from "./votingScore";
 
@@ -18,7 +19,7 @@ export interface ScoreNormalized {
   /** @nullable */
   rank?: number | null;
   sidequest_score?: SidequestScore | null;
-  team_id: string;
+  team: Team;
   tech_score?: TechnicalScore | null;
   voting_score?: VotingScore | null;
 }

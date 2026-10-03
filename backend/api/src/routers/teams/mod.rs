@@ -5,7 +5,9 @@ use crate::ctx::Ctx;
 use crate::error::{ApiJson, ApiJsonVec};
 use crate::models::AffectedRows;
 use crate::routers::events::models::EventIdQuery;
-use crate::routers::teams::models::{AdminTeam, CreateTeamAPIKey, Team, TeamCredentials};
+use crate::routers::teams::models::{
+    AdminTeam, CreateTeamAPIKey, ScoreNormalized, Team, TeamCredentials,
+};
 use crate::routers::users::models::TeamRoleOptQuery;
 use crate::ApiError;
 use axum::extract::{Path, Query, State};
@@ -14,7 +16,6 @@ use axum::{Json, Router};
 use hackathon_portal_repositories::db::{ExpertRatingCategory, TeamRole};
 use hackathon_portal_services::authorization::groups::Groups;
 use hackathon_portal_services::authorization::models::{TeamAffiliate, TeamRoles, TeamRolesMap};
-use hackathon_portal_services::rating::models::ScoreNormalized;
 use hackathon_portal_services::team::models::{TeamForCreate, TeamForUpdate};
 use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
@@ -775,11 +776,21 @@ pub async fn get_team_rating(
         });
     }
 
+    let can_view_project_assignment = groups.can_view_project_assignment(
+        event.visibility,
+        event.projects_visible,
+        event.project_assignments_visible,
+    );
+    let can_view_finalists = groups.can_view_finalists(event.visibility, event.finalists_visible);
+
     let full_ranking = state
         .rating_service
         .get_complete_scores(team.event_id)
         .await?;
-    let team_ranking = full_ranking.into_iter().find(|r| r.team_id == team_id);
+    let team_ranking = full_ranking
+        .into_iter()
+        .find(|r| r.team.id == team_id)
+        .map(|r| ScoreNormalized::from((r, can_view_project_assignment, can_view_finalists)));
 
     Ok(Json(team_ranking))
 }

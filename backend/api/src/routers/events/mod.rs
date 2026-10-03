@@ -9,6 +9,7 @@ use crate::routers::events::models::{
     SidequestsHistoryQuery, UpdateTechnicalQuestionDTO,
 };
 use crate::routers::sidequests::models::SidequestIdQuery;
+use crate::routers::teams::models::ScoreNormalized;
 use crate::routers::users::models::EventRoleOptQuery;
 use crate::{ApiError, ApiResult};
 use axum::extract::{Path, Query, State};
@@ -19,7 +20,7 @@ use hackathon_portal_services::authorization::groups::Groups;
 use hackathon_portal_services::authorization::models::{EventAffiliate, EventRoles, EventRolesMap};
 use hackathon_portal_services::event::models::{Event, EventForUpdate};
 use hackathon_portal_services::rating::models::{
-    CreateTechnicalQuestion, ExpertRatingLeaderboardEntry, ScoreNormalized, TechnicalQuestion,
+    CreateTechnicalQuestion, ExpertRatingLeaderboardEntry, TechnicalQuestion,
     UpdateTechnicalQuestion,
 };
 use hackathon_portal_services::sidequest::models::{
@@ -456,7 +457,7 @@ pub async fn get_leaderboard(
     let complete_scores = state.rating_service.get_complete_scores(event_id).await?;
     let leaderboard = complete_scores
         .into_iter()
-        .map(|s| s.team_id)
+        .map(|s| s.team.id)
         .collect::<Vec<_>>();
     Ok(Json(leaderboard))
 }
@@ -483,7 +484,20 @@ pub async fn get_leaderboard_detailed(
         });
     }
 
-    let leaderboard = state.rating_service.get_complete_scores(event_id).await?;
+    let can_view_project_assignment = groups.can_view_project_assignment(
+        event.visibility,
+        event.projects_visible,
+        event.project_assignments_visible,
+    );
+    let can_view_finalists = groups.can_view_finalists(event.visibility, event.finalists_visible);
+
+    let leaderboard = state
+        .rating_service
+        .get_complete_scores(event_id)
+        .await?
+        .into_iter()
+        .map(|s| ScoreNormalized::from((s, can_view_project_assignment, can_view_finalists)))
+        .collect();
     Ok(Json(leaderboard))
 }
 

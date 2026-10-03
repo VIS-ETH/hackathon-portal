@@ -1,3 +1,4 @@
+use crate::team::models::Team;
 use hackathon_portal_repositories::db::{
     db_expert_rating, db_technical_question, db_vote, ExpertRatingCategory,
 };
@@ -166,9 +167,9 @@ pub struct VotingScore {
     pub votes: HashMap<i32, i32>, // rank -> number of votes
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+#[derive(Debug, Clone)]
 pub struct ScoreNormalized {
-    pub team_id: Uuid,
+    pub team: Team,
     pub tech_score: Option<TechnicalScore>,
     pub expert_score: Option<ExpertScore>,
     pub sidequest_score: Option<SidequestScore>,

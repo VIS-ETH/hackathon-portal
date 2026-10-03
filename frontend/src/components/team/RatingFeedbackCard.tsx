@@ -3,7 +3,7 @@ import OverviewLeaderboardTable from "../sidequest/OverviewLeaderboardTable";
 import TechnicalQuestionEntry from "../technicalQuestions/TechnicalQuestionEntry";
 import ScoreDisplay from "./ScoreDisplay";
 
-import { useGetTeam, useGetTechnicalTeamRating } from "@/api/gen";
+import { useGetTechnicalTeamRating } from "@/api/gen";
 import { ScoreNormalized } from "@/api/gen/schemas";
 import { useResolveParams } from "@/hooks/useResolveParams";
 import {
@@ -13,7 +13,9 @@ import {
 } from "@/styles/common";
 import { fmtScore } from "@/utils";
 
-import { Card, Group, Loader, Text, Title } from "@mantine/core";
+import { useState } from "react";
+
+import { Button, Card, Group, Loader, Text, Title } from "@mantine/core";
 
 import { IconTrophy } from "@tabler/icons-react";
 
@@ -45,16 +47,25 @@ const CategoryTitle = ({
 type RatingFeedbackCardProps = {
   rating: ScoreNormalized;
   limitedView?: boolean;
+  autoLoadAnswers?: boolean;
 };
 
 const RatingFeedbackCard = ({
   rating,
   limitedView = false,
+  autoLoadAnswers = true,
 }: RatingFeedbackCardProps) => {
   const { event } = useResolveParams();
-  const { data: questions } = useGetTechnicalTeamRating(rating.team_id);
+  const team = rating.team;
 
-  const { data: team } = useGetTeam(rating.team_id);
+  const [loadTechQuestions, setLoadTechQuestions] = useState(autoLoadAnswers);
+
+  const { data: questions = [], isLoading: questionsLoading } =
+    useGetTechnicalTeamRating(team.id, {
+      query: {
+        enabled: loadTechQuestions,
+      },
+    });
 
   const placements = [
     { id: 1, place: "first", icon: <IconTrophy size={20} color="gold" /> },
@@ -102,19 +113,30 @@ const RatingFeedbackCard = ({
               normalized_score={rating.tech_score.score_normalized}
             />
           </Card.Section>
-          {questions &&
-            questions.map((q) => (
-              <Card.Section key={q.question.id} {...cardSectionProps}>
-                <TechnicalQuestionEntry
-                  key={q.question.id}
-                  technicalQuestion={q.question}
-                  teamId={rating.team_id}
-                  initialScore={q.points ?? undefined}
-                  mode="feedback"
-                  eventId={event.id}
-                />
-              </Card.Section>
-            ))}
+          {!autoLoadAnswers && !loadTechQuestions && (
+            <Card.Section {...cardSectionProps}>
+              <Button onClick={() => setLoadTechQuestions(true)}>
+                Load Answers
+              </Button>
+            </Card.Section>
+          )}
+          {questionsLoading && (
+            <Card.Section {...cardSectionProps} ta="center">
+              <Loader />
+            </Card.Section>
+          )}
+          {questions.map((q) => (
+            <Card.Section key={q.question.id} {...cardSectionProps}>
+              <TechnicalQuestionEntry
+                key={q.question.id}
+                technicalQuestion={q.question}
+                teamId={team.id}
+                initialScore={q.points ?? undefined}
+                mode="feedback"
+                eventId={event.id}
+              />
+            </Card.Section>
+          ))}
         </Card>
       )}
 

@@ -36,7 +36,11 @@ const TeamRanking = ({ eventId }: TeamRankingProps) => {
     <Stack pt={"md"}>
       {refreshButton}
       {leaderboardEntry.map((entry) => (
-        <TeamRankingEntry key={entry.team_id} info={entry} />
+        <TeamRankingEntry
+          key={entry.team.id}
+          info={entry}
+          onTeamUpdated={refetch}
+        />
       ))}
     </Stack>
   );

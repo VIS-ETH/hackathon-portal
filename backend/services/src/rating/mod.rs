@@ -12,16 +12,16 @@ use crate::ServiceResult;
 use futures::future::join_all;
 use hackathon_portal_repositories::db::{
     db_expert_rating, db_team, db_technical_question, db_technical_rating, db_vote,
-    ExpertRatingCategory, ExpertRatingRepository, TeamRepository, TechnicalQuestionRepository,
-    VoteRepository,
+    ExpertRatingCategory, ExpertRatingRepository, TechnicalQuestionRepository, VoteRepository,
 };
 use hackathon_portal_repositories::DbRepository;
 use itertools::Itertools;
-use sea_orm::sea_query::Func;
+use sea_orm::sea_query::{Func, IntoCondition};
 use sea_orm::TransactionTrait;
 use sea_orm::{prelude::*, DeleteResult};
 use sea_orm::{
-    ActiveModelTrait, FromQueryResult, IntoActiveModel, IntoSimpleExpr, QuerySelect, Set,
+    ActiveModelTrait, FromQueryResult, IntoActiveModel, IntoSimpleExpr, JoinType, QueryOrder,
+    QuerySelect, QueryTrait, Set,
 };
 use std::cmp::Ordering;
 use std::collections::HashMap;
@@ -299,34 +299,34 @@ impl RatingService {
         &self,
         team_id: Uuid,
     ) -> ServiceResult<Vec<TechnicalQuestionResult>> {
-        // TODO Improve this with join
-        let event_id = TeamRepository::fetch_by_id(self.db_repo.conn(), team_id)
+        let team_event_id = db_team::Entity::find()
+            .select_only()
+            .column(db_team::Column::EventId)
+            .filter(db_team::Column::Id.eq(team_id))
+            .into_query();
+
+        let ratings = db_technical_question::Entity::find()
+            .select_also(db_technical_rating::Entity)
+            .join(
+                JoinType::LeftJoin,
+                db_technical_question::Relation::TechnicalRating
+                    .def()
+                    .on_condition(move |_question, rating| {
+                        Expr::col((rating, db_technical_rating::Column::TeamId))
+                            .eq(team_id)
+                            .into_condition()
+                    }),
+            )
+            .filter(db_technical_question::Column::EventId.in_subquery(team_event_id))
+            .order_by_asc(db_technical_question::Column::Id)
+            .all(self.db_repo.conn())
             .await?
-            .event_id;
-
-        let questions =
-            TechnicalQuestionRepository::fetch_all_by_event_id(self.db_repo.conn(), event_id)
-                .await?;
-
-        let mut ratings = Vec::new();
-        for question in &questions {
-            let answer = db_technical_rating::Entity::find()
-                .filter(db_technical_rating::Column::TeamId.eq(team_id))
-                .filter(db_technical_rating::Column::TechnicalQuestionId.eq(question.id))
-                .all(self.db_repo.conn())
-                .await?;
-            if let Some(rating) = answer.first() {
-                ratings.push(TechnicalQuestionResult {
-                    question: question.clone().into(),
-                    points: Some(rating.score),
-                });
-            } else {
-                ratings.push(TechnicalQuestionResult {
-                    question: question.clone().into(),
-                    points: None,
-                });
-            }
-        }
+            .into_iter()
+            .map(|(question, rating)| TechnicalQuestionResult {
+                question: question.into(),
+                points: rating.map(|rating| rating.score),
+            })
+            .collect();
 
         Ok(ratings)
     }
@@ -510,7 +510,13 @@ impl RatingService {
         &self,
         event_id: Uuid,
     ) -> ServiceResult<HashMap<Uuid, Option<SidequestScore>>> {
-        let scores = self.sidequest_service.aggregate_scores(event_id).await?;
+        let scores = self
+            .sidequest_service
+            .get_leaderboard(event_id)
+            .await?
+            .into_iter()
+            .map(|score| (score.team_id, score.score))
+            .collect::<HashMap<_, _>>();
         let scores_normalized = self.project_scores(&scores, |s| *s, 10.0).ok_or(
             ServiceError::ScoreCalculationError {
                 message: "Failed to normalize sidequest scores".into(),
@@ -774,9 +780,8 @@ impl RatingService {
         let expert_scores = self.get_expert_score(event_id).await?;
         let sidequest_scores = self.get_sidequest_score(event_id).await?;
         let public_scores = self.get_public_score(event_id).await?;
-        let bonus_scores = TeamRepository::fetch_all_by_event_id(self.db_repo.conn(), event_id)
-            .await?
-            .into_iter()
+        let bonus_scores = teams
+            .iter()
             .map(|team| (team.id, team.extra_score.unwrap_or(0.0)))
             .collect::<HashMap<Uuid, _>>();
 
@@ -815,7 +820,7 @@ impl RatingService {
         Ok(teams
             .iter()
             .map(|team| ScoreNormalized {
-                team_id: team.id,
+                team: team.clone(),
                 tech_score: technical_scores
                     .get(&team.id)
                     .and_then(std::clone::Clone::clone),
