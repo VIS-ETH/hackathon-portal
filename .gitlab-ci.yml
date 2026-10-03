@@ -1,0 +1,56 @@
+# Simple checks: formatting and linting for frontend and backend.
+
+workflow:
+  rules:
+    # Run for merge requests and on the default branch; avoid duplicate branch + MR pipelines.
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+      when: never
+    - if: $CI_COMMIT_BRANCH
+
+stages:
+  - check
+
+# --- Frontend ---------------------------------------------------------------
+
+.frontend:
+  stage: check
+  image: node:24-slim
+  variables:
+    npm_config_cache: $CI_PROJECT_DIR/.npm
+  cache:
+    key:
+      files:
+        - frontend/package-lock.json
+    paths:
+      - .npm/
+  before_script:
+    - cd frontend
+    - npm ci --prefer-offline --no-audit --no-fund
+
+frontend:fmt:
+  extends: .frontend
+  script:
+    - npx prettier --check .
+
+frontend:lint:
+  extends: .frontend
+  script:
+    - npm run lint
+
+# --- Backend ----------------------------------------------------------------
+
+.backend:
+  stage: check
+  image: rust:slim-bookworm
+  variables:
+    CARGO_HOME: $CI_PROJECT_DIR/.cargo
+    CARGO_TERM_COLOR: always
+
+backend:fmt:
+  extends: .backend
+  script:
+    - rustup component add rustfmt
+    - cd backend
+    - cargo fmt --all --check
+
