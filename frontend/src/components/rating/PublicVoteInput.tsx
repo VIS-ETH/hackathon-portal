@@ -2,10 +2,11 @@
 
 import TeamImage from "../team/TeamImage";
 
-import { useGetMyVotes, useGetTeams, useSetMyVote } from "@/api/gen";
+import { useGetMe, useGetMyVotes, useGetTeams, useSetMyVote } from "@/api/gen";
 import { Team } from "@/api/gen/schemas";
 import { useResolveParams } from "@/hooks/useResolveParams";
 import { cardProps } from "@/styles/common";
+import { seededShuffle } from "@/utils";
 
 import { useState } from "react";
 
@@ -151,12 +152,13 @@ const SelectCard = ({ team, choose }: SelectCardProps) => {
 };
 
 const PublicVoteInput = () => {
+  const { data: me } = useGetMe();
   const { event, team: my_team } = useResolveParams();
 
   const { data: my_votes } = useGetMyVotes({ event_id: event?.id ?? "" });
   const { data: teams = [] } = useGetTeams({ event_id: event?.id ?? "" });
-
   const finalists = teams.filter((t) => t.finalist);
+  const finalistsShuffled = seededShuffle(finalists, me?.id ?? "");
   const mutateVote = useSetMyVote();
   const [firstPlace, setFirstPlace] = useState<string | null>(
     my_votes?.find((v) => v.rank === 1)?.team_id ?? null,
@@ -200,7 +202,7 @@ const PublicVoteInput = () => {
     });
   };
 
-  if (!event || !my_votes || !teams) {
+  if (!event || !my_votes || !teams || !me) {
     return <Skeleton height={200} radius="md" />;
   }
 
@@ -230,7 +232,7 @@ const PublicVoteInput = () => {
         <Title order={4}>Finalists</Title>
       </Center>
       <Flex gap="md" justify="center" align="center" wrap="wrap">
-        {finalists
+        {finalistsShuffled
           .filter(
             (team) =>
               ![firstPlace, secondPlace, thirdPlace].includes(team.id) &&
