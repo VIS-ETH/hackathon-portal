@@ -25,6 +25,8 @@ pub enum Relation {
     ExpertRating,
     #[sea_orm(has_many = "super::sidequest_attempt::Entity")]
     SidequestAttempt,
+    #[sea_orm(has_many = "super::stakeholder_project::Entity")]
+    StakeholderProject,
     #[sea_orm(has_many = "super::team_role_assignment::Entity")]
     TeamRoleAssignment,
     #[sea_orm(has_many = "super::upload::Entity")]
@@ -57,6 +59,12 @@ impl Related<super::sidequest_attempt::Entity> for Entity {
     }
 }
 
+impl Related<super::stakeholder_project::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::StakeholderProject.def()
+    }
+}
+
 impl Related<super::team_role_assignment::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::TeamRoleAssignment.def()
@@ -81,6 +89,15 @@ impl Related<super::event::Entity> for Entity {
     }
     fn via() -> Option<RelationDef> {
         Some(super::event_user_discord_id::Relation::User.def().rev())
+    }
+}
+
+impl Related<super::project::Entity> for Entity {
+    fn to() -> RelationDef {
+        super::stakeholder_project::Relation::Project.def()
+    }
+    fn via() -> Option<RelationDef> {
+        Some(super::stakeholder_project::Relation::User.def().rev())
     }
 }
 

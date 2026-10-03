@@ -23,6 +23,10 @@ const TeamAffiliatesCard = ({ teamId }: TeamAffiliatesCardProps) => {
     affiliate.roles.includes(TeamRole.Mentor),
   );
 
+  const stakeholders = affiliates.filter((affiliate) =>
+    affiliate.roles.includes(TeamRole.Stakeholder),
+  );
+
   return (
     <Card {...cardProps}>
       <CardSection {...cardSectionProps} h="100%">
@@ -43,21 +47,33 @@ const TeamAffiliatesCard = ({ teamId }: TeamAffiliatesCardProps) => {
           )}
         </Stack>
       </CardSection>
-      <CardSection {...cardSectionProps}>
+      <CardSection {...cardSectionProps} pt={0}>
         <Stack gap="sm">
-          {mentors.length ? (
-            <>
-              <Text c="dimmed" size="sm">
-                Mentors
-              </Text>
-              {mentors.map((mentor) => (
-                <IconTextGroup key={mentor.id} Icon={IconUserStar}>
-                  <Text>{mentor.name}</Text>
-                </IconTextGroup>
-              ))}
-            </>
-          ) : (
-            <Text c="dimmed">No mentors assigned</Text>
+          <Text c="dimmed" size="sm">
+            Mentors
+          </Text>
+          {mentors.map((mentor) => (
+            <IconTextGroup key={mentor.id} Icon={IconUserStar}>
+              <Text>{mentor.name}</Text>
+            </IconTextGroup>
+          ))}
+          {mentors.length === 0 && (
+            <Text size="xs" c="dimmed">
+              No mentors assigned
+            </Text>
+          )}
+          <Text c="dimmed" size="sm" mt="md">
+            Stakeholders
+          </Text>
+          {stakeholders.map((stakeholder) => (
+            <IconTextGroup key={stakeholder.id} Icon={IconUserStar}>
+              <Text>{stakeholder.name}</Text>
+            </IconTextGroup>
+          ))}
+          {stakeholders.length === 0 && (
+            <Text size="xs" c="dimmed">
+              No stakeholders assigned
+            </Text>
           )}
         </Stack>
       </CardSection>

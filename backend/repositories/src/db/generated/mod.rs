@@ -13,6 +13,7 @@ pub mod sea_orm_active_enums;
 pub mod sidequest;
 pub mod sidequest_attempt;
 pub mod sidequest_score;
+pub mod stakeholder_project;
 pub mod team;
 pub mod team_role_assignment;
 pub mod technical_question;

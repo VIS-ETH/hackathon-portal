@@ -1,4 +1,5 @@
-use hackathon_portal_repositories::db::db_project;
+use crate::user::models::{ReducedUser, User};
+use hackathon_portal_repositories::db::{db_project, db_user};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use uuid::Uuid;
@@ -10,16 +11,22 @@ pub struct Project {
     pub name: String,
     pub slug: String,
     pub content: String,
+    pub stakeholders: Vec<ReducedUser>,
 }
 
-impl From<db_project::Model> for Project {
-    fn from(event: db_project::Model) -> Self {
+impl From<(db_project::Model, Vec<db_user::Model>)> for Project {
+    fn from((project, stakeholders): (db_project::Model, Vec<db_user::Model>)) -> Self {
         Self {
-            id: event.id,
-            event_id: event.event_id,
-            name: event.name,
-            slug: event.slug,
-            content: event.content,
+            id: project.id,
+            event_id: project.event_id,
+            name: project.name,
+            slug: project.slug,
+            content: project.content,
+            stakeholders: stakeholders
+                .into_iter()
+                .map(User::from)
+                .map(ReducedUser::from)
+                .collect(),
         }
     }
 }
@@ -35,4 +42,5 @@ pub struct ProjectForCreate {
 pub struct ProjectForUpdate {
     pub name: Option<String>,
     pub content: Option<String>,
+    pub stakeholder_ids: Option<Vec<Uuid>>,
 }

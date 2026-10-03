@@ -10,4 +10,6 @@ export interface ProjectForUpdate {
   content?: string | null;
   /** @nullable */
   name?: string | null;
+  /** @nullable */
+  stakeholder_ids?: string[] | null;
 }

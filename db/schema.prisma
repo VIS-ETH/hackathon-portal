@@ -27,6 +27,7 @@ enum event_role {
 enum team_role {
   MENTOR
   MEMBER
+  STAKEHOLDER
 }
 
 enum expert_rating_category {
@@ -134,6 +135,7 @@ model user {
   upload                upload[]
   event_user_discord_id event_user_discord_id[]
   vote                  vote[]
+  stakeholder_project   stakeholder_project[]
 
   // meta
   @@unique([name, index])
@@ -191,12 +193,25 @@ model project {
   event event @relation(fields: [event_id], references: [id])
 
   // related models
-  team               team[]
-  project_preference project_preference[]
+  team                team[]
+  project_preference  project_preference[]
+  stakeholder_project stakeholder_project[]
 
   // meta
   @@unique([event_id, name])
   @@unique([event_id, slug])
+}
+
+model stakeholder_project {
+  project_id String @db.Uuid
+  user_id    String @db.Uuid
+
+  // relations
+  project project @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  user    user    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  // meta
+  @@id([project_id, user_id])
 }
 
 model project_preference {

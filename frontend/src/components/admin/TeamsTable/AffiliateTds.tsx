@@ -93,7 +93,11 @@ const AffiliateTds = ({ team, role, max }: AffiliateTdsProps) => {
           handleUpdate(mentor, index);
         }}
         role={
-          role === TeamRole.Member ? EventRole.Participant : EventRole.Mentor
+          role === TeamRole.Member
+            ? EventRole.Participant
+            : role === TeamRole.Mentor
+              ? EventRole.Mentor
+              : EventRole.Stakeholder
         }
         size="xs"
       />

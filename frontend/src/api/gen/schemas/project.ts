@@ -4,6 +4,7 @@
  * hackathon-portal-api
  * OpenAPI spec version: 1.0.0
  */
+import type { ReducedUser } from "./reducedUser";
 
 export interface Project {
   content: string;
@@ -11,4 +12,5 @@ export interface Project {
   id: string;
   name: string;
   slug: string;
+  stakeholders: ReducedUser[];
 }

@@ -29,6 +29,8 @@ pub enum Relation {
     Event,
     #[sea_orm(has_many = "super::project_preference::Entity")]
     ProjectPreference,
+    #[sea_orm(has_many = "super::stakeholder_project::Entity")]
+    StakeholderProject,
     #[sea_orm(has_many = "super::team::Entity")]
     Team,
 }
@@ -45,12 +47,27 @@ impl Related<super::project_preference::Entity> for Entity {
     }
 }
 
+impl Related<super::stakeholder_project::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::StakeholderProject.def()
+    }
+}
+
 impl Related<super::team::Entity> for Entity {
     fn to() -> RelationDef {
         super::project_preference::Relation::Team.def()
     }
     fn via() -> Option<RelationDef> {
         Some(super::project_preference::Relation::Project.def().rev())
+    }
+}
+
+impl Related<super::user::Entity> for Entity {
+    fn to() -> RelationDef {
+        super::stakeholder_project::Relation::User.def()
+    }
+    fn via() -> Option<RelationDef> {
+        Some(super::stakeholder_project::Relation::Project.def().rev())
     }
 }
 

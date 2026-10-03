@@ -148,4 +148,6 @@ pub enum TeamRole {
     Mentor,
     #[sea_orm(string_value = "MEMBER")]
     Member,
+    #[sea_orm(string_value = "STAKEHOLDER")]
+    Stakeholder,
 }

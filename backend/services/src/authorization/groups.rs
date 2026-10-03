@@ -140,6 +140,7 @@ impl From<TeamRole> for Groups {
         let groups = match value {
             TeamRole::Member => MEMBER_GROUPS,
             TeamRole::Mentor => MENTOR_GROUPS,
+            TeamRole::Stakeholder => MENTOR_GROUPS,
         };
 
         Self::new(groups.iter().copied().collect())

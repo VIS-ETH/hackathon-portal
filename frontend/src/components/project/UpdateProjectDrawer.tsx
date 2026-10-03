@@ -1,7 +1,7 @@
 import MarkdownCard from "../MarkdownCard";
 
-import { useUpdateProject } from "@/api/gen";
-import { Project, ProjectForUpdate } from "@/api/gen/schemas";
+import { useGetEventAffiliates, useUpdateProject } from "@/api/gen";
+import { EventRole, Project, ProjectForUpdate } from "@/api/gen/schemas";
 import { inputProps, primaryButtonProps, textareaProps } from "@/styles/common";
 
 import { useEffect } from "react";
@@ -10,6 +10,7 @@ import {
   Button,
   Divider,
   Drawer,
+  MultiSelect,
   Stack,
   TextInput,
   TextInputProps,
@@ -47,8 +48,23 @@ const UpdateProjectDrawer = ({
           delete draft.content;
         }
 
+        if (draft.stakeholder_ids?.length === project.stakeholders?.length) {
+          const stakeholderIds = project.stakeholders?.map((s) => s.id) || [];
+          const isSame = stakeholderIds.every((id) =>
+            draft.stakeholder_ids?.includes(id),
+          );
+
+          if (isSame) {
+            delete draft.stakeholder_ids;
+          }
+        }
+
         return draft;
       }),
+  });
+
+  const { data: stakeholder } = useGetEventAffiliates(project.event_id, {
+    role: EventRole.Stakeholder,
   });
 
   const updateProjectMutation = useUpdateProject();
@@ -57,6 +73,7 @@ const UpdateProjectDrawer = ({
     form.setInitialValues({
       name: project.name,
       content: project.content,
+      stakeholder_ids: project.stakeholders?.map((s) => s.id) || [],
     });
 
     form.reset();
@@ -88,6 +105,13 @@ const UpdateProjectDrawer = ({
             label="Name"
             required
             placeholder={project.name}
+          />
+          <MultiSelect
+            {...form.getInputProps("stakeholder_ids")}
+            label="Stakeholders"
+            data={
+              stakeholder?.map((s) => ({ value: s.id, label: s.name })) || []
+            }
           />
           <Textarea
             {...(textareaProps as TextareaProps)}

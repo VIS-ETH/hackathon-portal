@@ -7,7 +7,7 @@ import UpdateProjectDrawer from "@/components/project/UpdateProjectDrawer";
 import { useResolveParams } from "@/hooks/useResolveParams";
 import { iconProps, secondaryButtonProps } from "@/styles/common";
 
-import { Button, Group, Stack, Title } from "@mantine/core";
+import { Button, Group, Stack, Text, Title } from "@mantine/core";
 
 import { useDisclosure } from "@mantine/hooks";
 
@@ -77,6 +77,19 @@ const Project = () => {
             </Group>
           )}
         </Group>
+        {project.stakeholders.length > 0 && (
+          <Group justify="left" align="baseline" gap={"xs"}>
+            <Title order={4}>
+              {project.stakeholders.length > 1 ? "Stakeholders" : "Stakeholder"}
+              :
+            </Title>
+            <Text>
+              {project.stakeholders
+                .map((stakeholder) => stakeholder.name)
+                .join(", ")}
+            </Text>
+          </Group>
+        )}
         <MarkdownCard content={project.content} />
       </Stack>
       <UpdateProjectDrawer

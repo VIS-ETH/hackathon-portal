@@ -10,4 +10,5 @@ export type TeamRole = (typeof TeamRole)[keyof typeof TeamRole];
 export const TeamRole = {
   Mentor: "Mentor",
   Member: "Member",
+  Stakeholder: "Stakeholder",
 } as const;

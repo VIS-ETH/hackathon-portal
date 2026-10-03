@@ -454,6 +454,7 @@ pub async fn put_team_roles(
 
     let mut contains_member_roles = false;
     let mut contains_mentor_roles = false;
+    let mut contains_stakeholder_roles = false;
 
     for roles in body.values() {
         if roles.contains(&TeamRole::Member) {
@@ -462,6 +463,10 @@ pub async fn put_team_roles(
 
         if roles.contains(&TeamRole::Mentor) {
             contains_mentor_roles = true;
+        }
+
+        if roles.contains(&TeamRole::Stakeholder) {
+            contains_stakeholder_roles = true;
         }
     }
 
@@ -476,6 +481,12 @@ pub async fn put_team_roles(
     if contains_mentor_roles && !groups.can_manage_event() {
         return Err(ApiError::Forbidden {
             action: "create mentor role assignments for this team".to_string(),
+        });
+    }
+
+    if contains_stakeholder_roles && !groups.can_manage_event() {
+        return Err(ApiError::Forbidden {
+            action: "create stakeholder role assignments for this team".to_string(),
         });
     }
 
@@ -509,6 +520,7 @@ pub async fn delete_team_roles(
 
     let mut contains_member_roles = false;
     let mut contains_mentor_roles = false;
+    let mut contains_stakeholder_roles = false;
 
     for roles in body.values() {
         if roles.contains(&TeamRole::Member) {
@@ -517,6 +529,10 @@ pub async fn delete_team_roles(
 
         if roles.contains(&TeamRole::Mentor) {
             contains_mentor_roles = true;
+        }
+
+        if roles.contains(&TeamRole::Stakeholder) {
+            contains_stakeholder_roles = true;
         }
     }
 
@@ -531,6 +547,12 @@ pub async fn delete_team_roles(
     if contains_mentor_roles && !groups.can_manage_event() {
         return Err(ApiError::Forbidden {
             action: "delete mentor role assignments for this team".to_string(),
+        });
+    }
+
+    if contains_stakeholder_roles && !groups.can_manage_event() {
+        return Err(ApiError::Forbidden {
+            action: "delete stakeholder role assignments for this team".to_string(),
         });
     }
 

@@ -10,6 +10,7 @@ pub use super::project_preference::Entity as ProjectPreference;
 pub use super::sidequest::Entity as Sidequest;
 pub use super::sidequest_attempt::Entity as SidequestAttempt;
 pub use super::sidequest_score::Entity as SidequestScore;
+pub use super::stakeholder_project::Entity as StakeholderProject;
 pub use super::team::Entity as Team;
 pub use super::team_role_assignment::Entity as TeamRoleAssignment;
 pub use super::technical_question::Entity as TechnicalQuestion;

@@ -117,7 +117,8 @@ const TeamsTable = ({ event }: TeamsTableProps) => {
                   <Table.Th miw={50}>Idx</Table.Th>
                   <Table.Th miw={200}>Name</Table.Th>
                   {(view == TableView.Projects ||
-                    view == TableView.Mentors) && (
+                    view == TableView.Mentors ||
+                    view == TableView.Stakeholders) && (
                     <Table.Th miw={200}>Project</Table.Th>
                   )}
                   {view == TableView.Projects && (
@@ -162,7 +163,14 @@ const TeamsTable = ({ event }: TeamsTableProps) => {
                         Mentor&nbsp;{i + 1}
                       </Table.Th>
                     ))}
-                  {view == TableView.Comments && (
+                  {view == TableView.Stakeholders &&
+                    Array.from({ length: 1 }).map((_, i) => (
+                      <Table.Th key={i} miw={200}>
+                        Stakeholder&nbsp;{i + 1}
+                      </Table.Th>
+                    ))}
+
+                  {view == TableView.Notes && (
                     <>
                       <Table.Th>Comment</Table.Th>
                       <Table.Th>Extra Points</Table.Th>{" "}

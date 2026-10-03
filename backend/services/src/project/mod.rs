@@ -3,13 +3,13 @@ pub mod models;
 use crate::project::models::{Project, ProjectForCreate, ProjectForUpdate};
 use crate::{ServiceError, ServiceResult};
 use hackathon_portal_repositories::db::{
-    db_project, db_team, EventRepository, ProjectPreferenceRepository, ProjectRepository,
-    TeamRepository,
+    db_project, db_stakeholder_project, db_team, db_user, EventRepository,
+    ProjectPreferenceRepository, ProjectRepository, TeamRepository, UserRepository,
 };
 use hackathon_portal_repositories::DbRepository;
 use matching::GroupAssignment;
 use sea_orm::prelude::*;
-use sea_orm::{ActiveModelTrait, IntoActiveModel, Set, TransactionTrait};
+use sea_orm::{ActiveModelTrait, IntoActiveModel, QueryFilter, Set, TransactionTrait};
 use slug::slugify;
 use std::collections::HashMap;
 
@@ -43,21 +43,24 @@ impl ProjectService {
 
         txn.commit().await?;
 
-        Ok(project.into())
+        self.get_project(project.id).await
     }
 
     pub async fn get_projects(&self, event_id: Uuid) -> ServiceResult<Vec<Project>> {
         let projects =
             ProjectRepository::fetch_all_by_event_id(self.db_repo.conn(), event_id).await?;
 
-        let projects = projects.into_iter().map(Project::from).collect();
+        let mut result = Vec::with_capacity(projects.len());
+        for project in projects {
+            result.push(self.with_stakeholders(self.db_repo.conn(), project).await?);
+        }
 
-        Ok(projects)
+        Ok(result)
     }
 
     pub async fn get_project(&self, project_id: Uuid) -> ServiceResult<Project> {
         let project = ProjectRepository::fetch_by_id(self.db_repo.conn(), project_id).await?;
-        Ok(project.into())
+        self.with_stakeholders(self.db_repo.conn(), project).await
     }
 
     pub async fn get_project_by_slug(
@@ -67,8 +70,7 @@ impl ProjectService {
     ) -> ServiceResult<Project> {
         let project =
             ProjectRepository::fetch_by_slug(self.db_repo.conn(), event_slug, project_slug).await?;
-
-        Ok(project.into())
+        self.with_stakeholders(self.db_repo.conn(), project).await
     }
 
     pub async fn update_project(
@@ -101,9 +103,57 @@ impl ProjectService {
 
         let project = active_project.update(&txn).await?;
 
+        if let Some(stakeholder_ids) = project_fu.stakeholder_ids {
+            self.set_project_stakeholders(&txn, project_id, stakeholder_ids)
+                .await?;
+        }
+
         txn.commit().await?;
 
-        Ok(project.into())
+        self.get_project(project.id).await
+    }
+
+    async fn set_project_stakeholders<C: ConnectionTrait>(
+        &self,
+        db: &C,
+        project_id: Uuid,
+        stakeholder_ids: Vec<Uuid>,
+    ) -> ServiceResult<()> {
+        let mut unique_ids = Vec::with_capacity(stakeholder_ids.len());
+        for user_id in stakeholder_ids {
+            if unique_ids.contains(&user_id) {
+                continue;
+            }
+
+            UserRepository::fetch_by_id(db, user_id).await?;
+            unique_ids.push(user_id);
+        }
+
+        db_stakeholder_project::Entity::delete_many()
+            .filter(db_stakeholder_project::Column::ProjectId.eq(project_id))
+            .exec(db)
+            .await?;
+
+        for user_id in unique_ids {
+            db_stakeholder_project::ActiveModel {
+                project_id: Set(project_id),
+                user_id: Set(user_id),
+            }
+            .insert(db)
+            .await?;
+        }
+
+        Ok(())
+    }
+
+    async fn with_stakeholders<C: ConnectionTrait>(
+        &self,
+        db: &C,
+        project: db_project::Model,
+    ) -> ServiceResult<Project> {
+        let stakeholders = project.find_related(db_user::Entity).all(db).await?;
+
+        Ok((project, stakeholders).into())
     }
 
     /// Fails if the project is still assigned to a team.

@@ -27,7 +27,9 @@ const TeamsTableRow = ({ event, team, view, refetch }: TeamsTableRowProps) => {
         <Text ff="monospace">{fmtTeamIndex(team.index)}</Text>
       </Table.Td>
       <NameTd team={team} ro={view != TableView.General} refetch={refetch} />
-      {(view == TableView.Projects || view == TableView.Mentors) && (
+      {(view == TableView.Projects ||
+        view == TableView.Mentors ||
+        view == TableView.Stakeholders) && (
         <ProjectTd
           team={team}
           ro={view != TableView.Projects}
@@ -51,7 +53,10 @@ const TeamsTableRow = ({ event, team, view, refetch }: TeamsTableRowProps) => {
       {view == TableView.Mentors && (
         <AffiliateTds team={team} role={TeamRole.Mentor} max={2} />
       )}
-      {view == TableView.Comments && (
+      {view == TableView.Stakeholders && (
+        <AffiliateTds team={team} role={TeamRole.Stakeholder} max={1} />
+      )}
+      {view == TableView.Notes && (
         <ExtraScoreTd team={team} refetch={refetch} />
       )}
       {view == TableView.General && <ActionsTd team={team} refetch={refetch} />}

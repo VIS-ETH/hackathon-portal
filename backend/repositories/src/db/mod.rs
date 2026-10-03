@@ -23,6 +23,7 @@ pub use generated::project_preference as db_project_preference;
 pub use generated::sidequest as db_sidequest;
 pub use generated::sidequest_attempt as db_sidequest_attempt;
 pub use generated::sidequest_score as db_sidequest_score;
+pub use generated::stakeholder_project as db_stakeholder_project;
 pub use generated::team as db_team;
 pub use generated::team_role_assignment as db_team_role_assignment;
 pub use generated::technical_question as db_technical_question;
