@@ -8,7 +8,6 @@ use axum::{
     routing::{get, put},
     Json, Router,
 };
-use hackathon_portal_repositories::db::TeamRole;
 use hackathon_portal_services::rating::models::Vote;
 use hackathon_portal_services::{
     authorization::groups::Groups,
@@ -98,13 +97,9 @@ pub async fn set_my_vote(
         });
     }
 
-    if ctx
-        .roles()
-        .get_team_roles(&vote.team_id)
-        .contains(&TeamRole::Member)
-    {
+    if !ctx.roles().get_team_roles(&vote.team_id).is_empty() {
         return Err(ApiError::Forbidden {
-            action: "vote for your own team".to_string(),
+            action: "vote for a team you are affiliated with".to_string(),
         });
     }
 

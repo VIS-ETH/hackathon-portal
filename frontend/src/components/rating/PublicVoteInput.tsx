@@ -2,13 +2,19 @@
 
 import TeamImage from "../team/TeamImage";
 
-import { useGetMe, useGetMyVotes, useGetTeams, useSetMyVote } from "@/api/gen";
+import {
+  useGetMe,
+  useGetMyVotes,
+  useGetTeams,
+  useGetTeamsRoles,
+  useSetMyVote,
+} from "@/api/gen";
 import { Team } from "@/api/gen/schemas";
 import { useResolveParams } from "@/hooks/useResolveParams";
 import { cardProps } from "@/styles/common";
 import { seededShuffle } from "@/utils";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import {
   Button,
@@ -70,7 +76,7 @@ const RankingCard = ({ team, place }: RankingCardProps) => {
         background: `linear-gradient(180deg, rgba(255,255,255,0.98), ${p.accent})`,
       }}
     >
-      <Card.Section>
+      <Card.Section pt="md">
         <Image
           src={team?.photo_url || `/assets/awards/Trophy_${place}.svg`}
           height={160}
@@ -153,29 +159,49 @@ const SelectCard = ({ team, choose }: SelectCardProps) => {
 
 const PublicVoteInput = () => {
   const { data: me } = useGetMe();
-  const { event, team: my_team } = useResolveParams();
+  const { event } = useResolveParams();
 
-  const { data: my_votes } = useGetMyVotes({ event_id: event?.id ?? "" });
-  const { data: teams = [] } = useGetTeams({ event_id: event?.id ?? "" });
-  const finalists = teams.filter((t) => t.finalist);
-  const finalistsShuffled = seededShuffle(finalists, me?.id ?? "");
+  const { data: myVotes } = useGetMyVotes(
+    { event_id: event?.id ?? "" },
+    { query: { enabled: !!event } },
+  );
+  const { data: teams } = useGetTeams(
+    { event_id: event?.id ?? "" },
+    { query: { enabled: !!event } },
+  );
+  const { data: teamsRoles } = useGetTeamsRoles(
+    { event_id: event?.id ?? "" },
+    { query: { enabled: !!event } },
+  );
+  const finalistsShuffled = useMemo(() => {
+    if (!teams || !teamsRoles || !me) return [];
+    const affiliateToTeams = Object.keys(teamsRoles);
+    const finalists = teams.filter(
+      (t) => t.finalist && !affiliateToTeams.includes(t.id),
+    );
+    return seededShuffle(finalists, me.id);
+  }, [teams, teamsRoles, me]);
+  const affiliatedFinalists = useMemo(() => {
+    if (!teams || !teamsRoles) return [];
+    return teams.filter((t) => t.finalist && teamsRoles[t.id]);
+  }, [teams, teamsRoles]);
   const mutateVote = useSetMyVote();
   const [firstPlace, setFirstPlace] = useState<string | null>(
-    my_votes?.find((v) => v.rank === 1)?.team_id ?? null,
+    myVotes?.find((v) => v.rank === 1)?.team_id ?? null,
   );
   const [secondPlace, setSecondPlace] = useState<string | null>(
-    my_votes?.find((v) => v.rank === 2)?.team_id ?? null,
+    myVotes?.find((v) => v.rank === 2)?.team_id ?? null,
   );
   const [thirdPlace, setThirdPlace] = useState<string | null>(
-    my_votes?.find((v) => v.rank === 3)?.team_id ?? null,
+    myVotes?.find((v) => v.rank === 3)?.team_id ?? null,
   );
-  const [prevMyVotes, setPrevMyVotes] = useState(my_votes);
+  const [prevMyVotes, setPrevMyVotes] = useState(myVotes);
 
-  if (my_votes !== prevMyVotes) {
-    setPrevMyVotes(my_votes);
-    setFirstPlace(my_votes?.find((v) => v.rank === 1)?.team_id ?? null);
-    setSecondPlace(my_votes?.find((v) => v.rank === 2)?.team_id ?? null);
-    setThirdPlace(my_votes?.find((v) => v.rank === 3)?.team_id ?? null);
+  if (myVotes !== prevMyVotes) {
+    setPrevMyVotes(myVotes);
+    setFirstPlace(myVotes?.find((v) => v.rank === 1)?.team_id ?? null);
+    setSecondPlace(myVotes?.find((v) => v.rank === 2)?.team_id ?? null);
+    setThirdPlace(myVotes?.find((v) => v.rank === 3)?.team_id ?? null);
   }
 
   const choose = (place: number, teamId: string) => {
@@ -202,7 +228,7 @@ const PublicVoteInput = () => {
     });
   };
 
-  if (!event || !my_votes || !teams || !me) {
+  if (!event || !myVotes || !teams || !teamsRoles || !me) {
     return <Skeleton height={200} radius="md" />;
   }
 
@@ -234,14 +260,18 @@ const PublicVoteInput = () => {
       <Flex gap="md" justify="center" align="center" wrap="wrap">
         {finalistsShuffled
           .filter(
-            (team) =>
-              ![firstPlace, secondPlace, thirdPlace].includes(team.id) &&
-              !(team.id === my_team?.id),
+            (team) => ![firstPlace, secondPlace, thirdPlace].includes(team.id),
           )
           .map((team) => (
             <SelectCard key={team.id} team={team} choose={choose} />
           ))}
       </Flex>
+      {affiliatedFinalists.length > 0 && (
+        <Text c="dimmed" size="sm" ta="center">
+          You cannot vote for teams you are affiliated with:{" "}
+          {affiliatedFinalists.map((t) => t.name).join(", ")}
+        </Text>
+      )}
     </Stack>
   );
 };
