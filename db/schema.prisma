@@ -371,3 +371,13 @@ model technical_rating {
 
   @@id([technical_question_id, team_id])
 }
+
+// distributed lock for background jobs, so that only one backend replica runs each job per tick
+model job_lock {
+  name String @id
+
+  // fields
+  token        String   @db.Uuid
+  locked_at    DateTime
+  locked_until DateTime
+}

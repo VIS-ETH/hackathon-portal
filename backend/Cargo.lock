@@ -2110,6 +2110,7 @@ dependencies = [
  "serde_with",
  "slug",
  "strum 0.28.0",
+ "tokio",
  "tracing",
  "tracing-appender",
  "tracing-subscriber",

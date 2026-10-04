@@ -18,6 +18,7 @@ pub use generated::event as db_event;
 pub use generated::event_role_assignment as db_event_role_assignment;
 pub use generated::event_user_discord_id as db_event_user_discord_id;
 pub use generated::expert_rating as db_expert_rating;
+pub use generated::job_lock as db_job_lock;
 pub use generated::project as db_project;
 pub use generated::project_preference as db_project_preference;
 pub use generated::sidequest as db_sidequest;

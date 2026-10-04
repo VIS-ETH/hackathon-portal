@@ -5,6 +5,7 @@ pub mod error;
 pub mod event;
 pub mod health;
 pub mod infrastructure;
+pub mod job_lock;
 pub mod logger;
 pub mod project;
 pub mod rating;

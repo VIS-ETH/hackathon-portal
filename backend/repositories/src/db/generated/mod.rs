@@ -7,6 +7,7 @@ pub mod event;
 pub mod event_role_assignment;
 pub mod event_user_discord_id;
 pub mod expert_rating;
+pub mod job_lock;
 pub mod project;
 pub mod project_preference;
 pub mod sea_orm_active_enums;

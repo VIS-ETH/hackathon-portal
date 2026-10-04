@@ -5,6 +5,7 @@ pub use super::event::Entity as Event;
 pub use super::event_role_assignment::Entity as EventRoleAssignment;
 pub use super::event_user_discord_id::Entity as EventUserDiscordId;
 pub use super::expert_rating::Entity as ExpertRating;
+pub use super::job_lock::Entity as JobLock;
 pub use super::project::Entity as Project;
 pub use super::project_preference::Entity as ProjectPreference;
 pub use super::sidequest::Entity as Sidequest;

@@ -11,6 +11,7 @@ use hackathon_portal_services::crypto::CryptoService;
 use hackathon_portal_services::event::EventService;
 use hackathon_portal_services::health::HealthService;
 use hackathon_portal_services::infrastructure::InfrastructureService;
+use hackathon_portal_services::job_lock::JobLockService;
 use hackathon_portal_services::project::ProjectService;
 use hackathon_portal_services::rating::RatingService;
 use hackathon_portal_services::sidequest::SidequestService;
@@ -39,6 +40,7 @@ pub struct ApiState {
     pub appointment_service: Arc<AppointmentService>,
     pub upload_service: Arc<UploadService>,
     pub infrastructure_service: Arc<InfrastructureService>,
+    pub job_lock_service: Arc<JobLockService>,
     pub host_to_team_cache: Cache<(), Arc<HashMap<String, Team>>>,
 }
 
@@ -58,6 +60,7 @@ impl ApiState {
         appointment_service: Arc<AppointmentService>,
         upload_service: Arc<UploadService>,
         infrastructure_service: Arc<InfrastructureService>,
+        job_lock_service: Arc<JobLockService>,
         host_to_team_cache: Cache<(), Arc<HashMap<String, Team>>>,
     ) -> Self {
         Self {
@@ -74,6 +77,7 @@ impl ApiState {
             appointment_service,
             upload_service,
             infrastructure_service,
+            job_lock_service,
             host_to_team_cache,
         }
     }
@@ -123,6 +127,8 @@ impl ApiState {
 
         let appointment_service = Arc::new(AppointmentService::new(db_repo.clone()));
 
+        let job_lock_service = Arc::new(JobLockService::new(db_repo.clone()));
+
         let event_service = Arc::new(EventService::new(
             authorization_service.clone(),
             user_service.clone(),
@@ -151,6 +157,7 @@ impl ApiState {
             appointment_service,
             upload_service,
             infrastructure_service,
+            job_lock_service,
             host_to_team_cache,
         );
 
