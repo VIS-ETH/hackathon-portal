@@ -1,4 +1,8 @@
-FROM rust:slim-bookworm AS chef
+# Base for the builder stage; CI passes the registry cook image so branches
+# reuse main's compiled dependencies instead of re-cooking.
+ARG BUILDER_BASE=cook
+
+FROM rust:1.99.0-slim-bookworm AS chef
 
 WORKDIR /app
 
@@ -10,7 +14,7 @@ RUN apt-get update \
         ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-RUN cargo install cargo-chef --locked \
+RUN cargo install cargo-chef --version 0.1.78 --locked \
     && rm -rf $CARGO_HOME/registry
 
 FROM chef AS planner
@@ -25,13 +29,13 @@ COPY --from=planner /app/recipe.json recipe.json
 RUN cargo chef cook --release --recipe-path recipe.json \
     && rm -rf $CARGO_HOME/registry/src
 
-FROM cook AS builder
+FROM ${BUILDER_BASE} AS builder
 
 COPY . .
 
 RUN cargo build --release
 
-FROM debian:bookworm-slim AS runtime
+FROM debian:bookworm-20260918-slim AS runtime
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
