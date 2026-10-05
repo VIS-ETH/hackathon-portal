@@ -302,6 +302,41 @@ impl Groups {
     }
 
     #[must_use]
+    pub fn can_view_team_blog(
+        &self,
+        event_visibility: EventVisibility,
+        event_phase: EventPhase,
+    ) -> bool {
+        if let Some(decision) = self.default_can_view_policy(event_visibility) {
+            return decision;
+        }
+
+        if self == &Group::TeamAffiliate {
+            return true;
+        }
+
+        matches!(event_phase, EventPhase::Grading | EventPhase::Finished)
+    }
+
+    #[must_use]
+    pub fn can_update_team_blog(
+        &self,
+        event_visibility: EventVisibility,
+        event_phase: EventPhase,
+        event_is_ro: bool,
+    ) -> bool {
+        if let Some(decision) = self.default_can_manage_policy(event_visibility, event_is_ro) {
+            return decision;
+        }
+
+        if self == &Group::TeamMember {
+            return event_phase == EventPhase::Hacking;
+        }
+
+        false
+    }
+
+    #[must_use]
     pub fn can_update_team_ingress_config(
         &self,
         event_visibility: EventVisibility,

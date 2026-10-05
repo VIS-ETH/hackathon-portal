@@ -31,7 +31,11 @@ const Overview = () => {
         </Group>
       </Stack>
       {event.welcome_content && (
-        <MarkdownCard content={event.welcome_content} allowHtml={true} />
+        <MarkdownCard
+          trusted
+          content={event.welcome_content}
+          allowHtml={true}
+        />
       )}
     </Stack>
   );

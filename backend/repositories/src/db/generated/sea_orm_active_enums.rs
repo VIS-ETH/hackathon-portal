@@ -18,6 +18,36 @@ use serde::{Deserialize, Serialize};
     strum :: VariantArray,
     utoipa :: ToSchema,
 )]
+#[sea_orm(
+    rs_type = "String",
+    db_type = "Enum",
+    enum_name = "blog_section_layout"
+)]
+pub enum BlogSectionLayout {
+    #[sea_orm(string_value = "IMAGE_TOP")]
+    ImageTop,
+    #[sea_orm(string_value = "IMAGE_BOTTOM")]
+    ImageBottom,
+    #[sea_orm(string_value = "IMAGE_LEFT")]
+    ImageLeft,
+    #[sea_orm(string_value = "IMAGE_RIGHT")]
+    ImageRight,
+}
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Eq,
+    EnumIter,
+    DeriveActiveEnum,
+    Serialize,
+    Deserialize,
+    Copy,
+    Hash,
+    strum :: Display,
+    strum :: VariantArray,
+    utoipa :: ToSchema,
+)]
 #[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "event_phase")]
 pub enum EventPhase {
     #[sea_orm(string_value = "REGISTRATION")]
@@ -126,6 +156,8 @@ pub enum ExpertRatingCategory {
 pub enum MediaUsage {
     #[sea_orm(string_value = "TEAM_PHOTO")]
     TeamPhoto,
+    #[sea_orm(string_value = "TEAM_BLOG_IMAGE")]
+    TeamBlogImage,
 }
 #[derive(
     Debug,

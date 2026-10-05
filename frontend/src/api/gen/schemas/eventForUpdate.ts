@@ -8,6 +8,26 @@ import type { EventPhase } from "./eventPhase";
 import type { EventVisibility } from "./eventVisibility";
 
 export interface EventForUpdate {
+  /**
+   * @minimum 0
+   * @nullable
+   */
+  blog_max_characters?: number | null;
+  /**
+   * @minimum 0
+   * @nullable
+   */
+  blog_max_image_size_mb?: number | null;
+  /**
+   * @minimum 0
+   * @nullable
+   */
+  blog_max_images?: number | null;
+  /**
+   * @minimum 0
+   * @nullable
+   */
+  blog_max_sections?: number | null;
   /** @nullable */
   direct_address_template?: string | null;
   /** @nullable */

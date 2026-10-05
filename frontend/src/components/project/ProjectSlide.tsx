@@ -13,7 +13,7 @@ const ProjectSlide = ({ project }: ProjectSlideProps) => {
 
   return (
     <Container>
-      <MarkdownCard content={content} />
+      <MarkdownCard trusted content={content} />
     </Container>
   );
 };

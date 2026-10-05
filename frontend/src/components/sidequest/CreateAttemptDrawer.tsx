@@ -156,7 +156,7 @@ const CreateAttemptDrawer = ({
               </>
             )}
             <Divider />
-            <MarkdownCard content={sidequest.description} />
+            <MarkdownCard trusted content={sidequest.description} />
           </>
         )}
       </Stack>

@@ -31,6 +31,10 @@ pub struct Event {
     pub discord_config: Option<String>,
     pub vote_enabled: bool,
     pub finalists_visible: bool,
+    pub blog_max_sections: u32,
+    pub blog_max_images: u32,
+    pub blog_max_characters: u32,
+    pub blog_max_image_size_mb: u32,
 }
 
 impl From<db_event::Model> for Event {
@@ -60,6 +64,10 @@ impl From<db_event::Model> for Event {
             discord_config: value.discord_config,
             vote_enabled: value.voting_open,
             finalists_visible: value.finalists_visible,
+            blog_max_sections: value.blog_max_sections as u32,
+            blog_max_images: value.blog_max_images as u32,
+            blog_max_characters: value.blog_max_characters as u32,
+            blog_max_image_size_mb: value.blog_max_image_size_mb as u32,
         }
     }
 }
@@ -98,4 +106,8 @@ pub struct EventForUpdate {
     pub master_ai_api_key: Option<String>,
     pub vote_enabled: Option<bool>,
     pub finalists_visible: Option<bool>,
+    pub blog_max_sections: Option<u32>,
+    pub blog_max_images: Option<u32>,
+    pub blog_max_characters: Option<u32>,
+    pub blog_max_image_size_mb: Option<u32>,
 }

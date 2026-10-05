@@ -16,7 +16,7 @@ type UploaderProps = {
   maxSizeMB: number;
   accept: string[];
   multiple?: boolean;
-  onUploaded: (uploadedIds: string[]) => void;
+  onUploaded: (uploadedIds: string[], uploadedFiles: File[]) => void;
 };
 
 const Uploader = ({
@@ -56,6 +56,7 @@ const Uploader = ({
 
     setIsUploading(true);
     const uploadedIds: string[] = [];
+    const uploadedFiles: File[] = [];
 
     for (const file of files) {
       try {
@@ -88,6 +89,7 @@ const Uploader = ({
         }
 
         uploadedIds.push(uploadId);
+        uploadedFiles.push(file);
       } catch (error) {
         console.error("Error uploading file", { file, error });
         setFailedUploads((prev) => [...prev, file]);
@@ -96,7 +98,7 @@ const Uploader = ({
     }
 
     setIsUploading(false);
-    onUploaded(uploadedIds);
+    onUploaded(uploadedIds, uploadedFiles);
   };
 
   const handleOnReject = (rejectedFiles: FileRejection[]) => {

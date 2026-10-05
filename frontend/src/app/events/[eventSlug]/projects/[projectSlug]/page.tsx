@@ -90,7 +90,7 @@ const Project = () => {
             </Text>
           </Group>
         )}
-        <MarkdownCard content={project.content} />
+        <MarkdownCard trusted content={project.content} />
       </Stack>
       <UpdateProjectDrawer
         project={project}

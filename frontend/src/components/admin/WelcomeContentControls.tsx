@@ -52,7 +52,7 @@ const WelcomeContentControls = ({
           Save
         </Button>
       </Group>
-      <MarkdownCard content={localContent} allowHtml={true} />
+      <MarkdownCard trusted content={localContent} allowHtml={true} />
     </Stack>
   );
 };

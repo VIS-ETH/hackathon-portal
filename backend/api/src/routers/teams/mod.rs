@@ -16,7 +16,9 @@ use axum::{Json, Router};
 use hackathon_portal_repositories::db::{ExpertRatingCategory, TeamRole};
 use hackathon_portal_services::authorization::groups::Groups;
 use hackathon_portal_services::authorization::models::{TeamAffiliate, TeamRoles, TeamRolesMap};
-use hackathon_portal_services::team::models::{TeamForCreate, TeamForUpdate};
+use hackathon_portal_services::team::models::{
+    TeamBlogSection, TeamBlogSectionForUpdate, TeamForCreate, TeamForUpdate,
+};
 use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
 
@@ -43,6 +45,8 @@ pub fn get_router(state: &ApiState) -> Router {
             "/:team_id/project-preferences",
             patch(update_team_project_preferences),
         )
+        .route("/:team_id/blog", get(get_team_blog))
+        .route("/:team_id/blog", put(update_team_blog))
         .route("/:team_id/credentials", get(get_team_credentials))
         .route("/:team_id/expert-ratings", get(get_team_expert_ratings))
         .route("/:team_id/rating", get(get_team_rating))
@@ -672,6 +676,66 @@ pub async fn update_team_project_preferences(
         .await?;
 
     Ok(Json(pps))
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/teams/{team_id}/blog",
+    responses(
+        (status = StatusCode::OK, body = Vec<TeamBlogSection>),
+        (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
+    ),
+)]
+pub async fn get_team_blog(
+    ctx: Ctx,
+    State(state): State<ApiState>,
+    Path(team_id): Path<Uuid>,
+) -> ApiJsonVec<TeamBlogSection> {
+    let team = state.team_service.get_team(team_id).await?;
+    let event = state.event_service.get_event(team.event_id).await?;
+    let groups = Groups::from_event_and_team(ctx.roles(), event.id, team.id);
+
+    if !groups.can_view_team_blog(event.visibility, event.phase) {
+        return Err(ApiError::Forbidden {
+            action: "view the blog of this team".to_string(),
+        });
+    }
+
+    let sections = state.team_service.get_team_blog(team_id).await?;
+
+    Ok(Json(sections))
+}
+
+#[utoipa::path(
+    put,
+    path = "/api/teams/{team_id}/blog",
+    responses(
+        (status = StatusCode::OK, body = Vec<TeamBlogSection>),
+        (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
+    ),
+)]
+pub async fn update_team_blog(
+    ctx: Ctx,
+    State(state): State<ApiState>,
+    Path(team_id): Path<Uuid>,
+    Json(body): Json<Vec<TeamBlogSectionForUpdate>>,
+) -> ApiJsonVec<TeamBlogSection> {
+    let team = state.team_service.get_team(team_id).await?;
+    let event = state.event_service.get_event(team.event_id).await?;
+    let groups = Groups::from_event_and_team(ctx.roles(), event.id, team.id);
+
+    if !groups.can_update_team_blog(event.visibility, event.phase, event.read_only) {
+        return Err(ApiError::Forbidden {
+            action: "edit the blog of this team".to_string(),
+        });
+    }
+
+    let sections = state
+        .team_service
+        .update_team_blog(team_id, ctx.user().id, body)
+        .await?;
+
+    Ok(Json(sections))
 }
 
 #[utoipa::path(

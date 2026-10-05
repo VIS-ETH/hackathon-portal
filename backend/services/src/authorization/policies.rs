@@ -16,6 +16,8 @@ pub struct Policies {
     pub can_update_team_name: bool,
     pub can_update_team_photo: bool,
     pub can_update_team_ingress_config: bool,
+    pub can_view_team_blog: bool,
+    pub can_update_team_blog: bool,
     pub can_manage_team: bool,
     pub can_manage_expert_rating: bool,
     pub can_view_project: bool,
@@ -70,6 +72,12 @@ impl Policies {
                 event_ro,
             ),
             can_update_team_ingress_config: groups.can_update_team_ingress_config(
+                event_visibility,
+                event_phase,
+                event_ro,
+            ),
+            can_view_team_blog: groups.can_view_team_blog(event_visibility, event_phase),
+            can_update_team_blog: groups.can_update_team_blog(
                 event_visibility,
                 event_phase,
                 event_ro,

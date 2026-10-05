@@ -8,6 +8,14 @@ import type { EventPhase } from "./eventPhase";
 import type { EventVisibility } from "./eventVisibility";
 
 export interface Event {
+  /** @minimum 0 */
+  blog_max_characters: number;
+  /** @minimum 0 */
+  blog_max_image_size_mb: number;
+  /** @minimum 0 */
+  blog_max_images: number;
+  /** @minimum 0 */
+  blog_max_sections: number;
   /** @nullable */
   direct_address_template?: string | null;
   /** @nullable */

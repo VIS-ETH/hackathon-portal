@@ -37,6 +37,14 @@ enum expert_rating_category {
 
 enum media_usage {
   TEAM_PHOTO
+  TEAM_BLOG_IMAGE
+}
+
+enum blog_section_layout {
+  IMAGE_TOP
+  IMAGE_BOTTOM
+  IMAGE_LEFT
+  IMAGE_RIGHT
 }
 
 model event {
@@ -63,6 +71,10 @@ model event {
   feedback_visible            Boolean          @default(false)
   finalists_visible           Boolean          @default(false)
   master_ai_api_key           Bytes?
+  blog_max_sections           Int              @default(20)
+  blog_max_images             Int              @default(10)
+  blog_max_characters         Int              @default(20000)
+  blog_max_image_size_mb      Int              @default(5)
   visibility                  event_visibility
   phase                       event_phase
 
@@ -113,6 +125,7 @@ model team {
   expert_rating        expert_rating[]
   technical_rating     technical_rating[]
   vote                 vote[]
+  team_blog_section    team_blog_section[]
 
   // meta
   @@unique([event_id, name])
@@ -338,7 +351,26 @@ model upload {
   user user @relation(fields: [user_id], references: [id])
 
   // related models
-  team team[]
+  team              team[]
+  team_blog_section team_blog_section[]
+}
+
+model team_blog_section {
+  id       String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  team_id  String  @db.Uuid
+  image_id String? @db.Uuid
+
+  // fields
+  position Int
+  content  String
+  layout   blog_section_layout
+
+  // relations
+  team  team    @relation(fields: [team_id], references: [id])
+  image upload? @relation(fields: [image_id], references: [id])
+
+  // meta
+  @@unique([team_id, position])
 }
 
 model technical_question {

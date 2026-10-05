@@ -54,7 +54,7 @@ const DocumentationContentControls = ({
           Save
         </Button>
       </Group>
-      <MarkdownCard content={localContent} />
+      <MarkdownCard trusted content={localContent} />
     </Stack>
   );
 };

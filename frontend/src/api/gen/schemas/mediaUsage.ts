@@ -9,4 +9,5 @@ export type MediaUsage = (typeof MediaUsage)[keyof typeof MediaUsage];
 
 export const MediaUsage = {
   TeamPhoto: "TeamPhoto",
+  TeamBlogImage: "TeamBlogImage",
 } as const;

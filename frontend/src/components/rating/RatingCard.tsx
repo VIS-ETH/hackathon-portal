@@ -45,7 +45,7 @@ const ExpertRatingCard = ({ team }: ExpertRatingCardProps) => {
               <Accordion.Item value="disclosure">
                 <Accordion.Control>{project.name}</Accordion.Control>
                 <Accordion.Panel>
-                  <Markdown content={project.content} />
+                  <Markdown content={project.content} trusted />
                 </Accordion.Panel>
               </Accordion.Item>
             </Accordion>

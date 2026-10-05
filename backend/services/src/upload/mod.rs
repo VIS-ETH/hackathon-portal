@@ -1,5 +1,6 @@
 pub mod models;
 
+use crate::event::models::Event;
 use crate::upload::models::UploadUrl;
 use crate::{ServiceError, ServiceResult};
 use aws_smithy_types_convert::date_time::DateTimeExt;
@@ -31,14 +32,18 @@ impl UploadService {
 
     fn validate_content_type(usage: MediaUsage, mime: &Mime) -> ServiceResult<()> {
         match (usage, (mime.type_(), mime.subtype())) {
-            (MediaUsage::TeamPhoto, (mime::IMAGE, mime::JPEG | mime::PNG)) => Ok(()),
+            (
+                MediaUsage::TeamPhoto | MediaUsage::TeamBlogImage,
+                (mime::IMAGE, mime::JPEG | mime::PNG),
+            ) => Ok(()),
             _ => Err(ServiceError::UploadContentTypeNotAllowed),
         }
     }
 
-    fn validate_content_length(usage: MediaUsage, size: i64) -> ServiceResult<()> {
+    fn validate_content_length(event: &Event, usage: MediaUsage, size: i64) -> ServiceResult<()> {
         let limit_mb = match usage {
             MediaUsage::TeamPhoto => 10,
+            MediaUsage::TeamBlogImage => i64::from(event.blog_max_image_size_mb),
         };
 
         let limit = limit_mb * Self::MB;
@@ -68,13 +73,14 @@ impl UploadService {
 
     pub async fn validate_upload_request(
         &self,
+        event: &Event,
         user_id: Uuid,
         usage: MediaUsage,
         content_type: &Mime,
         content_size: i64,
     ) -> ServiceResult<()> {
         Self::validate_content_type(usage, content_type)?;
-        Self::validate_content_length(usage, content_size)?;
+        Self::validate_content_length(event, usage, content_size)?;
         self.validate_rate_limit(user_id).await?;
 
         Ok(())
@@ -125,7 +131,25 @@ impl UploadService {
     ) -> ServiceResult<()> {
         let txn = self.db_repo.conn().begin().await?;
 
-        let upload = UploadRepository::fetch_by_id(&txn, id).await?;
+        self.validate_upload_with(&txn, id, user_id, usage, allow_reuse)
+            .await?;
+
+        txn.commit().await?;
+
+        Ok(())
+    }
+
+    /// Like [`Self::validate_upload`], but runs on the given connection, so that inside a
+    /// transaction the upload is only marked as validated if the transaction commits.
+    pub async fn validate_upload_with<C: ConnectionTrait>(
+        &self,
+        db: &C,
+        id: Uuid,
+        user_id: Uuid,
+        usage: MediaUsage,
+        allow_reuse: bool,
+    ) -> ServiceResult<()> {
+        let upload = UploadRepository::fetch_by_id(db, id).await?;
 
         if upload.user_id != user_id {
             return Err(ServiceError::Forbidden {
@@ -156,9 +180,7 @@ impl UploadService {
         let mut active_upload = upload.into_active_model();
         active_upload.uploaded_at = Set(last_modified);
         active_upload.validated_at = Set(Some(Utc::now().naive_utc()));
-        active_upload.save(&txn).await?;
-
-        txn.commit().await?;
+        active_upload.save(db).await?;
 
         Ok(())
     }

@@ -155,6 +155,22 @@ impl EventService {
             active_event.sidequest_cooldown = Set(sidequest_cooldown as i32);
         }
 
+        if let Some(blog_max_sections) = event_fu.blog_max_sections {
+            active_event.blog_max_sections = Set(blog_max_sections as i32);
+        }
+
+        if let Some(blog_max_images) = event_fu.blog_max_images {
+            active_event.blog_max_images = Set(blog_max_images as i32);
+        }
+
+        if let Some(blog_max_characters) = event_fu.blog_max_characters {
+            active_event.blog_max_characters = Set(blog_max_characters as i32);
+        }
+
+        if let Some(blog_max_image_size_mb) = event_fu.blog_max_image_size_mb {
+            active_event.blog_max_image_size_mb = Set(blog_max_image_size_mb as i32);
+        }
+
         if let Some(managed_address_template) = event_fu.managed_address_template {
             if managed_address_template.is_empty() {
                 active_event.managed_address_template = Set(None);

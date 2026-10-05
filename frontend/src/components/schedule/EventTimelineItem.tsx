@@ -73,6 +73,7 @@ const EventTimelineItem = ({
             <>
               <Text size="sm" component="div" m={0}>
                 <Markdown
+                  trusted
                   content={
                     showFullContent ||
                     appointment.content.length <= contentLength

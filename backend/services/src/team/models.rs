@@ -1,4 +1,5 @@
 use crate::infrastructure::models::IngressConfig;
+use hackathon_portal_repositories::db::BlogSectionLayout;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use uuid::Uuid;
@@ -53,4 +54,19 @@ pub struct TeamForUpdate {
     pub ingress_enabled: Option<bool>,
     pub ingress_config: Option<IngressConfig>,
     pub finalist: Option<bool>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+pub struct TeamBlogSection {
+    pub content: String,
+    pub layout: BlogSectionLayout,
+    pub image_id: Option<Uuid>,
+    pub image_url: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+pub struct TeamBlogSectionForUpdate {
+    pub content: String,
+    pub layout: BlogSectionLayout,
+    pub image_id: Option<Uuid>,
 }

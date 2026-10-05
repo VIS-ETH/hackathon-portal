@@ -93,7 +93,7 @@ const Sidequest = () => {
             <Text>Lower result is better</Text>
           </IconTextGroup>
         )}
-        <MarkdownCard content={sidequest.description} />
+        <MarkdownCard trusted content={sidequest.description} />
         <SidequestLeaderboardTable sidequest={sidequest} />
       </Stack>
       <UpdateSidequestDrawer

@@ -45,6 +45,10 @@ pub struct Model {
     pub master_ai_api_key: Option<Vec<u8>>,
     pub finalists_visible: bool,
     pub voting_open: bool,
+    pub blog_max_characters: i32,
+    pub blog_max_image_size_mb: i32,
+    pub blog_max_images: i32,
+    pub blog_max_sections: i32,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

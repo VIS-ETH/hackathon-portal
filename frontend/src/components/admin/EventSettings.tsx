@@ -84,6 +84,25 @@ const EventSettings = ({ event, refetch }: EventSettingsProps) => {
           delete draft.sidequest_cooldown;
         }
 
+        if (!draft.blog_max_sections && draft.blog_max_sections !== 0) {
+          delete draft.blog_max_sections;
+        }
+
+        if (!draft.blog_max_images && draft.blog_max_images !== 0) {
+          delete draft.blog_max_images;
+        }
+
+        if (!draft.blog_max_characters && draft.blog_max_characters !== 0) {
+          delete draft.blog_max_characters;
+        }
+
+        if (
+          !draft.blog_max_image_size_mb &&
+          draft.blog_max_image_size_mb !== 0
+        ) {
+          delete draft.blog_max_image_size_mb;
+        }
+
         if (draft.read_only == event.read_only) {
           delete draft.read_only;
         }
@@ -221,6 +240,45 @@ const EventSettings = ({ event, refetch }: EventSettingsProps) => {
               key={form.key("master_ai_api_key")}
               label="Master AI API Key"
               type="password"
+            />
+          </SimpleGrid>
+          <Divider label="Team Blog" labelPosition="left" />
+          <SimpleGrid cols={{ xs: 1, md: 3 }}>
+            <NumberInput
+              {...(inputProps as NumberInputProps)}
+              {...form.getInputProps("blog_max_sections")}
+              key={form.key("blog_max_sections")}
+              label="Max sections per blog"
+              placeholder={event.blog_max_sections.toString()}
+              min={0}
+              step={1}
+            />
+            <NumberInput
+              {...(inputProps as NumberInputProps)}
+              {...form.getInputProps("blog_max_images")}
+              key={form.key("blog_max_images")}
+              label="Max images per blog"
+              placeholder={event.blog_max_images.toString()}
+              min={0}
+              step={1}
+            />
+            <NumberInput
+              {...(inputProps as NumberInputProps)}
+              {...form.getInputProps("blog_max_characters")}
+              key={form.key("blog_max_characters")}
+              label="Max characters per blog"
+              placeholder={event.blog_max_characters.toString()}
+              min={0}
+              step={1}
+            />
+            <NumberInput
+              {...(inputProps as NumberInputProps)}
+              {...form.getInputProps("blog_max_image_size_mb")}
+              key={form.key("blog_max_image_size_mb")}
+              label="Max blog image size (MB)"
+              placeholder={event.blog_max_image_size_mb.toString()}
+              min={1}
+              step={1}
             />
           </SimpleGrid>
           <Divider label="Infrastructure" labelPosition="left" />

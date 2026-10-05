@@ -130,6 +130,7 @@ const UpdateProjectDrawer = ({
           </Button>
           <Divider />
           <MarkdownCard
+            trusted
             content={form.getValues().content || "Nothing to preview"}
           />
         </Stack>

@@ -225,6 +225,10 @@ impl From<&ServiceError> for PublicError {
                                         StatusCode::FORBIDDEN,
                                         format!("This action is not allowed in the phase {current_phase}"),
                                     ),
+            ServiceError::TeamBlogLimitExceeded { resource, actual, limit } => (
+                                        StatusCode::BAD_REQUEST,
+                                        format!("Blog has {actual} {resource} which exceeds the limit of {limit}"),
+                                    ),
             ServiceError::UploadContentTypeNotAllowed => (
                                         StatusCode::BAD_REQUEST,
                                         "You may not upload files of this type".to_string(),

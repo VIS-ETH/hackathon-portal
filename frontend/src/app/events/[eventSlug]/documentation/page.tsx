@@ -17,7 +17,7 @@ const Documentation = () => {
     <Stack>
       <Title order={2}>Documentation</Title>
       {event.documentation_content ? (
-        <MarkdownCard content={event.documentation_content} />
+        <MarkdownCard trusted content={event.documentation_content} />
       ) : (
         <Text>No documentation available.</Text>
       )}

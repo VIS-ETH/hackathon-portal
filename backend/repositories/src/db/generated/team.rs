@@ -62,6 +62,8 @@ pub enum Relation {
     ProjectPreference,
     #[sea_orm(has_many = "super::sidequest_score::Entity")]
     SidequestScore,
+    #[sea_orm(has_many = "super::team_blog_section::Entity")]
+    TeamBlogSection,
     #[sea_orm(has_many = "super::team_role_assignment::Entity")]
     TeamRoleAssignment,
     #[sea_orm(has_many = "super::technical_rating::Entity")]
@@ -99,6 +101,12 @@ impl Related<super::project_preference::Entity> for Entity {
 impl Related<super::sidequest_score::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::SidequestScore.def()
+    }
+}
+
+impl Related<super::team_blog_section::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::TeamBlogSection.def()
     }
 }
 

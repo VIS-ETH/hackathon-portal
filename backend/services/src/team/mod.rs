@@ -3,14 +3,16 @@ pub mod models;
 use crate::authorization::AuthorizationService;
 use crate::crypto::CryptoService;
 use crate::infrastructure::models::IngressConfig;
-use crate::team::models::{Team, TeamForCreate, TeamForUpdate};
+use crate::team::models::{
+    Team, TeamBlogSection, TeamBlogSectionForUpdate, TeamForCreate, TeamForUpdate,
+};
 use crate::upload::UploadService;
 use crate::{ServiceError, ServiceResult};
 use futures::future::try_join_all;
 use hackathon_portal_repositories::db::{
-    db_event, db_project_preference, db_sidequest_score, db_team, db_team_role_assignment,
-    EventRepository, MediaUsage, ProjectPreferenceRepository, ProjectRepository, TeamRepository,
-    TeamRole,
+    db_event, db_project_preference, db_sidequest_score, db_team, db_team_blog_section,
+    db_team_role_assignment, EventRepository, MediaUsage, ProjectPreferenceRepository,
+    ProjectRepository, TeamBlogSectionRepository, TeamRepository, TeamRole,
 };
 use hackathon_portal_repositories::lite_llm::LiteLLMRepository;
 use hackathon_portal_repositories::DbRepository;
@@ -270,7 +272,7 @@ impl TeamService {
         Ok(finalists)
     }
 
-    /// Cascade deletes team role assignments and project preferences.
+    /// Cascade deletes team role assignments, project preferences and blog sections.
     /// Fails on any other related resources.
     pub async fn delete_team(&self, team_id: Uuid) -> ServiceResult<()> {
         let team = TeamRepository::fetch_by_id(self.db_repo.conn(), team_id).await?;
@@ -284,6 +286,11 @@ impl TeamService {
 
         db_project_preference::Entity::delete_many()
             .filter(db_project_preference::Column::TeamId.eq(team_id))
+            .exec(&txn)
+            .await?;
+
+        db_team_blog_section::Entity::delete_many()
+            .filter(db_team_blog_section::Column::TeamId.eq(team_id))
             .exec(&txn)
             .await?;
 
@@ -390,6 +397,115 @@ impl TeamService {
         let pps = new_pps.into_iter().map(|pp| pp.project_id).collect();
 
         Ok(pps)
+    }
+
+    pub async fn get_team_blog(&self, team_id: Uuid) -> ServiceResult<Vec<TeamBlogSection>> {
+        let sections =
+            TeamBlogSectionRepository::fetch_all_by_team_id(self.db_repo.conn(), team_id).await?;
+
+        try_join_all(
+            sections
+                .into_iter()
+                .map(|section| self.assemble_team_blog_section(section)),
+        )
+        .await
+    }
+
+    /// Replaces all blog sections of the team. Images that are not yet part of the blog
+    /// must be fresh uploads, so that uploads of other teams cannot be referenced.
+    /// The size of the blog is bounded by the blog limits of the event.
+    pub async fn update_team_blog(
+        &self,
+        team_id: Uuid,
+        user_id: Uuid,
+        sections: Vec<TeamBlogSectionForUpdate>,
+    ) -> ServiceResult<Vec<TeamBlogSection>> {
+        let (_, event) =
+            TeamRepository::fetch_by_id_with_event(self.db_repo.conn(), team_id).await?;
+
+        let image_ids = sections
+            .iter()
+            .filter_map(|section| section.image_id)
+            .collect::<HashSet<_>>();
+
+        let content_length = sections
+            .iter()
+            .map(|section| section.content.chars().count())
+            .sum::<usize>();
+
+        for (resource, actual, limit) in [
+            ("sections", sections.len(), event.blog_max_sections as usize),
+            ("images", image_ids.len(), event.blog_max_images as usize),
+            (
+                "characters",
+                content_length,
+                event.blog_max_characters as usize,
+            ),
+        ] {
+            if actual > limit {
+                return Err(ServiceError::TeamBlogLimitExceeded {
+                    resource: resource.to_string(),
+                    actual,
+                    limit,
+                });
+            }
+        }
+
+        // Images are validated inside the transaction, so that a failed update does not leave
+        // uploads marked as validated without them being part of the blog.
+        let txn = self.db_repo.conn().begin().await?;
+
+        let current_image_ids = TeamBlogSectionRepository::fetch_all_by_team_id(&txn, team_id)
+            .await?
+            .into_iter()
+            .filter_map(|section| section.image_id)
+            .collect::<HashSet<_>>();
+
+        for image_id in image_ids.difference(&current_image_ids) {
+            self.upload_service
+                .validate_upload_with(&txn, user_id, *image_id, MediaUsage::TeamBlogImage, false)
+                .await?;
+        }
+
+        db_team_blog_section::Entity::delete_many()
+            .filter(db_team_blog_section::Column::TeamId.eq(team_id))
+            .exec(&txn)
+            .await?;
+
+        for (position, section) in sections.into_iter().enumerate() {
+            let active_section = db_team_blog_section::ActiveModel {
+                team_id: Set(team_id),
+                image_id: Set(section.image_id),
+                position: Set(position as i32),
+                content: Set(section.content),
+                layout: Set(section.layout),
+                ..Default::default()
+            };
+
+            active_section.insert(&txn).await?;
+        }
+
+        txn.commit().await?;
+
+        self.get_team_blog(team_id).await
+    }
+
+    async fn assemble_team_blog_section(
+        &self,
+        section_model: db_team_blog_section::Model,
+    ) -> ServiceResult<TeamBlogSection> {
+        let image_url = if let Some(image_id) = section_model.image_id {
+            Some(self.upload_service.generate_download_url(image_id).await?)
+        } else {
+            None
+        };
+
+        Ok(TeamBlogSection {
+            content: section_model.content,
+            layout: section_model.layout,
+            image_id: section_model.image_id,
+            image_url,
+        })
     }
 
     async fn assemble_team(

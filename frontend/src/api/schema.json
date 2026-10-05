@@ -2581,6 +2581,88 @@
         }
       }
     },
+    "/api/teams/{team_id}/blog": {
+      "get": {
+        "tags": ["crate::routers::teams"],
+        "operationId": "get_team_blog",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/TeamBlogSection" }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["crate::routers::teams"],
+        "operationId": "update_team_blog",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/TeamBlogSectionForUpdate"
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/TeamBlogSection" }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/teams/{team_id}/credentials": {
       "get": {
         "tags": ["crate::routers::teams"],
@@ -3151,6 +3233,10 @@
           "result": { "type": "number", "format": "double", "nullable": true }
         }
       },
+      "BlogSectionLayout": {
+        "type": "string",
+        "enum": ["ImageTop", "ImageBottom", "ImageLeft", "ImageRight"]
+      },
       "Cooldown": {
         "type": "object",
         "required": ["duration"],
@@ -3247,9 +3333,33 @@
           "visibility",
           "phase",
           "vote_enabled",
-          "finalists_visible"
+          "finalists_visible",
+          "blog_max_sections",
+          "blog_max_images",
+          "blog_max_characters",
+          "blog_max_image_size_mb"
         ],
         "properties": {
+          "blog_max_characters": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "blog_max_image_size_mb": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "blog_max_images": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "blog_max_sections": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
           "direct_address_template": { "type": "string", "nullable": true },
           "discord_config": { "type": "string", "nullable": true },
           "discord_server_id": { "type": "string", "nullable": true },
@@ -3334,6 +3444,30 @@
       "EventForUpdate": {
         "type": "object",
         "properties": {
+          "blog_max_characters": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true,
+            "minimum": 0
+          },
+          "blog_max_image_size_mb": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true,
+            "minimum": 0
+          },
+          "blog_max_images": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true,
+            "minimum": 0
+          },
+          "blog_max_sections": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true,
+            "minimum": 0
+          },
           "direct_address_template": { "type": "string", "nullable": true },
           "discord_config": { "type": "string", "nullable": true },
           "discord_server_id": { "type": "string", "nullable": true },
@@ -3575,7 +3709,10 @@
         },
         "additionalProperties": false
       },
-      "MediaUsage": { "type": "string", "enum": ["TeamPhoto"] },
+      "MediaUsage": {
+        "type": "string",
+        "enum": ["TeamPhoto", "TeamBlogImage"]
+      },
       "Policies": {
         "type": "object",
         "required": [
@@ -3589,6 +3726,8 @@
           "can_update_team_name",
           "can_update_team_photo",
           "can_update_team_ingress_config",
+          "can_view_team_blog",
+          "can_update_team_blog",
           "can_manage_team",
           "can_manage_expert_rating",
           "can_view_project",
@@ -3612,6 +3751,7 @@
           "can_manage_sidequest_attempt": { "type": "boolean" },
           "can_manage_team": { "type": "boolean" },
           "can_public_vote": { "type": "boolean" },
+          "can_update_team_blog": { "type": "boolean" },
           "can_update_team_ingress_config": { "type": "boolean" },
           "can_update_team_name": { "type": "boolean" },
           "can_update_team_photo": { "type": "boolean" },
@@ -3623,6 +3763,7 @@
           "can_view_project_assignment": { "type": "boolean" },
           "can_view_sidequest": { "type": "boolean" },
           "can_view_sidequest_attempt": { "type": "boolean" },
+          "can_view_team_blog": { "type": "boolean" },
           "can_view_team_confidential": { "type": "boolean" },
           "can_view_team_feedback": { "type": "boolean" }
         }
@@ -3711,6 +3852,37 @@
         "properties": {
           "id": { "type": "string", "format": "uuid" },
           "name": { "type": "string" }
+        }
+      },
+      "ScoreNormalized": {
+        "type": "object",
+        "required": ["team", "extra_score", "final_score"],
+        "properties": {
+          "expert_score": {
+            "allOf": [{ "$ref": "#/components/schemas/ExpertScore" }],
+            "nullable": true
+          },
+          "extra_score": { "type": "number", "format": "double" },
+          "final_score": { "type": "number", "format": "double" },
+          "max_final_score": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "rank": { "type": "integer", "format": "int32", "nullable": true },
+          "sidequest_score": {
+            "allOf": [{ "$ref": "#/components/schemas/SidequestScore" }],
+            "nullable": true
+          },
+          "team": { "$ref": "#/components/schemas/Team" },
+          "tech_score": {
+            "allOf": [{ "$ref": "#/components/schemas/TechnicalScore" }],
+            "nullable": true
+          },
+          "voting_score": {
+            "allOf": [{ "$ref": "#/components/schemas/VotingScore" }],
+            "nullable": true
+          }
         }
       },
       "ServerProtocol": { "type": "string", "enum": ["Http", "Https"] },
@@ -3868,6 +4040,25 @@
             "type": "array",
             "items": { "$ref": "#/components/schemas/TeamRole" }
           }
+        }
+      },
+      "TeamBlogSection": {
+        "type": "object",
+        "required": ["content", "layout"],
+        "properties": {
+          "content": { "type": "string" },
+          "image_id": { "type": "string", "format": "uuid", "nullable": true },
+          "image_url": { "type": "string", "nullable": true },
+          "layout": { "$ref": "#/components/schemas/BlogSectionLayout" }
+        }
+      },
+      "TeamBlogSectionForUpdate": {
+        "type": "object",
+        "required": ["content", "layout"],
+        "properties": {
+          "content": { "type": "string" },
+          "image_id": { "type": "string", "format": "uuid", "nullable": true },
+          "layout": { "$ref": "#/components/schemas/BlogSectionLayout" }
         }
       },
       "TeamCredentials": {

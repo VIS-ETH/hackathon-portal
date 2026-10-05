@@ -82,6 +82,12 @@ pub enum ServiceError {
         message: String,
     },
 
+    TeamBlogLimitExceeded {
+        resource: String,
+        actual: usize,
+        limit: usize,
+    },
+
     UploadRateLimitExceeded,
 
     UploadContentLengthExceeded {

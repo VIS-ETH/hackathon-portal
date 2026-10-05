@@ -4,6 +4,7 @@ import { useGetTeamRating } from "@/api/gen";
 import PageSkeleton from "@/components/PageSkeleton";
 import RatingFeedbackCard from "@/components/team/RatingFeedbackCard";
 import TeamAffiliatesCard from "@/components/team/TeamAffiliatesCard";
+import TeamBlogCard from "@/components/team/TeamBlogCard";
 import TeamDetailsCard from "@/components/team/TeamDetailsCard";
 import TeamMenu from "@/components/team/TeamMenu";
 import { useResolveParams } from "@/hooks/useResolveParams";
@@ -43,6 +44,10 @@ const Team = () => {
           <TeamAffiliatesCard teamId={team.id} />
         )}
       </SimpleGrid>
+
+      {policies.can_view_team_blog && (
+        <TeamBlogCard team={team} canUpdate={policies.can_update_team_blog} />
+      )}
 
       {policies.can_view_team_feedback && rating && (
         <RatingFeedbackCard rating={rating} limitedView={false} />

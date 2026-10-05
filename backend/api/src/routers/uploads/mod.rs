@@ -48,7 +48,13 @@ pub async fn create_upload(
 
     state
         .upload_service
-        .validate_upload_request(ctx.user().id, body.usage, &mime, body.content_length)
+        .validate_upload_request(
+            &event,
+            ctx.user().id,
+            body.usage,
+            &mime,
+            body.content_length,
+        )
         .await?;
 
     let upload = state

@@ -117,6 +117,7 @@ const UpdateSidequestDrawer = ({
           </Button>
           <Divider />
           <MarkdownCard
+            trusted
             content={form.getValues().description || "Nothing to preview"}
           />
         </Stack>

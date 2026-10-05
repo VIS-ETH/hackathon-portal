@@ -70,6 +70,8 @@ import type {
   SidequestForUpdate,
   Team,
   TeamAffiliate,
+  TeamBlogSection,
+  TeamBlogSectionForUpdate,
   TeamCredentials,
   TeamForCreate,
   TeamForUpdate,
@@ -8725,6 +8727,233 @@ export const useCreateTeamAiApiKey = <TError = PublicError, TContext = unknown>(
     getCreateTeamAiApiKeyMutationOptions(options),
     queryClient,
   );
+};
+
+export const getTeamBlog = (
+  teamId: string,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<TeamBlogSection[]>(
+    { url: `/api/teams/${teamId}/blog`, method: "GET", signal },
+    options,
+  );
+};
+
+export const getGetTeamBlogQueryKey = (teamId: string) => {
+  return [`/api/teams/${teamId}/blog`] as const;
+};
+
+export const getGetTeamBlogQueryOptions = <
+  TData = Awaited<ReturnType<typeof getTeamBlog>>,
+  TError = PublicError,
+>(
+  teamId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getTeamBlog>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetTeamBlogQueryKey(teamId);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getTeamBlog>>> = ({
+    signal,
+  }) => getTeamBlog(teamId, requestOptions, signal);
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: teamId !== null && teamId !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getTeamBlog>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetTeamBlogQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getTeamBlog>>
+>;
+export type GetTeamBlogQueryError = PublicError;
+
+export function useGetTeamBlog<
+  TData = Awaited<ReturnType<typeof getTeamBlog>>,
+  TError = PublicError,
+>(
+  teamId: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getTeamBlog>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTeamBlog>>,
+          TError,
+          Awaited<ReturnType<typeof getTeamBlog>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetTeamBlog<
+  TData = Awaited<ReturnType<typeof getTeamBlog>>,
+  TError = PublicError,
+>(
+  teamId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getTeamBlog>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTeamBlog>>,
+          TError,
+          Awaited<ReturnType<typeof getTeamBlog>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetTeamBlog<
+  TData = Awaited<ReturnType<typeof getTeamBlog>>,
+  TError = PublicError,
+>(
+  teamId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getTeamBlog>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetTeamBlog<
+  TData = Awaited<ReturnType<typeof getTeamBlog>>,
+  TError = PublicError,
+>(
+  teamId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getTeamBlog>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetTeamBlogQueryOptions(teamId, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export const updateTeamBlog = (
+  teamId: string,
+  teamBlogSectionForUpdate: TeamBlogSectionForUpdate[],
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<TeamBlogSection[]>(
+    {
+      url: `/api/teams/${teamId}/blog`,
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      data: teamBlogSectionForUpdate,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getUpdateTeamBlogMutationKey = () => ["updateTeamBlog"] as const;
+
+export const getUpdateTeamBlogMutationOptions = <
+  TError = PublicError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateTeamBlog>>,
+    TError,
+    UpdateTeamBlogMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateTeamBlog>>,
+  TError,
+  UpdateTeamBlogMutationVariables,
+  TContext
+> => {
+  const mutationKey = getUpdateTeamBlogMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateTeamBlog>>,
+    UpdateTeamBlogMutationVariables
+  > = (props) => {
+    const { teamId, data } = props ?? {};
+
+    return updateTeamBlog(teamId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateTeamBlogMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateTeamBlog>>
+>;
+export type UpdateTeamBlogMutationBody = TeamBlogSectionForUpdate[];
+export type UpdateTeamBlogMutationError = PublicError;
+export type UpdateTeamBlogMutationVariables = {
+  teamId: string;
+  data: TeamBlogSectionForUpdate[];
+};
+
+export const useUpdateTeamBlog = <TError = PublicError, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof updateTeamBlog>>,
+      TError,
+      UpdateTeamBlogMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof updateTeamBlog>>,
+  TError,
+  UpdateTeamBlogMutationVariables,
+  TContext
+> => {
+  return useMutation(getUpdateTeamBlogMutationOptions(options), queryClient);
 };
 
 export const getTeamCredentials = (
