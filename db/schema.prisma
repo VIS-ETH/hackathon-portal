@@ -116,6 +116,7 @@ model team {
   ssh_config_override      String?
   ingress_enabled          Boolean @default(false)
   ingress_config           Json    @default("{\"version\":1,\"mode\":\"Managed\",\"config\":{\"server_port\":8080,\"access_control_mode\":\"AuthenticationAuthorization\"}}")
+  blog_version             Int     @default(0) // incremented on every blog update, used to detect concurrent edits
 
   // relations
   event   event    @relation(fields: [event_id], references: [id])

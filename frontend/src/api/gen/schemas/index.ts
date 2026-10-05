@@ -98,6 +98,8 @@ export * from "./sidequestScore";
 export * from "./sidequestsHistoryQuery";
 export * from "./team";
 export * from "./teamAffiliate";
+export * from "./teamBlog";
+export * from "./teamBlogForUpdate";
 export * from "./teamBlogSection";
 export * from "./teamBlogSectionForUpdate";
 export * from "./teamCredentials";

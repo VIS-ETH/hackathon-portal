@@ -70,8 +70,8 @@ import type {
   SidequestForUpdate,
   Team,
   TeamAffiliate,
-  TeamBlogSection,
-  TeamBlogSectionForUpdate,
+  TeamBlog,
+  TeamBlogForUpdate,
   TeamCredentials,
   TeamForCreate,
   TeamForUpdate,
@@ -8518,7 +8518,7 @@ export const getTeamBlog = (
   options?: SecondParameter<typeof customInstance>,
   signal?: AbortSignal,
 ) => {
-  return customInstance<TeamBlogSection[]>(
+  return customInstance<TeamBlog>(
     { url: `/api/teams/${teamId}/blog`, method: "GET", signal },
     options,
   );
@@ -8654,16 +8654,16 @@ export function useGetTeamBlog<
 
 export const updateTeamBlog = (
   teamId: string,
-  teamBlogSectionForUpdate: TeamBlogSectionForUpdate[],
+  teamBlogForUpdate: TeamBlogForUpdate,
   options?: SecondParameter<typeof customInstance>,
   signal?: AbortSignal,
 ) => {
-  return customInstance<TeamBlogSection[]>(
+  return customInstance<TeamBlog>(
     {
       url: `/api/teams/${teamId}/blog`,
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      data: teamBlogSectionForUpdate,
+      data: teamBlogForUpdate,
       signal,
     },
     options,
@@ -8713,11 +8713,11 @@ export const getUpdateTeamBlogMutationOptions = <
 export type UpdateTeamBlogMutationResult = NonNullable<
   Awaited<ReturnType<typeof updateTeamBlog>>
 >;
-export type UpdateTeamBlogMutationBody = TeamBlogSectionForUpdate[];
+export type UpdateTeamBlogMutationBody = TeamBlogForUpdate;
 export type UpdateTeamBlogMutationError = PublicError;
 export type UpdateTeamBlogMutationVariables = {
   teamId: string;
-  data: TeamBlogSectionForUpdate[];
+  data: TeamBlogForUpdate;
 };
 
 export const useUpdateTeamBlog = <TError = PublicError, TContext = unknown>(

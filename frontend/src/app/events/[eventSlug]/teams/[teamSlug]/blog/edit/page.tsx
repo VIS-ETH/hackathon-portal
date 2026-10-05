@@ -12,14 +12,13 @@ import { useRouter } from "next/navigation";
 const EditTeamBlog = () => {
   const router = useRouter();
   const { event, team, policies } = useResolveParams();
-  const { data: sections, refetch: refetchSections } = useGetTeamBlog(
-    team?.id ?? "",
-    {
-      query: {
-        enabled: (!!team?.id && policies?.can_update_team_blog) ?? false,
-      },
+  const { data: blog } = useGetTeamBlog(team?.id ?? "", {
+    query: {
+      enabled: (!!team?.id && policies?.can_update_team_blog) ?? false,
+      // The editor warns about concurrent edits as soon as a newer version is fetched.
+      refetchInterval: 30 * 1000,
     },
-  );
+  });
 
   if (!event || !team || !policies) {
     return <PageSkeleton />;
@@ -36,12 +35,11 @@ const EditTeamBlog = () => {
     );
   }
 
-  if (!sections) {
+  if (!blog) {
     return <PageSkeleton />;
   }
 
-  const handleSaved = async () => {
-    await refetchSections();
+  const handleSaved = () => {
     router.push(`/events/${event.slug}/teams/${team.slug}`);
   };
 
@@ -51,7 +49,7 @@ const EditTeamBlog = () => {
       <TeamBlogEditor
         event={event}
         team={team}
-        initialSections={sections}
+        blog={blog}
         onSaved={handleSaved}
       />
     </Stack>

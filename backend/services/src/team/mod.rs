@@ -4,7 +4,7 @@ use crate::authorization::AuthorizationService;
 use crate::crypto::CryptoService;
 use crate::infrastructure::models::IngressConfig;
 use crate::team::models::{
-    Team, TeamBlogSection, TeamBlogSectionForUpdate, TeamForCreate, TeamForUpdate,
+    Team, TeamBlog, TeamBlogForUpdate, TeamBlogSection, TeamForCreate, TeamForUpdate,
 };
 use crate::upload::UploadService;
 use crate::{ServiceError, ServiceResult};
@@ -403,27 +403,29 @@ impl TeamService {
         Ok(pps)
     }
 
-    pub async fn get_team_blog(&self, team_id: Uuid) -> ServiceResult<Vec<TeamBlogSection>> {
+    pub async fn get_team_blog(&self, team_id: Uuid) -> ServiceResult<TeamBlog> {
+        // The version is fetched before the sections, so that it is never newer than the
+        // sections. A concurrent update thus at worst causes a spurious conflict, but never
+        // lets a client overwrite sections it has not seen.
+        let team = TeamRepository::fetch_by_id(self.db_repo.conn(), team_id).await?;
         let sections =
             TeamBlogSectionRepository::fetch_all_by_team_id(self.db_repo.conn(), team_id).await?;
 
-        try_join_all(
-            sections
-                .into_iter()
-                .map(|section| self.assemble_team_blog_section(section)),
-        )
-        .await
+        self.assemble_team_blog(team.blog_version, sections).await
     }
 
     /// Replaces all blog sections of the team. Images that are not yet part of the blog
     /// must be fresh uploads, so that uploads of other teams cannot be referenced.
     /// The size of the blog is bounded by the blog limits of the event.
+    /// The update is rejected if the blog has changed since the version it is based on.
     pub async fn update_team_blog(
         &self,
         team_id: Uuid,
         user_id: Uuid,
-        sections: Vec<TeamBlogSectionForUpdate>,
-    ) -> ServiceResult<Vec<TeamBlogSection>> {
+        blog: TeamBlogForUpdate,
+    ) -> ServiceResult<TeamBlog> {
+        let TeamBlogForUpdate { version, sections } = blog;
+
         let (_, event) =
             TeamRepository::fetch_by_id_with_event(self.db_repo.conn(), team_id).await?;
 
@@ -459,6 +461,22 @@ impl TeamService {
         // uploads marked as validated without them being part of the blog.
         let txn = self.db_repo.conn().begin().await?;
 
+        // Incrementing the version locks the team row until the transaction ends, so
+        // concurrent updates are serialized and all but the first one are rejected.
+        let version_update = db_team::Entity::update_many()
+            .col_expr(
+                db_team::Column::BlogVersion,
+                Expr::col(db_team::Column::BlogVersion).add(1),
+            )
+            .filter(db_team::Column::Id.eq(team_id))
+            .filter(db_team::Column::BlogVersion.eq(version))
+            .exec(&txn)
+            .await?;
+
+        if version_update.rows_affected == 0 {
+            return Err(ServiceError::TeamBlogConflict);
+        }
+
         let current_image_ids = TeamBlogSectionRepository::fetch_all_by_team_id(&txn, team_id)
             .await?
             .into_iter()
@@ -476,6 +494,8 @@ impl TeamService {
             .exec(&txn)
             .await?;
 
+        let mut new_sections = Vec::with_capacity(sections.len());
+
         for (position, section) in sections.into_iter().enumerate() {
             let active_section = db_team_blog_section::ActiveModel {
                 team_id: Set(team_id),
@@ -486,12 +506,29 @@ impl TeamService {
                 ..Default::default()
             };
 
-            active_section.insert(&txn).await?;
+            new_sections.push(active_section.insert(&txn).await?);
         }
 
         txn.commit().await?;
 
-        self.get_team_blog(team_id).await
+        // The blog is assembled from what was written instead of being fetched again,
+        // which could already include a later update under a different version.
+        self.assemble_team_blog(version + 1, new_sections).await
+    }
+
+    async fn assemble_team_blog(
+        &self,
+        version: i32,
+        section_models: Vec<db_team_blog_section::Model>,
+    ) -> ServiceResult<TeamBlog> {
+        let sections = try_join_all(
+            section_models
+                .into_iter()
+                .map(|section| self.assemble_team_blog_section(section)),
+        )
+        .await?;
+
+        Ok(TeamBlog { version, sections })
     }
 
     async fn assemble_team_blog_section(

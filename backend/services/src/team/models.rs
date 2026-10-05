@@ -70,3 +70,16 @@ pub struct TeamBlogSectionForUpdate {
     pub layout: BlogSectionLayout,
     pub image_id: Option<Uuid>,
 }
+
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+pub struct TeamBlog {
+    pub version: i32,
+    pub sections: Vec<TeamBlogSection>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+pub struct TeamBlogForUpdate {
+    /// The version of the blog the update is based on.
+    pub version: i32,
+    pub sections: Vec<TeamBlogSectionForUpdate>,
+}

@@ -36,6 +36,7 @@ pub struct Model {
     #[sea_orm(column_type = "VarBinary(StringLen::None)", nullable)]
     pub ai_api_key: Option<Vec<u8>>,
     pub finalist: bool,
+    pub blog_version: i32,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

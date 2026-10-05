@@ -3,10 +3,11 @@ import TeamBlogSectionEditor, {
   EditableBlogSection,
 } from "./TeamBlogSectionEditor";
 
-import { useUpdateTeamBlog } from "@/api/gen";
+import { getGetTeamBlogQueryKey, useUpdateTeamBlog } from "@/api/gen";
 import {
   Event,
   Team,
+  TeamBlog,
   TeamBlogSection as TeamBlogSectionDTO,
 } from "@/api/gen/schemas";
 import {
@@ -24,29 +25,63 @@ import { Alert, Button, Card, Group, Stack, Tabs, Text } from "@mantine/core";
 import {
   IconAlertCircle,
   IconEye,
+  IconInfoCircle,
   IconPencil,
   IconPlus,
+  IconRefresh,
 } from "@tabler/icons-react";
+import { useQueryClient } from "@tanstack/react-query";
+import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
 
 type TeamBlogEditorProps = {
   event: Event;
   team: Team;
-  initialSections: TeamBlogSectionDTO[];
+  /** The latest blog, only used to initialize the editor and to detect concurrent edits. */
+  blog: TeamBlog;
   onSaved: () => void;
 };
+
+const toEditableSections = (
+  sections: TeamBlogSectionDTO[],
+): EditableBlogSection[] =>
+  sections.map((section) => ({ ...section, key: uuidv4() }));
 
 const TeamBlogEditor = ({
   event,
   team,
-  initialSections,
+  blog,
   onSaved,
 }: TeamBlogEditorProps) => {
-  const [sections, setSections] = useState<EditableBlogSection[]>(() =>
-    initialSections.map((section) => ({ ...section, key: uuidv4() })),
+  const [sections, setSections] = useState(() =>
+    toEditableSections(blog.sections),
   );
+  // The version the edits are based on, which must not follow refetches of the blog.
+  const [baseVersion, setBaseVersion] = useState(blog.version);
 
-  const updateTeamBlogMutation = useUpdateTeamBlog();
+  // Someone else has saved the blog since the edits were started, so saving would
+  // overwrite their changes. An older version can still arrive from a fetch that was
+  // started before our own save, which is not a conflict.
+  const hasConflict = blog.version > baseVersion;
+
+  const queryClient = useQueryClient();
+  const blogQueryKey = getGetTeamBlogQueryKey(team.id);
+
+  const updateTeamBlogMutation = useUpdateTeamBlog({
+    mutation: {
+      onSuccess: (savedBlog) => {
+        setBaseVersion(savedBlog.version);
+        queryClient.setQueryData(blogQueryKey, savedBlog);
+        onSaved();
+      },
+      onError: async (error) => {
+        // Fetching the latest version reveals the conflict without touching the edits.
+        if (axios.isAxiosError(error) && error.response?.status === 409) {
+          await queryClient.refetchQueries({ queryKey: blogQueryKey });
+        }
+      },
+    },
+  });
 
   const imageCount = new Set(
     sections.map((section) => section.image_id).filter(Boolean),
@@ -85,17 +120,28 @@ const TeamBlogEditor = ({
     setSections((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleSave = async () => {
-    await updateTeamBlogMutation.mutateAsync({
-      teamId: team.id,
-      data: sections.map(({ content, layout, image_id }) => ({
-        content,
-        layout,
-        image_id: image_id ?? null,
-      })),
-    });
+  const handleLoadLatest = () => {
+    const confirmation = window.confirm(
+      "Are you sure you want to load the latest version? All your changes will be lost.",
+    );
+    if (!confirmation) return;
 
-    onSaved();
+    setSections(toEditableSections(blog.sections));
+    setBaseVersion(blog.version);
+  };
+
+  const handleSave = () => {
+    updateTeamBlogMutation.mutate({
+      teamId: team.id,
+      data: {
+        version: baseVersion,
+        sections: sections.map(({ content, layout, image_id }) => ({
+          content,
+          layout,
+          image_id: image_id ?? null,
+        })),
+      },
+    });
   };
 
   const limitsText = (
@@ -108,20 +154,43 @@ const TeamBlogEditor = ({
 
   return (
     <Stack>
-      <Alert
-        icon={<IconAlertCircle {...largeIconProps} />}
-        color="red"
-        radius="md"
-        title="RISK OF DATA LOSS!"
-      >
-        <Text>
-          Saving <strong>replaces the whole blog</strong> with the content of
-          this editor. If multiple people edit the blog at the same time,{" "}
-          <strong>the last one to save overwrites</strong> all changes of the
-          others. Coordinate with your team so that only one person edits the
-          blog at a time.
-        </Text>
-      </Alert>
+      {hasConflict ? (
+        <Alert
+          icon={<IconAlertCircle {...largeIconProps} />}
+          color="yellow"
+          radius="md"
+          title="Someone else has changed the blog"
+        >
+          <Stack align="flex-start">
+            <Text>
+              Saving is disabled so that their changes are not overwritten. Your
+              changes are still here: copy what you want to keep, load the
+              latest version and apply your changes again.
+            </Text>
+            <Button
+              {...secondaryButtonProps}
+              variant="default"
+              leftSection={<IconRefresh {...iconProps} />}
+              onClick={handleLoadLatest}
+            >
+              Load Latest Version
+            </Button>
+          </Stack>
+        </Alert>
+      ) : (
+        <Alert
+          icon={<IconInfoCircle {...iconProps} />}
+          color="gray"
+          radius="md"
+        >
+          <Text size="sm">
+            Saving replaces the whole blog. If someone else saves while you are
+            editing, you will be warned and saving is disabled, so that their
+            changes are not overwritten. Agree with your team on who edits the
+            blog to avoid redoing work.
+          </Text>
+        </Alert>
+      )}
 
       <Tabs defaultValue="edit">
         <Tabs.List>
@@ -183,7 +252,7 @@ const TeamBlogEditor = ({
         {limitsText}
         <Button
           {...primaryButtonProps}
-          disabled={exceedsLimits}
+          disabled={exceedsLimits || hasConflict}
           loading={updateTeamBlogMutation.isPending}
           onClick={handleSave}
         >

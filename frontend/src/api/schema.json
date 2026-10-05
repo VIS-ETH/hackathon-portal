@@ -2597,10 +2597,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": { "$ref": "#/components/schemas/TeamBlogSection" }
-                }
+                "schema": { "$ref": "#/components/schemas/TeamBlog" }
               }
             }
           },
@@ -2629,12 +2626,7 @@
           "description": "",
           "content": {
             "application/json": {
-              "schema": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/TeamBlogSectionForUpdate"
-                }
-              }
+              "schema": { "$ref": "#/components/schemas/TeamBlogForUpdate" }
             }
           },
           "required": true
@@ -2644,10 +2636,15 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": { "$ref": "#/components/schemas/TeamBlogSection" }
-                }
+                "schema": { "$ref": "#/components/schemas/TeamBlog" }
+              }
+            }
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
               }
             }
           },
@@ -4003,6 +4000,32 @@
           "roles": {
             "type": "array",
             "items": { "$ref": "#/components/schemas/TeamRole" }
+          }
+        }
+      },
+      "TeamBlog": {
+        "type": "object",
+        "required": ["version", "sections"],
+        "properties": {
+          "sections": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/TeamBlogSection" }
+          },
+          "version": { "type": "integer", "format": "int32" }
+        }
+      },
+      "TeamBlogForUpdate": {
+        "type": "object",
+        "required": ["version", "sections"],
+        "properties": {
+          "sections": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/TeamBlogSectionForUpdate" }
+          },
+          "version": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The version of the blog the update is based on."
           }
         }
       },

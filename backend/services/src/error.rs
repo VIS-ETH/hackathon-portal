@@ -87,6 +87,8 @@ pub enum ServiceError {
         limit: usize,
     },
 
+    TeamBlogConflict,
+
     UploadRateLimitExceeded,
 
     UploadContentLengthExceeded {

@@ -23,7 +23,9 @@ type TeamBlogCardProps = {
 
 const TeamBlogCard = ({ team, canUpdate }: TeamBlogCardProps) => {
   const { data: event } = useGetEvent(team.event_id);
-  const { data: sections = [] } = useGetTeamBlog(team.id);
+  const { data: blog } = useGetTeamBlog(team.id);
+
+  const sections = blog?.sections ?? [];
 
   if (sections.length === 0 && !canUpdate) {
     return undefined;

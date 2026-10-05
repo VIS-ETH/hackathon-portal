@@ -17,7 +17,7 @@ use hackathon_portal_repositories::db::TeamRole;
 use hackathon_portal_services::authorization::groups::Groups;
 use hackathon_portal_services::authorization::models::{TeamAffiliate, TeamRoles, TeamRolesMap};
 use hackathon_portal_services::team::models::{
-    TeamBlogSection, TeamBlogSectionForUpdate, TeamForCreate, TeamForUpdate,
+    TeamBlog, TeamBlogForUpdate, TeamForCreate, TeamForUpdate,
 };
 use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
@@ -681,7 +681,7 @@ pub async fn update_team_project_preferences(
     get,
     path = "/api/teams/{team_id}/blog",
     responses(
-        (status = StatusCode::OK, body = Vec<TeamBlogSection>),
+        (status = StatusCode::OK, body = TeamBlog),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
 )]
@@ -689,7 +689,7 @@ pub async fn get_team_blog(
     ctx: Ctx,
     State(state): State<ApiState>,
     Path(team_id): Path<Uuid>,
-) -> ApiJsonVec<TeamBlogSection> {
+) -> ApiJson<TeamBlog> {
     let team = state.team_service.get_team(team_id).await?;
     let event = state.event_service.get_event(team.event_id).await?;
     let groups = Groups::from_event_and_team(ctx.roles(), event.id, team.id);
@@ -700,16 +700,17 @@ pub async fn get_team_blog(
         });
     }
 
-    let sections = state.team_service.get_team_blog(team_id).await?;
+    let blog = state.team_service.get_team_blog(team_id).await?;
 
-    Ok(Json(sections))
+    Ok(Json(blog))
 }
 
 #[utoipa::path(
     put,
     path = "/api/teams/{team_id}/blog",
     responses(
-        (status = StatusCode::OK, body = Vec<TeamBlogSection>),
+        (status = StatusCode::OK, body = TeamBlog),
+        (status = StatusCode::CONFLICT, body = PublicError),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
 )]
@@ -717,8 +718,8 @@ pub async fn update_team_blog(
     ctx: Ctx,
     State(state): State<ApiState>,
     Path(team_id): Path<Uuid>,
-    Json(body): Json<Vec<TeamBlogSectionForUpdate>>,
-) -> ApiJsonVec<TeamBlogSection> {
+    Json(body): Json<TeamBlogForUpdate>,
+) -> ApiJson<TeamBlog> {
     let team = state.team_service.get_team(team_id).await?;
     let event = state.event_service.get_event(team.event_id).await?;
     let groups = Groups::from_event_and_team(ctx.roles(), event.id, team.id);
@@ -729,12 +730,12 @@ pub async fn update_team_blog(
         });
     }
 
-    let sections = state
+    let blog = state
         .team_service
         .update_team_blog(team_id, ctx.user().id, body)
         .await?;
 
-    Ok(Json(sections))
+    Ok(Json(blog))
 }
 
 #[utoipa::path(
