@@ -48,8 +48,8 @@ pub enum Relation {
         on_delete = "Restrict"
     )]
     Event,
-    #[sea_orm(has_many = "super::expert_rating::Entity")]
-    ExpertRating,
+    #[sea_orm(has_many = "super::jury_rating::Entity")]
+    JuryRating,
     #[sea_orm(
         belongs_to = "super::project::Entity",
         from = "Column::ProjectId",
@@ -86,9 +86,9 @@ impl Related<super::event::Entity> for Entity {
     }
 }
 
-impl Related<super::expert_rating::Entity> for Entity {
+impl Related<super::jury_rating::Entity> for Entity {
     fn to() -> RelationDef {
-        Relation::ExpertRating.def()
+        Relation::JuryRating.def()
     }
 }
 

@@ -54,3 +54,11 @@ backend:fmt:
     - cd backend
     - cargo fmt --all --check
 
+backend:test:
+  extends: .backend
+  script:
+    # build deps as in backend/Dockerfile: openssl-sys needs pkg-config and libssl-dev,
+    # the utoipa-swagger-ui build script downloads Swagger UI with curl
+    - apt-get update && apt-get install -y --no-install-recommends pkg-config libssl-dev curl ca-certificates
+    - cd backend
+    - cargo test --locked

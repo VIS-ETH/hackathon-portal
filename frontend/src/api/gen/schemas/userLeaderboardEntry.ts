@@ -6,9 +6,9 @@
  */
 
 export interface UserLeaderboardEntry {
-  result: number;
   /** @minimum 0 */
-  score: number;
+  points: number;
+  result: number;
   user_id: string;
   user_name: string;
 }

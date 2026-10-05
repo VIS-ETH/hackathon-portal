@@ -25,7 +25,7 @@ pub enum Group {
     TeamMentor,
     TeamAffiliate,
     // Other roles
-    ExpertRater,
+    Juror,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
@@ -87,7 +87,7 @@ impl From<EventRole> for Groups {
             Group::TeamMember,
             Group::TeamMentor,
             Group::TeamAffiliate,
-            Group::ExpertRater,
+            Group::Juror,
         ];
 
         const MENTOR_GROUPS: &[Group] = &[
@@ -95,7 +95,7 @@ impl From<EventRole> for Groups {
             Group::EventStaff,
             Group::EventAffiliate,
             Group::EventGuest,
-            Group::ExpertRater,
+            Group::Juror,
         ];
 
         const PARTICIPANT_GROUPS: &[Group] = &[
@@ -116,7 +116,7 @@ impl From<EventRole> for Groups {
             Group::EventStaff,
             Group::EventAffiliate,
             Group::EventGuest,
-            Group::ExpertRater,
+            Group::Juror,
         ];
 
         let groups = match value {
@@ -177,24 +177,6 @@ impl Groups {
     }
 
     #[must_use]
-    pub fn can_view_event_feedback(
-        &self,
-        event_visibility: EventVisibility,
-        event_phase: EventPhase,
-        event_feedback_is_visible: bool,
-    ) -> bool {
-        if let Some(decision) = self.default_can_view_policy(event_visibility) {
-            return decision;
-        }
-
-        if self.can_view_event_internal(event_visibility) {
-            return event_phase == EventPhase::Finished && event_feedback_is_visible;
-        }
-
-        false
-    }
-
-    #[must_use]
     pub fn can_manage_event(&self) -> bool {
         self == &Group::EventAdmin
     }
@@ -218,7 +200,7 @@ impl Groups {
     }
 
     #[must_use]
-    pub fn can_manage_expert_rating(
+    pub fn can_manage_jury_rating(
         &self,
         event_visibility: EventVisibility,
         event_phase: EventPhase,
@@ -228,7 +210,7 @@ impl Groups {
             return decision;
         }
 
-        if self == &Group::ExpertRater {
+        if self == &Group::Juror {
             return event_phase == EventPhase::Grading;
         }
 

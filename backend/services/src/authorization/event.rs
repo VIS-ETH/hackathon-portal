@@ -204,22 +204,4 @@ impl AuthorizationService {
 
         Ok(affiliates)
     }
-
-    pub async fn count_event_affiliates(
-        &self,
-        event_id: Uuid,
-        role: Option<EventRole>,
-    ) -> ServiceResult<u64> {
-        let count = db_user::Entity::find()
-            .distinct()
-            .inner_join(db_event_role_assignment::Entity)
-            .filter(db_event_role_assignment::Column::EventId.eq(event_id))
-            .apply_if(role, |q, v| {
-                q.filter(db_event_role_assignment::Column::Role.eq(v))
-            })
-            .count(self.db_repo.conn())
-            .await?;
-
-        Ok(count)
-    }
 }

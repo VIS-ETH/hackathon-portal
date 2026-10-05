@@ -1,6 +1,6 @@
 "use client";
 
-import { useGetTeamRating } from "@/api/gen";
+import { useGetTeamRanking } from "@/api/gen";
 import PageSkeleton from "@/components/PageSkeleton";
 import RatingFeedbackCard from "@/components/team/RatingFeedbackCard";
 import TeamAffiliatesCard from "@/components/team/TeamAffiliatesCard";
@@ -14,7 +14,7 @@ import { Badge, Group, SimpleGrid, Stack, Title } from "@mantine/core";
 
 const Team = () => {
   const { event, team, refetchTeam, policies } = useResolveParams();
-  const { data: rating } = useGetTeamRating(team?.id ?? "", {
+  const { data: ranking } = useGetTeamRanking(team?.id ?? "", {
     query: {
       enabled: (!!team?.id && policies?.can_view_team_feedback) ?? false,
     },
@@ -49,8 +49,15 @@ const Team = () => {
         <TeamBlogCard team={team} canUpdate={policies.can_update_team_blog} />
       )}
 
-      {policies.can_view_team_feedback && rating && (
-        <RatingFeedbackCard rating={rating} limitedView={false} />
+      {policies.can_view_team_blog && (
+        <TeamBlogCard team={team} canUpdate={policies.can_update_team_blog} />
+      )}
+
+      {policies.can_view_team_feedback && ranking && (
+        <RatingFeedbackCard
+          entry={ranking.team}
+          maxTotalPoints={ranking.max_total_points}
+        />
       )}
     </Stack>
   );

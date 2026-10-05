@@ -6,7 +6,7 @@ import DocumentationContentControls from "@/components/admin/DocumentationConten
 import EventAffiliatesTable from "@/components/admin/EventAffiliatesTable";
 import EventSettings from "@/components/admin/EventSettings";
 import InvitationControls from "@/components/admin/InvitationControls";
-import Ranking from "@/components/admin/Ranking";
+import RankingTab from "@/components/admin/RankingTab";
 import TeamPasswordsControls from "@/components/admin/TeamPasswordsControls";
 import TeamsTable from "@/components/admin/TeamsTable";
 import WelcomeContentControls from "@/components/admin/WelcomeContentControls";
@@ -112,7 +112,7 @@ const Admin = () => {
       </Tabs.Panel>
 
       <Tabs.Panel value="ranking" mt="md">
-        <Ranking eventId={event.id} />
+        <RankingTab eventId={event.id} />
       </Tabs.Panel>
 
       <Tabs.Panel value="welcome" mt="md">

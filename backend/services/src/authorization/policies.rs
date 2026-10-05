@@ -8,7 +8,6 @@ use utoipa::ToSchema;
 pub struct Policies {
     pub can_view_event: bool,
     pub can_view_event_internal: bool,
-    pub can_view_event_feedback: bool,
     pub can_manage_event: bool,
     pub can_create_team: bool,
     pub can_view_team_confidential: bool,
@@ -19,7 +18,7 @@ pub struct Policies {
     pub can_view_team_blog: bool,
     pub can_update_team_blog: bool,
     pub can_manage_team: bool,
-    pub can_manage_expert_rating: bool,
+    pub can_manage_jury_rating: bool,
     pub can_view_project: bool,
     pub can_manage_project: bool,
     pub can_view_project_assignment: bool,
@@ -48,11 +47,6 @@ impl Policies {
         Self {
             can_view_event: groups.can_view_event(event_visibility),
             can_view_event_internal: groups.can_view_event_internal(event_visibility),
-            can_view_event_feedback: groups.can_view_event_feedback(
-                event_visibility,
-                event_phase,
-                event_feedback_visible,
-            ),
             can_manage_event: groups.can_manage_event(),
             can_create_team: groups.can_create_team(event_visibility, event_phase, event_ro),
             can_view_team_confidential: groups.can_view_team_confidential(event_visibility),
@@ -83,7 +77,7 @@ impl Policies {
                 event_ro,
             ),
             can_manage_team: groups.can_manage_team(event_visibility, event_phase, event_ro),
-            can_manage_expert_rating: groups.can_manage_expert_rating(
+            can_manage_jury_rating: groups.can_manage_jury_rating(
                 event_visibility,
                 event_phase,
                 event_ro,

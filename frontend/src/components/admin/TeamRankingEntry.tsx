@@ -4,7 +4,7 @@ import ScoreDisplay from "../team/ScoreDisplay";
 import TeamImage from "../team/TeamImage";
 
 import { useUpdateTeam } from "@/api/gen";
-import { ScoreNormalized } from "@/api/gen/schemas";
+import { AdminTeam, TeamRanking } from "@/api/gen/schemas";
 import { cardProps } from "@/styles/common";
 import { fmtTeamIndex } from "@/utils";
 
@@ -25,13 +25,19 @@ import { IconWorld } from "@tabler/icons-react";
 import Link from "next/link";
 
 type TeamRankingEntryProps = {
-  info: ScoreNormalized;
+  entry: TeamRanking;
+  maxTotalPoints: number;
+  // live team data; undefined if the team was deleted after the snapshot
+  team?: AdminTeam;
   onTeamUpdated: () => Promise<unknown>;
 };
 
-const TeamRankingEntry = ({ info, onTeamUpdated }: TeamRankingEntryProps) => {
-  const team = info.team;
-
+const TeamRankingEntry = ({
+  entry,
+  maxTotalPoints,
+  team,
+  onTeamUpdated,
+}: TeamRankingEntryProps) => {
   const updateTeamMutation = useUpdateTeam({
     mutation: { onSuccess: onTeamUpdated },
   });
@@ -39,14 +45,14 @@ const TeamRankingEntry = ({ info, onTeamUpdated }: TeamRankingEntryProps) => {
 
   const changeFinalist = (newFinalist: boolean) => {
     updateTeamMutation.mutate({
-      teamId: team.id,
+      teamId: entry.team_id,
       data: {
         finalist: newFinalist,
       },
     });
   };
 
-  const teamWebpage = team.ingress_url && (
+  const teamWebpage = team?.ingress_url && (
     <IconTextGroup Icon={IconWorld}>
       <Link
         href={team.ingress_url}
@@ -69,43 +75,21 @@ const TeamRankingEntry = ({ info, onTeamUpdated }: TeamRankingEntryProps) => {
                 <Grid justify="center" align="center" py="md">
                   <Grid.Col span={1}>
                     <Center>
-                      <Text ff="monospace">{info.rank?.toString()}</Text>
+                      <Text ff="monospace">{entry.rank}</Text>
                     </Center>
                   </Grid.Col>
                   <Grid.Col span={3}>
                     <Group>
-                      <Text>{team.name}</Text>
-                      <Text ff="mono">{fmtTeamIndex(team.index)}</Text>
+                      <Text>{entry.team_name}</Text>
+                      <Text ff="mono">{fmtTeamIndex(entry.team_index)}</Text>
                     </Group>
                   </Grid.Col>
                   <Grid.Col span={8}>
                     <ScoreDisplay
-                      extra_score={info.extra_score || 0}
-                      technical_score={info.tech_score?.score_normalized || 0}
-                      presentation_score={
-                        info.expert_score?.score_normalized || 0
-                      }
-                      sidequest_score={
-                        info.sidequest_score?.score_normalized || 0
-                      }
-                      public_voting_score={
-                        info.voting_score?.score_normalized || 0
-                      }
-                      max_score={info.max_final_score || 0}
+                      entry={entry}
+                      maxTotalPoints={maxTotalPoints}
                     />
-                    {info.tech_score == null && (
-                      <Text>Technical Score could not be retrieved</Text>
-                    )}
-                    {info.expert_score == null && (
-                      <Text>Presentation Score could not be retrieved</Text>
-                    )}
-                    {info.sidequest_score == null && (
-                      <Text>Sidequest Score could not be retrieved</Text>
-                    )}
-                    {info.voting_score == null && (
-                      <Text>Public Voting Score could not be retrieved</Text>
-                    )}
-                    {info.tech_score?.all_answered === false && (
+                    {!entry.technical.all_answered && (
                       <Text c="red">Not all technical questions answered</Text>
                     )}
                   </Grid.Col>
@@ -115,8 +99,8 @@ const TeamRankingEntry = ({ info, onTeamUpdated }: TeamRankingEntryProps) => {
                 <Switch
                   size="md"
                   description="Finalist"
-                  checked={team.finalist ?? false}
-                  disabled={finalistUpdating}
+                  checked={team?.finalist ?? false}
+                  disabled={!team || finalistUpdating}
                   thumbIcon={
                     finalistUpdating ? (
                       <Loader size={10} color="blue" />
@@ -132,19 +116,15 @@ const TeamRankingEntry = ({ info, onTeamUpdated }: TeamRankingEntryProps) => {
               <Stack>
                 <Group>
                   <TeamImage
-                    url={team.photo_url}
+                    url={team?.photo_url}
                     width={240}
                     height={160}
-                    alt={team.name}
+                    alt={entry.team_name}
                     fit="contain"
                   />
                   {teamWebpage}
                 </Group>
-                <RatingFeedbackCard
-                  rating={info}
-                  limitedView={true}
-                  autoLoadAnswers={false}
-                />
+                <RatingFeedbackCard entry={entry} adminView />
               </Stack>
             </Accordion.Panel>
           </Accordion.Item>

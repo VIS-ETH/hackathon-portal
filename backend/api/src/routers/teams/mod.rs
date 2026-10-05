@@ -6,14 +6,14 @@ use crate::error::{ApiJson, ApiJsonVec};
 use crate::models::AffectedRows;
 use crate::routers::events::models::EventIdQuery;
 use crate::routers::teams::models::{
-    AdminTeam, CreateTeamAPIKey, ScoreNormalized, Team, TeamCredentials,
+    AdminTeam, CreateTeamAPIKey, Team, TeamCredentials, TeamRankingView,
 };
 use crate::routers::users::models::TeamRoleOptQuery;
 use crate::ApiError;
 use axum::extract::{Path, Query, State};
 use axum::routing::{delete, get, patch, post, put};
 use axum::{Json, Router};
-use hackathon_portal_repositories::db::{ExpertRatingCategory, TeamRole};
+use hackathon_portal_repositories::db::TeamRole;
 use hackathon_portal_services::authorization::groups::Groups;
 use hackathon_portal_services::authorization::models::{TeamAffiliate, TeamRoles, TeamRolesMap};
 use hackathon_portal_services::team::models::{
@@ -48,8 +48,7 @@ pub fn get_router(state: &ApiState) -> Router {
         .route("/:team_id/blog", get(get_team_blog))
         .route("/:team_id/blog", put(update_team_blog))
         .route("/:team_id/credentials", get(get_team_credentials))
-        .route("/:team_id/expert-ratings", get(get_team_expert_ratings))
-        .route("/:team_id/rating", get(get_team_rating))
+        .route("/:team_id/ranking", get(get_team_ranking))
         .route("/:team_id/ai-api-keys", post(create_team_ai_api_key))
         .with_state(state.clone())
 }
@@ -765,37 +764,6 @@ pub async fn get_team_credentials(
 }
 
 #[utoipa::path(
-    get,
-    path = "/api/teams/{team_id}/expert-ratings",
-    responses(
-        (status = StatusCode::OK, body = HashMap<ExpertRatingCategory, f64>),
-        (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
-    ),
-)]
-pub async fn get_team_expert_ratings(
-    ctx: Ctx,
-    State(state): State<ApiState>,
-    Path(team_id): Path<Uuid>,
-) -> ApiJson<HashMap<ExpertRatingCategory, f64>> {
-    let team = state.team_service.get_team(team_id).await?;
-    let event = state.event_service.get_event(team.event_id).await?;
-    let groups = Groups::from_event_and_team(ctx.roles(), event.id, team.id);
-
-    if !groups.can_view_team_feedback(event.visibility, event.phase, event.feedback_visible) {
-        return Err(ApiError::Forbidden {
-            action: "view expert ratings for this team".to_string(),
-        });
-    }
-
-    let ratings = state
-        .rating_service
-        .aggregate_expert_ratings(team_id)
-        .await?;
-
-    Ok(Json(ratings))
-}
-
-#[utoipa::path(
     post,
     path = "/api/teams/{team_id}/ai-api-keys",
     responses(
@@ -828,17 +796,17 @@ pub async fn create_team_ai_api_key(
 
 #[utoipa::path(
     get,
-    path = "/api/teams/{team_id}/rating",
+    path = "/api/teams/{team_id}/ranking",
     responses(
-        (status = StatusCode::OK, body = Option<ScoreNormalized>),
+        (status = StatusCode::OK, body = Option<TeamRankingView>),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
 )]
-pub async fn get_team_rating(
+pub async fn get_team_ranking(
     ctx: Ctx,
     State(state): State<ApiState>,
     Path(team_id): Path<Uuid>,
-) -> ApiJson<Option<ScoreNormalized>> {
+) -> ApiJson<Option<TeamRankingView>> {
     let team = state.team_service.get_team(team_id).await?;
     let event = state.event_service.get_event(team.event_id).await?;
     let groups = Groups::from_event_and_team(ctx.roles(), event.id, team.id);
@@ -849,21 +817,19 @@ pub async fn get_team_rating(
         });
     }
 
-    let can_view_project_assignment = groups.can_view_project_assignment(
-        event.visibility,
-        event.projects_visible,
-        event.project_assignments_visible,
-    );
-    let can_view_finalists = groups.can_view_finalists(event.visibility, event.finalists_visible);
+    let snapshot = state.ranking_service.get_snapshot(event.id, None).await?;
+    let view = snapshot.and_then(|snapshot| {
+        let max_total_points = snapshot.ranking.max_total_points;
+        snapshot
+            .ranking
+            .teams
+            .into_iter()
+            .find(|entry| entry.team_id == team_id)
+            .map(|entry| TeamRankingView {
+                max_total_points,
+                team: entry,
+            })
+    });
 
-    let full_ranking = state
-        .rating_service
-        .get_complete_scores(team.event_id)
-        .await?;
-    let team_ranking = full_ranking
-        .into_iter()
-        .find(|r| r.team.id == team_id)
-        .map(|r| ScoreNormalized::from((r, can_view_project_assignment, can_view_finalists)));
-
-    Ok(Json(team_ranking))
+    Ok(Json(view))
 }

@@ -58,11 +58,6 @@ pub enum ServiceError {
         actual: usize,
     },
 
-    WrongVotingRank {
-        given_rank: i32,
-        allowed_ranks: String,
-    },
-
     DuplicateVote,
 
     WrongVotingValue {
@@ -109,7 +104,7 @@ pub enum ServiceError {
     Parsing {
         message: String,
     },
-    WrongTechnicalQuestionPoints {
+    WrongTechnicalRatingScore {
         given_score: f64,
         allowed_scores: String,
     },

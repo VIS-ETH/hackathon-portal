@@ -1,10 +1,9 @@
-import ExpertRating from "../rating/ExpertRating";
+import JuryRating from "../rating/JuryRating";
 import OverviewLeaderboardTable from "../sidequest/OverviewLeaderboardTable";
 import TechnicalQuestionEntry from "../technicalQuestions/TechnicalQuestionEntry";
 import ScoreDisplay from "./ScoreDisplay";
 
-import { useGetTechnicalTeamRating } from "@/api/gen";
-import { ScoreNormalized } from "@/api/gen/schemas";
+import { TeamRanking, TechnicalQuestion } from "@/api/gen/schemas";
 import { useResolveParams } from "@/hooks/useResolveParams";
 import {
   cardHeaderTextProps,
@@ -13,59 +12,63 @@ import {
 } from "@/styles/common";
 import { fmtScore } from "@/utils";
 
-import { useState } from "react";
+import { useMemo } from "react";
 
-import { Button, Card, Group, Loader, Text, Title } from "@mantine/core";
+import { Card, Group, Loader, Text, Title } from "@mantine/core";
 
 import { IconTrophy } from "@tabler/icons-react";
 
 type CategoryTitleProps = {
   title: string;
-  rank: number;
-  score: number;
-  normalized_score: number;
+  category: { rank: number; score: number; points: number };
 };
 
-const CategoryTitle = ({
-  title,
-  rank,
-  score,
-  normalized_score,
-}: CategoryTitleProps) => {
+const CategoryTitle = ({ title, category }: CategoryTitleProps) => {
   return (
     <Group justify="space-between">
       <Text {...cardHeaderTextProps}>{title}</Text>
       <Group>
-        <Text c="dimmed">Rank</Text> #{rank}
-        <Text c="dimmed">Score</Text> {fmtScore(score)}
-        <Text c="dimmed">Normalized Score</Text> {fmtScore(normalized_score)}
+        <Text c="dimmed">Rank</Text> #{category.rank}
+        <Text c="dimmed">Score</Text> {fmtScore(category.score)}
+        <Text c="dimmed">Points</Text> {fmtScore(category.points)}
       </Group>
     </Group>
   );
 };
 
 type RatingFeedbackCardProps = {
-  rating: ScoreNormalized;
-  limitedView?: boolean;
-  autoLoadAnswers?: boolean;
+  entry: TeamRanking;
+  // the admin view leaves out the overview
+  adminView?: boolean;
+  // only used outside the admin view
+  maxTotalPoints?: number;
 };
 
 const RatingFeedbackCard = ({
-  rating,
-  limitedView = false,
-  autoLoadAnswers = true,
+  entry,
+  adminView = false,
+  maxTotalPoints = 0,
 }: RatingFeedbackCardProps) => {
   const { event } = useResolveParams();
-  const team = rating.team;
 
-  const [loadTechQuestions, setLoadTechQuestions] = useState(autoLoadAnswers);
-
-  const { data: questions = [], isLoading: questionsLoading } =
-    useGetTechnicalTeamRating(team.id, {
-      query: {
-        enabled: loadTechQuestions,
-      },
-    });
+  // the answers are part of the ranking, so they show the questions as they were when it
+  // was computed; memoized because TechnicalQuestionEntry resets on a new question object
+  const answers = useMemo(
+    () =>
+      (entry.technical.answers ?? []).map((answer) => ({
+        question: {
+          id: answer.question_id,
+          event_id: event?.id ?? "",
+          question: answer.question,
+          description: answer.description,
+          min_points: answer.min_points,
+          max_points: answer.max_points,
+          binary: answer.binary,
+        } satisfies TechnicalQuestion,
+        score: answer.score,
+      })),
+    [entry.technical.answers, event?.id],
+  );
 
   const placements = [
     { id: 1, place: "first", icon: <IconTrophy size={20} color="gold" /> },
@@ -73,127 +76,81 @@ const RatingFeedbackCard = ({
     { id: 3, place: "third", icon: <IconTrophy size={20} color="#CD7F32" /> },
   ];
 
-  if (!event || !team) {
+  if (!event) {
     return <Loader />;
   }
 
   return (
     <>
       <Group>
-        {!limitedView && (
+        {!adminView && (
           <Group w="100%" justify="space-between">
             <Title order={3}>Feedback</Title>
             <Group gap={0}>
               <Title order={3} c="dimmed">
-                Overall Rank #{rating.rank}
+                Overall Rank #{entry.rank}
               </Title>
             </Group>
           </Group>
         )}
       </Group>
 
-      {!limitedView && (
-        <ScoreDisplay
-          technical_score={rating.tech_score?.score_normalized ?? 0}
-          presentation_score={rating.expert_score?.score_normalized ?? 0}
-          sidequest_score={rating.sidequest_score?.score_normalized ?? 0}
-          public_voting_score={rating.voting_score?.score_normalized ?? 0}
-          extra_score={rating.extra_score}
-          max_score={rating.max_final_score ?? 0}
-        />
+      {!adminView && (
+        <ScoreDisplay entry={entry} maxTotalPoints={maxTotalPoints} />
       )}
 
-      {rating.tech_score && (
-        <Card {...cardProps}>
-          <Card.Section {...cardSectionProps}>
-            <CategoryTitle
-              title="Technical Ranking"
-              rank={rating.tech_score.category_rank}
-              score={rating.tech_score.score}
-              normalized_score={rating.tech_score.score_normalized}
+      <Card {...cardProps}>
+        <Card.Section {...cardSectionProps}>
+          <CategoryTitle title="Technical Ranking" category={entry.technical} />
+        </Card.Section>
+        {answers.map((answer) => (
+          <Card.Section key={answer.question.id} {...cardSectionProps}>
+            <TechnicalQuestionEntry
+              technicalQuestion={answer.question}
+              teamId={entry.team_id}
+              initialScore={answer.score ?? undefined}
+              mode="feedback"
+              eventId={event.id}
             />
           </Card.Section>
-          {!autoLoadAnswers && !loadTechQuestions && (
-            <Card.Section {...cardSectionProps}>
-              <Button onClick={() => setLoadTechQuestions(true)}>
-                Load Answers
-              </Button>
-            </Card.Section>
-          )}
-          {questionsLoading && (
-            <Card.Section {...cardSectionProps} ta="center">
-              <Loader />
-            </Card.Section>
-          )}
-          {questions.map((q) => (
-            <Card.Section key={q.question.id} {...cardSectionProps}>
-              <TechnicalQuestionEntry
-                key={q.question.id}
-                technicalQuestion={q.question}
-                teamId={team.id}
-                initialScore={q.points ?? undefined}
-                mode="feedback"
-                eventId={event.id}
-              />
-            </Card.Section>
-          ))}
-        </Card>
-      )}
+        ))}
+      </Card>
 
-      {rating.expert_score && (
-        <Card {...cardProps}>
-          <Card.Section {...cardSectionProps}>
-            <CategoryTitle
-              title="Expert Ranking"
-              rank={rating.expert_score.category_rank}
-              score={rating.expert_score.score}
-              normalized_score={rating.expert_score.score_normalized}
-            />
-          </Card.Section>
-          <Card.Section {...cardSectionProps}>
-            <ExpertRating
-              category="Presentation"
-              rating={rating.expert_score.presentation_score}
-              feedbackOnly
-            />
-          </Card.Section>
-          <Card.Section {...cardSectionProps}>
-            <ExpertRating
-              category="Product"
-              rating={rating.expert_score.product_score}
-              feedbackOnly
-            />
-          </Card.Section>
-        </Card>
-      )}
+      <Card {...cardProps}>
+        <Card.Section {...cardSectionProps}>
+          <CategoryTitle title="Jury Ranking" category={entry.jury} />
+        </Card.Section>
+        <Card.Section {...cardSectionProps}>
+          <JuryRating
+            category="Presentation"
+            rating={entry.jury.presentation_score}
+            feedbackOnly
+          />
+        </Card.Section>
+        <Card.Section {...cardSectionProps}>
+          <JuryRating
+            category="Product"
+            rating={entry.jury.product_score}
+            feedbackOnly
+          />
+        </Card.Section>
+      </Card>
 
-      {rating.sidequest_score && (
-        <Card {...cardProps}>
+      <Card {...cardProps}>
+        <Card.Section {...cardSectionProps}>
+          <CategoryTitle title="Sidequest Ranking" category={entry.sidequest} />
+        </Card.Section>
+        {!adminView && (
           <Card.Section {...cardSectionProps}>
-            <CategoryTitle
-              title="Sidequest Ranking"
-              rank={rating.sidequest_score.category_rank}
-              score={rating.sidequest_score.score}
-              normalized_score={rating.sidequest_score.score_normalized}
-            />
+            <OverviewLeaderboardTable eventId={event.id} />
           </Card.Section>
-          {!limitedView && (
-            <Card.Section {...cardSectionProps}>
-              <OverviewLeaderboardTable eventId={event.id} />
-            </Card.Section>
-          )}
-        </Card>
-      )}
+        )}
+      </Card>
 
-      {team.finalist && rating.voting_score && (
+      {entry.finalist && (
         <Card {...cardProps}>
           <Card.Section {...cardSectionProps}>
-            <CategoryTitle
-              title="Public Voting Ranking"
-              rank={rating.voting_score.category_rank}
-              score={rating.voting_score.score}
-              normalized_score={rating.voting_score.score_normalized}
-            />
+            <CategoryTitle title="Public Ranking" category={entry.public} />
           </Card.Section>
           <Card.Section {...cardSectionProps}>
             <Group justify="space-between">
@@ -201,7 +158,7 @@ const RatingFeedbackCard = ({
                 <Group key={id}>
                   {icon}
                   <Text fw={600} size="lg">
-                    {rating.voting_score?.votes[id] || 0}
+                    {entry.public.votes[id] || 0}
                   </Text>
                   <Text c="dimmed" size="sm">
                     {place} place votes

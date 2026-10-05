@@ -6,7 +6,7 @@
  */
 
 export interface PublicVote {
-  rank: number;
+  place: number;
   team_id: string;
   user_id: string;
 }

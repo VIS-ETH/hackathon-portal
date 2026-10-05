@@ -1,10 +1,9 @@
 pub mod models;
 
-use crate::{ServiceError, ServiceResult};
+use crate::{ranking, ServiceError, ServiceResult};
 use chrono::{NaiveDateTime, Utc};
 use hackathon_portal_repositories::DbRepository;
 use models::{AttemptForCreate, SidequestForCreate, SidequestForUpdate};
-use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::sync::Arc;
 
@@ -16,14 +15,13 @@ use crate::sidequest::models::{
 };
 use hackathon_portal_repositories::db::{
     db_sidequest, db_sidequest_attempt, db_sidequest_score, db_team, EventPhase, EventRepository,
-    EventRole, SidequestAttemptRepository, SidequestRepository, TeamRepository, TeamRole,
+    EventRole, SidequestAttemptRepository, SidequestRepository, TeamRepository,
 };
 use sea_orm::Set;
 use sea_orm::{
     prelude::*,
     sea_query::{Func, IntoCondition, SimpleExpr},
-    FromQueryResult, IntoActiveModel, JoinType, QueryOrder, QuerySelect, QueryTrait,
-    TransactionTrait,
+    IntoActiveModel, JoinType, QueryOrder, QuerySelect, QueryTrait, TransactionTrait,
 };
 use slug::slugify;
 
@@ -335,113 +333,6 @@ impl SidequestService {
         Ok(cooldown)
     }
 
-    /// `sidequest_id` -> (`user_id` -> (`score`, `result`))
-    async fn aggregate_sidequest_scores_by_user(
-        &self,
-        sidequest: &Sidequest,
-    ) -> ServiceResult<HashMap<Uuid, (u64, f64)>> {
-        #[derive(FromQueryResult)]
-        struct UserResult {
-            user_id: Uuid,
-            best_result: f64,
-        }
-
-        let mut query = db_sidequest_attempt::Entity::find()
-            .filter(db_sidequest_attempt::Column::SidequestId.eq(sidequest.id))
-            .select_only()
-            .column(db_sidequest_attempt::Column::UserId)
-            .group_by(db_sidequest_attempt::Column::UserId);
-
-        query = if sidequest.is_higher_result_better {
-            query
-                .column_as(db_sidequest_attempt::Column::Result.max(), "best_result")
-                .order_by_desc(db_sidequest_attempt::Column::Result.max())
-        } else {
-            query
-                .column_as(db_sidequest_attempt::Column::Result.min(), "best_result")
-                .order_by_asc(db_sidequest_attempt::Column::Result.min())
-        };
-
-        let results = query
-            .into_model::<UserResult>()
-            .all(self.db_repo.conn())
-            .await?;
-
-        let mut current_score = self
-            .authorization_service
-            .count_event_affiliates(sidequest.event_id, Some(EventRole::Participant))
-            .await?;
-        let mut result_to_score = HashMap::new();
-
-        for result in &results {
-            // WARN: to_string() is a big hack since f64 doesn't implement Eq
-            result_to_score.insert(result.best_result.to_string(), current_score);
-            current_score = current_score.saturating_sub(1); // Clamp to 0, avoid overflow
-        }
-
-        let mut user_scores = HashMap::new();
-
-        for result in results {
-            user_scores.insert(
-                result.user_id,
-                (
-                    result_to_score[&result.best_result.to_string()],
-                    result.best_result,
-                ),
-            );
-        }
-
-        Ok(user_scores)
-    }
-
-    /// `sidequest_id` -> (`team_id` -> `score`)
-    async fn aggregate_sidequest_scores_by_team(
-        &self,
-        sidequest: &Sidequest,
-    ) -> ServiceResult<HashMap<Uuid, f64>> {
-        let teams =
-            TeamRepository::fetch_all_by_event_id(self.db_repo.conn(), sidequest.event_id).await?;
-
-        let user_scores = self.aggregate_sidequest_scores_by_user(sidequest).await?;
-        let mut team_scores = HashMap::new();
-
-        for team in teams {
-            let members = self
-                .authorization_service
-                .get_team_affiliates(team.id, Some(TeamRole::Member))
-                .await?;
-
-            for member in &members {
-                if let Some((score, _)) = user_scores.get(&member.id) {
-                    *team_scores.entry(team.id).or_insert(0.0) += *score as f64;
-                }
-            }
-
-            if members.is_empty() {
-                team_scores.insert(team.id, 0.0);
-            } else {
-                *team_scores.entry(team.id).or_insert(0.0) /= members.len() as f64;
-            }
-        }
-
-        Ok(team_scores)
-    }
-
-    /// `event_id` -> (`team_id` -> `score`)
-    pub async fn aggregate_scores(&self, event_id: Uuid) -> ServiceResult<HashMap<Uuid, f64>> {
-        let sidequests = self.get_sidequests(event_id).await?;
-        let mut scores = HashMap::new();
-
-        for sidequest in sidequests {
-            let sidequest_scores = self.aggregate_sidequest_scores_by_team(&sidequest).await?;
-            for (team_id, sidequest_score) in sidequest_scores {
-                *scores.entry(team_id).or_insert(0.0) += sidequest_score;
-            }
-        }
-
-        Ok(scores)
-    }
-
     pub async fn run_aggregator(&self, event_id: Uuid) -> ServiceResult<HashMap<Uuid, f64>> {
         let now = Utc::now().naive_utc();
         let event = EventRepository::fetch_by_id(self.db_repo.conn(), event_id).await?;
@@ -452,7 +343,14 @@ impl SidequestService {
             });
         }
 
-        let scores = self.aggregate_scores(event_id).await?;
+        let input = ranking::input::load_sidequest_input(self.db_repo.conn(), event_id).await?;
+
+        // `sidequest_team_scores` gives every team a 0 without sidequests; don't store those
+        if input.sidequests.is_empty() {
+            return Ok(HashMap::new());
+        }
+
+        let scores = ranking::compute::sidequest_team_scores(&input);
 
         let active_scores = scores
             .iter()
@@ -528,87 +426,47 @@ impl SidequestService {
         Ok(entries)
     }
 
-    pub async fn get_sidequest_leaderboard_by_team(
-        &self,
-        event_id: Uuid,
-        sidequest_id: Uuid,
-    ) -> ServiceResult<Vec<TeamLeaderboardEntry>> {
-        let sidequest: Sidequest = SidequestRepository::fetch_by_id_and_event_id(
-            self.db_repo.conn(),
-            sidequest_id,
-            event_id,
-        )
-        .await?
-        .into();
-
-        let teams =
-            TeamRepository::fetch_all_by_event_id(self.db_repo.conn(), sidequest.event_id).await?;
-
-        let team_mapping = teams
-            .into_iter()
-            .map(|team| (team.id, team))
-            .collect::<HashMap<_, _>>();
-
-        let scores = self.aggregate_sidequest_scores_by_team(&sidequest).await?;
-
-        let mut entries = scores
-            .into_iter()
-            .filter_map(|(team_id, score)| {
-                let team = team_mapping.get(&team_id)?;
-
-                Some(TeamLeaderboardEntry {
-                    team_id,
-                    team_name: team.name.clone(),
-                    score,
-                })
-            })
-            .collect::<Vec<_>>();
-
-        entries.sort_by(|a, b| b.score.partial_cmp(&a.score).unwrap_or(Ordering::Equal));
-
-        Ok(entries)
-    }
-
     pub async fn get_sidequest_leaderboard_by_user(
         &self,
         event_id: Uuid,
         sidequest_id: Uuid,
     ) -> ServiceResult<Vec<UserLeaderboardEntry>> {
-        let sidequest: Sidequest = SidequestRepository::fetch_by_id_and_event_id(
+        let sidequest = SidequestRepository::fetch_by_id_and_event_id(
             self.db_repo.conn(),
             sidequest_id,
             event_id,
         )
-        .await?
-        .into();
-
+        .await?;
+        let best_results = SidequestAttemptRepository::fetch_best_results_by_event_id(
+            self.db_repo.conn(),
+            sidequest.event_id,
+        )
+        .await?;
         let users = self
             .authorization_service
             .get_event_affiliates(sidequest.event_id, Some(EventRole::Participant))
             .await?;
+        let participant_count = users.len() as u64;
 
         let user_mapping = users
             .into_iter()
             .map(|user| (user.id, user))
             .collect::<HashMap<_, _>>();
 
-        let scores = self.aggregate_sidequest_scores_by_user(&sidequest).await?;
+        let entries =
+            ranking::compute::sidequest_user_points(&sidequest, &best_results, participant_count)
+                .into_iter()
+                .filter_map(|user_points| {
+                    let user = user_mapping.get(&user_points.user_id)?;
 
-        let mut entries = scores
-            .into_iter()
-            .filter_map(|(user_id, (score, result))| {
-                let user = user_mapping.get(&user_id)?;
-
-                Some(UserLeaderboardEntry {
-                    user_id,
-                    user_name: user.name.clone(),
-                    score,
-                    result,
+                    Some(UserLeaderboardEntry {
+                        user_id: user_points.user_id,
+                        user_name: user.name.clone(),
+                        points: user_points.points,
+                        result: user_points.result,
+                    })
                 })
-            })
-            .collect::<Vec<_>>();
-
-        entries.sort_by(|a, b| b.score.cmp(&a.score));
+                .collect();
 
         Ok(entries)
     }

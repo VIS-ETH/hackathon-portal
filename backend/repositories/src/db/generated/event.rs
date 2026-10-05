@@ -49,6 +49,8 @@ pub struct Model {
     pub blog_max_image_size_mb: i32,
     pub blog_max_images: i32,
     pub blog_max_sections: i32,
+    #[sea_orm(unique)]
+    pub current_ranking_snapshot_id: Option<Uuid>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
@@ -61,6 +63,14 @@ pub enum Relation {
     EventUserDiscordId,
     #[sea_orm(has_many = "super::project::Entity")]
     Project,
+    #[sea_orm(
+        belongs_to = "super::ranking_snapshot::Entity",
+        from = "Column::CurrentRankingSnapshotId",
+        to = "super::ranking_snapshot::Column::Id",
+        on_update = "Cascade",
+        on_delete = "SetNull"
+    )]
+    RankingSnapshot,
     #[sea_orm(has_many = "super::sidequest::Entity")]
     Sidequest,
     #[sea_orm(has_many = "super::team::Entity")]
@@ -90,6 +100,12 @@ impl Related<super::event_user_discord_id::Entity> for Entity {
 impl Related<super::project::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Project.def()
+    }
+}
+
+impl Related<super::ranking_snapshot::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::RankingSnapshot.def()
     }
 }
 

@@ -278,11 +278,11 @@ impl From<&ServiceError> for PublicError {
                 (StatusCode::BAD_REQUEST, format!("Invalid technical question: {message}"))
             }
             ServiceError::SerdeJson(error) => (StatusCode::BAD_REQUEST, error.to_string()),
-            ServiceError::WrongTechnicalQuestionPoints { given_score, allowed_scores } => {
+            ServiceError::WrongTechnicalRatingScore { given_score, allowed_scores } => {
                                 (
                                     StatusCode::BAD_REQUEST,
                                     format!(
-                                        "Wrong technical question points: given score {given_score}, allowed scores are {allowed_scores}"
+                                        "Wrong technical rating score: given score {given_score}, allowed scores are {allowed_scores}"
                                     ),
                                 )
                             },
@@ -290,11 +290,6 @@ impl From<&ServiceError> for PublicError {
                                             StatusCode::INTERNAL_SERVER_ERROR,
                                             format!("Score calculation error: {message}"),
                                         ),
-            ServiceError::WrongVotingRank { given_rank, allowed_ranks } => (
-                                        StatusCode::BAD_REQUEST,
-                                        format!(
-                                            "Wrong voting rank: given rank {given_rank}, allowed ranks are {allowed_ranks}"
-            )),
             ServiceError::DuplicateVote => (
                 StatusCode::BAD_REQUEST,
                 "This team is already in your votes".to_string(),

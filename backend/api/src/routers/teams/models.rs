@@ -1,7 +1,5 @@
 use hackathon_portal_services::infrastructure::models::IngressConfig;
-use hackathon_portal_services::rating::models::{
-    ExpertScore, ScoreNormalized as ScoreNormalizedBO, SidequestScore, TechnicalScore, VotingScore,
-};
+use hackathon_portal_services::ranking::models::TeamRanking;
 use hackathon_portal_services::team::models::Team as TeamBO;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
@@ -145,32 +143,7 @@ pub struct CreateTeamAPIKey {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
-pub struct ScoreNormalized {
-    pub team: Team,
-    pub tech_score: Option<TechnicalScore>,
-    pub expert_score: Option<ExpertScore>,
-    pub sidequest_score: Option<SidequestScore>,
-    pub voting_score: Option<VotingScore>,
-    pub extra_score: f64,
-    pub final_score: f64,
-    pub max_final_score: Option<f64>,
-    pub rank: Option<i32>,
-}
-
-impl From<(ScoreNormalizedBO, bool, bool)> for ScoreNormalized {
-    fn from(value: (ScoreNormalizedBO, bool, bool)) -> Self {
-        let (score, can_view_project_assignment, can_view_finalists) = value;
-
-        Self {
-            team: Team::from((score.team, can_view_project_assignment, can_view_finalists)),
-            tech_score: score.tech_score,
-            expert_score: score.expert_score,
-            sidequest_score: score.sidequest_score,
-            voting_score: score.voting_score,
-            extra_score: score.extra_score,
-            final_score: score.final_score,
-            max_final_score: score.max_final_score,
-            rank: score.rank,
-        }
-    }
+pub struct TeamRankingView {
+    pub max_total_points: f64,
+    pub team: TeamRanking,
 }

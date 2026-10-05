@@ -8,6 +8,7 @@ pub mod infrastructure;
 pub mod job_lock;
 pub mod logger;
 pub mod project;
+pub mod ranking;
 pub mod rating;
 pub mod sidequest;
 pub mod team;

@@ -1,6 +1,5 @@
-import PageLoader from "../PageLoader";
-
 import { useGetTeam } from "@/api/gen";
+import { TeamRanking } from "@/api/gen/schemas";
 import { cardProps, cardSectionProps } from "@/styles/common";
 
 import { useEffect, useState } from "react";
@@ -10,12 +9,15 @@ import { Card, Center, Container, Image, Stack, Title } from "@mantine/core";
 
 import { useDebouncedValue, useHotkeys } from "@mantine/hooks";
 
-type TeamRankSlideProps = TeamIdWithRank & {
+type TeamRankSlideProps = {
+  entry: TeamRanking;
   isActive?: boolean;
 };
 
-const TeamRankSlide = ({ teamId, rank, isActive }: TeamRankSlideProps) => {
-  const { data: team } = useGetTeam(teamId);
+const TeamRankSlide = ({ entry, isActive }: TeamRankSlideProps) => {
+  const { rank } = entry;
+  // only for the photo; the team may have been deleted after the snapshot
+  const { data: team } = useGetTeam(entry.team_id);
   const [showTeam, setShowTeam] = useState(false);
   const [prevIsActive, setPrevIsActive] = useState(isActive);
   const [debouncedIsActive] = useDebouncedValue(isActive, 50); // ensure slide isn't flashed before fully transitioning
@@ -42,11 +44,7 @@ const TeamRankSlide = ({ teamId, rank, isActive }: TeamRankSlideProps) => {
 
   useHotkeys([["Enter", onShowTeam]]);
 
-  if (!team) {
-    return <PageLoader />;
-  }
-
-  const photoCard = team.photo_url && (
+  const photoCard = team?.photo_url && (
     <Card {...cardProps} w={600}>
       <Card.Section {...cardSectionProps} p={0} mah="50vh">
         <Image src={team.photo_url} alt="Team Photo" fit="cover" />
@@ -104,7 +102,7 @@ const TeamRankSlide = ({ teamId, rank, isActive }: TeamRankSlideProps) => {
             <Stack>
               <Title order={3}>Rank {rank}</Title>
               {debouncedIsActive && showTeam ? (
-                <Title>{team.name}</Title>
+                <Title>{entry.team_name}</Title>
               ) : (
                 <Title c="dimmed" onClick={onShowTeam}>
                   {hypeText}
@@ -121,8 +119,3 @@ const TeamRankSlide = ({ teamId, rank, isActive }: TeamRankSlideProps) => {
 };
 
 export default TeamRankSlide;
-
-export type TeamIdWithRank = {
-  teamId: string;
-  rank: number;
-};

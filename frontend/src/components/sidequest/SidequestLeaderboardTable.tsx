@@ -29,7 +29,7 @@ const SidequestLeaderboardTable = ({
               <Table.Tr>
                 <Table.Th>User</Table.Th>
                 <Table.Th>Result</Table.Th>
-                <Table.Th>Score</Table.Th>
+                <Table.Th>Points</Table.Th>
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
@@ -38,7 +38,7 @@ const SidequestLeaderboardTable = ({
                   <Table.Tr key={entry.user_id}>
                     <Table.Td>{entry.user_name}</Table.Td>
                     <Table.Td>{entry.result}</Table.Td>
-                    <Table.Td>{entry.score}</Table.Td>
+                    <Table.Td>{entry.points}</Table.Td>
                   </Table.Tr>
                 ))
               ) : (

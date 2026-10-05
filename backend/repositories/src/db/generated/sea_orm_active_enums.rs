@@ -129,9 +129,9 @@ pub enum EventVisibility {
 #[sea_orm(
     rs_type = "String",
     db_type = "Enum",
-    enum_name = "expert_rating_category"
+    enum_name = "jury_rating_category"
 )]
-pub enum ExpertRatingCategory {
+pub enum JuryRatingCategory {
     #[sea_orm(string_value = "PRODUCT")]
     Product,
     #[sea_orm(string_value = "PRESENTATION")]

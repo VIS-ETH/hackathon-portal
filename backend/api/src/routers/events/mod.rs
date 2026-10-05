@@ -1,4 +1,5 @@
 pub mod models;
+pub mod ranking;
 
 use crate::api_state::ApiState;
 use crate::ctx::Ctx;
@@ -9,7 +10,6 @@ use crate::routers::events::models::{
     SidequestsHistoryQuery, UpdateTechnicalQuestionDTO,
 };
 use crate::routers::sidequests::models::SidequestIdQuery;
-use crate::routers::teams::models::ScoreNormalized;
 use crate::routers::users::models::EventRoleOptQuery;
 use crate::{ApiError, ApiResult};
 use axum::extract::{Path, Query, State};
@@ -20,8 +20,7 @@ use hackathon_portal_services::authorization::groups::Groups;
 use hackathon_portal_services::authorization::models::{EventAffiliate, EventRoles, EventRolesMap};
 use hackathon_portal_services::event::models::{Event, EventForUpdate};
 use hackathon_portal_services::rating::models::{
-    CreateTechnicalQuestion, ExpertRatingLeaderboardEntry, TechnicalQuestion,
-    UpdateTechnicalQuestion,
+    CreateTechnicalQuestion, TechnicalQuestion, UpdateTechnicalQuestion,
 };
 use hackathon_portal_services::sidequest::models::{
     HistoryEntry, TeamLeaderboardEntry, UserLeaderboardEntry,
@@ -48,22 +47,23 @@ pub fn get_router(state: &ApiState) -> Router {
         .route("/:event_id/affiliates", get(get_event_affiliates))
         .route("/:event_id/teams/index", post(index_teams))
         .route("/:event_id/projects/matching", get(get_projects_matching))
-        .route("/:event_id/leaderboard", get(get_leaderboard))
+        .route("/:event_id/ranking", get(ranking::get_ranking))
+        .route("/:event_id/ranking/live", get(ranking::get_live_ranking))
         .route(
-            "/:event_id/leaderboard-detailed",
-            get(get_leaderboard_detailed),
+            "/:event_id/ranking/snapshots",
+            get(ranking::get_ranking_snapshots),
         )
         .route(
-            "/:event_id/expert-ratings/leaderboard",
-            get(get_expert_ratings_leaderboard),
+            "/:event_id/ranking/snapshots",
+            post(ranking::create_ranking_snapshot),
+        )
+        .route(
+            "/:event_id/ranking/current",
+            put(ranking::set_current_ranking_snapshot),
         )
         .route(
             "/:event_id/sidequests/leaderboard",
             get(get_sidequests_leaderboard),
-        )
-        .route(
-            "/:event_id/sidequests/team-leaderboard",
-            get(get_sidequests_team_leaderboard),
         )
         .route(
             "/:event_id/sidequests/user-leaderboard",
@@ -434,105 +434,6 @@ pub async fn get_projects_matching(
 
 #[utoipa::path(
     get,
-    path = "/api/events/{event_id}/leaderboard",
-    responses(
-        (status = StatusCode::OK, body = Vec<Uuid>),
-        (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
-    )
-)]
-pub async fn get_leaderboard(
-    ctx: Ctx,
-    State(state): State<ApiState>,
-    Path(event_id): Path<Uuid>,
-) -> ApiJsonVec<Uuid> {
-    let event = state.event_service.get_event(event_id).await?;
-    let groups = Groups::from_event(ctx.roles(), event.id);
-
-    if !groups.can_view_event_feedback(event.visibility, event.phase, event.feedback_visible) {
-        return Err(ApiError::Forbidden {
-            action: "view leaderboard for this event".to_string(),
-        });
-    }
-
-    let complete_scores = state.rating_service.get_complete_scores(event_id).await?;
-    let leaderboard = complete_scores
-        .into_iter()
-        .map(|s| s.team.id)
-        .collect::<Vec<_>>();
-    Ok(Json(leaderboard))
-}
-
-#[utoipa::path(
-    get,
-    path = "/api/events/{event_id}/leaderboard-detailed",
-    responses(
-        (status = StatusCode::OK, body = Vec<ScoreNormalized>),
-        (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
-    )
-)]
-pub async fn get_leaderboard_detailed(
-    ctx: Ctx,
-    State(state): State<ApiState>,
-    Path(event_id): Path<Uuid>,
-) -> ApiJsonVec<ScoreNormalized> {
-    let event = state.event_service.get_event(event_id).await?;
-    let groups = Groups::from_event(ctx.roles(), event.id);
-
-    if !groups.can_manage_event() {
-        return Err(ApiError::Forbidden {
-            action: "view leaderboard for this event".to_string(),
-        });
-    }
-
-    let can_view_project_assignment = groups.can_view_project_assignment(
-        event.visibility,
-        event.projects_visible,
-        event.project_assignments_visible,
-    );
-    let can_view_finalists = groups.can_view_finalists(event.visibility, event.finalists_visible);
-
-    let leaderboard = state
-        .rating_service
-        .get_complete_scores(event_id)
-        .await?
-        .into_iter()
-        .map(|s| ScoreNormalized::from((s, can_view_project_assignment, can_view_finalists)))
-        .collect();
-    Ok(Json(leaderboard))
-}
-
-#[utoipa::path(
-    get,
-    path = "/api/events/{event_id}/expert-ratings/leaderboard",
-    responses(
-        (status = StatusCode::OK, body = Vec<ExpertRatingLeaderboardEntry>),
-        (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
-    )
-)]
-pub async fn get_expert_ratings_leaderboard(
-    ctx: Ctx,
-    State(state): State<ApiState>,
-    Path(event_id): Path<Uuid>,
-) -> ApiJsonVec<ExpertRatingLeaderboardEntry> {
-    let event = state.event_service.get_event(event_id).await?;
-    let groups = Groups::from_event(ctx.roles(), event.id);
-
-    if !groups.can_manage_event() {
-        return Err(ApiError::Forbidden {
-            action: "view expert ratings leaderboard for this event".to_string(),
-        });
-    }
-
-    let leaderboard = state
-        .rating_service
-        .get_expert_leaderboard(event_id)
-        .await?;
-
-    Ok(Json(leaderboard))
-}
-
-#[utoipa::path(
-    get,
     path = "/api/events/{event_id}/sidequests/leaderboard",
     responses(
         (status = StatusCode::OK, body = Vec<TeamLeaderboardEntry>),
@@ -554,40 +455,6 @@ pub async fn get_sidequests_leaderboard(
     }
 
     let leaderboard = state.sidequest_service.get_leaderboard(event_id).await?;
-
-    Ok(Json(leaderboard))
-}
-
-#[utoipa::path(
-    get,
-    path = "/api/events/{event_id}/sidequests/team-leaderboard",
-    responses(
-        (status = StatusCode::OK, body = Vec<TeamLeaderboardEntry>),
-        (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
-    ),
-    params(
-        ("sidequest_id" = Uuid, Query, description = "Filter by sidequest id"),
-    )
-)]
-pub async fn get_sidequests_team_leaderboard(
-    ctx: Ctx,
-    State(state): State<ApiState>,
-    Path(event_id): Path<Uuid>,
-    Query(query): Query<SidequestIdQuery>,
-) -> ApiJson<Vec<TeamLeaderboardEntry>> {
-    let event = state.event_service.get_event(event_id).await?;
-    let groups = Groups::from_event(ctx.roles(), event.id);
-
-    if !groups.can_view_event_internal(event.visibility) {
-        return Err(ApiError::Forbidden {
-            action: "view sidequest leaderboard for this event".to_string(),
-        });
-    }
-
-    let leaderboard = state
-        .sidequest_service
-        .get_sidequest_leaderboard_by_team(event.id, query.sidequest_id)
-        .await?;
 
     Ok(Json(leaderboard))
 }

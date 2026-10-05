@@ -19,5 +19,5 @@ export const Group = {
   TeamMember: "TeamMember",
   TeamMentor: "TeamMentor",
   TeamAffiliate: "TeamAffiliate",
-  ExpertRater: "ExpertRater",
+  Juror: "Juror",
 } as const;

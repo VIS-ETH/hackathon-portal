@@ -3,7 +3,7 @@ use crate::db::OrFailExt;
 use crate::{RepositoryError, RepositoryResult};
 use sea_orm::prelude::*;
 use sea_orm::sqlx::types::chrono::NaiveDateTime;
-use sea_orm::{Condition, JoinType, QueryOrder, QuerySelect};
+use sea_orm::{Condition, FromQueryResult, JoinType, QueryOrder, QuerySelect};
 
 impl sidequest_attempt::Entity {
     #[must_use]
@@ -21,6 +21,16 @@ impl sidequest_attempt::Entity {
     }
 }
 
+/// Best results of one user in one sidequest. Whether `max_result` or `min_result`
+/// is the best one depends on `sidequest.is_higher_result_better`.
+#[derive(FromQueryResult, Debug, Clone)]
+pub struct SidequestBestResult {
+    pub sidequest_id: Uuid,
+    pub user_id: Uuid,
+    pub max_result: f64,
+    pub min_result: f64,
+}
+
 pub struct SidequestAttemptRepository;
 
 impl SidequestAttemptRepository {
@@ -33,6 +43,29 @@ impl SidequestAttemptRepository {
         sidequest_attempt::Entity::find_in_interval(after, before)
             .inner_join(sidequest::Entity)
             .filter(sidequest::Column::EventId.eq(event_id))
+            .all(db)
+            .await
+            .map_err(RepositoryError::from)
+    }
+
+    pub async fn fetch_best_results_by_event_id<C: ConnectionTrait>(
+        db: &C,
+        event_id: Uuid,
+    ) -> RepositoryResult<Vec<SidequestBestResult>> {
+        sidequest_attempt::Entity::find()
+            .select_only()
+            .column(sidequest_attempt::Column::SidequestId)
+            .column(sidequest_attempt::Column::UserId)
+            .column_as(sidequest_attempt::Column::Result.max(), "max_result")
+            .column_as(sidequest_attempt::Column::Result.min(), "min_result")
+            .join(
+                JoinType::InnerJoin,
+                sidequest_attempt::Relation::Sidequest.def(),
+            )
+            .filter(sidequest::Column::EventId.eq(event_id))
+            .group_by(sidequest_attempt::Column::SidequestId)
+            .group_by(sidequest_attempt::Column::UserId)
+            .into_model::<SidequestBestResult>()
             .all(db)
             .await
             .map_err(RepositoryError::from)

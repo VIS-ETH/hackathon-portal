@@ -7,7 +7,7 @@
 import type { TechnicalQuestion } from "./technicalQuestion";
 
 export interface TechnicalQuestionResult {
-  /** @nullable */
-  points?: number | null;
   question: TechnicalQuestion;
+  /** @nullable */
+  score?: number | null;
 }

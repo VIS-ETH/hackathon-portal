@@ -1,45 +1,47 @@
 "use client";
 
-import { useGetLeaderboard } from "@/api/gen";
+import { useGetRanking } from "@/api/gen";
+import { TeamRanking } from "@/api/gen/schemas";
 import PageLoader from "@/components/PageLoader";
 import Presentation from "@/components/admin/Presentation";
-import TeamRankSlide, { TeamIdWithRank } from "@/components/team/TeamRankSlide";
+import TeamRankSlide from "@/components/team/TeamRankSlide";
 import { useResolveParams } from "@/hooks/useResolveParams";
+
+import { Center, Text } from "@mantine/core";
 
 import { useSearchParams } from "next/navigation";
 
-const Ranking = () => {
+const RankingPresentation = () => {
   const searchParams = useSearchParams();
   const { event } = useResolveParams();
 
-  const { data: rawEntries } = useGetLeaderboard(event?.id ?? "", {
+  // the current snapshot
+  const { data: snapshot } = useGetRanking(event?.id ?? "", undefined, {
     query: {
       enabled: !!event,
     },
   });
 
-  if (!event || !rawEntries) {
+  if (!event || snapshot === undefined) {
     return <PageLoader />;
   }
 
-  const maxTeams = parseInt(searchParams.get("maxTeams") ?? "10");
-  const entries = rawEntries
-    .slice(0, maxTeams)
-    .map(
-      (teamId, index) =>
-        ({
-          teamId,
-          rank: index + 1,
-        }) satisfies TeamIdWithRank,
-    )
-    .reverse();
+  if (snapshot === null) {
+    return (
+      <Center h="100vh">
+        <Text c="dimmed">No current ranking snapshot</Text>
+      </Center>
+    );
+  }
 
-  const toKey = (element: TeamIdWithRank) => element.teamId;
-  const toTitle = (element: TeamIdWithRank) => `Rank ${element.rank}`;
-  const toContent = (
-    element: TeamIdWithRank,
-    isActive: boolean | undefined,
-  ) => <TeamRankSlide {...element} isActive={isActive} />;
+  const maxTeams = parseInt(searchParams.get("maxTeams") ?? "10");
+  const entries = snapshot.ranking.teams.slice(0, maxTeams).reverse();
+
+  const toKey = (entry: TeamRanking) => entry.team_id;
+  const toTitle = (entry: TeamRanking) => `Rank ${entry.rank}`;
+  const toContent = (entry: TeamRanking, isActive: boolean | undefined) => (
+    <TeamRankSlide entry={entry} isActive={isActive} />
+  );
 
   return (
     <Presentation
@@ -52,4 +54,4 @@ const Ranking = () => {
   );
 };
 
-export default Ranking;
+export default RankingPresentation;

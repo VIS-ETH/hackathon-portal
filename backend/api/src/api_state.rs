@@ -13,6 +13,7 @@ use hackathon_portal_services::health::HealthService;
 use hackathon_portal_services::infrastructure::InfrastructureService;
 use hackathon_portal_services::job_lock::JobLockService;
 use hackathon_portal_services::project::ProjectService;
+use hackathon_portal_services::ranking::RankingService;
 use hackathon_portal_services::rating::RatingService;
 use hackathon_portal_services::sidequest::SidequestService;
 use hackathon_portal_services::team::models::Team;
@@ -35,6 +36,7 @@ pub struct ApiState {
     pub event_service: Arc<EventService>,
     pub team_service: Arc<TeamService>,
     pub rating_service: Arc<RatingService>,
+    pub ranking_service: Arc<RankingService>,
     pub project_service: Arc<ProjectService>,
     pub sidequest_service: Arc<SidequestService>,
     pub appointment_service: Arc<AppointmentService>,
@@ -55,6 +57,7 @@ impl ApiState {
         event_service: Arc<EventService>,
         team_service: Arc<TeamService>,
         rating_service: Arc<RatingService>,
+        ranking_service: Arc<RankingService>,
         project_service: Arc<ProjectService>,
         sidequest_service: Arc<SidequestService>,
         appointment_service: Arc<AppointmentService>,
@@ -72,6 +75,7 @@ impl ApiState {
             event_service,
             team_service,
             rating_service,
+            ranking_service,
             project_service,
             sidequest_service,
             appointment_service,
@@ -117,11 +121,9 @@ impl ApiState {
             db_repo.clone(),
         ));
 
-        let rating_service = Arc::new(RatingService::new(
-            db_repo.clone(),
-            sidequest_service.clone(),
-            team_service.clone(),
-        ));
+        let rating_service = Arc::new(RatingService::new(db_repo.clone()));
+
+        let ranking_service = Arc::new(RankingService::new(db_repo.clone()));
 
         let project_service = Arc::new(ProjectService::new(db_repo.clone()));
 
@@ -132,8 +134,6 @@ impl ApiState {
         let event_service = Arc::new(EventService::new(
             authorization_service.clone(),
             user_service.clone(),
-            sidequest_service.clone(),
-            rating_service.clone(),
             crypto_service.clone(),
             db_repo,
         ));
@@ -152,6 +152,7 @@ impl ApiState {
             event_service,
             team_service,
             rating_service,
+            ranking_service,
             project_service,
             sidequest_service,
             appointment_service,

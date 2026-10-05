@@ -24,6 +24,16 @@ pub struct SidequestsHistoryQuery {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+pub struct RankingQuery {
+    pub snapshot_id: Option<Uuid>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+pub struct SetCurrentRankingSnapshot {
+    pub snapshot_id: Uuid,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
 pub struct DiscordOauthBody {
     pub code: String,
     pub redirect_uri: String,

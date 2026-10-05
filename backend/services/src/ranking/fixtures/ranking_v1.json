@@ -1,0 +1,31 @@
+{
+  "max_total_points": 87.5,
+  "teams": [
+    {
+      "team_id": "0b6f7a1e-3c2d-4e5f-8a9b-1c2d3e4f5a6b",
+      "team_name": "Team Alpha",
+      "team_index": 3,
+      "finalist": true,
+      "rank": 1,
+      "total_points": 87.5,
+      "extra_points": 2.0,
+      "technical": { "score": 34.0, "points": 20.0, "rank": 1, "all_answered": true },
+      "jury": { "score": 8.1, "points": 30.0, "rank": 1, "presentation_score": 7.5, "product_score": 8.4 },
+      "sidequest": { "score": 120.0, "points": 9.1, "rank": 2 },
+      "public": { "score": 41.0, "points": 26.4, "rank": 2, "votes": { "1": 5, "2": 4, "3": 4 } }
+    },
+    {
+      "team_id": "7d8e9f0a-1b2c-4d3e-9f8a-7b6c5d4e3f2a",
+      "team_name": "Team Beta",
+      "team_index": 7,
+      "finalist": false,
+      "rank": 2,
+      "total_points": 61.25,
+      "extra_points": 0.0,
+      "technical": { "score": 20.5, "points": 12.06, "rank": 2, "all_answered": false },
+      "jury": { "score": 0.0, "points": 0.0, "rank": 2, "presentation_score": 0.0, "product_score": 0.0 },
+      "sidequest": { "score": 132.0, "points": 10.0, "rank": 1 },
+      "public": { "score": 46.5, "points": 30.0, "rank": 1, "votes": {} }
+    }
+  ]
+}

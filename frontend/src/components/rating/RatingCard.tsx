@@ -1,25 +1,25 @@
 import Markdown from "../Markdown";
 import TeamDetailsCard from "../team/TeamDetailsCard";
 import TechnicalQuestionEntry from "../technicalQuestions/TechnicalQuestionEntry";
-import ExpertRatingInput from "./ExpertRating/ExpertRatingInput";
+import JuryRatingInput from "./JuryRating/JuryRatingInput";
 
 import { useGetProject, useGetTechnicalTeamRating } from "@/api/gen";
-import { ExpertRatingCategory, Team } from "@/api/gen/schemas";
+import { JuryRatingCategory, Team } from "@/api/gen/schemas";
 import { useResolveParams } from "@/hooks/useResolveParams";
 import { cardProps, cardSectionProps } from "@/styles/common";
 
 import { Accordion, Button, Card, Group, Stack, Title } from "@mantine/core";
 
-type ExpertRatingCardProps = {
+type JuryRatingCardProps = {
   team: Team;
 };
 
-const ExpertRatingCard = ({ team }: ExpertRatingCardProps) => {
+const JuryRatingCard = ({ team }: JuryRatingCardProps) => {
   const { policies } = useResolveParams();
   const categories = {
-    [ExpertRatingCategory.Product]:
+    [JuryRatingCategory.Product]:
       "Feature completeness, quality, innovation, and overall functionality",
-    [ExpertRatingCategory.Presentation]:
+    [JuryRatingCategory.Presentation]:
       "Structure, clarity, and overall presentation",
   };
   const { data: teamTechnicalRating, refetch: refetchTechnicalRating } =
@@ -52,12 +52,12 @@ const ExpertRatingCard = ({ team }: ExpertRatingCardProps) => {
           </>
         )}
 
-        <Title order={3}>Expert Rating</Title>
+        <Title order={3}>Jury Rating</Title>
         {Object.entries(categories).map(([category, description]) => (
           <Card.Section key={category} {...cardSectionProps}>
-            <ExpertRatingInput
+            <JuryRatingInput
               teamId={team.id}
-              category={category as ExpertRatingCategory}
+              category={category as JuryRatingCategory}
               description={description}
             />
           </Card.Section>
@@ -78,7 +78,7 @@ const ExpertRatingCard = ({ team }: ExpertRatingCardProps) => {
                   eventId={event.id}
                   mode="grading"
                   technicalQuestion={rating.question}
-                  initialScore={rating.points ?? undefined}
+                  initialScore={rating.score ?? undefined}
                 />
               ))}
             </Stack>
@@ -89,4 +89,4 @@ const ExpertRatingCard = ({ team }: ExpertRatingCardProps) => {
   );
 };
 
-export default ExpertRatingCard;
+export default JuryRatingCard;

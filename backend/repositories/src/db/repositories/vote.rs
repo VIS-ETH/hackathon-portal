@@ -21,16 +21,15 @@ impl VoteRepository {
             .map_err(RepositoryError::from)
     }
 
-    pub async fn fetch_votes_for_team<C: ConnectionTrait>(
+    pub async fn fetch_all_by_event_id<C: ConnectionTrait>(
         db: &C,
-        team_id: Uuid,
+        event_id: Uuid,
     ) -> RepositoryResult<Vec<vote::Model>> {
-        let votes = vote::Entity::find()
-            .filter(vote::Column::TeamId.eq(team_id))
+        vote::Entity::find()
+            .join(JoinType::InnerJoin, vote::Relation::Team.def())
+            .filter(team::Column::EventId.eq(event_id))
             .all(db)
             .await
-            .map_err(RepositoryError::from)?;
-
-        Ok(votes)
+            .map_err(RepositoryError::from)
     }
 }

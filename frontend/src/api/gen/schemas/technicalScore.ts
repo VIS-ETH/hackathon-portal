@@ -4,10 +4,16 @@
  * hackathon-portal-api
  * OpenAPI spec version: 1.0.0
  */
+import type { TechnicalAnswer } from "./technicalAnswer";
 
 export interface TechnicalScore {
   all_answered: boolean;
-  category_rank: number;
+  /**
+   * One per technical question of the event, ordered by question id. Snapshots created
+   * before this field existed read back with an empty list.
+   */
+  answers?: TechnicalAnswer[];
+  points: number;
+  rank: number;
   score: number;
-  score_normalized: number;
 }

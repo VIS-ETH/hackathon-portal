@@ -17,10 +17,11 @@ pub use generated::appointment as db_appointment;
 pub use generated::event as db_event;
 pub use generated::event_role_assignment as db_event_role_assignment;
 pub use generated::event_user_discord_id as db_event_user_discord_id;
-pub use generated::expert_rating as db_expert_rating;
 pub use generated::job_lock as db_job_lock;
+pub use generated::jury_rating as db_jury_rating;
 pub use generated::project as db_project;
 pub use generated::project_preference as db_project_preference;
+pub use generated::ranking_snapshot as db_ranking_snapshot;
 pub use generated::sidequest as db_sidequest;
 pub use generated::sidequest_attempt as db_sidequest_attempt;
 pub use generated::sidequest_score as db_sidequest_score;
@@ -35,7 +36,7 @@ pub use generated::user as db_user;
 pub use generated::vote as db_vote;
 
 pub use generated::sea_orm_active_enums::{
-    BlogSectionLayout, EventPhase, EventRole, EventVisibility, ExpertRatingCategory, MediaUsage,
+    BlogSectionLayout, EventPhase, EventRole, EventVisibility, JuryRatingCategory, MediaUsage,
     TeamRole,
 };
 // endregion

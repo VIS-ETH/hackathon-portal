@@ -187,21 +187,21 @@ const PublicVoteInput = () => {
   }, [teams, teamsRoles]);
   const mutateVote = useSetMyVote();
   const [firstPlace, setFirstPlace] = useState<string | null>(
-    myVotes?.find((v) => v.rank === 1)?.team_id ?? null,
+    myVotes?.find((v) => v.place === 1)?.team_id ?? null,
   );
   const [secondPlace, setSecondPlace] = useState<string | null>(
-    myVotes?.find((v) => v.rank === 2)?.team_id ?? null,
+    myVotes?.find((v) => v.place === 2)?.team_id ?? null,
   );
   const [thirdPlace, setThirdPlace] = useState<string | null>(
-    myVotes?.find((v) => v.rank === 3)?.team_id ?? null,
+    myVotes?.find((v) => v.place === 3)?.team_id ?? null,
   );
   const [prevMyVotes, setPrevMyVotes] = useState(myVotes);
 
   if (myVotes !== prevMyVotes) {
     setPrevMyVotes(myVotes);
-    setFirstPlace(myVotes?.find((v) => v.rank === 1)?.team_id ?? null);
-    setSecondPlace(myVotes?.find((v) => v.rank === 2)?.team_id ?? null);
-    setThirdPlace(myVotes?.find((v) => v.rank === 3)?.team_id ?? null);
+    setFirstPlace(myVotes?.find((v) => v.place === 1)?.team_id ?? null);
+    setSecondPlace(myVotes?.find((v) => v.place === 2)?.team_id ?? null);
+    setThirdPlace(myVotes?.find((v) => v.place === 3)?.team_id ?? null);
   }
 
   const choose = (place: number, teamId: string) => {

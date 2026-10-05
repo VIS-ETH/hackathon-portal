@@ -94,7 +94,7 @@ pub struct TeamLeaderboardEntry {
 pub struct UserLeaderboardEntry {
     pub user_id: Uuid,
     pub user_name: String,
-    pub score: u64,
+    pub points: u64,
     pub result: f64,
 }
 

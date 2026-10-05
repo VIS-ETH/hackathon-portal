@@ -3,19 +3,16 @@ pub mod models;
 use crate::authorization::AuthorizationService;
 use crate::crypto::CryptoService;
 use crate::event::models::{Event, EventForCreate, EventForUpdate};
-use crate::rating::RatingService;
-use crate::sidequest::SidequestService;
 use crate::user::models::{ReducedUser, UserForCreate};
 use crate::user::UserService;
 use crate::{ServiceError, ServiceResult};
 use hackathon_portal_repositories::db::{
-    db_event, EventPhase, EventRepository, EventRole, EventVisibility, TeamRepository,
+    db_event, EventPhase, EventRepository, EventRole, EventVisibility,
 };
 use hackathon_portal_repositories::DbRepository;
 use sea_orm::prelude::*;
 use sea_orm::{ActiveModelTrait, IntoActiveModel, Set, TransactionTrait};
 use slug::slugify;
-use std::cmp::Ordering;
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 
@@ -23,8 +20,6 @@ use std::sync::Arc;
 pub struct EventService {
     authorization_service: Arc<AuthorizationService>,
     user_service: Arc<UserService>,
-    sidequest_service: Arc<SidequestService>,
-    rating_service: Arc<RatingService>,
     crypto_service: Arc<CryptoService>,
     db_repo: DbRepository,
 }
@@ -34,16 +29,12 @@ impl EventService {
     pub fn new(
         authorization_service: Arc<AuthorizationService>,
         user_service: Arc<UserService>,
-        sidequest_service: Arc<SidequestService>,
-        rating_service: Arc<RatingService>,
         crypto_service: Arc<CryptoService>,
         db_repo: DbRepository,
     ) -> Self {
         Self {
             authorization_service,
             user_service,
-            sidequest_service,
-            rating_service,
             crypto_service,
             db_repo,
         }
@@ -286,51 +277,6 @@ impl EventService {
             .await?;
 
         Ok(new_users)
-    }
-
-    pub async fn get_leaderboard(&self, event_id: Uuid) -> ServiceResult<Vec<Uuid>> {
-        let teams = TeamRepository::fetch_all_by_event_id(self.db_repo.conn(), event_id).await?;
-        let expert_leaderboard = self.rating_service.get_expert_leaderboard(event_id).await?;
-        let sidequest_leaderboard = self.sidequest_service.get_leaderboard(event_id).await?;
-
-        // Add bonus points
-        let mut sidequest_leaderboard = sidequest_leaderboard
-            .into_iter()
-            .map(|mut team| {
-                let extra_score = teams
-                    .iter()
-                    .find(|t| t.id == team.team_id)
-                    .and_then(|t| t.extra_score);
-
-                if let Some(extra_score) = extra_score {
-                    team.score += extra_score;
-                }
-
-                team
-            })
-            .collect::<Vec<_>>();
-
-        sidequest_leaderboard
-            .sort_by(|a, b| b.score.partial_cmp(&a.score).unwrap_or(Ordering::Equal));
-
-        let mut seen = HashSet::new();
-        let mut merged = Vec::new();
-
-        for team in expert_leaderboard.into_iter().take(3) {
-            seen.insert(team.team_id);
-            merged.push(team.team_id);
-        }
-
-        for team in sidequest_leaderboard {
-            if seen.contains(&team.team_id) {
-                continue;
-            }
-
-            seen.insert(team.team_id);
-            merged.push(team.team_id);
-        }
-
-        Ok(merged)
     }
 
     async fn generate_slug<C: ConnectionTrait>(

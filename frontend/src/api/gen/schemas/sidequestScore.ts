@@ -6,7 +6,7 @@
  */
 
 export interface SidequestScore {
-  category_rank: number;
+  points: number;
+  rank: number;
   score: number;
-  score_normalized: number;
 }

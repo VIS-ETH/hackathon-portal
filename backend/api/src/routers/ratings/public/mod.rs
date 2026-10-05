@@ -4,22 +4,17 @@ use crate::{
     api_state::ApiState, ctx::Ctx, error::ApiJson, routers::events::models::EventIdQuery, ApiError,
 };
 use axum::{
-    extract::{Path, Query, State},
+    extract::{Query, State},
     routing::{get, put},
     Json, Router,
 };
 use hackathon_portal_services::rating::models::Vote;
-use hackathon_portal_services::{
-    authorization::groups::Groups,
-    rating::models::{PublicVote, PublicVoteAggregated},
-};
-use uuid::Uuid;
+use hackathon_portal_services::{authorization::groups::Groups, rating::models::PublicVote};
 
 pub fn get_router(state: &ApiState) -> Router {
     Router::new()
         .route("/", get(get_my_votes))
         .route("/", put(set_my_vote))
-        .route("/:team_id", get(get_team_votes))
         .with_state(state.clone())
 }
 
@@ -108,34 +103,4 @@ pub async fn set_my_vote(
         .set_public_vote(ctx.user().id, event.id, vote)
         .await?;
     Ok(Json(votes.into()))
-}
-
-#[utoipa::path(
-    get,
-    path = "/api/ratings/public/{team_id}",
-    responses(
-        (status = StatusCode::OK, body = PublicVoteAggregated),
-        (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
-    ),
-)]
-pub async fn get_team_votes(
-    ctx: Ctx,
-    State(state): State<ApiState>,
-    Path(team_id): Path<Uuid>,
-) -> ApiJson<PublicVoteAggregated> {
-    let team = state.team_service.get_team(team_id).await?;
-    let groups = Groups::from_event(ctx.roles(), team.event_id);
-
-    if !groups.can_manage_event() {
-        return Err(ApiError::Forbidden {
-            action: "access votes for this event".to_string(),
-        });
-    }
-
-    let votes = state
-        .rating_service
-        .get_public_votes_for_team_aggregated(team_id)
-        .await?;
-
-    Ok(Json(votes))
 }

@@ -1,24 +1,21 @@
-use crate::team::models::Team;
 use hackathon_portal_repositories::db::{
-    db_expert_rating, db_technical_question, db_vote, ExpertRatingCategory,
+    db_jury_rating, db_technical_question, db_vote, JuryRatingCategory,
 };
-use sea_orm::FromQueryResult;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 use utoipa::ToSchema;
 use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
-pub struct ExpertRating {
+pub struct JuryRating {
     pub id: Uuid,
     pub user_id: Uuid,
     pub team_id: Uuid,
-    pub category: ExpertRatingCategory,
+    pub category: JuryRatingCategory,
     pub rating: f64,
 }
 
-impl From<db_expert_rating::Model> for ExpertRating {
-    fn from(value: db_expert_rating::Model) -> Self {
+impl From<db_jury_rating::Model> for JuryRating {
+    fn from(value: db_jury_rating::Model) -> Self {
         Self {
             id: value.id,
             user_id: value.user_id,
@@ -30,29 +27,15 @@ impl From<db_expert_rating::Model> for ExpertRating {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
-pub struct ExpertRatingForCreate {
+pub struct JuryRatingForCreate {
     pub team_id: Uuid,
-    pub category: ExpertRatingCategory,
+    pub category: JuryRatingCategory,
     pub rating: f64,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
-pub struct ExpertRatingForUpdate {
+pub struct JuryRatingForUpdate {
     pub rating: Option<f64>,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
-pub struct ExpertRatingLeaderboardEntry {
-    pub team_id: Uuid,
-    pub rating: f64,
-    pub categories: HashMap<ExpertRatingCategory, f64>,
-}
-
-#[derive(Debug, FromQueryResult)]
-pub struct AggregatedRating {
-    pub team_id: Uuid,
-    pub category: ExpertRatingCategory,
-    pub average: f64,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
@@ -103,7 +86,7 @@ pub struct UpdateTechnicalQuestion {
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
 pub struct TechnicalQuestionResult {
     pub question: TechnicalQuestion,
-    pub points: Option<f64>,
+    pub score: Option<f64>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
@@ -116,13 +99,7 @@ pub struct Vote {
 pub struct PublicVote {
     pub team_id: Uuid,
     pub user_id: Uuid,
-    pub rank: i32,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
-pub struct PublicVoteAggregated {
-    pub team_id: Uuid,
-    pub num_votes_per_rank: HashMap<i32, i32>,
+    pub place: i32,
 }
 
 impl From<db_vote::Model> for PublicVote {
@@ -130,52 +107,7 @@ impl From<db_vote::Model> for PublicVote {
         Self {
             team_id: value.team_id,
             user_id: value.user_id,
-            rank: value.rank,
+            place: value.place,
         }
     }
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
-pub struct TechnicalScore {
-    pub score_normalized: f64,
-    pub score: f64,
-    pub category_rank: i32,
-    pub all_answered: bool,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
-pub struct ExpertScore {
-    pub score_normalized: f64,
-    pub score: f64,
-    pub presentation_score: f64,
-    pub product_score: f64,
-    pub category_rank: i32,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
-pub struct SidequestScore {
-    pub score_normalized: f64,
-    pub score: f64,
-    pub category_rank: i32,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
-pub struct VotingScore {
-    pub score_normalized: f64,
-    pub category_rank: i32,
-    pub score: f64,
-    pub votes: HashMap<i32, i32>, // rank -> number of votes
-}
-
-#[derive(Debug, Clone)]
-pub struct ScoreNormalized {
-    pub team: Team,
-    pub tech_score: Option<TechnicalScore>,
-    pub expert_score: Option<ExpertScore>,
-    pub sidequest_score: Option<SidequestScore>,
-    pub voting_score: Option<VotingScore>,
-    pub extra_score: f64,
-    pub final_score: f64,
-    pub max_final_score: Option<f64>,
-    pub rank: Option<i32>,
 }
