@@ -1,0 +1,7 @@
+# Used by the backend:test CI job: `cargo nextest run --profile ci`
+[profile.ci]
+fail-fast = false
+
+[profile.ci.junit]
+# written to target/nextest/ci/junit.xml
+path = "junit.xml"

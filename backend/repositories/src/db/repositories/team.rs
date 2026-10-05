@@ -75,6 +75,10 @@ impl TeamRepository {
             .or_fail(team::Entity.table_name(), id)
     }
 
+    #[expect(
+        clippy::missing_panics_doc,
+        reason = "the foreign key constraint guarantees the event exists"
+    )]
     pub async fn fetch_by_id_with_event<C: ConnectionTrait>(
         db: &C,
         id: Uuid,
@@ -90,6 +94,10 @@ impl TeamRepository {
         Ok((team, event))
     }
 
+    #[expect(
+        clippy::missing_panics_doc,
+        reason = "the foreign key constraint guarantees the event exists"
+    )]
     pub async fn fetch_by_slug_with_event<C: ConnectionTrait>(
         db: &C,
         event_slug: &str,

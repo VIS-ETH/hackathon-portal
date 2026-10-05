@@ -26,7 +26,6 @@ use std::sync::Arc;
 use std::time::Duration;
 
 #[derive(Clone)]
-#[allow(clippy::struct_field_names)]
 pub struct ApiState {
     pub authenticator: Authenticator,
     pub discord_config: Arc<DiscordConfig>,
@@ -47,45 +46,6 @@ pub struct ApiState {
 }
 
 impl ApiState {
-    #[allow(clippy::too_many_arguments)]
-    pub fn new(
-        authenticator: Authenticator,
-        discord_config: Arc<DiscordConfig>,
-        health_service: Arc<HealthService>,
-        authorization_service: Arc<AuthorizationService>,
-        user_service: Arc<UserService>,
-        event_service: Arc<EventService>,
-        team_service: Arc<TeamService>,
-        rating_service: Arc<RatingService>,
-        ranking_service: Arc<RankingService>,
-        project_service: Arc<ProjectService>,
-        sidequest_service: Arc<SidequestService>,
-        appointment_service: Arc<AppointmentService>,
-        upload_service: Arc<UploadService>,
-        infrastructure_service: Arc<InfrastructureService>,
-        job_lock_service: Arc<JobLockService>,
-        host_to_team_cache: Cache<(), Arc<HashMap<String, Team>>>,
-    ) -> Self {
-        Self {
-            authenticator,
-            discord_config,
-            health_service,
-            authorization_service,
-            user_service,
-            event_service,
-            team_service,
-            rating_service,
-            ranking_service,
-            project_service,
-            sidequest_service,
-            appointment_service,
-            upload_service,
-            infrastructure_service,
-            job_lock_service,
-            host_to_team_cache,
-        }
-    }
-
     pub async fn from_config(config: &ApiConfig) -> ApiResult<Self> {
         let authenticator = Authenticator::new(&config.auth).await?;
 
@@ -143,7 +103,7 @@ impl ApiState {
             .name("host_to_team_cache")
             .build();
 
-        let state = Self::new(
+        Ok(Self {
             authenticator,
             discord_config,
             health_service,
@@ -160,8 +120,6 @@ impl ApiState {
             infrastructure_service,
             job_lock_service,
             host_to_team_cache,
-        );
-
-        Ok(state)
+        })
     }
 }

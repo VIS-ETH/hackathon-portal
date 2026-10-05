@@ -22,8 +22,8 @@ pub struct UploadService {
 impl UploadService {
     const MB: i64 = 1 << 20;
     const UPLOADS_RATE_LIMIT_COUNT: u64 = 20;
-    const UPLOADS_RATE_LIMIT_INTERVAL: Duration = Duration::from_secs(60 * 30); // 30 minutes
-    const PRESIGNED_URL_EXPIRATION: Duration = Duration::from_secs(60 * 15); // 15 minutes
+    const UPLOADS_RATE_LIMIT_INTERVAL: Duration = Duration::from_mins(30); // 30 minutes
+    const PRESIGNED_URL_EXPIRATION: Duration = Duration::from_mins(15); // 15 minutes
 
     #[must_use]
     pub const fn new(db_repo: DbRepository, s3_repo: S3Repository) -> Self {

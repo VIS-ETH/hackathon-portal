@@ -7,7 +7,10 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-#[allow(clippy::struct_field_names)]
+#[expect(
+    clippy::struct_field_names,
+    reason = "field names are config keys, renaming would break existing configs"
+)]
 pub struct HeaderConfig {
     // unique and sufficiently stable user identifier, e.g. a verified email
     pub auth_id_header: String,
@@ -28,7 +31,10 @@ impl HeaderAuthenticator {
         }
     }
 
-    #[allow(clippy::unnecessary_wraps)]
+    #[expect(
+        clippy::unnecessary_wraps,
+        reason = "signature shared with the other authenticators dispatched by Authenticator::validate"
+    )]
     pub fn validate(&self, req: &Request<Body>) -> ApiResult<Option<AuthenticationResult>> {
         let headers = req.headers();
 

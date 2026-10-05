@@ -1,10 +1,10 @@
 use crate::authorization::groups::Groups;
+use crate::event::models::Event;
 use hackathon_portal_repositories::db::{EventPhase, EventVisibility};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, ToSchema)]
-#[allow(clippy::struct_excessive_bools)]
 pub struct Policies {
     pub can_view_event: bool,
     pub can_view_event_internal: bool,
@@ -31,75 +31,105 @@ pub struct Policies {
     pub can_view_finalist: bool,
 }
 
+/// The event properties that policies depend on.
+#[derive(Debug, Clone, Copy)]
+pub struct EventFlags {
+    pub visibility: EventVisibility,
+    pub phase: EventPhase,
+    pub read_only: bool,
+    pub projects_visible: bool,
+    pub project_assignments_visible: bool,
+    pub feedback_visible: bool,
+    pub vote_enabled: bool,
+    pub finalists_visible: bool,
+}
+
+impl From<&Event> for EventFlags {
+    fn from(event: &Event) -> Self {
+        Self {
+            visibility: event.visibility,
+            phase: event.phase,
+            read_only: event.read_only,
+            projects_visible: event.projects_visible,
+            project_assignments_visible: event.project_assignments_visible,
+            feedback_visible: event.feedback_visible,
+            vote_enabled: event.vote_enabled,
+            finalists_visible: event.finalists_visible,
+        }
+    }
+}
+
 impl Policies {
     #[must_use]
-    pub fn new(
-        groups: &Groups,
-        event_visibility: EventVisibility,
-        event_phase: EventPhase,
-        event_ro: bool,
-        event_projects_visible: bool,
-        event_project_assignments_visible: bool,
-        event_feedback_visible: bool,
-        event_vote_enabled: bool,
-        event_finalists_visible: bool,
-    ) -> Self {
+    pub fn new(groups: &Groups, event: EventFlags) -> Self {
         Self {
-            can_view_event: groups.can_view_event(event_visibility),
-            can_view_event_internal: groups.can_view_event_internal(event_visibility),
+            can_view_event: groups.can_view_event(event.visibility),
+            can_view_event_internal: groups.can_view_event_internal(event.visibility),
             can_manage_event: groups.can_manage_event(),
-            can_create_team: groups.can_create_team(event_visibility, event_phase, event_ro),
-            can_view_team_confidential: groups.can_view_team_confidential(event_visibility),
+            can_create_team: groups.can_create_team(event.visibility, event.phase, event.read_only),
+            can_view_team_confidential: groups.can_view_team_confidential(event.visibility),
             can_view_team_feedback: groups.can_view_team_feedback(
-                event_visibility,
-                event_phase,
-                event_feedback_visible,
+                event.visibility,
+                event.phase,
+                event.feedback_visible,
             ),
             can_update_team_name: groups.can_update_team_name(
-                event_visibility,
-                event_phase,
-                event_ro,
+                event.visibility,
+                event.phase,
+                event.read_only,
             ),
             can_update_team_photo: groups.can_update_team_photo(
-                event_visibility,
-                event_phase,
-                event_ro,
+                event.visibility,
+                event.phase,
+                event.read_only,
             ),
             can_update_team_ingress_config: groups.can_update_team_ingress_config(
-                event_visibility,
-                event_phase,
-                event_ro,
+                event.visibility,
+                event.phase,
+                event.read_only,
             ),
-            can_view_team_blog: groups.can_view_team_blog(event_visibility, event_phase),
+            can_view_team_blog: groups.can_view_team_blog(event.visibility, event.phase),
             can_update_team_blog: groups.can_update_team_blog(
-                event_visibility,
-                event_phase,
-                event_ro,
+                event.visibility,
+                event.phase,
+                event.read_only,
             ),
-            can_manage_team: groups.can_manage_team(event_visibility, event_phase, event_ro),
+            can_manage_team: groups.can_manage_team(event.visibility, event.phase, event.read_only),
             can_manage_jury_rating: groups.can_manage_jury_rating(
-                event_visibility,
-                event_phase,
-                event_ro,
+                event.visibility,
+                event.phase,
+                event.read_only,
             ),
-            can_view_project: groups.can_view_project(event_visibility, event_projects_visible),
-            can_manage_project: groups.can_manage_project(event_visibility, event_phase, event_ro),
+            can_view_project: groups.can_view_project(event.visibility, event.projects_visible),
+            can_manage_project: groups.can_manage_project(
+                event.visibility,
+                event.phase,
+                event.read_only,
+            ),
             can_view_project_assignment: groups.can_view_project_assignment(
-                event_visibility,
-                event_projects_visible,
-                event_project_assignments_visible,
+                event.visibility,
+                event.projects_visible,
+                event.project_assignments_visible,
             ),
-            can_view_sidequest: groups.can_view_sidequest(event_visibility, event_phase),
-            can_manage_sidequest: groups.can_manage_sidequest(event_visibility, event_ro),
-            can_view_sidequest_attempt: groups.can_view_sidequest_attempt(event_visibility),
+            can_view_sidequest: groups.can_view_sidequest(event.visibility, event.phase),
+            can_manage_sidequest: groups.can_manage_sidequest(event.visibility, event.read_only),
+            can_view_sidequest_attempt: groups.can_view_sidequest_attempt(event.visibility),
             can_manage_sidequest_attempt: groups.can_manage_sidequest_attempt(
-                event_visibility,
-                event_phase,
-                event_ro,
+                event.visibility,
+                event.phase,
+                event.read_only,
             ),
-            can_create_upload: groups.can_create_upload(event_visibility, event_phase, event_ro),
-            can_public_vote: groups.can_public_vote(event_visibility, event_vote_enabled, event_ro),
-            can_view_finalist: groups.can_view_finalists(event_visibility, event_finalists_visible),
+            can_create_upload: groups.can_create_upload(
+                event.visibility,
+                event.phase,
+                event.read_only,
+            ),
+            can_public_vote: groups.can_public_vote(
+                event.visibility,
+                event.vote_enabled,
+                event.read_only,
+            ),
+            can_view_finalist: groups.can_view_finalists(event.visibility, event.finalists_visible),
         }
     }
 }
@@ -112,6 +142,10 @@ mod tests {
     use strum::VariantArray;
 
     #[test]
+    #[expect(
+        clippy::print_stdout,
+        reason = "dumps the policy matrix, inspect with --nocapture"
+    )]
     fn exhaustive_enumeration() {
         let event_roles = EventRole::VARIANTS.iter().powerset();
         let team_roles = TeamRole::VARIANTS.iter().powerset();
@@ -143,14 +177,16 @@ mod tests {
 
             let policies = Policies::new(
                 &Groups::from_roles(&er, &tr),
-                *input.2,
-                *input.3,
-                *input.4,
-                *input.5,
-                *input.6,
-                *input.7,
-                *input.8,
-                *input.9,
+                EventFlags {
+                    visibility: *input.2,
+                    phase: *input.3,
+                    read_only: *input.4,
+                    projects_visible: *input.5,
+                    project_assignments_visible: *input.6,
+                    feedback_visible: *input.7,
+                    vote_enabled: *input.8,
+                    finalists_visible: *input.9,
+                },
             );
 
             println!("{idx}: {input:?} => {policies:?}");

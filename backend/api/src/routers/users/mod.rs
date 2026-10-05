@@ -6,7 +6,7 @@ use axum::extract::{Query, State};
 use axum::routing::{get, patch};
 use axum::{Json, Router};
 use hackathon_portal_services::authorization::groups::Groups;
-use hackathon_portal_services::authorization::policies::Policies;
+use hackathon_portal_services::authorization::policies::{EventFlags, Policies};
 use hackathon_portal_services::user::models::{User, UserForUpdate};
 
 pub mod models;
@@ -81,17 +81,7 @@ pub async fn get_my_policies(
         unreachable!("Query validation ensures exactly one of event_id or team_id is set")
     };
 
-    let policies = Policies::new(
-        &groups,
-        event.visibility,
-        event.phase,
-        event.read_only,
-        event.projects_visible,
-        event.project_assignments_visible,
-        event.feedback_visible,
-        event.vote_enabled,
-        event.finalists_visible,
-    );
+    let policies = Policies::new(&groups, EventFlags::from(&event));
 
     Ok(Json(policies))
 }

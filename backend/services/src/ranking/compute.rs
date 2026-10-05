@@ -329,7 +329,6 @@ fn values(teams: &[TeamRanking], value: impl Fn(&TeamRanking) -> f64) -> Vec<(Uu
 }
 
 // exact comparison with 0 is part of the formula
-#[allow(clippy::float_cmp)]
 fn normalize(
     values: &[(Uuid, f64)],
     upper: f64,
@@ -636,12 +635,12 @@ mod tests {
     #[test]
     fn technical_all_answered_without_questions() {
         let a = team(0);
-        let ranking = rank(&input(&[a.clone()])).expect("ranks");
+        let ranking = rank(&input(std::slice::from_ref(&a))).expect("ranks");
 
         let a = &entry(&ranking, &a).technical;
         assert_eq!(a.score, 0.0);
         assert!(a.all_answered);
-        assert!(a.answers.is_empty());
+        assert_eq!(a.answers, Vec::<TechnicalAnswer>::new());
     }
 
     // endregion
@@ -651,7 +650,7 @@ mod tests {
     #[test]
     fn jury_weights_category_means() {
         let a = team(0);
-        let mut input = input(&[a.clone()]);
+        let mut input = input(std::slice::from_ref(&a));
         input.jury_ratings = vec![
             jury_rating(&a, JuryRatingCategory::Product, 8.0),
             jury_rating(&a, JuryRatingCategory::Product, 6.0),
@@ -836,7 +835,7 @@ mod tests {
         let a = team(0);
         let (first, second) = (sidequest(true), sidequest(false));
         let u = users(2);
-        let mut input = input(&[a.clone()]).sidequest;
+        let mut input = input(std::slice::from_ref(&a)).sidequest;
         input.participant_count = 10;
         input.best_results = vec![
             best_result(&first, u[0], 5.0),
@@ -936,7 +935,7 @@ mod tests {
     #[test]
     fn total_without_teams() {
         let ranking = rank(&input(&[])).expect("ranks");
-        assert!(ranking.teams.is_empty());
+        assert_eq!(ranking.teams, Vec::<TeamRanking>::new());
         assert_eq!(ranking.max_total_points, 0.0);
     }
 
@@ -965,7 +964,7 @@ mod tests {
         );
     }
     /// Snapshots are read back from JSONB text, so parsing must restore every `f64` exactly
-    /// (needs serde_json's `float_roundtrip` feature).
+    /// (needs `serde_json`'s `float_roundtrip` feature).
     #[test]
     fn snapshot_json_round_trips_floats_exactly() {
         let mut ranking: Ranking =

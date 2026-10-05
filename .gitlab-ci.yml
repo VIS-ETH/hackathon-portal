@@ -1,4 +1,4 @@
-# Simple checks: formatting and linting for frontend and backend.
+# Checks for frontend and backend: formatting, linting, type checking and tests.
 
 workflow:
   rules:
@@ -8,6 +8,10 @@ workflow:
       when: never
     - if: $CI_COMMIT_BRANCH
 
+default:
+  # a newer pipeline for the same ref cancels this one
+  interruptible: true
+
 stages:
   - check
 
@@ -16,6 +20,10 @@ stages:
 .frontend:
   stage: check
   image: node:24-slim
+  rules:
+    - changes:
+        - frontend/**/*
+        - .gitlab-ci.yml
   variables:
     npm_config_cache: $CI_PROJECT_DIR/.npm
   cache:
@@ -38,14 +46,61 @@ frontend:lint:
   script:
     - npm run lint
 
+frontend:typecheck:
+  extends: .frontend
+  script:
+    # next-env.d.ts and .next/types are generated, not committed
+    - npx next typegen
+    - npx tsc --noEmit
+
+frontend:api:
+  extends: .frontend
+  script:
+    # the generated client must match src/api/schema.json (kept in sync with
+    # the backend by its openapi test)
+    - cp -r src/api/gen "$CI_PROJECT_DIR/gen-before"
+    - npm run api
+    - diff -ru "$CI_PROJECT_DIR/gen-before" src/api/gen
+
 # --- Backend ----------------------------------------------------------------
 
 .backend:
   stage: check
-  image: rust:slim-bookworm
+  # pinned to the backend/Dockerfile toolchain: new rustfmt/clippy releases
+  # change formatting, add lints and can leave #[expect]s unfulfilled
+  image: rust:1.99.0-slim-bookworm
+  rules:
+    - changes:
+        - backend/**/*
+        # compared against the backend's OpenAPI spec in a test
+        - frontend/src/api/schema.json
+        - .gitlab-ci.yml
   variables:
     CARGO_HOME: $CI_PROJECT_DIR/.cargo
     CARGO_TERM_COLOR: always
+    # smaller, cache-friendly builds; backtraces keep file and line numbers
+    CARGO_INCREMENTAL: "0"
+    CARGO_PROFILE_DEV_DEBUG: line-tables-only
+
+.backend-build:
+  extends: .backend
+  cache:
+    - key:
+        prefix: cargo-registry
+        files:
+          - backend/Cargo.lock
+      paths:
+        - .cargo/registry/index/
+        - .cargo/registry/cache/
+        - .cargo/git/db/
+    # per job: test and clippy build different artifacts
+    - key: $CI_JOB_NAME_SLUG-target
+      paths:
+        - backend/target/
+  before_script:
+    # build deps as in backend/Dockerfile: openssl-sys needs pkg-config and libssl-dev,
+    # the utoipa-swagger-ui build script downloads Swagger UI with curl
+    - apt-get update && apt-get install -y --no-install-recommends pkg-config libssl-dev curl ca-certificates
 
 backend:fmt:
   extends: .backend
@@ -55,10 +110,28 @@ backend:fmt:
     - cargo fmt --all --check
 
 backend:test:
-  extends: .backend
+  extends: .backend-build
   script:
-    # build deps as in backend/Dockerfile: openssl-sys needs pkg-config and libssl-dev,
-    # the utoipa-swagger-ui build script downloads Swagger UI with curl
-    - apt-get update && apt-get install -y --no-install-recommends pkg-config libssl-dev curl ca-certificates
+    - curl -LsSf https://github.com/nextest-rs/nextest/releases/download/cargo-nextest-0.9.146/cargo-nextest-0.9.146-x86_64-unknown-linux-gnu.tar.gz | tar zxf - -C /usr/local/cargo/bin
     - cd backend
-    - cargo test --locked
+    # profile in backend/.config/nextest.toml
+    - cargo nextest run --locked --workspace --all-targets --profile ci
+  artifacts:
+    when: always
+    reports:
+      junit: backend/target/nextest/ci/junit.xml
+
+backend:clippy:
+  extends: .backend-build
+  script:
+    - apt-get install -y --no-install-recommends jq
+    - rustup component add clippy
+    - cd backend
+    # report first, so it is also produced when the gate below fails
+    - cargo clippy --locked --all-targets --message-format=json > clippy.json
+    - jq -s -f ../.gitlab/clippy-codequality.jq clippy.json > ../gl-code-quality-report.json
+    - cargo clippy --locked --all-targets -- -D warnings
+  artifacts:
+    when: always
+    reports:
+      codequality: gl-code-quality-report.json

@@ -160,11 +160,12 @@ mod tests {
     use super::*;
 
     #[test]
+    #[expect(clippy::print_stdout, reason = "dev helper, run with --nocapture")]
     fn get_default_ingress_config() {
         // cargo test get_default_ingress_config -- --nocapture
         println!(
             "{}",
-            serde_json::to_string(&IngressConfig::default()).unwrap()
+            serde_json::to_string(&IngressConfig::default()).expect("IngressConfig serializes")
         );
     }
 }

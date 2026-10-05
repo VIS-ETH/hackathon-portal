@@ -21,12 +21,16 @@ pub struct CryptoService {
 }
 
 impl CryptoService {
+    /// # Panics
+    ///
+    /// Panics if `key` is not a 64 character hex string (32 bytes).
     #[must_use]
     pub fn new(key: String) -> Self {
         let master_key = hex::decode(key).expect("Failed to decode hex string");
-        if master_key.len() != 32 {
-            panic!("Crypto key must be 32 bytes (64 hex characters) long");
-        }
+        assert!(
+            master_key.len() == 32,
+            "Crypto key must be 32 bytes (64 hex characters) long"
+        );
         let key = Key::<Aes256Gcm>::try_from(master_key.as_slice())
             .expect("Crypto key must be 32 bytes (64 hex characters) long");
         let cipher = Aes256Gcm::new(&key);
@@ -45,9 +49,11 @@ impl CryptoService {
         Ok([nonce_bytes, ciphertext].concat())
     }
 
-    pub fn decrypt(&self, ciphertext: &Vec<u8>) -> ServiceResult<String> {
-        let (nonce, ciphertext) = ciphertext.split_at(12);
-        let nonce = Nonce::<U12>::try_from(nonce).expect("nonce is exactly 12 bytes");
+    pub fn decrypt(&self, ciphertext: &[u8]) -> ServiceResult<String> {
+        let (nonce, ciphertext) = ciphertext
+            .split_first_chunk::<12>()
+            .ok_or(crate::ServiceError::Crypto(aes_gcm::Error))?;
+        let nonce = Nonce::<U12>::from(*nonce);
         let plaintext = self.cipher.decrypt(&nonce, ciphertext)?;
         let plaintext = String::from_utf8(plaintext).map_err(|_| crate::ServiceError::Parsing {
             message: "Failed to parse decrypted data as UTF-8 string".to_string(),

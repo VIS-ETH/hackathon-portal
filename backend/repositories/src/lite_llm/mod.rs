@@ -48,7 +48,7 @@ impl LiteLLMRepository {
         let res = self
             .client
             .post(format!("https://{}{}", self.host, endpoint))
-            .header("Authorization", format!("Bearer {}", key))
+            .header("Authorization", format!("Bearer {key}"))
             .header("Content-Type", "application/json")
             .json(&payload)
             .send()

@@ -52,9 +52,7 @@ pub async fn check_authorization(
                         return None;
                     }
 
-                    let Some(managed_address) = t.managed_address.clone() else {
-                        return None;
-                    };
+                    let managed_address = t.managed_address.clone()?;
 
                     Some((managed_address, t))
                 })

@@ -1,4 +1,8 @@
-#![allow(clippy::print_stdout, clippy::print_stderr)]
+#![expect(
+    clippy::print_stdout,
+    clippy::print_stderr,
+    reason = "the CLI reports to the terminal"
+)]
 use crate::cli::run;
 use std::process::exit;
 

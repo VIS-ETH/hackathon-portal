@@ -81,7 +81,7 @@ impl DiscordClient {
 
         // Parse the YAML configuration
         let mut discord_config = if let Some(config_yaml) = &event.discord_config {
-            self.parse_discord_config(config_yaml)?
+            Self::parse_discord_config(config_yaml)?
         } else {
             info!("No Discord configuration found for event, skipping sync");
             return Ok(());
@@ -127,6 +127,10 @@ impl DiscordClient {
         Ok(())
     }
 
+    #[expect(
+        clippy::too_many_lines,
+        reason = "TODO: split into phases (team channels, renames, upserts, cleanup)"
+    )]
     pub async fn sync_channels(
         &self,
         api_state: &ApiState,
@@ -469,13 +473,11 @@ impl DiscordClient {
         writable_by_roles: &[&PermissionRole],
         role_mapping: &HashMap<String, RoleId>,
     ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-        // First, get current permission overwrites to avoid unnecessary API calls
-        let channel = match self.client.http.get_channel(channel_id).await? {
-            serenity::all::Channel::Guild(channel) => channel,
-            _ => return Err("Category channel is not a guild channel".into()),
+        // Permission overwrites only exist on guild channels
+        let serenity::all::Channel::Guild(_) = self.client.http.get_channel(channel_id).await?
+        else {
+            return Err("Category channel is not a guild channel".into());
         };
-
-        let _current_overwrites = channel.permissions.clone();
 
         // Build desired permission overwrites
         let mut desired_overwrites = Vec::new();
@@ -831,10 +833,10 @@ impl DiscordClient {
 
         // Create sets for comparison
         let mut config_role_names: HashSet<String> =
-            config.roles.iter().map(|r| r.name.to_string()).collect();
+            config.roles.iter().map(|r| r.name.clone()).collect();
 
         let current_role_names: HashSet<String> =
-            current_roles.iter().map(|r| r.name.to_string()).collect();
+            current_roles.iter().map(|r| r.name.clone()).collect();
 
         // Get team roles from database
         let teams = api_state.team_service.get_teams(event_id).await?;
@@ -879,7 +881,7 @@ impl DiscordClient {
             if let Some(existing_role) = current_roles.iter().find(|r| r.name == role_config.name) {
                 let position = (total_roles - index) as u16;
                 debug!("Role exists: {}", role_config.name);
-                if self.role_needs_update(existing_role, role_config, position) {
+                if Self::role_needs_update(existing_role, role_config, position) {
                     info!(
                         "Updating role: {} (position: {})",
                         role_config.name, position
@@ -897,7 +899,7 @@ impl DiscordClient {
                 continue;
             }
 
-            if !config_role_names.contains(&(existing_role.name.to_string())) {
+            if !config_role_names.contains(&existing_role.name.clone()) {
                 info!("Deleting role: {} (not in config)", existing_role.name);
                 self.delete_role(existing_role.id, guild_id).await?;
             }
@@ -915,13 +917,13 @@ impl DiscordClient {
     ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         let mut create_role = EditRole::default()
             .name(&role_config.name) // Use slug as the role name in Discord
-            .colour(self.parse_color(&role_config.color)?)
+            .colour(Self::parse_color(&role_config.color)?)
             .mentionable(role_config.mentionable)
             .hoist(role_config.show_in_roster) // hoist means show in separate section in member list
             .position(position);
 
         // Set permissions based on special role type
-        let permissions = self.get_role_permissions(role_config.special.as_ref());
+        let permissions = Self::get_role_permissions(role_config.special.as_ref());
         create_role = create_role.permissions(permissions);
 
         self.client
@@ -944,10 +946,10 @@ impl DiscordClient {
     ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         let edit_role = EditRole::new()
             .name(&role_config.name)
-            .colour(self.parse_color(&role_config.color)?)
+            .colour(Self::parse_color(&role_config.color)?)
             .mentionable(role_config.mentionable)
             .hoist(role_config.show_in_roster)
-            .permissions(self.get_role_permissions(role_config.special.as_ref()))
+            .permissions(Self::get_role_permissions(role_config.special.as_ref()))
             .position(position);
 
         self.client
@@ -979,13 +981,12 @@ impl DiscordClient {
     }
 
     fn role_needs_update(
-        &self,
         existing_role: &Role,
         role_config: &RoleConfig,
         _expected_position: u16,
     ) -> bool {
         // Check if color needs update
-        let config_color = self.parse_color(&role_config.color).unwrap_or(0);
+        let config_color = Self::parse_color(&role_config.color).unwrap_or(0);
         if existing_role.colour.0 != config_color {
             return true;
         }
@@ -1006,7 +1007,7 @@ impl DiscordClient {
         }
 
         // Check if permissions need update
-        let expected_permissions = self.get_role_permissions(role_config.special.as_ref());
+        let expected_permissions = Self::get_role_permissions(role_config.special.as_ref());
         if existing_role.permissions != expected_permissions {
             return true;
         }
@@ -1027,7 +1028,7 @@ impl DiscordClient {
         info!("Setting @everyone permissions: {:?}", default_permissions);
 
         // Convert the permission map to Serenity Permissions
-        let permissions = self.parse_permissions(default_permissions);
+        let permissions = Self::parse_permissions(default_permissions);
 
         // Update the @everyone role permissions
         let everyone_role_id = RoleId::new(guild_id); // @everyone role ID is same as guild ID
@@ -1047,7 +1048,6 @@ impl DiscordClient {
     }
 
     fn parse_discord_config(
-        &self,
         config_yaml: &str,
     ) -> Result<DiscordConfig, Box<dyn std::error::Error + Send + Sync>> {
         if config_yaml.trim().is_empty() {
@@ -1062,11 +1062,11 @@ impl DiscordClient {
         Ok(config)
     }
 
-    fn parse_permissions(&self, permission_map: &HashMap<String, bool>) -> Permissions {
+    fn parse_permissions(permission_map: &HashMap<String, bool>) -> Permissions {
         let mut permissions = Permissions::empty();
 
         for (permission_name, allowed) in permission_map {
-            if let Some(permission) = self.map_permission_name(permission_name) {
+            if let Some(permission) = Self::map_permission_name(permission_name) {
                 if *allowed {
                     permissions.insert(permission);
                 } else {
@@ -1083,24 +1083,21 @@ impl DiscordClient {
         permissions
     }
 
-    fn parse_color(
-        &self,
-        color_str: &str,
-    ) -> Result<u32, Box<dyn std::error::Error + Send + Sync>> {
+    fn parse_color(color_str: &str) -> Result<u32, Box<dyn std::error::Error + Send + Sync>> {
         // Handle hex colors like "#FF0000" or "FF0000"
         let color_str = color_str.trim_start_matches('#');
         u32::from_str_radix(color_str, 16)
             .map_err(|e| Box::new(e) as Box<dyn std::error::Error + Send + Sync>)
     }
 
-    fn get_role_permissions(&self, special_role: Option<&SpecialRole>) -> Permissions {
+    fn get_role_permissions(special_role: Option<&SpecialRole>) -> Permissions {
         match special_role {
             Some(SpecialRole::Admin) => Permissions::all(),
             Some(_) | None => Permissions::empty(), // Other roles
         }
     }
 
-    fn map_permission_name(&self, name: &str) -> Option<Permissions> {
+    fn map_permission_name(name: &str) -> Option<Permissions> {
         match name.to_lowercase().as_str() {
             "create_instant_invite" => Some(Permissions::CREATE_INSTANT_INVITE),
             "kick_members" => Some(Permissions::KICK_MEMBERS),

@@ -12,6 +12,10 @@ pub type ServiceResult<T> = Result<T, ServiceError>;
 
 #[serde_as]
 #[derive(Debug, Serialize, From)]
+#[expect(
+    clippy::large_enum_variant,
+    reason = "error type, only built on the failure path"
+)]
 pub enum ServiceError {
     DependencyMissing {
         dependency: String,

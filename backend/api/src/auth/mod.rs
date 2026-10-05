@@ -25,6 +25,10 @@ pub struct AuthenticationResult {
 }
 
 #[derive(Clone)]
+#[expect(
+    clippy::large_enum_variant,
+    reason = "built once at startup and held in ApiState"
+)]
 pub enum Authenticator {
     Mock(MockAuthenticator),
     Header(HeaderAuthenticator),

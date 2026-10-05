@@ -1,3 +1,8 @@
+#![expect(
+    clippy::needless_for_each,
+    reason = "emitted by the utoipa OpenApi derive"
+)]
+
 use utoipa::OpenApi;
 use utoipauto::utoipauto;
 

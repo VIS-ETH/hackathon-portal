@@ -97,6 +97,10 @@ impl EventService {
         Ok(event.into())
     }
 
+    #[expect(
+        clippy::too_many_lines,
+        reason = "flat patch application, one block per updatable column"
+    )]
     pub async fn update_event(
         &self,
         event_id: Uuid,

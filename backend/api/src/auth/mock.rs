@@ -16,7 +16,11 @@ impl MockAuthenticator {
         Self
     }
 
-    #[allow(clippy::unused_self, clippy::unnecessary_wraps)]
+    #[expect(
+        clippy::unused_self,
+        clippy::unnecessary_wraps,
+        reason = "signature shared with the other authenticators dispatched by Authenticator::validate"
+    )]
     pub fn validate(&self, _: &Request<Body>) -> ApiResult<Option<AuthenticationResult>> {
         Ok(Some(AuthenticationResult {
             auth_id: "aeinstein@ethz.ch".to_string(),

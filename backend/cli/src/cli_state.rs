@@ -16,7 +16,7 @@ use std::sync::Arc;
 use tokio::sync::OnceCell;
 
 #[derive(Clone)]
-#[allow(dead_code, clippy::struct_field_names)]
+#[expect(dead_code, reason = "scaffolding for upcoming CLI commands")]
 pub struct CliState {
     config: CliConfig,
     pg_repo: OnceCell<Arc<DbRepository>>,
@@ -52,12 +52,11 @@ impl CliState {
         }
     }
 
-    #[allow(dead_code)]
     pub fn config(&self) -> &CliConfig {
         &self.config
     }
 
-    #[allow(dead_code)]
+    #[expect(dead_code, reason = "scaffolding for upcoming CLI commands")]
     pub async fn pg_repo(&self) -> CliResult<Arc<DbRepository>> {
         self.pg_repo
             .get_or_try_init(async || {

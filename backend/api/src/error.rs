@@ -156,9 +156,10 @@ impl From<&RepositoryError> for PublicError {
             | RepositoryError::S3PutObject(_)
             | RepositoryError::S3GetBucketCors(_)
             | RepositoryError::Parsing { message: _ }
-            | RepositoryError::S3PutBucketCors(_) => ise,
-            RepositoryError::RequestError(_) | RepositoryError::SerdeJson(_) => ise,
-            RepositoryError::Cryptography(_) => ise,
+            | RepositoryError::S3PutBucketCors(_)
+            | RepositoryError::RequestError(_)
+            | RepositoryError::SerdeJson(_)
+            | RepositoryError::Cryptography(_) => ise,
         };
 
         Self::new(status, message)
@@ -166,6 +167,10 @@ impl From<&RepositoryError> for PublicError {
 }
 
 impl From<&ServiceError> for PublicError {
+    #[expect(
+        clippy::too_many_lines,
+        reason = "flat exhaustive mapping of error variants to responses"
+    )]
     fn from(value: &ServiceError) -> Self {
         let ise = (
             StatusCode::INTERNAL_SERVER_ERROR,
@@ -262,7 +267,9 @@ impl From<&ServiceError> for PublicError {
                                         ),
                                     ),
             ServiceError::Repository(e) => return e.into(),
-            ServiceError::Matching { message } => (StatusCode::BAD_REQUEST, message.clone()),
+            ServiceError::Matching { message } | ServiceError::Parsing { message } => {
+                (StatusCode::BAD_REQUEST, message.clone())
+            }
             ServiceError::DependencyMissing { .. } |
             ServiceError::Io(_) |
             ServiceError::TracingSetGlobalDefault(_) |
@@ -273,7 +280,6 @@ impl From<&ServiceError> for PublicError {
                 StatusCode::BAD_REQUEST,
                 "The master AI API key is missing".to_string(),
             ),
-            ServiceError::Parsing { message } => (StatusCode::BAD_REQUEST, message.clone()),
             ServiceError::InvalidTechnicalQuestion { message } => {
                 (StatusCode::BAD_REQUEST, format!("Invalid technical question: {message}"))
             }

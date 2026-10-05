@@ -91,6 +91,10 @@ impl TeamService {
         Ok(team)
     }
 
+    #[expect(
+        clippy::missing_panics_doc,
+        reason = "the foreign key constraint guarantees the event exists"
+    )]
     pub async fn get_all_teams(&self) -> ServiceResult<Vec<Team>> {
         let events = EventRepository::fetch_all(self.db_repo.conn())
             .await?

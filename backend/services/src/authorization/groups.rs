@@ -139,8 +139,7 @@ impl From<TeamRole> for Groups {
 
         let groups = match value {
             TeamRole::Member => MEMBER_GROUPS,
-            TeamRole::Mentor => MENTOR_GROUPS,
-            TeamRole::Stakeholder => MENTOR_GROUPS,
+            TeamRole::Mentor | TeamRole::Stakeholder => MENTOR_GROUPS,
         };
 
         Self::new(groups.iter().copied().collect())
@@ -472,6 +471,7 @@ impl Groups {
         false
     }
 
+    #[must_use]
     pub fn can_view_finalists(
         &self,
         event_visibility: EventVisibility,
@@ -487,6 +487,7 @@ impl Groups {
         false
     }
 
+    #[must_use]
     pub fn can_public_vote(
         &self,
         event_visibility: EventVisibility,

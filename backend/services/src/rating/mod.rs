@@ -273,13 +273,18 @@ impl RatingService {
         )
         .await?;
 
-        if (question.binary
+        #[expect(
+            clippy::float_cmp,
+            reason = "binary questions accept exactly min or max, both integers exactly representable in f64"
+        )]
+        let invalid_score = (question.binary
             && !(score == f64::from(question.min_points)
                 || score == f64::from(question.max_points)))
             || (!question.binary
                 && (score < f64::from(question.min_points)
-                    || score > f64::from(question.max_points)))
-        {
+                    || score > f64::from(question.max_points)));
+
+        if invalid_score {
             return Err(ServiceError::WrongTechnicalRatingScore {
                 given_score: score,
                 allowed_scores: format!(

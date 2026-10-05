@@ -56,6 +56,7 @@ impl CliConfig {
         })
     }
 
+    #[expect(dead_code, reason = "scaffolding for upcoming CLI commands")]
     pub fn discord(&self) -> CliResult<&DiscordConfig> {
         self.discord
             .as_ref()
