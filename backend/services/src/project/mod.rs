@@ -1,10 +1,12 @@
 mod matching;
 pub mod models;
+use crate::authorization::groups::Group;
+use crate::authorization::AuthorizationService;
 use crate::project::models::{Project, ProjectForCreate, ProjectForUpdate};
 use crate::{ServiceError, ServiceResult};
 use hackathon_portal_repositories::db::{
     db_project, db_stakeholder_project, db_team, db_user, EventRepository,
-    ProjectPreferenceRepository, ProjectRepository, TeamRepository, UserRepository,
+    ProjectPreferenceRepository, ProjectRepository, TeamRepository,
 };
 use hackathon_portal_repositories::DbRepository;
 use matching::GroupAssignment;
@@ -104,7 +106,7 @@ impl ProjectService {
         let project = active_project.update(&txn).await?;
 
         if let Some(stakeholder_ids) = project_fu.stakeholder_ids {
-            self.set_project_stakeholders(&txn, project_id, stakeholder_ids)
+            self.set_project_stakeholders(&txn, event_id, project_id, stakeholder_ids)
                 .await?;
         }
 
@@ -116,18 +118,34 @@ impl ProjectService {
     async fn set_project_stakeholders<C: ConnectionTrait>(
         &self,
         db: &C,
+        event_id: Uuid,
         project_id: Uuid,
         stakeholder_ids: Vec<Uuid>,
     ) -> ServiceResult<()> {
         let mut unique_ids = Vec::with_capacity(stakeholder_ids.len());
         for user_id in stakeholder_ids {
-            if unique_ids.contains(&user_id) {
-                continue;
+            if !unique_ids.contains(&user_id) {
+                unique_ids.push(user_id);
             }
-
-            UserRepository::fetch_by_id(db, user_id).await?;
-            unique_ids.push(user_id);
         }
+
+        let current_ids = db_stakeholder_project::Entity::find()
+            .filter(db_stakeholder_project::Column::ProjectId.eq(project_id))
+            .all(db)
+            .await?
+            .into_iter()
+            .map(|stakeholder| stakeholder.user_id)
+            .collect::<Vec<_>>();
+
+        // Only newly added stakeholders need the stakeholder event role,
+        // so a revoked role doesn't block later edits of the project
+        let required_event_groups = unique_ids
+            .iter()
+            .filter(|user_id| !current_ids.contains(user_id))
+            .map(|user_id| (*user_id, Group::EventStakeholder))
+            .collect::<Vec<_>>();
+
+        AuthorizationService::ensure_event_groups(db, event_id, &required_event_groups).await?;
 
         db_stakeholder_project::Entity::delete_many()
             .filter(db_stakeholder_project::Column::ProjectId.eq(project_id))

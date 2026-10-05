@@ -323,6 +323,12 @@ pub async fn update_team(
     let event = state.event_service.get_event(team.event_id).await?;
     let groups = Groups::from_event_and_team(ctx.roles(), event.id, team.id);
 
+    if !groups.can_view_event(event.visibility) {
+        return Err(ApiError::Forbidden {
+            action: "update this team".to_string(),
+        });
+    }
+
     if body.name.is_some()
         && !groups.can_update_team_name(event.visibility, event.phase, event.read_only)
     {
@@ -365,7 +371,10 @@ pub async fn update_team(
         });
     }
 
-    let team = state.team_service.update_team(team_id, body).await?;
+    let team = state
+        .team_service
+        .update_team(team_id, ctx.user().id, body)
+        .await?;
 
     let can_view_project_assignment = groups.can_view_project_assignment(
         event.visibility,

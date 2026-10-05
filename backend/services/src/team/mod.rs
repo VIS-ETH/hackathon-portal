@@ -9,7 +9,8 @@ use crate::{ServiceError, ServiceResult};
 use futures::future::try_join_all;
 use hackathon_portal_repositories::db::{
     db_event, db_project_preference, db_sidequest_score, db_team, db_team_role_assignment,
-    EventRepository, MediaUsage, ProjectPreferenceRepository, TeamRepository, TeamRole,
+    EventRepository, MediaUsage, ProjectPreferenceRepository, ProjectRepository, TeamRepository,
+    TeamRole,
 };
 use hackathon_portal_repositories::lite_llm::LiteLLMRepository;
 use hackathon_portal_repositories::DbRepository;
@@ -134,7 +135,12 @@ impl TeamService {
         self.assemble_team(team, &event).await
     }
 
-    pub async fn update_team(&self, team_id: Uuid, team_fu: TeamForUpdate) -> ServiceResult<Team> {
+    pub async fn update_team(
+        &self,
+        team_id: Uuid,
+        user_id: Uuid,
+        team_fu: TeamForUpdate,
+    ) -> ServiceResult<Team> {
         let txn = self.db_repo.conn().begin().await?;
 
         let (team, event) = TeamRepository::fetch_by_id_with_event(&txn, team_id).await?;
@@ -155,6 +161,8 @@ impl TeamService {
             if project_id.is_nil() {
                 active_team.project_id = Set(None);
             } else {
+                ProjectRepository::fetch_by_id_and_event_id(&txn, *project_id, event.id).await?;
+
                 active_team.project_id = Set(Some(*project_id));
             }
         }
@@ -164,7 +172,7 @@ impl TeamService {
                 active_team.photo_id = Set(None);
             } else {
                 self.upload_service
-                    .validate_upload(*photo_id, MediaUsage::TeamPhoto, false)
+                    .validate_upload(*photo_id, user_id, MediaUsage::TeamPhoto, false)
                     .await?;
 
                 active_team.photo_id = Set(Some(*photo_id));
@@ -355,6 +363,12 @@ impl TeamService {
         let mut new_pps = Vec::new();
         let txn = self.db_repo.conn().begin().await?;
 
+        let team = TeamRepository::fetch_by_id(&txn, team_id).await?;
+
+        for project_id in &pps {
+            ProjectRepository::fetch_by_id_and_event_id(&txn, *project_id, team.event_id).await?;
+        }
+
         db_project_preference::Entity::delete_many()
             .filter(db_project_preference::Column::TeamId.eq(team_id))
             .exec(&txn)
@@ -517,7 +531,6 @@ fn apply_template(template: &str, team: &db_team::Model) -> String {
 
     template
         .replace("{team_id}", &team.id.to_string())
-        .replace("{team_name}", &team.name)
         .replace("{team_slug}", &team.slug)
         .replace("{team_index}", &team.index.to_string())
         .replace("{team_index_padded}", &format!("{:02}", team.index))

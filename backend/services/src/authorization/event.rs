@@ -1,3 +1,4 @@
+use crate::authorization::groups::{Group, Groups};
 use crate::authorization::models::{AffiliateRow, EventAffiliate, EventRolesMap};
 use crate::authorization::AuthorizationService;
 use crate::user::fmt_user_name;
@@ -30,6 +31,51 @@ impl AuthorizationService {
                 });
 
         Ok(roles_map)
+    }
+
+    /// Ensures that each user belongs to the paired group in the event, based on their event roles.
+    pub async fn ensure_event_groups<C: ConnectionTrait>(
+        db: &C,
+        event_id: Uuid,
+        requirements: &[(Uuid, Group)],
+    ) -> ServiceResult<()> {
+        if requirements.is_empty() {
+            return Ok(());
+        }
+
+        let user_ids = requirements
+            .iter()
+            .map(|(user_id, _)| *user_id)
+            .collect::<Vec<_>>();
+
+        let assignments = EventRoleAssignmentRepository::fetch_all_by_event_id_and_user_ids(
+            db, event_id, &user_ids,
+        )
+        .await?;
+
+        let roles_by_user = assignments.into_iter().fold(
+            HashMap::new(),
+            |mut acc: HashMap<Uuid, Vec<EventRole>>, assignment| {
+                acc.entry(assignment.user_id)
+                    .or_default()
+                    .push(assignment.role);
+
+                acc
+            },
+        );
+
+        for (user_id, group) in requirements {
+            let roles = roles_by_user.get(user_id).map_or(&[][..], Vec::as_slice);
+
+            if Groups::from_roles(roles, &[]) != *group {
+                return Err(ServiceError::MissingEventGroup {
+                    user_id: *user_id,
+                    group: *group,
+                });
+            }
+        }
+
+        Ok(())
     }
 
     pub async fn assign_event_roles(

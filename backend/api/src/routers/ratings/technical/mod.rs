@@ -72,7 +72,7 @@ pub async fn set_technical_team_rating(
 
     let rating = state
         .rating_service
-        .set_technical_rating(team_id, body.question_id, body.score)
+        .set_technical_rating(event.id, team_id, body.question_id, body.score)
         .await?;
     Ok(Json(rating))
 }

@@ -19,13 +19,15 @@ impl TechnicalQuestionRepository {
             .map_err(RepositoryError::from)
     }
 
-    pub async fn fetch_by_id<C: ConnectionTrait>(
+    pub async fn fetch_by_id_and_event_id<C: ConnectionTrait>(
         db: &C,
-        question_id: Uuid,
+        id: Uuid,
+        event_id: Uuid,
     ) -> RepositoryResult<technical_question::Model> {
-        technical_question::Entity::find_by_id(question_id)
+        technical_question::Entity::find_by_id(id)
+            .filter(technical_question::Column::EventId.eq(event_id))
             .one(db)
             .await?
-            .or_fail(technical_question::Entity.table_name(), question_id)
+            .or_fail(technical_question::Entity.table_name(), id)
     }
 }

@@ -119,12 +119,21 @@ impl UploadService {
     pub async fn validate_upload(
         &self,
         id: Uuid,
+        user_id: Uuid,
         usage: MediaUsage,
         allow_reuse: bool,
     ) -> ServiceResult<()> {
         let txn = self.db_repo.conn().begin().await?;
 
         let upload = UploadRepository::fetch_by_id(&txn, id).await?;
+
+        if upload.user_id != user_id {
+            return Err(ServiceError::Forbidden {
+                resource: "upload".to_string(),
+                id: id.to_string(),
+                action: "use".to_string(),
+            });
+        }
 
         if upload.validated_at.is_some() && !allow_reuse {
             return Err(ServiceError::UploadIsAlreadyValidated);

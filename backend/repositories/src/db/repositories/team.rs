@@ -39,6 +39,18 @@ impl TeamRepository {
             .or_fail(team::Entity.table_name(), id)
     }
 
+    pub async fn fetch_by_id_and_event_id<C: ConnectionTrait>(
+        db: &C,
+        id: Uuid,
+        event_id: Uuid,
+    ) -> RepositoryResult<team::Model> {
+        team::Entity::find_by_id(id)
+            .filter(team::Column::EventId.eq(event_id))
+            .one(db)
+            .await?
+            .or_fail(team::Entity.table_name(), id)
+    }
+
     pub async fn fetch_by_id_with_event<C: ConnectionTrait>(
         db: &C,
         id: Uuid,

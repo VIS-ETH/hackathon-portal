@@ -68,11 +68,24 @@ impl RatingService {
         }
     }
 
+    fn check_vote_range(vote: f64) -> ServiceResult<()> {
+        if !(0.0..=10.0).contains(&vote) || (2.0 * vote).fract() != 0.0 {
+            return Err(ServiceError::WrongVotingValue {
+                given_value: vote,
+                requirements: "0 <= r <= 10 && 2*r \\in N".to_string(),
+            });
+        }
+
+        Ok(())
+    }
+
     pub async fn create_expert_rating(
         &self,
         creator_id: Uuid,
         appointment_fc: ExpertRatingForCreate,
     ) -> ServiceResult<ExpertRating> {
+        Self::check_vote_range(appointment_fc.rating)?;
+
         let active_rating = db_expert_rating::ActiveModel {
             user_id: Set(creator_id),
             team_id: Set(appointment_fc.team_id),
@@ -105,6 +118,10 @@ impl RatingService {
         rating_id: Uuid,
         rating_fu: ExpertRatingForUpdate,
     ) -> ServiceResult<ExpertRating> {
+        if let Some(value) = rating_fu.rating {
+            Self::check_vote_range(value)?;
+        }
+
         let rating = ExpertRatingRepository::fetch_by_id(self.db_repo.conn(), rating_id).await?;
 
         let mut active_rating = rating.into_active_model();
@@ -246,15 +263,6 @@ impl RatingService {
         Ok(questions)
     }
 
-    pub async fn get_technical_question(
-        &self,
-        question_id: Uuid,
-    ) -> ServiceResult<TechnicalQuestion> {
-        let question =
-            TechnicalQuestionRepository::fetch_by_id(self.db_repo.conn(), question_id).await?;
-        Ok(question.into())
-    }
-
     pub async fn create_technical_question(
         &self,
         question_fc: CreateTechnicalQuestion,
@@ -282,10 +290,13 @@ impl RatingService {
 
     pub async fn delete_technical_question(
         &self,
+        event_id: Uuid,
         question_id: Uuid,
     ) -> ServiceResult<DeleteResult> {
         let trx = self.db_repo.conn().begin().await?;
-        let question = TechnicalQuestionRepository::fetch_by_id(&trx, question_id).await?;
+        let question =
+            TechnicalQuestionRepository::fetch_by_id_and_event_id(&trx, question_id, event_id)
+                .await?;
         // ratings reference the question with ON DELETE RESTRICT
         db_technical_rating::Entity::delete_many()
             .filter(db_technical_rating::Column::TechnicalQuestionId.eq(question_id))
@@ -298,10 +309,16 @@ impl RatingService {
 
     pub async fn update_technical_question(
         &self,
+        event_id: Uuid,
         update_question: UpdateTechnicalQuestion,
     ) -> ServiceResult<TechnicalQuestion> {
         let trx = self.db_repo.conn().begin().await?;
-        let question = TechnicalQuestionRepository::fetch_by_id(&trx, update_question.id).await?;
+        let question = TechnicalQuestionRepository::fetch_by_id_and_event_id(
+            &trx,
+            update_question.id,
+            event_id,
+        )
+        .await?;
         validate_technical_question(
             update_question
                 .question
@@ -372,12 +389,17 @@ impl RatingService {
 
     pub async fn set_technical_rating(
         &self,
+        event_id: Uuid,
         team_id: Uuid,
         question_id: Uuid,
         points: f64,
     ) -> ServiceResult<TechnicalQuestionResult> {
-        let question =
-            TechnicalQuestionRepository::fetch_by_id(self.db_repo.conn(), question_id).await?;
+        let question = TechnicalQuestionRepository::fetch_by_id_and_event_id(
+            self.db_repo.conn(),
+            question_id,
+            event_id,
+        )
+        .await?;
 
         if (question.binary
             && !(points == f64::from(question.min_points)
@@ -427,6 +449,15 @@ impl RatingService {
     ) -> ServiceResult<db_vote::Model> {
         let trx = self.db_repo.conn().begin().await?;
         let votes = VoteRepository::fetch_votes_by_user_in_event(&trx, event_id, user_id).await?;
+
+        // check if they already voted for this team at another place
+        if votes
+            .iter()
+            .any(|v| v.team_id == vote.team_id && v.rank != vote.place)
+        {
+            return Err(ServiceError::DuplicateVote);
+        }
+
         let updated_vote = if let Some(existing_vote) = votes.iter().find(|v| v.rank == vote.place)
         {
             let mut active_vote = existing_vote.clone().into_active_model();
@@ -441,6 +472,7 @@ impl RatingService {
             };
             active_vote.insert(&trx).await?
         };
+
         trx.commit().await?;
         Ok(updated_vote)
     }

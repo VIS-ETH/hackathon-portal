@@ -184,6 +184,10 @@ impl From<&ServiceError> for PublicError {
                                         StatusCode::BAD_REQUEST,
                                         format!("User '{name}' is already a member of another team"),
                                     ),
+            ServiceError::MissingEventGroup { user_id, group } => (
+                                        StatusCode::BAD_REQUEST,
+                                        format!("User '{user_id}' is not in group {group} of this event"),
+                                    ),
             ServiceError::TeamSizeExceeded { expected, actual } => (
                                         StatusCode::BAD_REQUEST,
                                         format!("Team size is {actual} which exceeds the limit of {expected}"),
@@ -287,7 +291,16 @@ impl From<&ServiceError> for PublicError {
                                         format!(
                                             "Wrong voting rank: given rank {given_rank}, allowed ranks are {allowed_ranks}"
             )),
-                                        };
+            ServiceError::DuplicateVote => (
+                StatusCode::BAD_REQUEST,
+                "This team is already in your votes".to_string(),
+            ),
+            ServiceError::WrongVotingValue { given_value, requirements } => (
+                StatusCode::BAD_REQUEST,
+                format!("Your value {given_value} does not satisfy the requirements {requirements}"),
+                )
+
+        };
 
         Self::new(status, message)
     }

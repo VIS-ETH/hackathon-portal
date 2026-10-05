@@ -93,7 +93,7 @@ pub async fn get_sidequest_attempts(
 
         state
             .sidequest_service
-            .get_attempts_by_sidequest(sidequest_id, query.after, query.before)
+            .get_attempts_by_sidequest(event.id, sidequest_id, query.after, query.before)
             .await?
     } else if let Some(team_id) = query.team_id {
         let team_groups = Groups::from_event_and_team(ctx.roles(), event.id, team_id);
@@ -108,7 +108,7 @@ pub async fn get_sidequest_attempts(
 
         state
             .sidequest_service
-            .get_attempts_by_team(team_id, query.after, query.before)
+            .get_attempts_by_team(event.id, team_id, query.after, query.before)
             .await?
     } else if let Some(user_id) = query.user_id {
         if user_id != ctx.user().id && !event_groups.can_view_event(event.visibility) {

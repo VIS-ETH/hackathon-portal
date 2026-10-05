@@ -1,3 +1,4 @@
+use crate::authorization::groups::Group;
 use chrono::NaiveDateTime;
 use derive_more::From;
 use hackathon_portal_repositories::db::{EventPhase, MediaUsage};
@@ -5,6 +6,7 @@ use hackathon_portal_repositories::RepositoryError;
 use serde::Serialize;
 use serde_with::{serde_as, DisplayFromStr};
 use std::fmt;
+use uuid::Uuid;
 
 pub type ServiceResult<T> = Result<T, ServiceError>;
 
@@ -26,6 +28,11 @@ pub enum ServiceError {
 
     UserIsAlreadyMemberOfAnotherTeam {
         name: String,
+    },
+
+    MissingEventGroup {
+        user_id: Uuid,
+        group: Group,
     },
 
     TeamSizeExceeded {
@@ -54,6 +61,13 @@ pub enum ServiceError {
     WrongVotingRank {
         given_rank: i32,
         allowed_ranks: String,
+    },
+
+    DuplicateVote,
+
+    WrongVotingValue {
+        given_value: f64,
+        requirements: String,
     },
 
     SidequestCooldown {

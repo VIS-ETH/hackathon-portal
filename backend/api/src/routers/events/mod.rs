@@ -586,7 +586,7 @@ pub async fn get_sidequests_team_leaderboard(
 
     let leaderboard = state
         .sidequest_service
-        .get_sidequest_leaderboard_by_team(query.sidequest_id)
+        .get_sidequest_leaderboard_by_team(event.id, query.sidequest_id)
         .await?;
 
     Ok(Json(leaderboard))
@@ -620,7 +620,7 @@ pub async fn get_sidequests_user_leaderboard(
 
     let leaderboard = state
         .sidequest_service
-        .get_sidequest_leaderboard_by_user(query.sidequest_id)
+        .get_sidequest_leaderboard_by_user(event.id, query.sidequest_id)
         .await?;
 
     Ok(Json(leaderboard))
@@ -734,7 +734,7 @@ pub async fn post_event_discord_oauth(
     let event = state.event_service.get_event(event_id).await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
-    if !groups.can_view_event(event.visibility) {
+    if !groups.can_view_event_internal(event.visibility) {
         return Err(ApiError::Forbidden {
             action: "join this event on Discord".to_string(),
         });
@@ -891,7 +891,7 @@ pub async fn delete_technical_questions(
 
     let deleted_result = state
         .rating_service
-        .delete_technical_question(question_id)
+        .delete_technical_question(event_id, question_id)
         .await?;
 
     let rows_affected = AffectedRows {
@@ -925,14 +925,17 @@ pub async fn update_technical_questions(
 
     let updated = state
         .rating_service
-        .update_technical_question(UpdateTechnicalQuestion {
-            id: question_id,
-            question: body.question,
-            description: body.description,
-            min_points: body.min_points,
-            max_points: body.max_points,
-            binary: body.binary,
-        })
+        .update_technical_question(
+            event_id,
+            UpdateTechnicalQuestion {
+                id: question_id,
+                question: body.question,
+                description: body.description,
+                min_points: body.min_points,
+                max_points: body.max_points,
+                binary: body.binary,
+            },
+        )
         .await?;
 
     Ok(Json(updated))

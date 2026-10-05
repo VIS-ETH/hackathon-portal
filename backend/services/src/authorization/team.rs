@@ -1,3 +1,4 @@
+use crate::authorization::groups::Group;
 use crate::authorization::models::{AffiliateRow, TeamAffiliate, TeamRolesMap};
 use crate::authorization::AuthorizationService;
 use crate::user::fmt_user_name;
@@ -43,6 +44,7 @@ impl AuthorizationService {
             TeamRepository::fetch_by_id_with_event(self.db_repo.conn(), team_id).await?;
 
         let mut active_role_assignments = Vec::new();
+        let mut required_event_groups = Vec::new();
 
         for (user_id, roles) in roles {
             for role in roles {
@@ -51,10 +53,21 @@ impl AuthorizationService {
                     team_id: Set(team_id),
                     role: Set(role),
                 });
+
+                let group = match role {
+                    TeamRole::Member => Group::EventParticipant,
+                    TeamRole::Mentor => Group::EventMentor,
+                    TeamRole::Stakeholder => Group::EventStakeholder,
+                };
+
+                required_event_groups.push((user_id, group));
             }
         }
 
         let txn = self.db_repo.conn().begin().await?;
+
+        // Ensure that each team role is backed by a matching event role
+        Self::ensure_event_groups(&txn, team.event_id, &required_event_groups).await?;
 
         let rows_affected = db_team_role_assignment::Entity::insert_many(active_role_assignments)
             .on_conflict(

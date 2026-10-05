@@ -8,6 +8,7 @@ use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::sync::Arc;
 
+use crate::authorization::groups::Group;
 use crate::authorization::AuthorizationService;
 use crate::sidequest::models::{
     Attempt, AttemptForUpdate, Cooldown, HistoryEntry, Sidequest, TeamLeaderboardEntry,
@@ -156,6 +157,13 @@ impl SidequestService {
         let sidequest =
             SidequestRepository::fetch_by_id(self.db_repo.conn(), attempt_fc.sidequest_id).await?;
 
+        AuthorizationService::ensure_event_groups(
+            self.db_repo.conn(),
+            sidequest.event_id,
+            &[(attempt_fc.user_id, Group::EventParticipant)],
+        )
+        .await?;
+
         let cooldown = self
             .get_cooldown(sidequest.event_id, attempt_fc.user_id)
             .await?;
@@ -200,10 +208,14 @@ impl SidequestService {
 
     pub async fn get_attempts_by_sidequest(
         &self,
+        event_id: Uuid,
         sidequest_id: Uuid,
         after: Option<NaiveDateTime>,
         before: Option<NaiveDateTime>,
     ) -> ServiceResult<Vec<Attempt>> {
+        SidequestRepository::fetch_by_id_and_event_id(self.db_repo.conn(), sidequest_id, event_id)
+            .await?;
+
         let attempts = SidequestAttemptRepository::fetch_all_by_sidequest_id(
             self.db_repo.conn(),
             sidequest_id,
@@ -219,10 +231,13 @@ impl SidequestService {
 
     pub async fn get_attempts_by_team(
         &self,
+        event_id: Uuid,
         team_id: Uuid,
         after: Option<NaiveDateTime>,
         before: Option<NaiveDateTime>,
     ) -> ServiceResult<Vec<Attempt>> {
+        TeamRepository::fetch_by_id_and_event_id(self.db_repo.conn(), team_id, event_id).await?;
+
         let attempts = SidequestAttemptRepository::fetch_all_by_team_id(
             self.db_repo.conn(),
             team_id,
@@ -515,9 +530,16 @@ impl SidequestService {
 
     pub async fn get_sidequest_leaderboard_by_team(
         &self,
+        event_id: Uuid,
         sidequest_id: Uuid,
     ) -> ServiceResult<Vec<TeamLeaderboardEntry>> {
-        let sidequest = self.get_sidequest(sidequest_id).await?;
+        let sidequest: Sidequest = SidequestRepository::fetch_by_id_and_event_id(
+            self.db_repo.conn(),
+            sidequest_id,
+            event_id,
+        )
+        .await?
+        .into();
 
         let teams =
             TeamRepository::fetch_all_by_event_id(self.db_repo.conn(), sidequest.event_id).await?;
@@ -549,9 +571,16 @@ impl SidequestService {
 
     pub async fn get_sidequest_leaderboard_by_user(
         &self,
+        event_id: Uuid,
         sidequest_id: Uuid,
     ) -> ServiceResult<Vec<UserLeaderboardEntry>> {
-        let sidequest = self.get_sidequest(sidequest_id).await?;
+        let sidequest: Sidequest = SidequestRepository::fetch_by_id_and_event_id(
+            self.db_repo.conn(),
+            sidequest_id,
+            event_id,
+        )
+        .await?
+        .into();
 
         let users = self
             .authorization_service
