@@ -1,8 +1,11 @@
-import ControlPanel from "./ControlePanel";
+import ControlPanel from "./ControlPanel";
 import PointsPanel from "./PointsPanel";
 import QuestionPanel from "./QuestionPanel";
+import { TechnicalQuestionMode } from "./types";
 
 import {
+  getGetTechnicalQuestionsQueryKey,
+  getGetTechnicalTeamRatingQueryKey,
   useCreateTechnicalQuestions,
   useDeleteTechnicalQuestions,
   useSetTechnicalTeamRating,
@@ -14,10 +17,12 @@ import { useState } from "react";
 
 import { Center, Grid } from "@mantine/core";
 
+import { useQueryClient } from "@tanstack/react-query";
+
 type TechnicalQuestionEntryProps = {
   technicalQuestion?: TechnicalQuestionType;
   initialScore?: number;
-  mode: "view" | "edit" | "grading" | "feedback" | "create";
+  mode: TechnicalQuestionMode;
   eventId: string;
   teamId?: string;
 };
@@ -33,11 +38,12 @@ const TechnicalQuestionEntry = ({
   const [description, setDescription] = useState(
     technicalQuestion?.description || "",
   );
-  const [minPoints, setMinPoints] = useState(
-    technicalQuestion?.min_points || 0,
+  // "" while the user has cleared the input
+  const [minPoints, setMinPoints] = useState<number | "">(
+    technicalQuestion?.min_points ?? 0,
   );
-  const [maxPoints, setMaxPoints] = useState(
-    technicalQuestion?.max_points || 10,
+  const [maxPoints, setMaxPoints] = useState<number | "">(
+    technicalQuestion?.max_points ?? 10,
   );
   const [binary, setBinary] = useState(technicalQuestion?.binary || false);
   const [score, setScore] = useState<number | undefined>(initialScore);
@@ -50,73 +56,114 @@ const TechnicalQuestionEntry = ({
     if (technicalQuestion) {
       setQuestion(technicalQuestion.question);
       setDescription(technicalQuestion.description || "");
-      setMinPoints(technicalQuestion.min_points || 0);
-      setMaxPoints(technicalQuestion.max_points || 10);
+      setMinPoints(technicalQuestion.min_points);
+      setMaxPoints(technicalQuestion.max_points);
       setBinary(technicalQuestion.binary || false);
     }
   }
   if (initialScore !== prevInitialScore) {
     setPrevInitialScore(initialScore);
-    if (initialScore !== undefined) {
-      setScore(initialScore);
-    }
+    setScore(initialScore);
   }
 
-  // API calls would go here
+  const validationError = !question.trim()
+    ? "Question must not be empty"
+    : minPoints === "" || maxPoints === ""
+      ? "Min and max points are required"
+      : minPoints >= maxPoints
+        ? "Min points must be lower than max points"
+        : undefined;
 
-  const createEndpoint = useCreateTechnicalQuestions();
-  const updateEndpoint = useUpdateTechnicalQuestions();
-  const deleteEndpoint = useDeleteTechnicalQuestions();
-  const scoreEndpoint = useSetTechnicalTeamRating();
+  const queryClient = useQueryClient();
+  const refetchQuestions = () =>
+    queryClient.invalidateQueries({
+      queryKey: getGetTechnicalQuestionsQueryKey(eventId),
+    });
+  const createEndpoint = useCreateTechnicalQuestions({
+    mutation: {
+      onSuccess: () => {
+        setQuestion("");
+        setDescription("");
+        setMinPoints(0);
+        setMaxPoints(10);
+        setBinary(false);
+        return refetchQuestions();
+      },
+    },
+  });
+  const updateEndpoint = useUpdateTechnicalQuestions({
+    mutation: { onSuccess: refetchQuestions },
+  });
+  const deleteEndpoint = useDeleteTechnicalQuestions({
+    mutation: { onSuccess: refetchQuestions },
+  });
+  const scoreEndpoint = useSetTechnicalTeamRating({
+    mutation: {
+      onSuccess: (_, { teamId }) =>
+        queryClient.invalidateQueries({
+          queryKey: getGetTechnicalTeamRatingQueryKey(teamId),
+        }),
+    },
+  });
 
-  const createMutation = async () => {
-    if (mode !== "create") return;
-    // Check required fields
-    await createEndpoint.mutateAsync({
+  const createMutation = () => {
+    if (mode !== "create" || validationError) return;
+    createEndpoint.mutate({
       eventId: eventId,
       data: {
         question,
         description,
-        min_points: minPoints,
-        max_points: maxPoints,
+        // validationError guarantees both are numbers here
+        min_points: Number(minPoints),
+        max_points: Number(maxPoints),
         binary,
       },
     });
   };
 
-  const deleteMutation = async () => {
+  const deleteMutation = () => {
     if (mode !== "edit" || !technicalQuestion) return;
-    await deleteEndpoint.mutate({
+    const confirmation = window.confirm(
+      `Are you sure you want to delete "${technicalQuestion.question}"? All scores given for it will be deleted as well.`,
+    );
+    if (!confirmation) return;
+    deleteEndpoint.mutate({
       eventId: eventId,
       questionId: technicalQuestion.id,
     });
   };
 
-  const updateMutation = async () => {
-    if (mode !== "edit" || !technicalQuestion) return;
-    await updateEndpoint.mutate({
+  const updateMutation = () => {
+    if (mode !== "edit" || !technicalQuestion || validationError) return;
+    updateEndpoint.mutate({
       eventId: eventId,
       questionId: technicalQuestion.id,
       data: {
         question,
         description,
-        min_points: minPoints,
-        max_points: maxPoints,
+        // validationError guarantees both are numbers here
+        min_points: Number(minPoints),
+        max_points: Number(maxPoints),
         binary,
       },
     });
   };
 
-  const scoreMutation = async (newScore: number) => {
+  const scoreMutation = (newScore: number) => {
     if (mode !== "grading" || !technicalQuestion || !teamId) return;
     setScore(newScore);
-    await scoreEndpoint.mutate({
-      teamId: teamId,
-      data: {
-        question_id: technicalQuestion.id,
-        score: newScore,
+    scoreEndpoint.mutate(
+      {
+        teamId: teamId,
+        data: {
+          question_id: technicalQuestion.id,
+          score: newScore,
+        },
       },
-    });
+      // Revert to the last persisted score; the error itself is surfaced
+      // by the global MutationCache handler.
+      { onError: () => setScore(initialScore) },
+    );
   };
 
   const columnWidths = {
@@ -147,7 +194,8 @@ const TechnicalQuestionEntry = ({
       binaryScore={score == maxPoints}
       onChangeMinPoints={setMinPoints}
       onChangeMaxPoints={setMaxPoints}
-      onChangeScore={scoreMutation}
+      onChangeScore={setScore}
+      onCommitScore={scoreMutation}
     />
   );
 
@@ -159,6 +207,7 @@ const TechnicalQuestionEntry = ({
       onDelete={deleteMutation}
       onQuestionChange={setBinary}
       booleanQuestion={binary}
+      validationError={validationError}
     />
   );
 

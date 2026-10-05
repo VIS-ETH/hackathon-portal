@@ -1,40 +1,44 @@
+import { TechnicalQuestionMode } from "./types";
+
 import {
+  Button,
   Grid,
   Group,
   NumberInput,
   Slider,
   Stack,
-  Switch,
   Text,
 } from "@mantine/core";
 
 import { IconAlertTriangleFilled } from "@tabler/icons-react";
 
 type PointsPanelProps = {
-  minPoints?: number;
-  maxPoints?: number;
+  minPoints?: number | "";
+  maxPoints?: number | "";
   numericScore?: number;
   binaryScore?: boolean;
   binaryChoice?: boolean;
-  onChangeMinPoints?: (newMinPoints: number) => void;
-  onChangeMaxPoints?: (newMaxPoints: number) => void;
-  onChangeScore?: (newScore: number) => Promise<void>;
-  mode: "view" | "edit" | "grading" | "feedback" | "create";
+  onChangeMinPoints?: (newMinPoints: number | "") => void;
+  onChangeMaxPoints?: (newMaxPoints: number | "") => void;
+  onChangeScore?: (newScore: number) => void;
+  onCommitScore?: (newScore: number) => void;
+  mode: TechnicalQuestionMode;
 };
 
 const PointsPanel = ({
-  minPoints,
-  maxPoints,
+  minPoints: rawMinPoints,
+  maxPoints: rawMaxPoints,
   numericScore,
   binaryScore,
   binaryChoice,
   onChangeMinPoints,
   onChangeMaxPoints,
   onChangeScore,
+  onCommitScore,
   mode,
 }: PointsPanelProps) => {
-  // Points panel implementation would go here
-
+  const minPoints = rawMinPoints === "" ? undefined : rawMinPoints;
+  const maxPoints = rawMaxPoints === "" ? undefined : rawMaxPoints;
   const intervalReadOnly = !(mode === "edit" || mode === "create");
   const pointsReadOnly = !(mode === "grading");
 
@@ -65,8 +69,11 @@ const PointsPanel = ({
         <Grid.Col span={3}>
           <NumberInput
             readOnly={intervalReadOnly}
-            value={minPoints}
-            onChange={(value) => onChangeMinPoints?.((value as number) || 0)}
+            value={rawMinPoints}
+            onChange={(value) =>
+              onChangeMinPoints?.(typeof value === "number" ? value : "")
+            }
+            allowDecimal={false}
             hideControls
             w={"100%"}
           />
@@ -74,19 +81,34 @@ const PointsPanel = ({
         <Grid.Col span={6}>
           {binaryChoice ? (
             <Group w={"100%"} justify="center">
-              <Switch
-                readOnly={pointsReadOnly}
-                checked={binaryScore}
-                onChange={(event) => {
-                  if (maxPoints === undefined || minPoints === undefined)
-                    return;
-                  if (event.currentTarget.checked) {
-                    onChangeScore?.(maxPoints);
-                  } else {
-                    onChangeScore?.(minPoints);
+              <Button.Group>
+                <Button
+                  disabled={pointsReadOnly}
+                  variant={
+                    numericScore !== undefined && !binaryScore
+                      ? "filled"
+                      : "default"
                   }
-                }}
-              />
+                  onClick={() =>
+                    minPoints !== undefined && onCommitScore?.(minPoints)
+                  }
+                >
+                  No
+                </Button>
+                <Button
+                  disabled={pointsReadOnly}
+                  variant={
+                    numericScore !== undefined && binaryScore
+                      ? "filled"
+                      : "default"
+                  }
+                  onClick={() =>
+                    maxPoints !== undefined && onCommitScore?.(maxPoints)
+                  }
+                >
+                  Yes
+                </Button>
+              </Button.Group>
             </Group>
           ) : (
             <Slider
@@ -94,16 +116,21 @@ const PointsPanel = ({
               disabled={pointsReadOnly}
               min={minPoints}
               max={maxPoints}
-              value={numericScore}
+              value={numericScore ?? minPoints}
+              color={numericScore === undefined ? "gray" : undefined}
               onChange={onChangeScore}
+              onChangeEnd={onCommitScore}
             />
           )}
         </Grid.Col>
         <Grid.Col span={3}>
           <NumberInput
             readOnly={intervalReadOnly}
-            value={maxPoints}
-            onChange={(value) => onChangeMaxPoints?.((value as number) || 0)}
+            value={rawMaxPoints}
+            onChange={(value) =>
+              onChangeMaxPoints?.(typeof value === "number" ? value : "")
+            }
+            allowDecimal={false}
             hideControls
             w={"100%"}
           />

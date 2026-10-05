@@ -1,12 +1,15 @@
-import { Button, Group, Switch } from "@mantine/core";
+import { TechnicalQuestionMode } from "./types";
+
+import { Button, Group, Switch, Text } from "@mantine/core";
 
 type ControlPanelProps = {
-  mode: "view" | "edit" | "grading" | "feedback" | "create";
-  onCreate: () => Promise<void>;
-  onUpdate: () => Promise<void>;
-  onDelete: () => Promise<void>;
+  mode: TechnicalQuestionMode;
+  onCreate: () => void;
+  onUpdate: () => void;
+  onDelete: () => void;
   onQuestionChange?: (binary: boolean) => void;
   booleanQuestion?: boolean;
+  validationError?: string;
 };
 
 const ControlPanel = ({
@@ -16,6 +19,7 @@ const ControlPanel = ({
   onDelete,
   onQuestionChange,
   booleanQuestion,
+  validationError,
 }: ControlPanelProps) => {
   if (mode === "view" || mode === "grading" || mode === "feedback") {
     return null;
@@ -30,12 +34,23 @@ const ControlPanel = ({
           onChange={(event) => onQuestionChange?.(event.currentTarget.checked)}
         />
       }
-      {mode === "create" && <Button onClick={onCreate}>Create</Button>}
+      {mode === "create" && (
+        <Button onClick={onCreate} disabled={!!validationError}>
+          Create
+        </Button>
+      )}
       {mode === "edit" && (
         <>
-          <Button onClick={onUpdate}>Save</Button>{" "}
+          <Button onClick={onUpdate} disabled={!!validationError}>
+            Save
+          </Button>{" "}
           <Button onClick={onDelete}>Delete</Button>
         </>
+      )}
+      {validationError && (
+        <Text c="red" size="sm">
+          {validationError}
+        </Text>
       )}
     </Group>
   );

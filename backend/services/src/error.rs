@@ -93,6 +93,9 @@ pub enum ServiceError {
         given_score: f64,
         allowed_scores: String,
     },
+    InvalidTechnicalQuestion {
+        message: String,
+    },
 
     ScoreCalculationError {
         message: String,

@@ -266,6 +266,9 @@ impl From<&ServiceError> for PublicError {
                 "The master AI API key is missing".to_string(),
             ),
             ServiceError::Parsing { message } => (StatusCode::BAD_REQUEST, message.clone()),
+            ServiceError::InvalidTechnicalQuestion { message } => {
+                (StatusCode::BAD_REQUEST, format!("Invalid technical question: {message}"))
+            }
             ServiceError::SerdeJson(error) => (StatusCode::BAD_REQUEST, error.to_string()),
             ServiceError::WrongTechnicalQuestionPoints { given_score, allowed_scores } => {
                                 (

@@ -49,7 +49,7 @@ const RatingInput = () => {
       <Button variant="default" onClick={teamSelectOpen}>
         Select Team
       </Button>
-      {currentTeam && <RatingCard team={currentTeam} />}
+      {currentTeam && <RatingCard key={currentTeam.id} team={currentTeam} />}
     </>
   );
 };

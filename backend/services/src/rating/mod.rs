@@ -16,7 +16,7 @@ use hackathon_portal_repositories::db::{
 };
 use hackathon_portal_repositories::DbRepository;
 use itertools::Itertools;
-use sea_orm::sea_query::{Func, IntoCondition};
+use sea_orm::sea_query::{Func, IntoCondition, OnConflict};
 use sea_orm::TransactionTrait;
 use sea_orm::{prelude::*, DeleteResult};
 use sea_orm::{
@@ -32,6 +32,26 @@ pub struct RatingService {
     db_repo: DbRepository,
     sidequest_service: Arc<SidequestService>,
     team_service: Arc<TeamService>,
+}
+
+fn validate_technical_question(
+    question: &str,
+    min_points: i32,
+    max_points: i32,
+) -> ServiceResult<()> {
+    if question.trim().is_empty() {
+        return Err(ServiceError::InvalidTechnicalQuestion {
+            message: "the question must not be empty".to_string(),
+        });
+    }
+    if min_points >= max_points {
+        return Err(ServiceError::InvalidTechnicalQuestion {
+            message: format!(
+                "min points ({min_points}) must be lower than max points ({max_points})"
+            ),
+        });
+    }
+    Ok(())
 }
 
 impl RatingService {
@@ -239,6 +259,12 @@ impl RatingService {
         &self,
         question_fc: CreateTechnicalQuestion,
     ) -> ServiceResult<TechnicalQuestion> {
+        validate_technical_question(
+            &question_fc.question,
+            question_fc.min_points,
+            question_fc.max_points,
+        )?;
+
         let active_question = db_technical_question::ActiveModel {
             event_id: Set(question_fc.event_id),
             question: Set(question_fc.question),
@@ -260,6 +286,11 @@ impl RatingService {
     ) -> ServiceResult<DeleteResult> {
         let trx = self.db_repo.conn().begin().await?;
         let question = TechnicalQuestionRepository::fetch_by_id(&trx, question_id).await?;
+        // ratings reference the question with ON DELETE RESTRICT
+        db_technical_rating::Entity::delete_many()
+            .filter(db_technical_rating::Column::TechnicalQuestionId.eq(question_id))
+            .exec(&trx)
+            .await?;
         let affected_rows = question.delete(&trx).await?;
         trx.commit().await?;
         Ok(affected_rows)
@@ -271,6 +302,14 @@ impl RatingService {
     ) -> ServiceResult<TechnicalQuestion> {
         let trx = self.db_repo.conn().begin().await?;
         let question = TechnicalQuestionRepository::fetch_by_id(&trx, update_question.id).await?;
+        validate_technical_question(
+            update_question
+                .question
+                .as_deref()
+                .unwrap_or(&question.question),
+            update_question.min_points.unwrap_or(question.min_points),
+            update_question.max_points.unwrap_or(question.max_points),
+        )?;
         let mut active_question = question.into_active_model();
 
         if let Some(question) = update_question.question {
@@ -337,8 +376,8 @@ impl RatingService {
         question_id: Uuid,
         points: f64,
     ) -> ServiceResult<TechnicalQuestionResult> {
-        let trx = self.db_repo.conn().begin().await?;
-        let question = TechnicalQuestionRepository::fetch_by_id(&trx, question_id).await?;
+        let question =
+            TechnicalQuestionRepository::fetch_by_id(self.db_repo.conn(), question_id).await?;
 
         if (question.binary
             && !(points == f64::from(question.min_points)
@@ -358,25 +397,21 @@ impl RatingService {
             });
         }
 
-        let existing_rating = db_technical_rating::Entity::find()
-            .filter(db_technical_rating::Column::TeamId.eq(team_id))
-            .filter(db_technical_rating::Column::TechnicalQuestionId.eq(question_id))
-            .one(self.db_repo.conn())
-            .await?;
-
-        let rating = if let Some(existing_rating) = existing_rating {
-            let mut active_rating = existing_rating.into_active_model();
-            active_rating.score = Set(points);
-            active_rating.update(self.db_repo.conn()).await?
-        } else {
-            let active_rating = db_technical_rating::ActiveModel {
-                team_id: Set(team_id),
-                technical_question_id: Set(question_id),
-                score: Set(points),
-                ..Default::default()
-            };
-            active_rating.insert(self.db_repo.conn()).await?
-        };
+        let rating = db_technical_rating::Entity::insert(db_technical_rating::ActiveModel {
+            team_id: Set(team_id),
+            technical_question_id: Set(question_id),
+            score: Set(points),
+        })
+        .on_conflict(
+            OnConflict::columns([
+                db_technical_rating::Column::TechnicalQuestionId,
+                db_technical_rating::Column::TeamId,
+            ])
+            .update_column(db_technical_rating::Column::Score)
+            .to_owned(),
+        )
+        .exec_with_returning(self.db_repo.conn())
+        .await?;
 
         Ok(TechnicalQuestionResult {
             question: question.into(),
