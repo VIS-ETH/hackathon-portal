@@ -504,7 +504,7 @@ impl TeamService {
 
         for image_id in image_ids.difference(&current_image_ids) {
             self.upload_service
-                .validate_upload_with(&txn, user_id, *image_id, MediaUsage::TeamBlogImage, false)
+                .validate_upload_with(&txn, *image_id, user_id, MediaUsage::TeamBlogImage, false)
                 .await?;
         }
 

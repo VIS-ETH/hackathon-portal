@@ -49,10 +49,6 @@ const Team = () => {
         <TeamBlogCard team={team} canUpdate={policies.can_update_team_blog} />
       )}
 
-      {policies.can_view_team_blog && (
-        <TeamBlogCard team={team} canUpdate={policies.can_update_team_blog} />
-      )}
-
       {policies.can_view_team_feedback && ranking && (
         <RatingFeedbackCard
           entry={ranking.team}
