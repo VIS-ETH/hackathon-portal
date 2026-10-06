@@ -1,5 +1,6 @@
 import { useCreateAppointment } from "@/api/gen";
 import { AppointmentForCreate } from "@/api/gen/schemas";
+import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { inputProps, primaryButtonProps, textareaProps } from "@/styles/common";
 
 import { useEffect } from "react";
@@ -55,6 +56,8 @@ const CreateAppointmentDrawer = ({
   });
   const createAppointmentMutation = useCreateAppointment();
 
+  const confirmClose = useUnsavedChanges(form.isDirty());
+
   useEffect(() => {
     form.reset();
   }, [form.setInitialValues, form.reset, opened]);
@@ -70,7 +73,7 @@ const CreateAppointmentDrawer = ({
     <Drawer
       position="right"
       opened={opened}
-      onClose={onClose}
+      onClose={() => confirmClose() && onClose()}
       title="Create Appointment"
     >
       <form onSubmit={form.onSubmit(handleSubmit)}>

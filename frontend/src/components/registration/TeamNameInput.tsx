@@ -1,5 +1,6 @@
 import { useUpdateTeam } from "@/api/gen";
 import { Team } from "@/api/gen/schemas";
+import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import {
   cardHeaderSectionProps,
   cardHeaderTextProps,
@@ -36,10 +37,13 @@ const TeamNameInput = ({ team, refetch }: TeamNameInputProps) => {
     setLocalName(team.name);
   }
 
-  const handleSave = async () => {
-    const newName = localName.trim();
+  const newName = localName.trim();
+  const canSave = newName !== team.name && newName !== "";
 
-    if (newName === team.name || newName === "") {
+  useUnsavedChanges(canSave);
+
+  const handleSave = async () => {
+    if (!canSave) {
       return;
     }
 
@@ -70,7 +74,7 @@ const TeamNameInput = ({ team, refetch }: TeamNameInputProps) => {
           <Button
             {...primaryButtonProps}
             onClick={handleSave}
-            disabled={localName === team.name || localName === ""}
+            disabled={!canSave}
           >
             Update
           </Button>

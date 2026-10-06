@@ -1,5 +1,6 @@
 import { useInviteUsers } from "@/api/gen";
 import { Event, EventRole, UserForCreate } from "@/api/gen/schemas";
+import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import {
   cardProps,
   cardSectionProps,
@@ -33,6 +34,8 @@ const InvitationControls = ({ event }: InvitationControlsProps) => {
   const [role, setRole] = useState<EventRole>(EventRole.Participant);
 
   const inviteUsersMutation = useInviteUsers();
+
+  useUnsavedChanges(input.trim() !== "");
 
   const handleRun = async () => {
     const parsed = input

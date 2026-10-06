@@ -3,6 +3,7 @@ import GenericIngressControls from "./GenericIngressControls";
 
 import { useUpdateTeam } from "@/api/gen";
 import { Team } from "@/api/gen/schemas";
+import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { modalProps, primaryButtonProps } from "@/styles/common";
 
 import { useState } from "react";
@@ -27,8 +28,19 @@ const NetworkConfigModal = ({
   const [localIngressConfig, setLocalIngressConfig] = useState(
     team.ingress_config,
   );
+  const [prevOpened, setPrevOpened] = useState(opened);
+
+  if (opened !== prevOpened) {
+    setPrevOpened(opened);
+    setLocalIngressConfig(team.ingress_config);
+  }
 
   const updateTeamMutation = useUpdateTeam();
+
+  // A closed modal never counts, since a refetch can change the team's config.
+  const confirmClose = useUnsavedChanges(
+    opened && !isEqual(localIngressConfig, team.ingress_config),
+  );
 
   const handleUpdate = async () => {
     await updateTeamMutation.mutateAsync({
@@ -47,7 +59,7 @@ const NetworkConfigModal = ({
       {...modalProps}
       size={team.ingress_enabled ? "auto" : undefined}
       opened={opened}
-      onClose={onClose}
+      onClose={() => confirmClose() && onClose()}
       title="Network Configuration"
     >
       {team.ingress_enabled ? (

@@ -2,6 +2,7 @@ import MarkdownCard from "../MarkdownCard";
 
 import { useCreateSidequest } from "@/api/gen";
 import { SidequestForCreate } from "@/api/gen/schemas";
+import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { inputProps, primaryButtonProps, textareaProps } from "@/styles/common";
 
 import { useEffect } from "react";
@@ -48,6 +49,8 @@ const CreateSidequestDrawer = ({
 
   const createSidequestMutation = useCreateSidequest();
 
+  const confirmClose = useUnsavedChanges(form.isDirty());
+
   useEffect(() => {
     form.reset();
   }, [form.setInitialValues, form.reset, opened]);
@@ -66,7 +69,7 @@ const CreateSidequestDrawer = ({
       position="right"
       size="xl"
       opened={opened}
-      onClose={onClose}
+      onClose={() => confirmClose() && onClose()}
       title="Create Sidequest"
     >
       <form onSubmit={form.onSubmit(handleSubmit)}>

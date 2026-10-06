@@ -2,6 +2,7 @@ import MarkdownCard from "../MarkdownCard";
 
 import { useUpdateSidequest } from "@/api/gen";
 import { Sidequest, SidequestForUpdate } from "@/api/gen/schemas";
+import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { inputProps, primaryButtonProps, textareaProps } from "@/styles/common";
 
 import { useEffect } from "react";
@@ -54,6 +55,8 @@ const UpdateSidequestDrawer = ({
 
   const updateSidequestMutation = useUpdateSidequest();
 
+  const confirmClose = useUnsavedChanges(form.isDirty());
+
   useEffect(() => {
     form.setInitialValues({
       name: sidequest.name,
@@ -79,7 +82,7 @@ const UpdateSidequestDrawer = ({
       position="right"
       size="xl"
       opened={opened}
-      onClose={onClose}
+      onClose={() => confirmClose() && onClose()}
       title="Update Sidequest"
     >
       <form onSubmit={form.onSubmit(handleSubmit)}>

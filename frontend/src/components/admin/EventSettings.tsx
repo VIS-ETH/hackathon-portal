@@ -5,6 +5,7 @@ import {
   EventPhase,
   EventVisibility,
 } from "@/api/gen/schemas";
+import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import {
   cardHeaderTextProps,
   cardProps,
@@ -128,16 +129,19 @@ const EventSettings = ({ event, refetch }: EventSettingsProps) => {
   const updateEventMutation = useUpdateEvent();
 
   useEffect(() => {
-    form.setFieldValue("read_only", event.read_only);
-    form.setFieldValue("projects_visible", event.projects_visible);
-    form.setFieldValue(
-      "project_assignments_visible",
-      event.project_assignments_visible,
-    );
-    form.setFieldValue("finalists_visible", event.finalists_visible);
-    form.setFieldValue("vote_enabled", event.vote_enabled);
-    form.setFieldValue("feedback_visible", event.feedback_visible);
-  }, [form.setValues, event]);
+    const flags = {
+      read_only: event.read_only,
+      projects_visible: event.projects_visible,
+      project_assignments_visible: event.project_assignments_visible,
+      finalists_visible: event.finalists_visible,
+      vote_enabled: event.vote_enabled,
+      feedback_visible: event.feedback_visible,
+    };
+    form.setInitialValues(flags);
+    form.setValues(flags);
+  }, [form.setInitialValues, form.setValues, event]);
+
+  useUnsavedChanges(form.isDirty());
 
   const handleSubmit = async (data: EventForUpdate) => {
     const dataToPrint = { ...data };

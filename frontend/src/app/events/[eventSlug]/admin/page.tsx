@@ -11,6 +11,7 @@ import TeamPasswordsControls from "@/components/admin/TeamPasswordsControls";
 import TeamsTable from "@/components/admin/TeamsTable";
 import WelcomeContentControls from "@/components/admin/WelcomeContentControls";
 import { useResolveParams } from "@/hooks/useResolveParams";
+import { confirmDiscard } from "@/hooks/useUnsavedChanges";
 import { iconProps } from "@/styles/common";
 
 import { useEffect, useState } from "react";
@@ -48,7 +49,7 @@ const Admin = () => {
   }, []);
 
   const handleTabChange = (value: string | null) => {
-    if (value) {
+    if (value && value !== activeTab && confirmDiscard()) {
       setActiveTab(value);
       window.history.replaceState(null, "", `#${value}`);
     }

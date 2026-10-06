@@ -1,5 +1,6 @@
 import { useGetAdminTeams, useUpdateTeam } from "@/api/gen";
 import { Event } from "@/api/gen/schemas";
+import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import {
   cardProps,
   cardSectionProps,
@@ -35,6 +36,8 @@ const TeamPasswordsControls = ({ event }: TeamPasswordsControlsProps) => {
   });
 
   const updateTeamMutation = useUpdateTeam();
+
+  useUnsavedChanges(pw_input !== "" || ml_input !== "");
 
   const indicesAreUnique =
     teams?.length === new Set(teams?.map((team) => team.index)).size;

@@ -2,6 +2,7 @@ import MarkdownCard from "../MarkdownCard";
 
 import { useUpdateEvent } from "@/api/gen";
 import { Event } from "@/api/gen/schemas";
+import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { primaryButtonProps, textareaProps } from "@/styles/common";
 
 import { useState } from "react";
@@ -21,7 +22,8 @@ const WelcomeContentControls = ({
 
   const updateEventMutation = useUpdateEvent();
 
-  const hasChanges = localContent !== event.welcome_content;
+  const hasChanges = localContent !== (event.welcome_content ?? "");
+  useUnsavedChanges(hasChanges);
 
   const handleSave = async () => {
     await updateEventMutation.mutateAsync({

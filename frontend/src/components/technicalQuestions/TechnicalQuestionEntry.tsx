@@ -12,6 +12,7 @@ import {
   useUpdateTechnicalQuestions,
 } from "@/api/gen";
 import { TechnicalQuestion as TechnicalQuestionType } from "@/api/gen/schemas";
+import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 
 import { useState } from "react";
 
@@ -27,6 +28,14 @@ type TechnicalQuestionEntryProps = {
   teamId?: string;
 };
 
+const EMPTY_QUESTION = {
+  question: "",
+  description: "",
+  min_points: 0,
+  max_points: 10,
+  binary: false,
+};
+
 const TechnicalQuestionEntry = ({
   technicalQuestion,
   mode,
@@ -34,18 +43,13 @@ const TechnicalQuestionEntry = ({
   eventId,
   teamId,
 }: TechnicalQuestionEntryProps) => {
-  const [question, setQuestion] = useState(technicalQuestion?.question || "");
-  const [description, setDescription] = useState(
-    technicalQuestion?.description || "",
-  );
+  const saved = technicalQuestion ?? EMPTY_QUESTION;
+  const [question, setQuestion] = useState(saved.question);
+  const [description, setDescription] = useState(saved.description || "");
   // "" while the user has cleared the input
-  const [minPoints, setMinPoints] = useState<number | "">(
-    technicalQuestion?.min_points ?? 0,
-  );
-  const [maxPoints, setMaxPoints] = useState<number | "">(
-    technicalQuestion?.max_points ?? 10,
-  );
-  const [binary, setBinary] = useState(technicalQuestion?.binary || false);
+  const [minPoints, setMinPoints] = useState<number | "">(saved.min_points);
+  const [maxPoints, setMaxPoints] = useState<number | "">(saved.max_points);
+  const [binary, setBinary] = useState(saved.binary);
   const [score, setScore] = useState<number | undefined>(initialScore);
   const [prevTechnicalQuestion, setPrevTechnicalQuestion] =
     useState(technicalQuestion);
@@ -66,6 +70,14 @@ const TechnicalQuestionEntry = ({
     setScore(initialScore);
   }
 
+  useUnsavedChanges(
+    question !== saved.question ||
+      description !== (saved.description || "") ||
+      minPoints !== saved.min_points ||
+      maxPoints !== saved.max_points ||
+      binary !== saved.binary,
+  );
+
   const validationError = !question.trim()
     ? "Question must not be empty"
     : minPoints === "" || maxPoints === ""
@@ -82,11 +94,11 @@ const TechnicalQuestionEntry = ({
   const createEndpoint = useCreateTechnicalQuestions({
     mutation: {
       onSuccess: () => {
-        setQuestion("");
-        setDescription("");
-        setMinPoints(0);
-        setMaxPoints(10);
-        setBinary(false);
+        setQuestion(EMPTY_QUESTION.question);
+        setDescription(EMPTY_QUESTION.description);
+        setMinPoints(EMPTY_QUESTION.min_points);
+        setMaxPoints(EMPTY_QUESTION.max_points);
+        setBinary(EMPTY_QUESTION.binary);
         return refetchQuestions();
       },
     },

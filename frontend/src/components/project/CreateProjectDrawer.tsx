@@ -2,6 +2,7 @@ import MarkdownCard from "../MarkdownCard";
 
 import { useCreateProject } from "@/api/gen";
 import { ProjectForCreate } from "@/api/gen/schemas";
+import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { inputProps, primaryButtonProps, textareaProps } from "@/styles/common";
 
 import { useEffect } from "react";
@@ -46,6 +47,8 @@ const CreateProjectDrawer = ({
 
   const createProjectMutation = useCreateProject();
 
+  const confirmClose = useUnsavedChanges(form.isDirty());
+
   useEffect(() => {
     form.reset();
   }, [form.setInitialValues, form.reset, opened]);
@@ -64,7 +67,7 @@ const CreateProjectDrawer = ({
       position="right"
       size="xl"
       opened={opened}
-      onClose={onClose}
+      onClose={() => confirmClose() && onClose()}
       title="Create Project"
     >
       <form onSubmit={form.onSubmit(handleSubmit)}>

@@ -10,6 +10,7 @@ import {
   TeamBlog,
   TeamBlogSection as TeamBlogSectionDTO,
 } from "@/api/gen/schemas";
+import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import {
   cardProps,
   iconProps,
@@ -32,6 +33,7 @@ import {
 } from "@tabler/icons-react";
 import { useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
+import { isEqual } from "lodash";
 import { v4 as uuidv4 } from "uuid";
 
 type TeamBlogEditorProps = {
@@ -47,6 +49,13 @@ const toEditableSections = (
 ): EditableBlogSection[] =>
   sections.map((section) => ({ ...section, key: uuidv4() }));
 
+const toSectionsForUpdate = (sections: TeamBlogSectionDTO[]) =>
+  sections.map(({ content, layout, image_id }) => ({
+    content,
+    layout,
+    image_id: image_id ?? null,
+  }));
+
 const TeamBlogEditor = ({
   event,
   team,
@@ -56,13 +65,17 @@ const TeamBlogEditor = ({
   const [sections, setSections] = useState(() =>
     toEditableSections(blog.sections),
   );
-  // The version the edits are based on, which must not follow refetches of the blog.
-  const [baseVersion, setBaseVersion] = useState(blog.version);
+  // The blog the edits are based on, which must not follow refetches of the blog.
+  const [base, setBase] = useState(blog);
+
+  useUnsavedChanges(
+    !isEqual(toSectionsForUpdate(sections), toSectionsForUpdate(base.sections)),
+  );
 
   // Someone else has saved the blog since the edits were started, so saving would
   // overwrite their changes. An older version can still arrive from a fetch that was
   // started before our own save, which is not a conflict.
-  const hasConflict = blog.version > baseVersion;
+  const hasConflict = blog.version > base.version;
 
   const queryClient = useQueryClient();
   const blogQueryKey = getGetTeamBlogQueryKey(team.id);
@@ -70,7 +83,7 @@ const TeamBlogEditor = ({
   const updateTeamBlogMutation = useUpdateTeamBlog({
     mutation: {
       onSuccess: (savedBlog) => {
-        setBaseVersion(savedBlog.version);
+        setBase(savedBlog);
         queryClient.setQueryData(blogQueryKey, savedBlog);
         onSaved();
       },
@@ -127,19 +140,15 @@ const TeamBlogEditor = ({
     if (!confirmation) return;
 
     setSections(toEditableSections(blog.sections));
-    setBaseVersion(blog.version);
+    setBase(blog);
   };
 
   const handleSave = () => {
     updateTeamBlogMutation.mutate({
       teamId: team.id,
       data: {
-        version: baseVersion,
-        sections: sections.map(({ content, layout, image_id }) => ({
-          content,
-          layout,
-          image_id: image_id ?? null,
-        })),
+        version: base.version,
+        sections: toSectionsForUpdate(sections),
       },
     });
   };

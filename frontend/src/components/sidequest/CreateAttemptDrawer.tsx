@@ -15,6 +15,7 @@ import {
   TeamAffiliate,
   TeamRole,
 } from "@/api/gen/schemas";
+import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { inputProps, primaryButtonProps } from "@/styles/common";
 
 import { useState } from "react";
@@ -62,6 +63,10 @@ const CreateAttemptDrawer = ({
 
   const createAttemptMutation = useCreateSidequestAttempt();
 
+  const confirmClose = useUnsavedChanges(
+    !!team || !!user || !!sidequest || result !== 0,
+  );
+
   const reset = () => {
     setTeam(undefined);
     setUser(undefined);
@@ -100,7 +105,7 @@ const CreateAttemptDrawer = ({
     <Drawer
       position="right"
       opened={opened}
-      onClose={onClose}
+      onClose={() => confirmClose() && onClose()}
       title="Create Attempt"
     >
       <Stack>

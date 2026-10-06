@@ -1,5 +1,6 @@
 import { useUpdateEvent } from "@/api/gen";
 import { Event } from "@/api/gen/schemas";
+import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { iconProps, largeIconProps } from "@/styles/common";
 
 import React, { useMemo, useState } from "react";
@@ -626,7 +627,9 @@ const DiscordConfigPage = ({ event, refetch }: DiscordControlsProps) => {
   const updateEventMutation = useUpdateEvent();
 
   const hasChanges =
-    serverId !== event.discord_server_id || yamlInput !== event.discord_config;
+    serverId !== (event.discord_server_id ?? "") ||
+    yamlInput !== (event.discord_config ?? "");
+  useUnsavedChanges(hasChanges);
 
   const handleSave = async () => {
     await updateEventMutation.mutateAsync({

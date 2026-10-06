@@ -1,6 +1,7 @@
 import TechnicalQuestions from "../technicalQuestions/TechnicalQuestionList";
 
 import RankingPanel from "@/components/admin/RankingPanel";
+import { confirmDiscard } from "@/hooks/useUnsavedChanges";
 import { cardProps, segmentedControlProps } from "@/styles/common";
 
 import { useState } from "react";
@@ -20,7 +21,7 @@ const RankingTab = ({ eventId }: RankingTabProps) => {
       <SegmentedControl
         {...segmentedControlProps}
         value={currentView}
-        onChange={setCurrentView}
+        onChange={(view) => confirmDiscard() && setCurrentView(view)}
         data={views}
       />
 

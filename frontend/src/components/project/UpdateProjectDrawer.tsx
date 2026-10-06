@@ -2,6 +2,7 @@ import MarkdownCard from "../MarkdownCard";
 
 import { useGetEventAffiliates, useUpdateProject } from "@/api/gen";
 import { EventRole, Project, ProjectForUpdate } from "@/api/gen/schemas";
+import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { inputProps, primaryButtonProps, textareaProps } from "@/styles/common";
 
 import { useEffect } from "react";
@@ -69,6 +70,8 @@ const UpdateProjectDrawer = ({
 
   const updateProjectMutation = useUpdateProject();
 
+  const confirmClose = useUnsavedChanges(form.isDirty());
+
   useEffect(() => {
     form.setInitialValues({
       name: project.name,
@@ -94,7 +97,7 @@ const UpdateProjectDrawer = ({
       position="right"
       size="xl"
       opened={opened}
-      onClose={onClose}
+      onClose={() => confirmClose() && onClose()}
       title="Update Project"
     >
       <form onSubmit={form.onSubmit(handleSubmit)}>
