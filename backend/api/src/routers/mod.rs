@@ -3,6 +3,7 @@ mod docs;
 mod events;
 mod projects;
 mod ratings;
+mod secrets;
 mod sidequest_attempts;
 mod sidequests;
 mod teams;
@@ -30,6 +31,7 @@ pub fn get_router(state: ApiState) -> Router {
         )
         .nest("/appointments", appointments::get_router(&state))
         .nest("/uploads", uploads::get_router(&state))
+        .nest("/secrets", secrets::get_router(&state))
         .route_layer(middleware::from_fn(mw_require_auth))
         .layer(middleware::from_fn_with_state(state, mw_resolve_ctx))
 }

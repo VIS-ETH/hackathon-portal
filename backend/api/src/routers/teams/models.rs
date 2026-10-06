@@ -74,8 +74,6 @@ pub struct AdminTeam {
     pub slug: String,
     pub index: i32,
     pub photo_url: Option<String>,
-    pub password: Option<String>,
-    pub ai_api_key: Option<String>,
     pub extra_score: Option<f64>,
     pub comment: Option<String>,
     pub managed_address: Option<String>,
@@ -102,8 +100,6 @@ impl From<TeamBO> for AdminTeam {
             slug: value.slug,
             index: value.index,
             photo_url: value.photo_url,
-            password: value.password,
-            ai_api_key: value.ai_api_key,
             extra_score: value.extra_score,
             comment: value.comment,
             managed_address: value.managed_address,
@@ -118,21 +114,6 @@ impl From<TeamBO> for AdminTeam {
             ingress_config: value.ingress_config,
             ingress_url: value.ingress_url,
             finalist: value.finalist,
-        }
-    }
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
-pub struct TeamCredentials {
-    pub vm_password: Option<String>,
-    pub ai_api_key: Option<String>,
-}
-
-impl From<TeamBO> for TeamCredentials {
-    fn from(value: TeamBO) -> Self {
-        Self {
-            vm_password: value.password,
-            ai_api_key: value.ai_api_key,
         }
     }
 }

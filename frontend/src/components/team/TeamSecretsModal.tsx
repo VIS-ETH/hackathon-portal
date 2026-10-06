@@ -1,0 +1,40 @@
+import { useGetTeamSecrets } from "@/api/gen";
+import { Team } from "@/api/gen/schemas";
+import SecretsList from "@/components/secrets/SecretsList";
+import { modalProps } from "@/styles/common";
+
+import { Center, Modal, Text } from "@mantine/core";
+
+type TeamSecretsModalProps = {
+  team: Team;
+  opened: boolean;
+  onClose: () => void;
+};
+
+const TeamSecretsModal = ({ team, opened, onClose }: TeamSecretsModalProps) => {
+  const { data: secrets = [] } = useGetTeamSecrets(team.id, {
+    query: { enabled: opened },
+  });
+
+  return (
+    <Modal
+      {...modalProps}
+      opened={opened}
+      onClose={onClose}
+      title="Team Secrets"
+    >
+      {secrets.length ? (
+        <SecretsList secrets={secrets} />
+      ) : (
+        <Center>
+          <Text c="dimmed">
+            No secrets available. Please contact an administrator if you think
+            this is an error.
+          </Text>
+        </Center>
+      )}
+    </Modal>
+  );
+};
+
+export default TeamSecretsModal;

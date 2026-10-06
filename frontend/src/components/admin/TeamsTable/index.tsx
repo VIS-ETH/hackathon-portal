@@ -1,4 +1,3 @@
-import GenerateAPIKeys from "../GenerateAPIKeys";
 import TeamsTableRow from "./Row";
 import { TableView } from "./TableView";
 
@@ -164,20 +163,6 @@ const TeamsTable = ({ event }: TeamsTableProps) => {
                       <Table.Th miw={200}>Private Address</Table.Th>
                       <Table.Th miw={300}>SSH Config</Table.Th>
                       <Table.Th miw={200}>Ingress Enabled</Table.Th>
-                    </>
-                  )}
-                  {view == TableView.Credentials && (
-                    <>
-                      <Table.Th miw={200}>VM Password</Table.Th>
-                      <Table.Th miw={200}>
-                        <Group justify="space-between">
-                          <Text>ML Key</Text>
-                          <GenerateAPIKeys
-                            teams={teams}
-                            refetch={refetchTeams}
-                          />
-                        </Group>
-                      </Table.Th>
                     </>
                   )}
                   {view == TableView.Members &&

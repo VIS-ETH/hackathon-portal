@@ -41,6 +41,9 @@ export const parseIntStrict = (value: string | number): number | undefined => {
   return parsed;
 };
 
+// Name of the team secret that holds the generated LiteLLM key (see the backend).
+export const AI_API_KEY_SECRET_NAME = "AI API Key";
+
 export async function getKeyInfo(
   apiKey: string,
 ): Promise<{ usedBudget: number; maxBudget: number }> {

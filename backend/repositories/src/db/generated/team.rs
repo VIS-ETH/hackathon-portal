@@ -31,10 +31,6 @@ pub struct Model {
     pub ingress_enabled: bool,
     #[sea_orm(column_type = "JsonBinary")]
     pub ingress_config: Json,
-    #[sea_orm(column_type = "VarBinary(StringLen::None)", nullable)]
-    pub password: Option<Vec<u8>>,
-    #[sea_orm(column_type = "VarBinary(StringLen::None)", nullable)]
-    pub ai_api_key: Option<Vec<u8>>,
     pub finalist: bool,
     pub blog_version: i32,
 }
@@ -67,6 +63,8 @@ pub enum Relation {
     TeamBlogSection,
     #[sea_orm(has_many = "super::team_role_assignment::Entity")]
     TeamRoleAssignment,
+    #[sea_orm(has_many = "super::team_secret::Entity")]
+    TeamSecret,
     #[sea_orm(has_many = "super::technical_rating::Entity")]
     TechnicalRating,
     #[sea_orm(
@@ -117,6 +115,12 @@ impl Related<super::team_role_assignment::Entity> for Entity {
     }
 }
 
+impl Related<super::team_secret::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::TeamSecret.def()
+    }
+}
+
 impl Related<super::technical_rating::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::TechnicalRating.def()
@@ -141,6 +145,15 @@ impl Related<super::project::Entity> for Entity {
     }
     fn via() -> Option<RelationDef> {
         Some(super::project_preference::Relation::Team.def().rev())
+    }
+}
+
+impl Related<super::secret::Entity> for Entity {
+    fn to() -> RelationDef {
+        super::team_secret::Relation::Secret.def()
+    }
+    fn via() -> Option<RelationDef> {
+        Some(super::team_secret::Relation::Team.def().rev())
     }
 }
 

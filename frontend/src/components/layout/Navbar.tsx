@@ -4,7 +4,9 @@ import classes from "./Navbar.module.css";
 import UserMenu from "./UserMenu";
 
 import { useGetMe } from "@/api/gen";
+import UserSecretsModal from "@/components/secrets/UserSecretsModal";
 import { useDiscord } from "@/hooks/useDiscord";
+import { useMySecrets } from "@/hooks/useMySecrets";
 import { useResolveParams } from "@/hooks/useResolveParams";
 import { badgeProps, containerProps } from "@/styles/common";
 
@@ -20,6 +22,7 @@ import {
   Stack,
   Tabs,
   Text,
+  UnstyledButton,
   rem,
 } from "@mantine/core";
 
@@ -35,6 +38,8 @@ const Navbar = () => {
   const { event, policies } = useResolveParams();
   const [drawerOpened, drawerHandles] = useDisclosure(false);
   const { discordAuthUrl } = useDiscord();
+  const mySecrets = useMySecrets();
+  const [secretsOpened, secretsHandles] = useDisclosure(false);
 
   const tabs = [
     {
@@ -164,6 +169,19 @@ const Navbar = () => {
               >
                 (Re)connect Discord Account
               </Link>
+              {mySecrets.length > 0 && (
+                <UnstyledButton
+                  className={cx(classes.mobileLink)}
+                  w="100%"
+                  onClick={() => {
+                    // The drawer would cover the modal.
+                    drawerHandles.close();
+                    secretsHandles.open();
+                  }}
+                >
+                  My Secrets
+                </UnstyledButton>
+              )}
               <Link
                 href="https://auth.viscon-hackathon.ch"
                 referrerPolicy="no-referrer"
@@ -182,6 +200,11 @@ const Navbar = () => {
               </Box>
             </ScrollArea>
           </Drawer>
+          <UserSecretsModal
+            secrets={mySecrets}
+            opened={secretsOpened}
+            onClose={secretsHandles.close}
+          />
           <Tabs
             value={activePath}
             variant="outline"

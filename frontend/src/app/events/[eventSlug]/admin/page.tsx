@@ -7,9 +7,9 @@ import EventAffiliatesTable from "@/components/admin/EventAffiliatesTable";
 import EventSettings from "@/components/admin/EventSettings";
 import InvitationControls from "@/components/admin/InvitationControls";
 import RankingTab from "@/components/admin/RankingTab";
-import TeamPasswordsControls from "@/components/admin/TeamPasswordsControls";
 import TeamsTable from "@/components/admin/TeamsTable";
 import WelcomeContentControls from "@/components/admin/WelcomeContentControls";
+import SecretsTab from "@/components/admin/secrets/SecretsTab";
 import { useResolveParams } from "@/hooks/useResolveParams";
 import { confirmDiscard } from "@/hooks/useUnsavedChanges";
 import { iconProps } from "@/styles/common";
@@ -21,6 +21,7 @@ import { Stack, Tabs } from "@mantine/core";
 import {
   IconAlignJustified,
   IconBrandDiscord,
+  IconKey,
   IconSettings,
   IconShieldHalf,
   IconTrophy,
@@ -37,6 +38,7 @@ const Admin = () => {
       "general",
       "roles",
       "teams",
+      "secrets",
       "ranking",
       "welcome",
       "documentation",
@@ -76,6 +78,9 @@ const Admin = () => {
         <Tabs.Tab value="teams" leftSection={<IconUsers {...iconProps} />}>
           Teams
         </Tabs.Tab>
+        <Tabs.Tab value="secrets" leftSection={<IconKey {...iconProps} />}>
+          Secrets
+        </Tabs.Tab>
         <Tabs.Tab value="ranking" leftSection={<IconTrophy {...iconProps} />}>
           Ranking
         </Tabs.Tab>
@@ -111,10 +116,11 @@ const Admin = () => {
       </Tabs.Panel>
 
       <Tabs.Panel value="teams" mt="md">
-        <Stack>
-          <TeamsTable event={event} />
-          <TeamPasswordsControls event={event} />
-        </Stack>
+        <TeamsTable event={event} />
+      </Tabs.Panel>
+
+      <Tabs.Panel value="secrets" mt="md">
+        <SecretsTab event={event} />
       </Tabs.Panel>
 
       <Tabs.Panel value="ranking" mt="md">

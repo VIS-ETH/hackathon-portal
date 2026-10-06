@@ -174,6 +174,28 @@ pub enum MediaUsage {
     strum :: VariantArray,
     utoipa :: ToSchema,
 )]
+#[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "secret_scope")]
+pub enum SecretScope {
+    #[sea_orm(string_value = "TEAM")]
+    Team,
+    #[sea_orm(string_value = "USER")]
+    User,
+}
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Eq,
+    EnumIter,
+    DeriveActiveEnum,
+    Serialize,
+    Deserialize,
+    Copy,
+    Hash,
+    strum :: Display,
+    strum :: VariantArray,
+    utoipa :: ToSchema,
+)]
 #[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "team_role")]
 pub enum TeamRole {
     #[sea_orm(string_value = "MENTOR")]

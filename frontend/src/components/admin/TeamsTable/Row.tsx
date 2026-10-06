@@ -1,6 +1,5 @@
 import ActionsTd from "./ActionsTd";
 import AffiliateTds from "./AffiliateTds";
-import CredentialsTd from "./CredentialsTd";
 import ExtraScoreTd from "./ExtraScoreTd";
 import InfrastructureTds from "./InfrastructureTds";
 import MatchingTds from "./MatchingTds";
@@ -54,9 +53,6 @@ const TeamsTableRow = ({
       )}
       {view == TableView.Infra && (
         <InfrastructureTds team={team} refetch={refetch} />
-      )}
-      {view == TableView.Credentials && (
-        <CredentialsTd team={team} refetch={refetch} />
       )}
       {view == TableView.Members && (
         <AffiliateTds

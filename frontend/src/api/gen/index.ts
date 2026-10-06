@@ -26,12 +26,15 @@ import type {
   EventDiscordResponse,
   EventForUpdate,
   EventRole,
+  EventSecrets,
   GetAdminTeamsParams,
   GetAppointmentsParams,
   GetEventAffiliatesParams,
+  GetEventSecretsParams,
   GetEventsRoles200,
   GetJuryRatingsParams,
   GetMyPoliciesParams,
+  GetMySecretsParams,
   GetMyVotesParams,
   GetProjectsMatching200,
   GetProjectsParams,
@@ -66,6 +69,9 @@ import type {
   RankingSnapshot,
   RankingSnapshotInfo,
   ReducedUser,
+  Secret,
+  SecretForCreate,
+  SecretValue,
   SetCurrentRankingSnapshot,
   SetMyVoteParams,
   SetTechnicalRating,
@@ -76,7 +82,6 @@ import type {
   TeamAffiliate,
   TeamBlog,
   TeamBlogForUpdate,
-  TeamCredentials,
   TeamForCreate,
   TeamForUpdate,
   TeamLeaderboardEntry,
@@ -84,6 +89,7 @@ import type {
   TeamRole,
   TechnicalQuestion,
   TechnicalQuestionResult,
+  UpdateSecretValuesBody,
   UpdateTechnicalQuestionDTO,
   UploadUrl,
   User,
@@ -5688,6 +5694,548 @@ export const useSetTechnicalTeamRating = <
   );
 };
 
+export const getEventSecrets = (
+  params: GetEventSecretsParams,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<EventSecrets>(
+    { url: `/api/secrets`, method: "GET", params, signal },
+    options,
+  );
+};
+
+export const getGetEventSecretsQueryKey = (params?: GetEventSecretsParams) => {
+  return [`/api/secrets`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetEventSecretsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getEventSecrets>>,
+  TError = PublicError,
+>(
+  params: GetEventSecretsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getEventSecrets>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetEventSecretsQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getEventSecrets>>> = ({
+    signal,
+  }) => getEventSecrets(params, requestOptions, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getEventSecrets>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetEventSecretsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getEventSecrets>>
+>;
+export type GetEventSecretsQueryError = PublicError;
+
+export function useGetEventSecrets<
+  TData = Awaited<ReturnType<typeof getEventSecrets>>,
+  TError = PublicError,
+>(
+  params: GetEventSecretsParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getEventSecrets>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getEventSecrets>>,
+          TError,
+          Awaited<ReturnType<typeof getEventSecrets>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetEventSecrets<
+  TData = Awaited<ReturnType<typeof getEventSecrets>>,
+  TError = PublicError,
+>(
+  params: GetEventSecretsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getEventSecrets>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getEventSecrets>>,
+          TError,
+          Awaited<ReturnType<typeof getEventSecrets>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetEventSecrets<
+  TData = Awaited<ReturnType<typeof getEventSecrets>>,
+  TError = PublicError,
+>(
+  params: GetEventSecretsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getEventSecrets>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetEventSecrets<
+  TData = Awaited<ReturnType<typeof getEventSecrets>>,
+  TError = PublicError,
+>(
+  params: GetEventSecretsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getEventSecrets>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetEventSecretsQueryOptions(params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export const createSecret = (
+  secretForCreate: SecretForCreate,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<Secret>(
+    {
+      url: `/api/secrets`,
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      data: secretForCreate,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getCreateSecretMutationKey = () => ["createSecret"] as const;
+
+export const getCreateSecretMutationOptions = <
+  TError = PublicError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createSecret>>,
+    TError,
+    CreateSecretMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createSecret>>,
+  TError,
+  CreateSecretMutationVariables,
+  TContext
+> => {
+  const mutationKey = getCreateSecretMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createSecret>>,
+    CreateSecretMutationVariables
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createSecret(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateSecretMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createSecret>>
+>;
+export type CreateSecretMutationBody = SecretForCreate;
+export type CreateSecretMutationError = PublicError;
+export type CreateSecretMutationVariables = { data: SecretForCreate };
+
+export const useCreateSecret = <TError = PublicError, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof createSecret>>,
+      TError,
+      CreateSecretMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof createSecret>>,
+  TError,
+  CreateSecretMutationVariables,
+  TContext
+> => {
+  return useMutation(getCreateSecretMutationOptions(options), queryClient);
+};
+
+export const getMySecrets = (
+  params: GetMySecretsParams,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<SecretValue[]>(
+    { url: `/api/secrets/me`, method: "GET", params, signal },
+    options,
+  );
+};
+
+export const getGetMySecretsQueryKey = (params?: GetMySecretsParams) => {
+  return [`/api/secrets/me`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetMySecretsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getMySecrets>>,
+  TError = PublicError,
+>(
+  params: GetMySecretsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getMySecrets>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetMySecretsQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getMySecrets>>> = ({
+    signal,
+  }) => getMySecrets(params, requestOptions, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getMySecrets>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetMySecretsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getMySecrets>>
+>;
+export type GetMySecretsQueryError = PublicError;
+
+export function useGetMySecrets<
+  TData = Awaited<ReturnType<typeof getMySecrets>>,
+  TError = PublicError,
+>(
+  params: GetMySecretsParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getMySecrets>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMySecrets>>,
+          TError,
+          Awaited<ReturnType<typeof getMySecrets>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetMySecrets<
+  TData = Awaited<ReturnType<typeof getMySecrets>>,
+  TError = PublicError,
+>(
+  params: GetMySecretsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getMySecrets>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMySecrets>>,
+          TError,
+          Awaited<ReturnType<typeof getMySecrets>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetMySecrets<
+  TData = Awaited<ReturnType<typeof getMySecrets>>,
+  TError = PublicError,
+>(
+  params: GetMySecretsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getMySecrets>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetMySecrets<
+  TData = Awaited<ReturnType<typeof getMySecrets>>,
+  TError = PublicError,
+>(
+  params: GetMySecretsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getMySecrets>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetMySecretsQueryOptions(params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export const deleteSecret = (
+  secretId: string,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<unknown | null>(
+    { url: `/api/secrets/${secretId}`, method: "DELETE", signal },
+    options,
+  );
+};
+
+export const getDeleteSecretMutationKey = () => ["deleteSecret"] as const;
+
+export const getDeleteSecretMutationOptions = <
+  TError = PublicError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteSecret>>,
+    TError,
+    DeleteSecretMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteSecret>>,
+  TError,
+  DeleteSecretMutationVariables,
+  TContext
+> => {
+  const mutationKey = getDeleteSecretMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteSecret>>,
+    DeleteSecretMutationVariables
+  > = (props) => {
+    const { secretId } = props ?? {};
+
+    return deleteSecret(secretId, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteSecretMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteSecret>>
+>;
+
+export type DeleteSecretMutationError = PublicError;
+export type DeleteSecretMutationVariables = { secretId: string };
+
+export const useDeleteSecret = <TError = PublicError, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof deleteSecret>>,
+      TError,
+      DeleteSecretMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof deleteSecret>>,
+  TError,
+  DeleteSecretMutationVariables,
+  TContext
+> => {
+  return useMutation(getDeleteSecretMutationOptions(options), queryClient);
+};
+
+export const updateSecretValues = (
+  secretId: string,
+  updateSecretValuesBody: UpdateSecretValuesBody,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<Secret>(
+    {
+      url: `/api/secrets/${secretId}/values`,
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      data: updateSecretValuesBody,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getUpdateSecretValuesMutationKey = () =>
+  ["updateSecretValues"] as const;
+
+export const getUpdateSecretValuesMutationOptions = <
+  TError = PublicError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateSecretValues>>,
+    TError,
+    UpdateSecretValuesMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateSecretValues>>,
+  TError,
+  UpdateSecretValuesMutationVariables,
+  TContext
+> => {
+  const mutationKey = getUpdateSecretValuesMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateSecretValues>>,
+    UpdateSecretValuesMutationVariables
+  > = (props) => {
+    const { secretId, data } = props ?? {};
+
+    return updateSecretValues(secretId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateSecretValuesMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateSecretValues>>
+>;
+export type UpdateSecretValuesMutationBody = UpdateSecretValuesBody;
+export type UpdateSecretValuesMutationError = PublicError;
+export type UpdateSecretValuesMutationVariables = {
+  secretId: string;
+  data: UpdateSecretValuesBody;
+};
+
+export const useUpdateSecretValues = <TError = PublicError, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof updateSecretValues>>,
+      TError,
+      UpdateSecretValuesMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof updateSecretValues>>,
+  TError,
+  UpdateSecretValuesMutationVariables,
+  TContext
+> => {
+  return useMutation(
+    getUpdateSecretValuesMutationOptions(options),
+    queryClient,
+  );
+};
+
 export const getSidequestAttempts = (
   params: GetSidequestAttemptsParams,
   options?: SecondParameter<typeof customInstance>,
@@ -9065,166 +9613,6 @@ export const useUpdateTeamBlog = <TError = PublicError, TContext = unknown>(
   return useMutation(getUpdateTeamBlogMutationOptions(options), queryClient);
 };
 
-export const getTeamCredentials = (
-  teamId: string,
-  options?: SecondParameter<typeof customInstance>,
-  signal?: AbortSignal,
-) => {
-  return customInstance<TeamCredentials>(
-    { url: `/api/teams/${teamId}/credentials`, method: "GET", signal },
-    options,
-  );
-};
-
-export const getGetTeamCredentialsQueryKey = (teamId: string) => {
-  return [`/api/teams/${teamId}/credentials`] as const;
-};
-
-export const getGetTeamCredentialsQueryOptions = <
-  TData = Awaited<ReturnType<typeof getTeamCredentials>>,
-  TError = PublicError,
->(
-  teamId: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getTeamCredentials>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-) => {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
-
-  const queryKey =
-    queryOptions?.queryKey ?? getGetTeamCredentialsQueryKey(teamId);
-
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getTeamCredentials>>
-  > = ({ signal }) => getTeamCredentials(teamId, requestOptions, signal);
-
-  return {
-    queryKey,
-    queryFn,
-    enabled: teamId !== null && teamId !== undefined,
-    ...queryOptions,
-  } as UseQueryOptions<
-    Awaited<ReturnType<typeof getTeamCredentials>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-};
-
-export type GetTeamCredentialsQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getTeamCredentials>>
->;
-export type GetTeamCredentialsQueryError = PublicError;
-
-export function useGetTeamCredentials<
-  TData = Awaited<ReturnType<typeof getTeamCredentials>>,
-  TError = PublicError,
->(
-  teamId: string,
-  options: {
-    query: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getTeamCredentials>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getTeamCredentials>>,
-          TError,
-          Awaited<ReturnType<typeof getTeamCredentials>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetTeamCredentials<
-  TData = Awaited<ReturnType<typeof getTeamCredentials>>,
-  TError = PublicError,
->(
-  teamId: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getTeamCredentials>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getTeamCredentials>>,
-          TError,
-          Awaited<ReturnType<typeof getTeamCredentials>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetTeamCredentials<
-  TData = Awaited<ReturnType<typeof getTeamCredentials>>,
-  TError = PublicError,
->(
-  teamId: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getTeamCredentials>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-
-export function useGetTeamCredentials<
-  TData = Awaited<ReturnType<typeof getTeamCredentials>>,
-  TError = PublicError,
->(
-  teamId: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getTeamCredentials>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-} {
-  const queryOptions = getGetTeamCredentialsQueryOptions(teamId, options);
-
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
 export const getTeamProjectPreferences = (
   teamId: string,
   options?: SecondParameter<typeof customInstance>,
@@ -9936,6 +10324,145 @@ export const useDeleteTeamRoles = <TError = PublicError, TContext = unknown>(
 > => {
   return useMutation(getDeleteTeamRolesMutationOptions(options), queryClient);
 };
+
+export const getTeamSecrets = (
+  teamId: string,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<SecretValue[]>(
+    { url: `/api/teams/${teamId}/secrets`, method: "GET", signal },
+    options,
+  );
+};
+
+export const getGetTeamSecretsQueryKey = (teamId: string) => {
+  return [`/api/teams/${teamId}/secrets`] as const;
+};
+
+export const getGetTeamSecretsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getTeamSecrets>>,
+  TError = PublicError,
+>(
+  teamId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getTeamSecrets>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetTeamSecretsQueryKey(teamId);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getTeamSecrets>>> = ({
+    signal,
+  }) => getTeamSecrets(teamId, requestOptions, signal);
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: teamId !== null && teamId !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getTeamSecrets>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetTeamSecretsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getTeamSecrets>>
+>;
+export type GetTeamSecretsQueryError = PublicError;
+
+export function useGetTeamSecrets<
+  TData = Awaited<ReturnType<typeof getTeamSecrets>>,
+  TError = PublicError,
+>(
+  teamId: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getTeamSecrets>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTeamSecrets>>,
+          TError,
+          Awaited<ReturnType<typeof getTeamSecrets>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetTeamSecrets<
+  TData = Awaited<ReturnType<typeof getTeamSecrets>>,
+  TError = PublicError,
+>(
+  teamId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getTeamSecrets>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTeamSecrets>>,
+          TError,
+          Awaited<ReturnType<typeof getTeamSecrets>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetTeamSecrets<
+  TData = Awaited<ReturnType<typeof getTeamSecrets>>,
+  TError = PublicError,
+>(
+  teamId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getTeamSecrets>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetTeamSecrets<
+  TData = Awaited<ReturnType<typeof getTeamSecrets>>,
+  TError = PublicError,
+>(
+  teamId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getTeamSecrets>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetTeamSecretsQueryOptions(teamId, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
 
 export const createUpload = (
   createUploadDTO: CreateUploadDTO,

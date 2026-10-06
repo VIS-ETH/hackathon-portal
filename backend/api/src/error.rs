@@ -284,6 +284,14 @@ impl From<&ServiceError> for PublicError {
                 StatusCode::BAD_REQUEST,
                 "The master AI API key is missing".to_string(),
             ),
+            ServiceError::SecretNameNotUnique { name } => (
+                StatusCode::CONFLICT,
+                format!("A secret named '{name}' already exists"),
+            ),
+            ServiceError::SecretSubjectNotInEvent { scope, id } => (
+                StatusCode::BAD_REQUEST,
+                format!("{scope} '{id}' does not belong to the event of this secret"),
+            ),
             ServiceError::InvalidTechnicalQuestion { message } => {
                 (StatusCode::BAD_REQUEST, format!("Invalid technical question: {message}"))
             }

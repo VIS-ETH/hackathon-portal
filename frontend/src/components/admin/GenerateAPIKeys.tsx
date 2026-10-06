@@ -1,7 +1,8 @@
 "use client";
 
 import { useCreateTeamAiApiKey } from "@/api/gen";
-import { AdminTeam } from "@/api/gen/schemas";
+import { SecretSubject } from "@/api/gen/schemas";
+import { iconProps, secondaryButtonProps } from "@/styles/common";
 
 import { useState } from "react";
 
@@ -9,8 +10,10 @@ import { Button, Modal, NumberInput, Text } from "@mantine/core";
 
 import { useDisclosure, useMap } from "@mantine/hooks";
 
+import { IconRobot } from "@tabler/icons-react";
+
 type GenerateAPIKeysProps = {
-  teams: AdminTeam[];
+  teams: SecretSubject[];
   refetch: () => Promise<unknown>;
 };
 
@@ -18,9 +21,9 @@ const GenerateAPIKeys = ({ teams, refetch }: GenerateAPIKeysProps) => {
   const [budget, setBudget] = useState<string | number>("");
   const [opened, { open, close }] = useDisclosure(false);
   const generateKeysMutation = useCreateTeamAiApiKey();
-  const teamKeyStatus = useMap<number, string>();
+  const teamKeyStatus = useMap<string, string>();
 
-  const createKeyForTeam = async (team: AdminTeam) => {
+  const createKeyForTeam = async (team: SecretSubject) => {
     try {
       await generateKeysMutation.mutateAsync({
         teamId: team.id,
@@ -29,10 +32,10 @@ const GenerateAPIKeys = ({ teams, refetch }: GenerateAPIKeysProps) => {
         },
       });
     } catch {
-      teamKeyStatus.set(team.index, "error");
+      teamKeyStatus.set(team.key, "error");
       return;
     }
-    teamKeyStatus.set(team.index, "success");
+    teamKeyStatus.set(team.key, "success");
   };
 
   const handleGenerateKeys = async () => {
@@ -77,14 +80,21 @@ const GenerateAPIKeys = ({ teams, refetch }: GenerateAPIKeysProps) => {
         </Button>
 
         {teamKeyStatus.size > 0 &&
-          teamKeyStatus.entries().map(([teamIndex, status]) => (
-            <Text key={teamIndex}>
-              team-{teamIndex}: {status}
+          teamKeyStatus.entries().map(([teamKey, status]) => (
+            <Text key={teamKey}>
+              {teamKey}: {status}
             </Text>
           ))}
       </Modal>
 
-      <Button onClick={open}>Generate</Button>
+      <Button
+        {...secondaryButtonProps}
+        size="sm"
+        leftSection={<IconRobot {...iconProps} />}
+        onClick={open}
+      >
+        Generate AI Keys
+      </Button>
     </>
   );
 };

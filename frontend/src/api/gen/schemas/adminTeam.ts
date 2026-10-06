@@ -8,8 +8,6 @@ import type { IngressConfig } from "./ingressConfig";
 
 export interface AdminTeam {
   /** @nullable */
-  ai_api_key?: string | null;
-  /** @nullable */
   comment?: string | null;
   /** @nullable */
   direct_address?: string | null;
@@ -30,8 +28,6 @@ export interface AdminTeam {
   /** @nullable */
   managed_address_override?: string | null;
   name: string;
-  /** @nullable */
-  password?: string | null;
   /** @nullable */
   photo_url?: string | null;
   /** @nullable */

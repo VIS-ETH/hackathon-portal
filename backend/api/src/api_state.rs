@@ -15,6 +15,7 @@ use hackathon_portal_services::job_lock::JobLockService;
 use hackathon_portal_services::project::ProjectService;
 use hackathon_portal_services::ranking::RankingService;
 use hackathon_portal_services::rating::RatingService;
+use hackathon_portal_services::secret::SecretService;
 use hackathon_portal_services::sidequest::SidequestService;
 use hackathon_portal_services::team::models::Team;
 use hackathon_portal_services::team::TeamService;
@@ -34,6 +35,7 @@ pub struct ApiState {
     pub user_service: Arc<UserService>,
     pub event_service: Arc<EventService>,
     pub team_service: Arc<TeamService>,
+    pub secret_service: Arc<SecretService>,
     pub rating_service: Arc<RatingService>,
     pub ranking_service: Arc<RankingService>,
     pub project_service: Arc<ProjectService>,
@@ -63,10 +65,13 @@ impl ApiState {
         let user_service = Arc::new(UserService::new(db_repo.clone()));
         let upload_service = Arc::new(UploadService::new(db_repo.clone(), s3_repo));
 
+        let secret_service = Arc::new(SecretService::new(crypto_service.clone(), db_repo.clone()));
+
         let team_service = Arc::new(TeamService::new(
             authorization_service.clone(),
             upload_service.clone(),
             crypto_service.clone(),
+            secret_service.clone(),
             db_repo.clone(),
             lite_llm_repo,
         ));
@@ -111,6 +116,7 @@ impl ApiState {
             user_service,
             event_service,
             team_service,
+            secret_service,
             rating_service,
             ranking_service,
             project_service,

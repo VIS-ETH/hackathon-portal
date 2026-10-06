@@ -2,7 +2,7 @@ use crate::db::generated::{event, team};
 use crate::db::OrFailExt;
 use crate::{RepositoryError, RepositoryResult};
 use sea_orm::prelude::*;
-use sea_orm::{Condition, DerivePartialModel, FromQueryResult, QueryOrder};
+use sea_orm::{Condition, DerivePartialModel, FromQueryResult, QueryOrder, QuerySelect};
 
 #[derive(DerivePartialModel, FromQueryResult, Debug, Clone)]
 #[sea_orm(entity = "team::Entity")]
@@ -73,6 +73,23 @@ impl TeamRepository {
             .one(db)
             .await?
             .or_fail(team::Entity.table_name(), id)
+    }
+
+    /// Returns those of the given ids that belong to teams of the event.
+    pub async fn fetch_ids_by_event_id_and_ids<C: ConnectionTrait>(
+        db: &C,
+        event_id: Uuid,
+        ids: &[Uuid],
+    ) -> RepositoryResult<Vec<Uuid>> {
+        team::Entity::find()
+            .filter(team::Column::EventId.eq(event_id))
+            .filter(team::Column::Id.is_in(ids.iter().copied()))
+            .select_only()
+            .column(team::Column::Id)
+            .into_tuple()
+            .all(db)
+            .await
+            .map_err(RepositoryError::from)
     }
 
     #[expect(

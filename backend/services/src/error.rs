@@ -1,7 +1,7 @@
 use crate::authorization::groups::Group;
 use chrono::NaiveDateTime;
 use derive_more::From;
-use hackathon_portal_repositories::db::{EventPhase, MediaUsage};
+use hackathon_portal_repositories::db::{EventPhase, MediaUsage, SecretScope};
 use hackathon_portal_repositories::RepositoryError;
 use serde::Serialize;
 use serde_with::{serde_as, DisplayFromStr};
@@ -106,6 +106,15 @@ pub enum ServiceError {
     },
 
     MissingMasterAIAPIKey,
+
+    SecretNameNotUnique {
+        name: String,
+    },
+
+    SecretSubjectNotInEvent {
+        scope: SecretScope,
+        id: Uuid,
+    },
 
     Parsing {
         message: String,

@@ -10,6 +10,7 @@ pub mod logger;
 pub mod project;
 pub mod ranking;
 pub mod rating;
+pub mod secret;
 pub mod sidequest;
 pub mod team;
 pub mod upload;

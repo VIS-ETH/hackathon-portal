@@ -1,5 +1,6 @@
 import AccessDetailsModal from "./AccessDetailsModal";
 import NetworkConfigModal from "./NetworkConfigModal";
+import TeamSecretsModal from "./TeamSecretsModal";
 import UploadTeamPhotoModal from "./UploadTeamPhotoModal";
 
 import { useUpdateTeam } from "@/api/gen";
@@ -14,6 +15,7 @@ import {
   IconChevronDown,
   IconKey,
   IconNetwork,
+  IconServer,
   IconTrash,
   IconUpload,
 } from "@tabler/icons-react";
@@ -28,6 +30,7 @@ type TeamMenuProps = {
 const TeamMenu = ({ team, refetchTeam, policies }: TeamMenuProps) => {
   const [uploadPhotoOpened, uploadPhotoHandles] = useDisclosure();
   const [accessDetailsOpened, accessDetailsHandles] = useDisclosure();
+  const [secretsOpened, secretsHandles] = useDisclosure();
   const [networkConfigOpened, networkConfigHandles] = useDisclosure();
   const updateTeamMutation = useUpdateTeam();
 
@@ -65,10 +68,16 @@ const TeamMenu = ({ team, refetchTeam, policies }: TeamMenuProps) => {
   const accessDetailsItem = policies.can_view_team_confidential && (
     <>
       <Menu.Item
-        leftSection={<IconKey {...iconProps} />}
+        leftSection={<IconServer {...iconProps} />}
         onClick={accessDetailsHandles.open}
       >
         Access Details
+      </Menu.Item>
+      <Menu.Item
+        leftSection={<IconKey {...iconProps} />}
+        onClick={secretsHandles.open}
+      >
+        Team Secrets
       </Menu.Item>
     </>
   );
@@ -122,6 +131,11 @@ const TeamMenu = ({ team, refetchTeam, policies }: TeamMenuProps) => {
         team={team}
         opened={accessDetailsOpened}
         onClose={accessDetailsHandles.close}
+      />
+      <TeamSecretsModal
+        team={team}
+        opened={secretsOpened}
+        onClose={secretsHandles.close}
       />
       <NetworkConfigModal
         team={team}

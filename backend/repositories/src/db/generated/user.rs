@@ -32,6 +32,8 @@ pub enum Relation {
     TeamRoleAssignment,
     #[sea_orm(has_many = "super::upload::Entity")]
     Upload,
+    #[sea_orm(has_many = "super::user_secret::Entity")]
+    UserSecret,
     #[sea_orm(has_many = "super::vote::Entity")]
     Vote,
 }
@@ -78,6 +80,12 @@ impl Related<super::upload::Entity> for Entity {
     }
 }
 
+impl Related<super::user_secret::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::UserSecret.def()
+    }
+}
+
 impl Related<super::vote::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Vote.def()
@@ -99,6 +107,15 @@ impl Related<super::project::Entity> for Entity {
     }
     fn via() -> Option<RelationDef> {
         Some(super::stakeholder_project::Relation::User.def().rev())
+    }
+}
+
+impl Related<super::secret::Entity> for Entity {
+    fn to() -> RelationDef {
+        super::user_secret::Relation::Secret.def()
+    }
+    fn via() -> Option<RelationDef> {
+        Some(super::user_secret::Relation::User.def().rev())
     }
 }
 

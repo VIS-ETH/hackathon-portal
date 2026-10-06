@@ -1,6 +1,7 @@
 use crate::authorization::groups::{Group, Groups};
 use crate::authorization::models::{AffiliateRow, EventAffiliate, EventRolesMap};
 use crate::authorization::AuthorizationService;
+use crate::secret::SecretService;
 use crate::user::fmt_user_name;
 use crate::{ServiceError, ServiceResult};
 use hackathon_portal_repositories::db::{
@@ -10,7 +11,7 @@ use hackathon_portal_repositories::db::{EventRepository, EventRoleAssignmentRepo
 use sea_orm::prelude::*;
 use sea_orm::sea_query::OnConflict;
 use sea_orm::{Condition, QuerySelect, QueryTrait, SelectColumns, Set, TransactionTrait};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
 
 impl AuthorizationService {
@@ -123,6 +124,7 @@ impl AuthorizationService {
     ) -> ServiceResult<u64> {
         let mut rows_affected = 0;
         let txn = self.db_repo.conn().begin().await?;
+        let user_ids = roles.keys().copied().collect::<Vec<_>>();
 
         for (user_id, roles) in roles {
             for role in roles {
@@ -154,6 +156,22 @@ impl AuthorizationService {
                 id: event_id.to_string(),
             });
         }
+
+        // Users without any role left in the event lose their secrets.
+        let remaining_user_ids = EventRoleAssignmentRepository::fetch_all_by_event_id_and_user_ids(
+            &txn, event_id, &user_ids,
+        )
+        .await?
+        .into_iter()
+        .map(|assignment| assignment.user_id)
+        .collect::<HashSet<_>>();
+
+        let removed_user_ids = user_ids
+            .into_iter()
+            .filter(|user_id| !remaining_user_ids.contains(user_id))
+            .collect::<Vec<_>>();
+
+        SecretService::delete_user_secrets(&txn, event_id, &removed_user_ids).await?;
 
         txn.commit().await?;
 

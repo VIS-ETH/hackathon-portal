@@ -1723,6 +1723,181 @@
         }
       }
     },
+    "/api/secrets": {
+      "get": {
+        "tags": ["crate::routers::secrets"],
+        "operationId": "get_event_secrets",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "query",
+            "description": "Filter by event id",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/EventSecrets" }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["crate::routers::secrets"],
+        "operationId": "create_secret",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/SecretForCreate" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Secret" }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/secrets/me": {
+      "get": {
+        "tags": ["crate::routers::secrets"],
+        "operationId": "get_my_secrets",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "query",
+            "description": "Filter by event id",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/SecretValue" }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/secrets/{secret_id}": {
+      "delete": {
+        "tags": ["crate::routers::secrets"],
+        "operationId": "delete_secret",
+        "parameters": [
+          {
+            "name": "secret_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "default": null, "nullable": true }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/secrets/{secret_id}/values": {
+      "put": {
+        "tags": ["crate::routers::secrets"],
+        "operationId": "update_secret_values",
+        "parameters": [
+          {
+            "name": "secret_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": { "type": "string" }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Secret" }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/sidequest-attempts": {
       "get": {
         "tags": ["crate::routers::sidequest_attempts"],
@@ -2737,38 +2912,6 @@
         }
       }
     },
-    "/api/teams/{team_id}/credentials": {
-      "get": {
-        "tags": ["crate::routers::teams"],
-        "operationId": "get_team_credentials",
-        "parameters": [
-          {
-            "name": "team_id",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "string", "format": "uuid" }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/TeamCredentials" }
-              }
-            }
-          },
-          "500": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/PublicError" }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/teams/{team_id}/project-preferences": {
       "get": {
         "tags": ["crate::routers::teams"],
@@ -3012,6 +3155,41 @@
         }
       }
     },
+    "/api/teams/{team_id}/secrets": {
+      "get": {
+        "tags": ["crate::routers::teams"],
+        "operationId": "get_team_secrets",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/SecretValue" }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/uploads": {
       "post": {
         "tags": ["crate::routers::uploads"],
@@ -3160,7 +3338,6 @@
           "finalist"
         ],
         "properties": {
-          "ai_api_key": { "type": "string", "nullable": true },
           "comment": { "type": "string", "nullable": true },
           "direct_address": { "type": "string", "nullable": true },
           "direct_address_override": { "type": "string", "nullable": true },
@@ -3179,7 +3356,6 @@
           "managed_address": { "type": "string", "nullable": true },
           "managed_address_override": { "type": "string", "nullable": true },
           "name": { "type": "string" },
-          "password": { "type": "string", "nullable": true },
           "photo_url": { "type": "string", "nullable": true },
           "private_address": { "type": "string", "nullable": true },
           "private_address_override": { "type": "string", "nullable": true },
@@ -3585,6 +3761,24 @@
           }
         }
       },
+      "EventSecrets": {
+        "type": "object",
+        "required": ["secrets", "teams", "users"],
+        "properties": {
+          "secrets": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Secret" }
+          },
+          "teams": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/SecretSubject" }
+          },
+          "users": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/SecretSubject" }
+          }
+        }
+      },
       "EventVisibility": {
         "type": "string",
         "enum": ["Hidden", "Internal", "Public"]
@@ -3919,6 +4113,63 @@
           "name": { "type": "string" }
         }
       },
+      "Secret": {
+        "type": "object",
+        "required": ["id", "event_id", "scope", "name", "values"],
+        "properties": {
+          "event_id": { "type": "string", "format": "uuid" },
+          "id": { "type": "string", "format": "uuid" },
+          "name": { "type": "string" },
+          "scope": { "$ref": "#/components/schemas/SecretScope" },
+          "values": {
+            "type": "object",
+            "description": "Values keyed by the id of the team or user, depending on the scope.",
+            "additionalProperties": { "type": "string" }
+          }
+        }
+      },
+      "SecretForCreate": {
+        "type": "object",
+        "required": ["event_id", "scope", "name"],
+        "properties": {
+          "event_id": { "type": "string", "format": "uuid" },
+          "name": { "type": "string" },
+          "scope": { "$ref": "#/components/schemas/SecretScope" }
+        }
+      },
+      "SecretScope": { "type": "string", "enum": ["Team", "User"] },
+      "SecretSubject": {
+        "type": "object",
+        "description": "A team or user that secret values can be distributed to.",
+        "required": ["id", "key", "label", "roles"],
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "index": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The index of a team, `None` for users.",
+            "nullable": true
+          },
+          "key": {
+            "type": "string",
+            "description": "Identifies the subject in imports: `team-NN` for teams, the auth id for users."
+          },
+          "label": { "type": "string" },
+          "roles": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/EventRole" },
+            "description": "The event roles of a user, empty for teams."
+          }
+        }
+      },
+      "SecretValue": {
+        "type": "object",
+        "required": ["name", "value"],
+        "properties": {
+          "name": { "type": "string" },
+          "value": { "type": "string" }
+        }
+      },
       "ServerProtocol": { "type": "string", "enum": ["Http", "Https"] },
       "SetCurrentRankingSnapshot": {
         "type": "object",
@@ -4126,13 +4377,6 @@
           "layout": { "$ref": "#/components/schemas/BlogSectionLayout" }
         }
       },
-      "TeamCredentials": {
-        "type": "object",
-        "properties": {
-          "ai_api_key": { "type": "string", "nullable": true },
-          "vm_password": { "type": "string", "nullable": true }
-        }
-      },
       "TeamForCreate": {
         "type": "object",
         "required": ["event_id", "name"],
@@ -4144,7 +4388,6 @@
       "TeamForUpdate": {
         "type": "object",
         "properties": {
-          "ai_api_key": { "type": "string", "nullable": true },
           "comment": { "type": "string", "nullable": true },
           "direct_address_override": { "type": "string", "nullable": true },
           "extra_score": {
@@ -4160,7 +4403,6 @@
           "ingress_enabled": { "type": "boolean", "nullable": true },
           "managed_address_override": { "type": "string", "nullable": true },
           "name": { "type": "string", "nullable": true },
-          "password": { "type": "string", "nullable": true },
           "photo_id": { "type": "string", "format": "uuid", "nullable": true },
           "private_address_override": { "type": "string", "nullable": true },
           "project_id": {

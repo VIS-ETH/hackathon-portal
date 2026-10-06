@@ -8,8 +8,6 @@ import type { IngressConfig } from "./ingressConfig";
 
 export interface TeamForUpdate {
   /** @nullable */
-  ai_api_key?: string | null;
-  /** @nullable */
   comment?: string | null;
   /** @nullable */
   direct_address_override?: string | null;
@@ -24,8 +22,6 @@ export interface TeamForUpdate {
   managed_address_override?: string | null;
   /** @nullable */
   name?: string | null;
-  /** @nullable */
-  password?: string | null;
   /** @nullable */
   photo_id?: string | null;
   /** @nullable */

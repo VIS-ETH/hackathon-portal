@@ -47,6 +47,11 @@ enum blog_section_layout {
   IMAGE_RIGHT
 }
 
+enum secret_scope {
+  TEAM
+  USER
+}
+
 model event {
   id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
 
@@ -93,6 +98,7 @@ model event {
   event_role_assignment event_role_assignment[]
   event_user_discord_id event_user_discord_id[]
   technical_question    technical_question[]
+  secret                secret[]
 }
 
 model team {
@@ -104,8 +110,6 @@ model team {
   name                     String
   slug                     String
   index                    Int
-  password                 Bytes?
-  ai_api_key               Bytes?
   extra_score              Float?
   comment                  String?
   photo_id                 String? @db.Uuid
@@ -131,6 +135,7 @@ model team {
   technical_rating     technical_rating[]
   vote                 vote[]
   team_blog_section    team_blog_section[]
+  team_secret          team_secret[]
 
   // meta
   @@unique([event_id, name])
@@ -156,6 +161,7 @@ model user {
   event_user_discord_id event_user_discord_id[]
   vote                  vote[]
   stakeholder_project   stakeholder_project[]
+  user_secret           user_secret[]
 
   // meta
   @@unique([name, index])
@@ -424,6 +430,54 @@ model technical_rating {
   technical_question technical_question @relation(fields: [technical_question_id], references: [id])
 
   @@id([technical_question_id, team_id])
+}
+
+// a named secret of an event, whose values are distributed per team or per user
+model secret {
+  id       String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  event_id String @db.Uuid
+
+  // fields
+  scope secret_scope
+  name  String
+
+  // relations
+  event event @relation(fields: [event_id], references: [id], onDelete: Cascade)
+
+  // related models
+  team_secret team_secret[]
+  user_secret user_secret[]
+
+  // meta
+  @@unique([event_id, scope, name])
+}
+
+model team_secret {
+  secret_id String @db.Uuid
+  team_id   String @db.Uuid
+
+  // fields
+  value Bytes // encrypted
+
+  // relations
+  secret secret @relation(fields: [secret_id], references: [id], onDelete: Cascade)
+  team   team   @relation(fields: [team_id], references: [id], onDelete: Cascade)
+
+  @@id([secret_id, team_id])
+}
+
+model user_secret {
+  secret_id String @db.Uuid
+  user_id   String @db.Uuid
+
+  // fields
+  value Bytes // encrypted
+
+  // relations
+  secret secret @relation(fields: [secret_id], references: [id], onDelete: Cascade)
+  user   user   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@id([secret_id, user_id])
 }
 
 // distributed lock for background jobs, so that only one backend replica runs each job per tick

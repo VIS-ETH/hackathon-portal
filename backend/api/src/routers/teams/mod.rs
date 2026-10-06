@@ -5,9 +5,7 @@ use crate::ctx::Ctx;
 use crate::error::{ApiJson, ApiJsonVec};
 use crate::models::AffectedRows;
 use crate::routers::events::models::EventIdQuery;
-use crate::routers::teams::models::{
-    AdminTeam, CreateTeamAPIKey, Team, TeamCredentials, TeamRankingView,
-};
+use crate::routers::teams::models::{AdminTeam, CreateTeamAPIKey, Team, TeamRankingView};
 use crate::routers::users::models::TeamRoleOptQuery;
 use crate::ApiError;
 use axum::extract::{Path, Query, State};
@@ -16,6 +14,7 @@ use axum::{Json, Router};
 use hackathon_portal_repositories::db::TeamRole;
 use hackathon_portal_services::authorization::groups::Groups;
 use hackathon_portal_services::authorization::models::{TeamAffiliate, TeamRoles, TeamRolesMap};
+use hackathon_portal_services::secret::models::SecretValue;
 use hackathon_portal_services::team::models::{
     TeamBlog, TeamBlogForUpdate, TeamForCreate, TeamForUpdate,
 };
@@ -49,7 +48,7 @@ pub fn get_router(state: &ApiState) -> Router {
         )
         .route("/:team_id/blog", get(get_team_blog))
         .route("/:team_id/blog", put(update_team_blog))
-        .route("/:team_id/credentials", get(get_team_credentials))
+        .route("/:team_id/secrets", get(get_team_secrets))
         .route("/:team_id/ranking", get(get_team_ranking))
         .route("/:team_id/ai-api-keys", post(create_team_ai_api_key))
         .with_state(state.clone())
@@ -425,8 +424,6 @@ pub async fn update_team(
     }
 
     if (body.project_id.is_some()
-        || body.password.is_some()
-        || body.ai_api_key.is_some()
         || body.comment.is_some()
         || body.extra_score.is_some()
         || body.managed_address_override.is_some()
@@ -808,28 +805,30 @@ pub async fn update_team_blog(
 
 #[utoipa::path(
     get,
-    path = "/api/teams/{team_id}/credentials",
+    path = "/api/teams/{team_id}/secrets",
     responses(
-        (status = StatusCode::OK, body = TeamCredentials),
+        (status = StatusCode::OK, body = Vec<SecretValue>),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
 )]
-pub async fn get_team_credentials(
+pub async fn get_team_secrets(
     ctx: Ctx,
     State(state): State<ApiState>,
     Path(team_id): Path<Uuid>,
-) -> ApiJson<TeamCredentials> {
+) -> ApiJsonVec<SecretValue> {
     let team = state.team_service.get_team(team_id).await?;
     let event = state.event_service.get_event(team.event_id).await?;
     let groups = Groups::from_event_and_team(ctx.roles(), event.id, team.id);
 
     if !groups.can_view_team_confidential(event.visibility) {
         return Err(ApiError::Forbidden {
-            action: "view the credentials for this team".to_string(),
+            action: "view the secrets of this team".to_string(),
         });
     }
 
-    Ok(Json(TeamCredentials::from(team)))
+    let secrets = state.secret_service.get_team_secrets(team.id).await?;
+
+    Ok(Json(secrets))
 }
 
 #[utoipa::path(

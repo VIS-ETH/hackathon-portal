@@ -71,6 +71,8 @@ pub enum Relation {
         on_delete = "SetNull"
     )]
     RankingSnapshot,
+    #[sea_orm(has_many = "super::secret::Entity")]
+    Secret,
     #[sea_orm(has_many = "super::sidequest::Entity")]
     Sidequest,
     #[sea_orm(has_many = "super::team::Entity")]
@@ -106,6 +108,12 @@ impl Related<super::project::Entity> for Entity {
 impl Related<super::ranking_snapshot::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::RankingSnapshot.def()
+    }
+}
+
+impl Related<super::secret::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::Secret.def()
     }
 }
 

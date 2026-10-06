@@ -3,6 +3,8 @@ pub mod models;
 use crate::authorization::AuthorizationService;
 use crate::crypto::CryptoService;
 use crate::infrastructure::models::IngressConfig;
+use crate::secret::models::AI_API_KEY_SECRET_NAME;
+use crate::secret::SecretService;
 use crate::team::models::{
     Team, TeamBlog, TeamBlogForUpdate, TeamBlogSection, TeamForCreate, TeamForUpdate,
 };
@@ -27,6 +29,7 @@ pub struct TeamService {
     authorization_service: Arc<AuthorizationService>,
     upload_service: Arc<UploadService>,
     crypto_service: Arc<CryptoService>,
+    secret_service: Arc<SecretService>,
     db_repo: DbRepository,
     lite_llm_repo: LiteLLMRepository,
 }
@@ -37,6 +40,7 @@ impl TeamService {
         authorization_service: Arc<AuthorizationService>,
         upload_service: Arc<UploadService>,
         crypto_service: Arc<CryptoService>,
+        secret_service: Arc<SecretService>,
         db_repo: DbRepository,
         lite_llm_repo: LiteLLMRepository,
     ) -> Self {
@@ -44,6 +48,7 @@ impl TeamService {
             authorization_service,
             upload_service,
             crypto_service,
+            secret_service,
             db_repo,
             lite_llm_repo,
         }
@@ -185,23 +190,6 @@ impl TeamService {
             }
         }
 
-        if let Some(password) = &team_fu.password {
-            if password.is_empty() {
-                active_team.password = Set(None);
-            } else {
-                active_team.password = Set(Some(self.crypto_service.encrypt(&password.clone())?));
-            }
-        }
-
-        if let Some(ai_api_key) = &team_fu.ai_api_key {
-            if ai_api_key.is_empty() {
-                active_team.ai_api_key = Set(None);
-            } else {
-                active_team.ai_api_key =
-                    Set(Some(self.crypto_service.encrypt(&ai_api_key.clone())?));
-            }
-        }
-
         if let Some(comment) = &team_fu.comment {
             if comment.is_empty() {
                 active_team.comment = Set(None);
@@ -276,7 +264,7 @@ impl TeamService {
         Ok(finalists)
     }
 
-    /// Cascade deletes team role assignments, project preferences and blog sections.
+    /// Cascade deletes team role assignments, project preferences, blog sections and secret values.
     /// Fails on any other related resources.
     pub async fn delete_team(&self, team_id: Uuid) -> ServiceResult<()> {
         let team = TeamRepository::fetch_by_id(self.db_repo.conn(), team_id).await?;
@@ -610,16 +598,6 @@ impl TeamService {
         } else {
             None
         };
-        let password = team_model
-            .password
-            .as_ref()
-            .map(|p| self.crypto_service.decrypt(p))
-            .transpose()?;
-        let ai_api_key = team_model
-            .ai_api_key
-            .as_ref()
-            .map(|k| self.crypto_service.decrypt(k))
-            .transpose()?;
 
         let team = Team {
             id: team_model.id,
@@ -630,8 +608,6 @@ impl TeamService {
             index: team_model.index,
             photo_id: team_model.photo_id,
             photo_url,
-            password,
-            ai_api_key,
             extra_score: team_model.extra_score,
             comment: team_model.comment,
             managed_address,
@@ -692,14 +668,23 @@ impl TeamService {
             .await
             .map_err(ServiceError::Repository)?;
 
-        let mut active_team = team.into_active_model();
-        let enc_key = self.crypto_service.encrypt(&generated_key)?;
-        active_team.ai_api_key = Set(Some(enc_key));
-
-        active_team.update(self.db_repo.conn()).await?;
+        self.secret_service
+            .set_team_secret(
+                event_id,
+                team_id,
+                AI_API_KEY_SECRET_NAME,
+                generated_key.clone(),
+            )
+            .await?;
 
         Ok(generated_key)
     }
+}
+
+/// The index of a team padded to two digits, as in the `{team_index_padded}` template.
+#[must_use]
+pub fn fmt_team_index(index: i32) -> String {
+    format!("{index:02}")
 }
 
 fn apply_template(template: &str, team: &db_team::Model) -> String {
@@ -709,7 +694,7 @@ fn apply_template(template: &str, team: &db_team::Model) -> String {
         .replace("{team_id}", &team.id.to_string())
         .replace("{team_slug}", &team.slug)
         .replace("{team_index}", &team.index.to_string())
-        .replace("{team_index_padded}", &format!("{:02}", team.index))
+        .replace("{team_index_padded}", &fmt_team_index(team.index))
 }
 
 fn apply_override_and_template(
