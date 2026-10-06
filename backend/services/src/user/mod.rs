@@ -2,6 +2,7 @@ pub mod models;
 
 use crate::user::models::{User, UserForCreate, UserForUpdate};
 use crate::ServiceResult;
+use chrono::{NaiveDateTime, TimeDelta, Utc};
 use hackathon_portal_repositories::db::{
     db_event_user_discord_id, db_user, EventUserRepository, OrFailExt, UserRepository,
 };
@@ -13,6 +14,10 @@ use sea_orm::{
     Statement, TransactionTrait,
 };
 use std::collections::HashMap;
+use tracing::warn;
+
+/// Minimum time between two `last_seen_at` writes of the same user.
+const LAST_SEEN_INTERVAL: TimeDelta = TimeDelta::minutes(5);
 
 #[derive(Clone)]
 pub struct UserService {
@@ -25,21 +30,50 @@ impl UserService {
         Self { db_repo }
     }
 
+    /// Resolves the user of an authenticated request and records it as their latest activity.
     pub async fn create_or_get_user(&self, user: UserForCreate) -> ServiceResult<User> {
         let existing =
             UserRepository::fetch_by_auth_id_opt(self.db_repo.conn(), &user.auth_id).await?;
 
+        let last_seen_at = existing.as_ref().and_then(|e| e.last_seen_at);
+
         if let Some(existing) = existing {
             if user.name.as_ref().is_none_or(|name| *name == existing.name) {
+                self.touch_last_seen_if_stale(existing.id, last_seen_at);
                 return Ok(existing.into());
             }
         }
 
-        Ok(self
+        let result = self
             .create_or_get_users(std::slice::from_ref(&user))
             .await?
             .pop()
-            .or_fail(db_user::Entity.table_name(), &user.auth_id)?)
+            .or_fail(db_user::Entity.table_name(), &user.auth_id)?;
+
+        self.touch_last_seen_if_stale(result.id, last_seen_at);
+
+        Ok(result)
+    }
+
+    /// Updates `last_seen_at` in the background if it's older than [`LAST_SEEN_INTERVAL`].
+    /// Failures are only logged, so they never affect the request.
+    fn touch_last_seen_if_stale(&self, user_id: Uuid, last_seen_at: Option<NaiveDateTime>) {
+        let now = Utc::now().naive_utc();
+        let stale_before = now - LAST_SEEN_INTERVAL;
+
+        if last_seen_at.is_some_and(|t| t >= stale_before) {
+            return;
+        }
+
+        let db_repo = self.db_repo.clone();
+
+        tokio::spawn(async move {
+            if let Err(e) =
+                UserRepository::touch_last_seen(db_repo.conn(), user_id, now, stale_before).await
+            {
+                warn!(user = %user_id, error = ?e, "Failed to update last seen");
+            }
+        });
     }
 
     pub async fn create_or_get_users(&self, users: &[UserForCreate]) -> ServiceResult<Vec<User>> {

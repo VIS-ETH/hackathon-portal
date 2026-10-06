@@ -13,6 +13,7 @@ pub struct Model {
     #[sea_orm(column_type = "Text")]
     pub name: String,
     pub index: i32,
+    pub last_seen_at: Option<DateTime>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

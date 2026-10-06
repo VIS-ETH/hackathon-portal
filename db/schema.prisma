@@ -145,6 +145,8 @@ model user {
   name    String
   index   Int // used to differentiate users with the same name
 
+  last_seen_at DateTime? // last authenticated API request, updated at most every few minutes
+
   // related models
   event_role_assignment event_role_assignment[]
   team_role_assignment  team_role_assignment[]

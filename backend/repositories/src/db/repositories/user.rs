@@ -2,6 +2,7 @@ use crate::db::generated::user;
 use crate::db::OrFailExt;
 use crate::{RepositoryError, RepositoryResult};
 use sea_orm::prelude::*;
+use sea_orm::Condition;
 
 pub struct UserRepository;
 
@@ -36,5 +37,29 @@ impl UserRepository {
             .all(db)
             .await
             .map_err(RepositoryError::from)
+    }
+
+    /// Sets `last_seen_at` to `now`, unless it's already later than `stale_before`.
+    ///
+    /// The condition is part of the update, so concurrent callers don't write more than once.
+    pub async fn touch_last_seen<C: ConnectionTrait>(
+        db: &C,
+        id: Uuid,
+        now: DateTime,
+        stale_before: DateTime,
+    ) -> RepositoryResult<()> {
+        user::Entity::update_many()
+            .col_expr(user::Column::LastSeenAt, Expr::value(now))
+            .filter(user::Column::Id.eq(id))
+            .filter(
+                Condition::any()
+                    .add(user::Column::LastSeenAt.is_null())
+                    .add(user::Column::LastSeenAt.lt(stale_before)),
+            )
+            .exec(db)
+            .await
+            .map_err(RepositoryError::from)?;
+
+        Ok(())
     }
 }
