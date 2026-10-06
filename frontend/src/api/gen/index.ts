@@ -43,7 +43,11 @@ import type {
   GetSidequestsParams,
   GetSidequestsUserLeaderboardParams,
   GetTeamAffiliatesParams,
+  GetTeamsAffiliates200,
+  GetTeamsAffiliatesParams,
   GetTeamsParams,
+  GetTeamsProjectPreferences200,
+  GetTeamsProjectPreferencesParams,
   GetTeamsRoles200,
   GetTeamsRolesParams,
   InviteUsersDTO,
@@ -7503,6 +7507,327 @@ export function useGetAdminTeams<
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
   const queryOptions = getGetAdminTeamsQueryOptions(params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export const getTeamsAffiliates = (
+  params: GetTeamsAffiliatesParams,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<GetTeamsAffiliates200>(
+    { url: `/api/teams/affiliates`, method: "GET", params, signal },
+    options,
+  );
+};
+
+export const getGetTeamsAffiliatesQueryKey = (
+  params?: GetTeamsAffiliatesParams,
+) => {
+  return [`/api/teams/affiliates`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetTeamsAffiliatesQueryOptions = <
+  TData = Awaited<ReturnType<typeof getTeamsAffiliates>>,
+  TError = PublicError,
+>(
+  params: GetTeamsAffiliatesParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getTeamsAffiliates>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetTeamsAffiliatesQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getTeamsAffiliates>>
+  > = ({ signal }) => getTeamsAffiliates(params, requestOptions, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getTeamsAffiliates>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetTeamsAffiliatesQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getTeamsAffiliates>>
+>;
+export type GetTeamsAffiliatesQueryError = PublicError;
+
+export function useGetTeamsAffiliates<
+  TData = Awaited<ReturnType<typeof getTeamsAffiliates>>,
+  TError = PublicError,
+>(
+  params: GetTeamsAffiliatesParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getTeamsAffiliates>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTeamsAffiliates>>,
+          TError,
+          Awaited<ReturnType<typeof getTeamsAffiliates>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetTeamsAffiliates<
+  TData = Awaited<ReturnType<typeof getTeamsAffiliates>>,
+  TError = PublicError,
+>(
+  params: GetTeamsAffiliatesParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getTeamsAffiliates>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTeamsAffiliates>>,
+          TError,
+          Awaited<ReturnType<typeof getTeamsAffiliates>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetTeamsAffiliates<
+  TData = Awaited<ReturnType<typeof getTeamsAffiliates>>,
+  TError = PublicError,
+>(
+  params: GetTeamsAffiliatesParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getTeamsAffiliates>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetTeamsAffiliates<
+  TData = Awaited<ReturnType<typeof getTeamsAffiliates>>,
+  TError = PublicError,
+>(
+  params: GetTeamsAffiliatesParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getTeamsAffiliates>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetTeamsAffiliatesQueryOptions(params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export const getTeamsProjectPreferences = (
+  params: GetTeamsProjectPreferencesParams,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<GetTeamsProjectPreferences200>(
+    { url: `/api/teams/project-preferences`, method: "GET", params, signal },
+    options,
+  );
+};
+
+export const getGetTeamsProjectPreferencesQueryKey = (
+  params?: GetTeamsProjectPreferencesParams,
+) => {
+  return [
+    `/api/teams/project-preferences`,
+    ...(params ? [params] : []),
+  ] as const;
+};
+
+export const getGetTeamsProjectPreferencesQueryOptions = <
+  TData = Awaited<ReturnType<typeof getTeamsProjectPreferences>>,
+  TError = PublicError,
+>(
+  params: GetTeamsProjectPreferencesParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getTeamsProjectPreferences>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetTeamsProjectPreferencesQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getTeamsProjectPreferences>>
+  > = ({ signal }) =>
+    getTeamsProjectPreferences(params, requestOptions, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getTeamsProjectPreferences>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetTeamsProjectPreferencesQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getTeamsProjectPreferences>>
+>;
+export type GetTeamsProjectPreferencesQueryError = PublicError;
+
+export function useGetTeamsProjectPreferences<
+  TData = Awaited<ReturnType<typeof getTeamsProjectPreferences>>,
+  TError = PublicError,
+>(
+  params: GetTeamsProjectPreferencesParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getTeamsProjectPreferences>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTeamsProjectPreferences>>,
+          TError,
+          Awaited<ReturnType<typeof getTeamsProjectPreferences>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetTeamsProjectPreferences<
+  TData = Awaited<ReturnType<typeof getTeamsProjectPreferences>>,
+  TError = PublicError,
+>(
+  params: GetTeamsProjectPreferencesParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getTeamsProjectPreferences>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTeamsProjectPreferences>>,
+          TError,
+          Awaited<ReturnType<typeof getTeamsProjectPreferences>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetTeamsProjectPreferences<
+  TData = Awaited<ReturnType<typeof getTeamsProjectPreferences>>,
+  TError = PublicError,
+>(
+  params: GetTeamsProjectPreferencesParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getTeamsProjectPreferences>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetTeamsProjectPreferences<
+  TData = Awaited<ReturnType<typeof getTeamsProjectPreferences>>,
+  TError = PublicError,
+>(
+  params: GetTeamsProjectPreferencesParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getTeamsProjectPreferences>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetTeamsProjectPreferencesQueryOptions(
+    params,
+    options,
+  );
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
     TData,

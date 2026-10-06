@@ -1,8 +1,4 @@
-import {
-  useGetProjects,
-  useGetProjectsMatching,
-  useGetTeamProjectPreferences,
-} from "@/api/gen";
+import { useGetProjects, useGetProjectsMatching } from "@/api/gen";
 import { AdminTeam } from "@/api/gen/schemas";
 import { resizeArray } from "@/utils";
 
@@ -10,11 +6,11 @@ import { Table, Text } from "@mantine/core";
 
 type MatchingTdsProps = {
   team: AdminTeam;
+  projectPreferences: string[];
 };
 
-const MatchingTds = ({ team }: MatchingTdsProps) => {
+const MatchingTds = ({ team, projectPreferences: pps }: MatchingTdsProps) => {
   const { data: matching } = useGetProjectsMatching(team.event_id);
-  const { data: pps = [] } = useGetTeamProjectPreferences(team.id);
   const { data: projects = [] } = useGetProjects({
     event_id: team.event_id,
   });

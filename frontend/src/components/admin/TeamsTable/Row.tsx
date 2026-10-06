@@ -8,8 +8,10 @@ import NameTd from "./NameTd";
 import ProjectTd from "./ProjectTd";
 import { TableView } from "./TableView";
 
-import { AdminTeam, Event, TeamRole } from "@/api/gen/schemas";
+import { AdminTeam, Event, TeamAffiliate, TeamRole } from "@/api/gen/schemas";
 import { fmtTeamIndex } from "@/utils";
+
+import { memo } from "react";
 
 import { Table, Text } from "@mantine/core";
 
@@ -17,10 +19,21 @@ type TeamsTableRowProps = {
   event: Event;
   team: AdminTeam;
   view: TableView;
-  refetch?: () => void;
+  refetch?: () => Promise<unknown>;
+  affiliates: TeamAffiliate[];
+  refetchAffiliates: () => Promise<unknown>;
+  projectPreferences: string[];
 };
 
-const TeamsTableRow = ({ event, team, view, refetch }: TeamsTableRowProps) => {
+const TeamsTableRow = ({
+  event,
+  team,
+  view,
+  refetch,
+  affiliates,
+  refetchAffiliates,
+  projectPreferences,
+}: TeamsTableRowProps) => {
   return (
     <Table.Tr>
       <Table.Td>
@@ -36,7 +49,9 @@ const TeamsTableRow = ({ event, team, view, refetch }: TeamsTableRowProps) => {
           refetch={refetch}
         />
       )}
-      {view == TableView.Projects && <MatchingTds team={team} />}
+      {view == TableView.Projects && (
+        <MatchingTds team={team} projectPreferences={projectPreferences} />
+      )}
       {view == TableView.Infra && (
         <InfrastructureTds team={team} refetch={refetch} />
       )}
@@ -46,15 +61,29 @@ const TeamsTableRow = ({ event, team, view, refetch }: TeamsTableRowProps) => {
       {view == TableView.Members && (
         <AffiliateTds
           team={team}
+          affiliates={affiliates}
+          refetchAffiliates={refetchAffiliates}
           role={TeamRole.Member}
           max={event.max_team_size}
         />
       )}
       {view == TableView.Mentors && (
-        <AffiliateTds team={team} role={TeamRole.Mentor} max={2} />
+        <AffiliateTds
+          team={team}
+          affiliates={affiliates}
+          refetchAffiliates={refetchAffiliates}
+          role={TeamRole.Mentor}
+          max={2}
+        />
       )}
       {view == TableView.Stakeholders && (
-        <AffiliateTds team={team} role={TeamRole.Stakeholder} max={1} />
+        <AffiliateTds
+          team={team}
+          affiliates={affiliates}
+          refetchAffiliates={refetchAffiliates}
+          role={TeamRole.Stakeholder}
+          max={1}
+        />
       )}
       {view == TableView.Notes && (
         <ExtraScoreTd team={team} refetch={refetch} />
@@ -64,4 +93,4 @@ const TeamsTableRow = ({ event, team, view, refetch }: TeamsTableRowProps) => {
   );
 };
 
-export default TeamsTableRow;
+export default memo(TeamsTableRow);

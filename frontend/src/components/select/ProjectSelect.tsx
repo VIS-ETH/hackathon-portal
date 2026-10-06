@@ -2,6 +2,8 @@ import { useGetProjects } from "@/api/gen";
 import { Project } from "@/api/gen/schemas";
 import { inputProps } from "@/styles/common";
 
+import { useMemo } from "react";
+
 import { Select, SelectProps } from "@mantine/core";
 
 type ProjectSelectProps = SelectProps & {
@@ -16,24 +18,31 @@ const ProjectSelect = ({
   setProject,
   ...additionalProps
 }: ProjectSelectProps) => {
-  const { data: projects = [] } = useGetProjects({
+  const { data: projects } = useGetProjects({
     event_id: eventId,
   });
+
+  const options = useMemo(
+    () =>
+      (projects ?? []).map((project) => ({
+        label: project.name,
+        value: project.id,
+      })),
+    [projects],
+  );
 
   return (
     <Select
       {...(inputProps as SelectProps)}
+      comboboxProps={{ keepMounted: false }}
       {...additionalProps}
-      data={projects.map((project) => ({
-        label: project.name,
-        value: project.id,
-      }))}
+      data={options}
       value={projectId ?? null} // Mantine expects null and not undefined
       onChange={(value) => {
         if (value === null) {
           setProject(undefined);
         } else {
-          setProject(projects.find((project) => project.id === value));
+          setProject(projects?.find((project) => project.id === value));
         }
       }}
       placeholder={`Select project`}

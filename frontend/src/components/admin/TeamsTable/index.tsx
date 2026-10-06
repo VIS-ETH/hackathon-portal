@@ -2,7 +2,12 @@ import GenerateAPIKeys from "../GenerateAPIKeys";
 import TeamsTableRow from "./Row";
 import { TableView } from "./TableView";
 
-import { useGetAdminTeams, useIndexTeams } from "@/api/gen";
+import {
+  useGetAdminTeams,
+  useGetTeamsAffiliates,
+  useGetTeamsProjectPreferences,
+  useIndexTeams,
+} from "@/api/gen";
 import { Event } from "@/api/gen/schemas";
 import IconTextGroup from "@/components/IconTextGroup";
 import NoEntriesTr from "@/components/NoEntriesTr";
@@ -33,6 +38,9 @@ import {
   IconRefresh,
 } from "@tabler/icons-react";
 
+// Shared fallback, so rows without entries get the same array on every render.
+const EMPTY: never[] = [];
+
 type TeamsTableProps = {
   event: Event;
 };
@@ -43,6 +51,24 @@ const TeamsTable = ({ event }: TeamsTableProps) => {
   const { data: teams = [], refetch: refetchTeams } = useGetAdminTeams({
     event_id: event.id,
   });
+
+  const { data: teamsAffiliates, refetch: refetchTeamsAffiliates } =
+    useGetTeamsAffiliates(
+      { event_id: event.id },
+      {
+        query: {
+          enabled:
+            view == TableView.Members ||
+            view == TableView.Mentors ||
+            view == TableView.Stakeholders,
+        },
+      },
+    );
+
+  const { data: teamsProjectPreferences } = useGetTeamsProjectPreferences(
+    { event_id: event.id },
+    { query: { enabled: view == TableView.Projects } },
+  );
 
   const indexTeamsMutation = useIndexTeams();
 
@@ -74,7 +100,7 @@ const TeamsTable = ({ event }: TeamsTableProps) => {
             <Text c="red" fw={600}>
               Unless specified otherwise, all changes are APPLIED IMMEDIATELY.
               <br />
-              DO NOT TYPE in the input fields, only paste prepared values.
+              Text fields are saved when you leave the field or press Enter.
             </Text>
           </IconTextGroup>
         </Card.Section>
@@ -146,7 +172,10 @@ const TeamsTable = ({ event }: TeamsTableProps) => {
                       <Table.Th miw={200}>
                         <Group justify="space-between">
                           <Text>ML Key</Text>
-                          <GenerateAPIKeys teams={teams} />
+                          <GenerateAPIKeys
+                            teams={teams}
+                            refetch={refetchTeams}
+                          />
                         </Group>
                       </Table.Th>
                     </>
@@ -173,7 +202,7 @@ const TeamsTable = ({ event }: TeamsTableProps) => {
                   {view == TableView.Notes && (
                     <>
                       <Table.Th>Comment</Table.Th>
-                      <Table.Th>Extra Points</Table.Th>{" "}
+                      <Table.Th>Extra Points</Table.Th>
                     </>
                   )}
                   {view == TableView.General && <Table.Th>Actions</Table.Th>}
@@ -188,6 +217,11 @@ const TeamsTable = ({ event }: TeamsTableProps) => {
                       team={team}
                       view={view}
                       refetch={refetchTeams}
+                      affiliates={teamsAffiliates?.[team.id] ?? EMPTY}
+                      refetchAffiliates={refetchTeamsAffiliates}
+                      projectPreferences={
+                        teamsProjectPreferences?.[team.id] ?? EMPTY
+                      }
                     />
                   ))
                 ) : (

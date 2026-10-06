@@ -1,21 +1,23 @@
 import { useUpdateTeam } from "@/api/gen";
 import { AdminTeam } from "@/api/gen/schemas";
+import { useBlurSave } from "@/hooks/useBlurSave";
+import { inputProps } from "@/styles/common";
 
-import { useState } from "react";
-
-import { NumberInput, Table, Textarea } from "@mantine/core";
+import {
+  NumberInput,
+  NumberInputProps,
+  Table,
+  Textarea,
+  TextareaProps,
+} from "@mantine/core";
 
 type ExtraScoreTdProps = {
   team: AdminTeam;
-  refetch?: () => void;
+  refetch?: () => Promise<unknown>;
 };
 
 const ExtraScoreTd = ({ team, refetch }: ExtraScoreTdProps) => {
   const updateMutation = useUpdateTeam();
-  const [comment, setComment] = useState(team.comment ?? "");
-  const [extraScore, setExtraScore] = useState<string | number>(
-    team.extra_score ?? "",
-  );
 
   const handleUpdate = async (
     comment: string | undefined,
@@ -28,39 +30,46 @@ const ExtraScoreTd = ({ team, refetch }: ExtraScoreTdProps) => {
         extra_score: score,
       },
     });
-    refetch?.();
+    await refetch?.();
   };
 
   // An empty field saves "", which the backend stores as null.
-  const handleCommentBlur = async () => {
-    if (comment !== (team.comment ?? "")) {
-      await handleUpdate(comment, undefined);
-    }
-  };
+  const comment = useBlurSave(team.comment ?? "", (value) =>
+    handleUpdate(value, undefined),
+  );
 
   // An empty field saves 0, since the backend ignores null.
-  const handleExtraScoreBlur = async () => {
-    const score = typeof extraScore === "number" ? extraScore : 0;
-    if (score !== (team.extra_score ?? 0)) {
-      await handleUpdate(undefined, score);
-    }
-  };
+  const extraScore = useBlurSave<string | number>(
+    team.extra_score ?? "",
+    async (value) => {
+      const score = typeof value === "number" ? value : 0;
+      if (score !== (team.extra_score ?? 0)) {
+        await handleUpdate(undefined, score);
+      }
+    },
+  );
 
   return (
     <>
       <Table.Td>
         <Textarea
+          {...(inputProps as TextareaProps)}
+          size="xs"
           autosize
-          value={comment}
-          onChange={(event) => setComment(event.currentTarget.value)}
-          onBlur={handleCommentBlur}
+          value={comment.value}
+          onChange={(event) => comment.setDraft(event.currentTarget.value)}
+          onBlur={comment.commit}
+          disabled={comment.saving}
         />
       </Table.Td>
       <Table.Td>
         <NumberInput
-          value={extraScore}
-          onChange={setExtraScore}
-          onBlur={handleExtraScoreBlur}
+          {...(inputProps as NumberInputProps)}
+          size="xs"
+          value={extraScore.value}
+          onChange={extraScore.setDraft}
+          onBlur={extraScore.commit}
+          disabled={extraScore.saving}
         />
       </Table.Td>
     </>

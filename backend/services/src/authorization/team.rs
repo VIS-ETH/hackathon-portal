@@ -1,5 +1,5 @@
 use crate::authorization::groups::Group;
-use crate::authorization::models::{AffiliateRow, TeamAffiliate, TeamRolesMap};
+use crate::authorization::models::{AffiliateRow, TeamAffiliate, TeamAffiliateRow, TeamRolesMap};
 use crate::authorization::AuthorizationService;
 use crate::user::fmt_user_name;
 use crate::{ServiceError, ServiceResult};
@@ -212,6 +212,60 @@ impl AuthorizationService {
             .collect::<Vec<_>>();
 
         affiliates.sort_by(|a, b| a.name.cmp(&b.name));
+
+        Ok(affiliates)
+    }
+
+    /// Affiliates of all teams of an event, keyed by team id. Teams without
+    /// affiliates are omitted.
+    pub async fn get_teams_affiliates(
+        &self,
+        event_id: Uuid,
+    ) -> ServiceResult<HashMap<Uuid, Vec<TeamAffiliate>>> {
+        let affiliate_rows = db_user::Entity::find()
+            .inner_join(db_team_role_assignment::Entity)
+            .join(
+                JoinType::InnerJoin,
+                db_team_role_assignment::Relation::Team.def(),
+            )
+            .filter(db_team::Column::EventId.eq(event_id))
+            .select_only()
+            .select_column(db_team_role_assignment::Column::TeamId)
+            .select_column(db_user::Column::Id)
+            .select_column(db_user::Column::Name)
+            .select_column(db_user::Column::Index)
+            .select_column(db_team_role_assignment::Column::Role)
+            .into_model::<TeamAffiliateRow>()
+            .all(self.db_repo.conn())
+            .await?;
+
+        let affiliates =
+            affiliate_rows.into_iter().fold(
+                HashMap::new(),
+                |mut acc: HashMap<Uuid, HashMap<Uuid, TeamAffiliate>>, row| {
+                    let affiliate = acc.entry(row.team_id).or_default().entry(row.id).or_insert(
+                        TeamAffiliate {
+                            id: row.id,
+                            name: fmt_user_name(&row.name, row.index),
+                            roles: Vec::new(),
+                        },
+                    );
+
+                    affiliate.roles.push(row.role);
+
+                    acc
+                },
+            );
+
+        let affiliates = affiliates
+            .into_iter()
+            .map(|(team_id, affiliates)| {
+                let mut affiliates = affiliates.into_values().collect::<Vec<_>>();
+                affiliates.sort_by(|a, b| a.name.cmp(&b.name));
+
+                (team_id, affiliates)
+            })
+            .collect();
 
         Ok(affiliates)
     }

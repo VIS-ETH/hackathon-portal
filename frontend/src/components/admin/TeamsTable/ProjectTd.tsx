@@ -9,7 +9,7 @@ import { NIL } from "uuid";
 type ProjectTdProps = {
   team: AdminTeam;
   ro?: boolean;
-  refetch?: () => void;
+  refetch?: () => Promise<unknown>;
 };
 
 const ProjectTd = ({ team, ro, refetch }: ProjectTdProps) => {

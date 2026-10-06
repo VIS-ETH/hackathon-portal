@@ -268,6 +268,14 @@ const discordSchema: object = {
 const ajv = new Ajv({ allErrors: true, verbose: true });
 const validate = ajv.compile(discordSchema);
 
+// ----- Editor Setup -----
+// Module constants, so CodeMirror doesn't reconfigure on every render.
+const editorExtensions = [yaml()];
+const editorBasicSetup = {
+  lineNumbers: true,
+  highlightActiveLine: true,
+};
+
 // ----- sidequest_master Functions -----
 const resolvePermission = (
   permission: string | string[] | null | undefined,
@@ -757,12 +765,9 @@ const DiscordConfigPage = ({ event, refetch }: DiscordControlsProps) => {
               value={yamlInput}
               height="600px"
               theme={oneDark}
-              extensions={[yaml()]}
-              onChange={(value) => setYamlInput(value)}
-              basicSetup={{
-                lineNumbers: true,
-                highlightActiveLine: true,
-              }}
+              extensions={editorExtensions}
+              onChange={setYamlInput}
+              basicSetup={editorBasicSetup}
             />
 
             {isLoading && (

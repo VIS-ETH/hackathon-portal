@@ -1,4 +1,4 @@
-use crate::db::generated::{event, project};
+use crate::db::generated::{event, project, user};
 use crate::db::OrFailExt;
 use crate::{RepositoryError, RepositoryResult};
 use sea_orm::prelude::*;
@@ -14,6 +14,19 @@ impl ProjectRepository {
         project::Entity::find()
             .filter(project::Column::EventId.eq(event_id))
             .order_by_asc(project::Column::Name)
+            .all(db)
+            .await
+            .map_err(RepositoryError::from)
+    }
+
+    pub async fn fetch_all_by_event_id_with_stakeholders<C: ConnectionTrait>(
+        db: &C,
+        event_id: Uuid,
+    ) -> RepositoryResult<Vec<(project::Model, Vec<user::Model>)>> {
+        project::Entity::find()
+            .filter(project::Column::EventId.eq(event_id))
+            .order_by_asc(project::Column::Name)
+            .find_with_related(user::Entity)
             .all(db)
             .await
             .map_err(RepositoryError::from)

@@ -1,14 +1,11 @@
-import {
-  useDeleteTeamRoles,
-  useGetTeamAffiliates,
-  usePutTeamRoles,
-} from "@/api/gen";
+import { useDeleteTeamRoles, usePutTeamRoles } from "@/api/gen";
 import {
   AdminTeam,
   DeleteTeamRolesBody,
   EventAffiliate,
   EventRole,
   PutTeamRolesBody,
+  TeamAffiliate,
   TeamRole,
 } from "@/api/gen/schemas";
 import EventAffiliateSelect from "@/components/select/EventAffiliateSelect";
@@ -18,14 +15,19 @@ import { Table } from "@mantine/core";
 
 type AffiliateTdsProps = {
   team: AdminTeam;
+  affiliates: TeamAffiliate[];
+  refetchAffiliates: () => Promise<unknown>;
   role: TeamRole;
   max: number;
 };
 
-const AffiliateTds = ({ team, role, max }: AffiliateTdsProps) => {
-  const { data: rawAffiliates = [], refetch: refetchAffiliates } =
-    useGetTeamAffiliates(team.id);
-
+const AffiliateTds = ({
+  team,
+  affiliates: rawAffiliates,
+  refetchAffiliates,
+  role,
+  max,
+}: AffiliateTdsProps) => {
   const putTeamRolesMutation = usePutTeamRoles();
   const deleteTeamRolesMutation = useDeleteTeamRoles();
 

@@ -1,12 +1,13 @@
 import { useUpdateTeam } from "@/api/gen";
 import { AdminTeam, TeamForUpdate } from "@/api/gen/schemas";
+import { useBlurSave } from "@/hooks/useBlurSave";
 import { inputProps } from "@/styles/common";
 
 import { PasswordInput, PasswordInputProps, Table } from "@mantine/core";
 
 type CredentialsTdProps = {
   team: AdminTeam;
-  refetch?: () => void;
+  refetch?: () => Promise<unknown>;
 };
 
 const CredentialsTd = ({ team, refetch }: CredentialsTdProps) => {
@@ -18,8 +19,15 @@ const CredentialsTd = ({ team, refetch }: CredentialsTdProps) => {
       data,
     });
 
-    refetch?.();
+    await refetch?.();
   };
+
+  const password = useBlurSave(team.password ?? "", (value) =>
+    handleUpdate({ password: value }),
+  );
+  const aiApiKey = useBlurSave(team.ai_api_key ?? "", (value) =>
+    handleUpdate({ ai_api_key: value }),
+  );
 
   return (
     <>
@@ -28,8 +36,11 @@ const CredentialsTd = ({ team, refetch }: CredentialsTdProps) => {
           {...(inputProps as PasswordInputProps)}
           size="xs"
           placeholder="N/A"
-          value={team.password ?? ""}
-          onChange={(e) => handleUpdate({ password: e.target.value })}
+          value={password.value}
+          onChange={(e) => password.setDraft(e.currentTarget.value)}
+          onBlur={password.commit}
+          disabled={password.saving}
+          onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
         />
       </Table.Td>
       <Table.Td>
@@ -37,8 +48,11 @@ const CredentialsTd = ({ team, refetch }: CredentialsTdProps) => {
           {...(inputProps as PasswordInputProps)}
           size="xs"
           placeholder="N/A"
-          value={team.ai_api_key ?? ""}
-          onChange={(e) => handleUpdate({ ai_api_key: e.target.value })}
+          value={aiApiKey.value}
+          onChange={(e) => aiApiKey.setDraft(e.currentTarget.value)}
+          onBlur={aiApiKey.commit}
+          disabled={aiApiKey.saving}
+          onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
         />
       </Table.Td>
     </>

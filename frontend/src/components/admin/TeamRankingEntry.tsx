@@ -8,6 +8,8 @@ import { AdminTeam, TeamRanking } from "@/api/gen/schemas";
 import { cardProps } from "@/styles/common";
 import { fmtTeamIndex } from "@/utils";
 
+import { memo, useState } from "react";
+
 import {
   Accordion,
   Box,
@@ -42,6 +44,8 @@ const TeamRankingEntry = ({
     mutation: { onSuccess: onTeamUpdated },
   });
   const finalistUpdating = updateTeamMutation.isPending;
+  // The panel content renders on first open and then stays mounted, so closing still animates.
+  const [opened, setOpened] = useState(false);
 
   const changeFinalist = (newFinalist: boolean) => {
     updateTeamMutation.mutate({
@@ -68,7 +72,13 @@ const TeamRankingEntry = ({
   return (
     <Card {...cardProps}>
       <Card.Section>
-        <Accordion>
+        <Accordion
+          onChange={(value) => {
+            if (value) {
+              setOpened(true);
+            }
+          }}
+        >
           <Accordion.Item value="team-info">
             <Group wrap="nowrap" gap={0}>
               <Accordion.Control>
@@ -113,19 +123,21 @@ const TeamRankingEntry = ({
               </Box>
             </Group>
             <Accordion.Panel>
-              <Stack>
-                <Group>
-                  <TeamImage
-                    url={team?.photo_url}
-                    width={240}
-                    height={160}
-                    alt={entry.team_name}
-                    fit="contain"
-                  />
-                  {teamWebpage}
-                </Group>
-                <RatingFeedbackCard entry={entry} adminView />
-              </Stack>
+              {opened && (
+                <Stack>
+                  <Group>
+                    <TeamImage
+                      url={team?.photo_url}
+                      width={240}
+                      height={160}
+                      alt={entry.team_name}
+                      fit="contain"
+                    />
+                    {teamWebpage}
+                  </Group>
+                  <RatingFeedbackCard entry={entry} adminView />
+                </Stack>
+              )}
             </Accordion.Panel>
           </Accordion.Item>
         </Accordion>
@@ -134,4 +146,4 @@ const TeamRankingEntry = ({
   );
 };
 
-export default TeamRankingEntry;
+export default memo(TeamRankingEntry);

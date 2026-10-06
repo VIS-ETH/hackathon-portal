@@ -28,6 +28,8 @@ pub fn get_router(state: &ApiState) -> Router {
         .route("/", get(get_teams))
         .route("/admin", get(get_admin_teams))
         .route("/roles", get(get_teams_roles))
+        .route("/affiliates", get(get_teams_affiliates))
+        .route("/project-preferences", get(get_teams_project_preferences))
         .route("/slug/:event_slug/:team_slug", get(get_team_by_slug))
         .route("/:team_id", get(get_team))
         .route("/:team_id", patch(update_team))
@@ -198,6 +200,72 @@ pub async fn get_teams_roles(
     }
 
     Ok(Json(roles))
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/teams/affiliates",
+    responses(
+        (status = StatusCode::OK, body = HashMap<Uuid, Vec<TeamAffiliate>>),
+        (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
+    ),
+    params(
+        ("event_id"= Uuid, Query, description = "Filter by event id"),
+    )
+)]
+pub async fn get_teams_affiliates(
+    ctx: Ctx,
+    State(state): State<ApiState>,
+    Query(query): Query<EventIdQuery>,
+) -> ApiJson<HashMap<Uuid, Vec<TeamAffiliate>>> {
+    let event = state.event_service.get_event(query.event_id).await?;
+    let groups = Groups::from_event(ctx.roles(), event.id);
+
+    if !groups.can_manage_event() {
+        return Err(ApiError::Forbidden {
+            action: "view team affiliates for this event".to_string(),
+        });
+    }
+
+    let affiliates = state
+        .authorization_service
+        .get_teams_affiliates(event.id)
+        .await?;
+
+    Ok(Json(affiliates))
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/teams/project-preferences",
+    responses(
+        (status = StatusCode::OK, body = HashMap<Uuid, Vec<Uuid>>),
+        (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
+    ),
+    params(
+        ("event_id"= Uuid, Query, description = "Filter by event id"),
+    )
+)]
+pub async fn get_teams_project_preferences(
+    ctx: Ctx,
+    State(state): State<ApiState>,
+    Query(query): Query<EventIdQuery>,
+) -> ApiJson<HashMap<Uuid, Vec<Uuid>>> {
+    let event = state.event_service.get_event(query.event_id).await?;
+    let groups = Groups::from_event(ctx.roles(), event.id);
+
+    if !groups.can_manage_event() {
+        return Err(ApiError::Forbidden {
+            action: "view project preferences for this event".to_string(),
+        });
+    }
+
+    let pps = state
+        .team_service
+        .get_teams_project_preferences(event.id)
+        .await?;
+
+    Ok(Json(pps))
 }
 
 #[utoipa::path(

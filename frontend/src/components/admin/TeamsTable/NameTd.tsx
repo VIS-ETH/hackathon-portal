@@ -1,5 +1,6 @@
 import { useUpdateTeam } from "@/api/gen";
 import { AdminTeam } from "@/api/gen/schemas";
+import { useBlurSave } from "@/hooks/useBlurSave";
 import { inputProps } from "@/styles/common";
 
 import { Table, TextInput, TextInputProps } from "@mantine/core";
@@ -7,7 +8,7 @@ import { Table, TextInput, TextInputProps } from "@mantine/core";
 type NameTdProps = {
   team: AdminTeam;
   ro?: boolean;
-  refetch?: () => void;
+  refetch?: () => Promise<unknown>;
 };
 
 const NameTd = ({ team, ro, refetch }: NameTdProps) => {
@@ -25,16 +26,21 @@ const NameTd = ({ team, ro, refetch }: NameTdProps) => {
       },
     });
 
-    refetch?.();
+    await refetch?.();
   };
+
+  const name = useBlurSave(team.name, handleUpdate);
 
   return (
     <Table.Td>
       <TextInput
         {...(inputProps as TextInputProps)}
         size="xs"
-        value={team.name}
-        onChange={async (value) => handleUpdate(value.target.value)}
+        value={name.value}
+        onChange={(e) => name.setDraft(e.currentTarget.value)}
+        onBlur={name.commit}
+        disabled={name.saving}
+        onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
         readOnly={ro}
       />
     </Table.Td>

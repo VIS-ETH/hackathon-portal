@@ -1,4 +1,4 @@
-import { useGetTeams, useUpdateTeam } from "@/api/gen";
+import { useGetAdminTeams, useUpdateTeam } from "@/api/gen";
 import { Event } from "@/api/gen/schemas";
 import {
   cardProps,
@@ -30,7 +30,7 @@ const TeamPasswordsControls = ({ event }: TeamPasswordsControlsProps) => {
   const [pw_input, setPWInput] = useState("");
   const [ml_input, setMLInput] = useState("");
 
-  const { data: teams } = useGetTeams({
+  const { data: teams, refetch: refetchTeams } = useGetAdminTeams({
     event_id: event.id,
   });
 
@@ -141,6 +141,8 @@ const TeamPasswordsControls = ({ event }: TeamPasswordsControlsProps) => {
         },
       });
     }
+
+    await refetchTeams();
 
     alert("Passwords updated");
 

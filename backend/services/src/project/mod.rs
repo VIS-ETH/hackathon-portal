@@ -49,15 +49,13 @@ impl ProjectService {
     }
 
     pub async fn get_projects(&self, event_id: Uuid) -> ServiceResult<Vec<Project>> {
-        let projects =
-            ProjectRepository::fetch_all_by_event_id(self.db_repo.conn(), event_id).await?;
+        let projects = ProjectRepository::fetch_all_by_event_id_with_stakeholders(
+            self.db_repo.conn(),
+            event_id,
+        )
+        .await?;
 
-        let mut result = Vec::with_capacity(projects.len());
-        for project in projects {
-            result.push(self.with_stakeholders(self.db_repo.conn(), project).await?);
-        }
-
-        Ok(result)
+        Ok(projects.into_iter().map(Project::from).collect())
     }
 
     pub async fn get_project(&self, project_id: Uuid) -> ServiceResult<Project> {
@@ -208,20 +206,23 @@ impl ProjectService {
         let team_ids = teams.iter().map(|t| t.id).collect::<Vec<_>>();
 
         // Mapping from team_id -> project_id -> preference
-        let mut preference = HashMap::<Uuid, HashMap<Uuid, i32>>::new();
-        for team in teams {
-            let team_pref =
-                ProjectPreferenceRepository::fetch_all_by_team_id(self.db_repo.conn(), team.id)
-                    .await?;
-
-            let team_pref =
-                team_pref
-                    .into_iter()
-                    .fold(HashMap::<Uuid, i32>::new(), |mut acc, pref| {
-                        acc.insert(pref.project_id, pref.score);
+        let mut preference =
+            ProjectPreferenceRepository::fetch_all_by_event_id(self.db_repo.conn(), event_id)
+                .await?
+                .into_iter()
+                .fold(
+                    HashMap::<Uuid, HashMap<Uuid, i32>>::new(),
+                    |mut acc, pref| {
+                        acc.entry(pref.team_id)
+                            .or_default()
+                            .insert(pref.project_id, pref.score);
                         acc
-                    });
-            preference.insert(team.id, team_pref);
+                    },
+                );
+
+        // Teams without preferences still take part in the matching
+        for team in teams {
+            preference.entry(team.id).or_default();
         }
 
         let matching_problem = GroupAssignment::new(

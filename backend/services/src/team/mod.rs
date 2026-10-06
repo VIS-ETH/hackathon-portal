@@ -353,6 +353,25 @@ impl TeamService {
         Ok(pps)
     }
 
+    /// Project preferences of all teams of an event, keyed by team id.
+    /// Teams without preferences are omitted.
+    pub async fn get_teams_project_preferences(
+        &self,
+        event_id: Uuid,
+    ) -> ServiceResult<HashMap<Uuid, Vec<Uuid>>> {
+        let pps = ProjectPreferenceRepository::fetch_all_by_event_id(self.db_repo.conn(), event_id)
+            .await?;
+
+        let pps = pps
+            .into_iter()
+            .fold(HashMap::<Uuid, Vec<Uuid>>::new(), |mut acc, pp| {
+                acc.entry(pp.team_id).or_default().push(pp.project_id);
+                acc
+            });
+
+        Ok(pps)
+    }
+
     pub async fn update_team_project_preferences(
         &self,
         team_id: Uuid,

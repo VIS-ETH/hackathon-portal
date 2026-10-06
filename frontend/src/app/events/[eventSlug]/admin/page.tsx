@@ -59,7 +59,12 @@ const Admin = () => {
   }
 
   return (
-    <Tabs value={activeTab} onChange={handleTabChange} mt="-md">
+    <Tabs
+      value={activeTab}
+      onChange={handleTabChange}
+      keepMounted={false}
+      mt="-md"
+    >
       <Tabs.List>
         <Tabs.Tab value="general" leftSection={<IconSettings {...iconProps} />}>
           General
@@ -106,7 +111,7 @@ const Admin = () => {
 
       <Tabs.Panel value="teams" mt="md">
         <Stack>
-          {activeTab === "teams" && <TeamsTable event={event} />}
+          <TeamsTable event={event} />
           <TeamPasswordsControls event={event} />
         </Stack>
       </Tabs.Panel>

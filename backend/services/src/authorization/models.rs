@@ -44,6 +44,15 @@ pub struct AffiliateRow<R: TryGetable> {
     pub role: R,
 }
 
+#[derive(Debug, Clone, FromQueryResult)]
+pub struct TeamAffiliateRow {
+    pub team_id: Uuid,
+    pub id: Uuid,
+    pub name: String,
+    pub index: i32,
+    pub role: TeamRole,
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
 pub struct EventAffiliate {
     pub id: Uuid,

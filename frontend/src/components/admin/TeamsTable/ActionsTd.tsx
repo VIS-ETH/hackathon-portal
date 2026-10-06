@@ -8,7 +8,7 @@ import { IconTrash } from "@tabler/icons-react";
 
 type ActionsTdProps = {
   team: AdminTeam;
-  refetch?: () => void;
+  refetch?: () => Promise<unknown>;
 };
 
 const ActionsTd = ({ team, refetch }: ActionsTdProps) => {

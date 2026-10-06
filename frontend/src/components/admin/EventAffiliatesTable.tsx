@@ -25,7 +25,6 @@ import {
 } from "@mantine/core";
 
 import { IconAlertTriangle, IconRefresh } from "@tabler/icons-react";
-import objectHash from "object-hash";
 
 type EventAffiliatesTableProps = {
   event: Event;
@@ -108,7 +107,7 @@ const EventAffiliatesTable = ({ event }: EventAffiliatesTableProps) => {
               {filteredAffiliates.length ? (
                 filteredAffiliates.map((affiliate) => (
                   <EventAffiliatesTableRow
-                    key={objectHash(affiliate)}
+                    key={affiliate.id}
                     event={event}
                     affiliate={affiliate}
                     dangerous={dangerous}

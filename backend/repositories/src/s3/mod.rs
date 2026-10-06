@@ -7,7 +7,7 @@ use aws_sdk_s3::types::{CorsConfiguration, CorsRule};
 use aws_sdk_s3::{Client, Config};
 use mime::Mime;
 use serde::{Deserialize, Serialize};
-use std::time::Duration;
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -27,6 +27,8 @@ pub struct S3Repository {
 }
 
 impl S3Repository {
+    const SIGNING_TIME_STEP: Duration = Duration::from_mins(5); // 5 minutes
+
     #[must_use]
     pub fn new(client: Client, bucket: String) -> Self {
         Self { client, bucket }
@@ -121,7 +123,19 @@ impl S3Repository {
         key: &str,
         expires_in: Duration,
     ) -> RepositoryResult<String> {
-        let config = PresigningConfig::builder().expires_in(expires_in).build()?;
+        // Signing at the start of the current time step returns the same URL for the whole step,
+        // so clients can cache it; extending the expiry keeps it valid for at least `expires_in`.
+        let now = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_secs();
+        let step = Self::SIGNING_TIME_STEP.as_secs();
+        let start_time = UNIX_EPOCH + Duration::from_secs(now - now % step);
+
+        let config = PresigningConfig::builder()
+            .start_time(start_time)
+            .expires_in(expires_in + Self::SIGNING_TIME_STEP)
+            .build()?;
 
         let response = self
             .client

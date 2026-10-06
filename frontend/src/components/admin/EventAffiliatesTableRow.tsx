@@ -1,6 +1,8 @@
 import { useDeleteEventRoles, usePutEventRoles } from "@/api/gen";
 import { Event, EventAffiliate, EventRole } from "@/api/gen/schemas";
 
+import { memo } from "react";
+
 import { Checkbox, Table } from "@mantine/core";
 
 type EventAffiliatesTableRowProps = {
@@ -75,4 +77,4 @@ const EventAffiliatesTableRow = ({
   );
 };
 
-export default EventAffiliatesTableRow;
+export default memo(EventAffiliatesTableRow);
