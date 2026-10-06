@@ -39,7 +39,12 @@ pub async fn create_jury_rating(
     let event = state.event_service.get_event(team.event_id).await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
-    if !groups.can_manage_jury_rating(event.visibility, event.phase, event.read_only) {
+    if !groups.can_manage_jury_rating(
+        event.visibility,
+        event.phase,
+        event.jury_rating_open,
+        event.read_only,
+    ) {
         return Err(ApiError::Forbidden {
             action: "create a jury rating for this event".to_string(),
         });
@@ -73,7 +78,12 @@ pub async fn get_jury_ratings(
     let event = state.event_service.get_event(team.event_id).await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
-    if !groups.can_manage_jury_rating(event.visibility, event.phase, event.read_only) {
+    if !groups.can_manage_jury_rating(
+        event.visibility,
+        event.phase,
+        event.jury_rating_open,
+        event.read_only,
+    ) {
         return Err(ApiError::Forbidden {
             action: "view jury ratings for this event".to_string(),
         });
@@ -109,8 +119,12 @@ pub async fn get_jury_rating(
     let groups = Groups::from_event(ctx.roles(), event.id);
 
     let user_policy_pass = rating.user_id == ctx.user().id || groups.can_manage_event();
-    let rating_policy_pass =
-        groups.can_manage_jury_rating(event.visibility, event.phase, event.read_only);
+    let rating_policy_pass = groups.can_manage_jury_rating(
+        event.visibility,
+        event.phase,
+        event.jury_rating_open,
+        event.read_only,
+    );
 
     if !user_policy_pass || !rating_policy_pass {
         return Err(ApiError::Forbidden {
@@ -142,8 +156,12 @@ pub async fn update_jury_rating(
     let groups = Groups::from_event(ctx.roles(), event.id);
 
     let user_policy_pass = rating.user_id == ctx.user().id || groups.can_manage_event();
-    let rating_policy_pass =
-        groups.can_manage_jury_rating(event.visibility, event.phase, event.read_only);
+    let rating_policy_pass = groups.can_manage_jury_rating(
+        event.visibility,
+        event.phase,
+        event.jury_rating_open,
+        event.read_only,
+    );
 
     if !user_policy_pass || !rating_policy_pass {
         return Err(ApiError::Forbidden {
@@ -179,8 +197,12 @@ pub async fn delete_jury_rating(
     let groups = Groups::from_event(ctx.roles(), event.id);
 
     let user_policy_pass = rating.user_id == ctx.user().id || groups.can_manage_event();
-    let rating_policy_pass =
-        groups.can_manage_jury_rating(event.visibility, event.phase, event.read_only);
+    let rating_policy_pass = groups.can_manage_jury_rating(
+        event.visibility,
+        event.phase,
+        event.jury_rating_open,
+        event.read_only,
+    );
 
     if !user_policy_pass || !rating_policy_pass {
         return Err(ApiError::Forbidden {

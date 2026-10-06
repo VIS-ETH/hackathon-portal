@@ -134,7 +134,8 @@ const EventSettings = ({ event, refetch }: EventSettingsProps) => {
       projects_visible: event.projects_visible,
       project_assignments_visible: event.project_assignments_visible,
       finalists_visible: event.finalists_visible,
-      vote_enabled: event.vote_enabled,
+      public_vote_open: event.public_vote_open,
+      jury_rating_open: event.jury_rating_open,
       feedback_visible: event.feedback_visible,
     };
     form.setInitialValues(flags);
@@ -343,11 +344,18 @@ const EventSettings = ({ event, refetch }: EventSettingsProps) => {
               label="Finalists visible"
             />
             <Checkbox
-              {...form.getInputProps("vote_enabled", {
+              {...form.getInputProps("public_vote_open", {
                 type: "checkbox",
               })}
-              key={form.key("vote_enabled")}
-              label="Vote open"
+              key={form.key("public_vote_open")}
+              label="Public vote open"
+            />
+            <Checkbox
+              {...form.getInputProps("jury_rating_open", {
+                type: "checkbox",
+              })}
+              key={form.key("jury_rating_open")}
+              label="Jury rating open"
             />
             <Checkbox
               {...form.getInputProps("feedback_visible", {

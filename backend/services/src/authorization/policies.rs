@@ -19,6 +19,7 @@ pub struct Policies {
     pub can_update_team_blog: bool,
     pub can_manage_team: bool,
     pub can_manage_jury_rating: bool,
+    pub can_manage_public_vote: bool,
     pub can_view_project: bool,
     pub can_manage_project: bool,
     pub can_view_project_assignment: bool,
@@ -27,7 +28,6 @@ pub struct Policies {
     pub can_view_sidequest_attempt: bool,
     pub can_manage_sidequest_attempt: bool,
     pub can_create_upload: bool,
-    pub can_public_vote: bool,
     pub can_view_finalist: bool,
 }
 
@@ -40,7 +40,8 @@ pub struct EventFlags {
     pub projects_visible: bool,
     pub project_assignments_visible: bool,
     pub feedback_visible: bool,
-    pub vote_enabled: bool,
+    pub public_vote_open: bool,
+    pub jury_rating_open: bool,
     pub finalists_visible: bool,
 }
 
@@ -53,7 +54,8 @@ impl From<&Event> for EventFlags {
             projects_visible: event.projects_visible,
             project_assignments_visible: event.project_assignments_visible,
             feedback_visible: event.feedback_visible,
-            vote_enabled: event.vote_enabled,
+            public_vote_open: event.public_vote_open,
+            jury_rating_open: event.jury_rating_open,
             finalists_visible: event.finalists_visible,
         }
     }
@@ -98,6 +100,13 @@ impl Policies {
             can_manage_jury_rating: groups.can_manage_jury_rating(
                 event.visibility,
                 event.phase,
+                event.jury_rating_open,
+                event.read_only,
+            ),
+            can_manage_public_vote: groups.can_manage_public_vote(
+                event.visibility,
+                event.phase,
+                event.public_vote_open,
                 event.read_only,
             ),
             can_view_project: groups.can_view_project(event.visibility, event.projects_visible),
@@ -122,11 +131,6 @@ impl Policies {
             can_create_upload: groups.can_create_upload(
                 event.visibility,
                 event.phase,
-                event.read_only,
-            ),
-            can_public_vote: groups.can_public_vote(
-                event.visibility,
-                event.vote_enabled,
                 event.read_only,
             ),
             can_view_finalist: groups.can_view_finalists(event.visibility, event.finalists_visible),
@@ -155,7 +159,8 @@ mod tests {
         let event_projects_visible = [true, false].iter();
         let event_project_assignments_visible = [true, false].iter();
         let event_feedback_is_visible = [true, false].iter();
-        let event_vote_enabled = [true, false].iter();
+        let event_public_vote_open = [true, false].iter();
+        let event_jury_rating_open = [true, false].iter();
         let event_finalists_visible = [true, false].iter();
 
         let inputs = iproduct!(
@@ -167,7 +172,8 @@ mod tests {
             event_projects_visible,
             event_project_assignments_visible,
             event_feedback_is_visible,
-            event_vote_enabled,
+            event_public_vote_open,
+            event_jury_rating_open,
             event_finalists_visible,
         );
 
@@ -184,8 +190,9 @@ mod tests {
                     projects_visible: *input.5,
                     project_assignments_visible: *input.6,
                     feedback_visible: *input.7,
-                    vote_enabled: *input.8,
-                    finalists_visible: *input.9,
+                    public_vote_open: *input.8,
+                    jury_rating_open: *input.9,
+                    finalists_visible: *input.10,
                 },
             );
 

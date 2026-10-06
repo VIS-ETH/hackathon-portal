@@ -61,8 +61,7 @@ const Navbar = () => {
       label: "Rating",
       path: `/events/${event?.slug}/rating`,
       visible:
-        (policies?.can_manage_jury_rating && event?.phase === "Grading") ||
-        policies?.can_public_vote,
+        policies?.can_manage_jury_rating || policies?.can_manage_public_vote,
     },
     {
       label: "Teams",

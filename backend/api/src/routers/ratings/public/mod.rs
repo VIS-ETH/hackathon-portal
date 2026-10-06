@@ -37,7 +37,12 @@ pub async fn get_my_votes(
     let event = state.event_service.get_event(query.event_id).await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
-    if !groups.can_public_vote(event.visibility, event.vote_enabled, event.read_only) {
+    if !groups.can_manage_public_vote(
+        event.visibility,
+        event.phase,
+        event.public_vote_open,
+        event.read_only,
+    ) {
         return Err(ApiError::Forbidden {
             action: "access votes for this event".to_string(),
         });
@@ -71,7 +76,12 @@ pub async fn set_my_vote(
     let event = state.event_service.get_event(query.event_id).await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
-    if !groups.can_public_vote(event.visibility, event.vote_enabled, event.read_only) {
+    if !groups.can_manage_public_vote(
+        event.visibility,
+        event.phase,
+        event.public_vote_open,
+        event.read_only,
+    ) {
         return Err(ApiError::Forbidden {
             action: "access votes for this event".to_string(),
         });

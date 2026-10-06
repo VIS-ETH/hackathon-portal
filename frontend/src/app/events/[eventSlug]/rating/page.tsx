@@ -9,11 +9,9 @@ import { Stack } from "@mantine/core";
 const Page = () => {
   const { policies } = useResolveParams();
 
-  if (policies?.can_manage_jury_rating) {
-  }
   return (
     <Stack>
-      {policies?.can_public_vote && <PublicVoteInput />}
+      {policies?.can_manage_public_vote && <PublicVoteInput />}
       {policies?.can_manage_jury_rating && <RatingInput />}
     </Stack>
   );

@@ -72,7 +72,8 @@ model event {
   read_only                   Boolean          @default(true)
   projects_visible            Boolean          @default(false)
   project_assignments_visible Boolean          @default(false)
-  voting_open                 Boolean          @default(false)
+  public_vote_open            Boolean          @default(false)
+  jury_rating_open            Boolean          @default(false)
   feedback_visible            Boolean          @default(false)
   finalists_visible           Boolean          @default(false)
   master_ai_api_key           Bytes?

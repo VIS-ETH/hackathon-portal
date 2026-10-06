@@ -203,6 +203,7 @@ impl Groups {
         &self,
         event_visibility: EventVisibility,
         event_phase: EventPhase,
+        event_jury_rating_open: bool,
         event_is_ro: bool,
     ) -> bool {
         if let Some(decision) = self.default_can_manage_policy(event_visibility, event_is_ro) {
@@ -210,10 +211,25 @@ impl Groups {
         }
 
         if self == &Group::Juror {
-            return event_phase == EventPhase::Grading;
+            return event_phase == EventPhase::Grading && event_jury_rating_open;
         }
 
         false
+    }
+
+    #[must_use]
+    pub fn can_manage_public_vote(
+        &self,
+        event_visibility: EventVisibility,
+        event_phase: EventPhase,
+        event_public_vote_open: bool,
+        event_is_ro: bool,
+    ) -> bool {
+        if let Some(decision) = self.default_can_manage_policy(event_visibility, event_is_ro) {
+            return decision;
+        }
+
+        event_phase == EventPhase::Grading && event_public_vote_open
     }
 
     #[must_use]
@@ -484,24 +500,6 @@ impl Groups {
         if self == &Group::EventAffiliate {
             return finalists_visible;
         }
-        false
-    }
-
-    #[must_use]
-    pub fn can_public_vote(
-        &self,
-        event_visibility: EventVisibility,
-        public_voting_enabled: bool,
-        event_read_only: bool,
-    ) -> bool {
-        if let Some(decision) = self.default_can_manage_policy(event_visibility, event_read_only) {
-            return decision;
-        }
-
-        if public_voting_enabled {
-            return true;
-        }
-
         false
     }
 

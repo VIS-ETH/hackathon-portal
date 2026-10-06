@@ -11,10 +11,10 @@ export interface Policies {
   can_manage_event: boolean;
   can_manage_jury_rating: boolean;
   can_manage_project: boolean;
+  can_manage_public_vote: boolean;
   can_manage_sidequest: boolean;
   can_manage_sidequest_attempt: boolean;
   can_manage_team: boolean;
-  can_public_vote: boolean;
   can_update_team_blog: boolean;
   can_update_team_ingress_config: boolean;
   can_update_team_name: boolean;

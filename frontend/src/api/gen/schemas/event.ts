@@ -28,6 +28,7 @@ export interface Event {
   feedback_visible: boolean;
   finalists_visible: boolean;
   id: string;
+  jury_rating_open: boolean;
   /** @nullable */
   managed_address_template?: string | null;
   /** @minimum 0 */
@@ -40,6 +41,7 @@ export interface Event {
   private_address_template?: string | null;
   project_assignments_visible: boolean;
   projects_visible: boolean;
+  public_vote_open: boolean;
   read_only: boolean;
   /** @minimum 0 */
   sidequest_cooldown: number;
@@ -48,7 +50,6 @@ export interface Event {
   ssh_config_template?: string | null;
   start: string;
   visibility: EventVisibility;
-  vote_enabled: boolean;
   /** @nullable */
   welcome_content?: string | null;
 }

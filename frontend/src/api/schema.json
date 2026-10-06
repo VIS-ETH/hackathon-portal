@@ -3544,7 +3544,8 @@
           "feedback_visible",
           "visibility",
           "phase",
-          "vote_enabled",
+          "public_vote_open",
+          "jury_rating_open",
           "finalists_visible",
           "blog_max_sections",
           "blog_max_images",
@@ -3580,6 +3581,7 @@
           "feedback_visible": { "type": "boolean" },
           "finalists_visible": { "type": "boolean" },
           "id": { "type": "string", "format": "uuid" },
+          "jury_rating_open": { "type": "boolean" },
           "managed_address_template": { "type": "string", "nullable": true },
           "max_team_size": {
             "type": "integer",
@@ -3596,6 +3598,7 @@
           "private_address_template": { "type": "string", "nullable": true },
           "project_assignments_visible": { "type": "boolean" },
           "projects_visible": { "type": "boolean" },
+          "public_vote_open": { "type": "boolean" },
           "read_only": { "type": "boolean" },
           "sidequest_cooldown": {
             "type": "integer",
@@ -3606,7 +3609,6 @@
           "ssh_config_template": { "type": "string", "nullable": true },
           "start": { "type": "string", "format": "date-time" },
           "visibility": { "$ref": "#/components/schemas/EventVisibility" },
-          "vote_enabled": { "type": "boolean" },
           "welcome_content": { "type": "string", "nullable": true }
         }
       },
@@ -3687,6 +3689,7 @@
           "end": { "type": "string", "format": "date-time", "nullable": true },
           "feedback_visible": { "type": "boolean", "nullable": true },
           "finalists_visible": { "type": "boolean", "nullable": true },
+          "jury_rating_open": { "type": "boolean", "nullable": true },
           "managed_address_template": { "type": "string", "nullable": true },
           "master_ai_api_key": { "type": "string", "nullable": true },
           "max_team_size": {
@@ -3712,6 +3715,7 @@
             "nullable": true
           },
           "projects_visible": { "type": "boolean", "nullable": true },
+          "public_vote_open": { "type": "boolean", "nullable": true },
           "read_only": { "type": "boolean", "nullable": true },
           "sidequest_cooldown": {
             "type": "integer",
@@ -3729,7 +3733,6 @@
             "allOf": [{ "$ref": "#/components/schemas/EventVisibility" }],
             "nullable": true
           },
-          "vote_enabled": { "type": "boolean", "nullable": true },
           "welcome_content": { "type": "string", "nullable": true }
         }
       },
@@ -3947,6 +3950,7 @@
           "can_update_team_blog",
           "can_manage_team",
           "can_manage_jury_rating",
+          "can_manage_public_vote",
           "can_view_project",
           "can_manage_project",
           "can_view_project_assignment",
@@ -3955,7 +3959,6 @@
           "can_view_sidequest_attempt",
           "can_manage_sidequest_attempt",
           "can_create_upload",
-          "can_public_vote",
           "can_view_finalist"
         ],
         "properties": {
@@ -3964,10 +3967,10 @@
           "can_manage_event": { "type": "boolean" },
           "can_manage_jury_rating": { "type": "boolean" },
           "can_manage_project": { "type": "boolean" },
+          "can_manage_public_vote": { "type": "boolean" },
           "can_manage_sidequest": { "type": "boolean" },
           "can_manage_sidequest_attempt": { "type": "boolean" },
           "can_manage_team": { "type": "boolean" },
-          "can_public_vote": { "type": "boolean" },
           "can_update_team_blog": { "type": "boolean" },
           "can_update_team_ingress_config": { "type": "boolean" },
           "can_update_team_name": { "type": "boolean" },

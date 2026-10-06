@@ -43,6 +43,8 @@ export interface EventForUpdate {
   /** @nullable */
   finalists_visible?: boolean | null;
   /** @nullable */
+  jury_rating_open?: boolean | null;
+  /** @nullable */
   managed_address_template?: string | null;
   /** @nullable */
   master_ai_api_key?: string | null;
@@ -66,6 +68,8 @@ export interface EventForUpdate {
   /** @nullable */
   projects_visible?: boolean | null;
   /** @nullable */
+  public_vote_open?: boolean | null;
+  /** @nullable */
   read_only?: boolean | null;
   /**
    * @minimum 0
@@ -77,8 +81,6 @@ export interface EventForUpdate {
   /** @nullable */
   start?: string | null;
   visibility?: EventVisibility | null;
-  /** @nullable */
-  vote_enabled?: boolean | null;
   /** @nullable */
   welcome_content?: string | null;
 }
