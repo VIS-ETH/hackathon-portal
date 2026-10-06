@@ -76,10 +76,10 @@ impl S3Repository {
         ];
 
         let allowed_request_headers = vec![
-            "Content-Type".to_string(),
-            "Content-Length".to_string(),
-            "Authorization".to_string(),
-            "X-Amz-*".to_string(),
+            "content-type".to_string(),
+            "content-length".to_string(),
+            "authorization".to_string(),
+            "x-amz-*".to_string(),
         ];
 
         let allowed_response_headers = vec!["ETag".to_string(), "Accept-Ranges".to_string()];

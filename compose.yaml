@@ -1,6 +1,6 @@
 include:
   - compose.app.yaml
-  - compose.minio.yaml
+  - compose.garage.yaml
   - compose.postgres.yaml
 
 volumes:
@@ -8,7 +8,7 @@ volumes:
     external: true
   portal_db_backup:
     external: true
-  portal_minio_data:
+  portal_garage_data:
     external: true
 
 networks:

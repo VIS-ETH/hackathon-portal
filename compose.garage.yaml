@@ -1,0 +1,35 @@
+services:
+  garage:
+    image: dxflrs/garage:v2.3.0
+    container_name: portal_garage
+    command: ["/garage", "server", "--single-node", "--default-bucket"]
+    environment:
+      GARAGE_DEFAULT_ACCESS_KEY: ${PORTAL__S3__ACCESS_KEY}
+      GARAGE_DEFAULT_SECRET_KEY: ${PORTAL__S3__SECRET_KEY}
+      GARAGE_DEFAULT_BUCKET: ${PORTAL__S3__BUCKET}
+    configs:
+      - source: garage
+        target: /etc/garage.toml
+    volumes:
+      - portal_garage_data:/var/lib/garage
+    ports:
+      - 9000:9000
+    restart: unless-stopped
+    profiles:
+      - dev
+
+configs:
+  garage:
+    content: |
+      metadata_dir = "/var/lib/garage/meta"
+      data_dir = "/var/lib/garage/data"
+      db_engine = "sqlite"
+      replication_factor = 1
+
+      rpc_bind_addr = "[::]:3901"
+      rpc_public_addr = "127.0.0.1:3901"
+      rpc_secret = "a780dd56dc9ce8190be0e655f64ffe4fedeefe266405c9293f38452661188eac" # Only used for local development
+
+      [s3_api]
+      s3_region = "${PORTAL__S3__REGION}"
+      api_bind_addr = "[::]:9000"
