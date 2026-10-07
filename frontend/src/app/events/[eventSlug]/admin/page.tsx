@@ -12,7 +12,7 @@ import WelcomeContentControls from "@/components/admin/WelcomeContentControls";
 import SecretsTab from "@/components/admin/secrets/SecretsTab";
 import { useResolveParams } from "@/hooks/useResolveParams";
 import { confirmDiscard } from "@/hooks/useUnsavedChanges";
-import { iconProps } from "@/styles/common";
+import { iconProps, pageTabsProps, tabsPanelProps } from "@/styles/common";
 
 import { useEffect, useState } from "react";
 
@@ -63,10 +63,10 @@ const Admin = () => {
 
   return (
     <Tabs
+      {...pageTabsProps}
       value={activeTab}
       onChange={handleTabChange}
       keepMounted={false}
-      mt="-md"
     >
       <Tabs.List>
         <Tabs.Tab value="general" leftSection={<IconSettings {...iconProps} />}>
@@ -104,38 +104,38 @@ const Admin = () => {
         </Tabs.Tab>
       </Tabs.List>
 
-      <Tabs.Panel value="general" mt="md">
+      <Tabs.Panel {...tabsPanelProps} value="general">
         <EventSettings event={event} refetch={refetchEvent} />
       </Tabs.Panel>
 
-      <Tabs.Panel value="roles" mt="md">
+      <Tabs.Panel {...tabsPanelProps} value="roles">
         <Stack>
           <EventAffiliatesTable event={event} />
           <InvitationControls event={event} />
         </Stack>
       </Tabs.Panel>
 
-      <Tabs.Panel value="teams" mt="md">
+      <Tabs.Panel {...tabsPanelProps} value="teams">
         <TeamsTable event={event} />
       </Tabs.Panel>
 
-      <Tabs.Panel value="secrets" mt="md">
+      <Tabs.Panel {...tabsPanelProps} value="secrets">
         <SecretsTab event={event} />
       </Tabs.Panel>
 
-      <Tabs.Panel value="ranking" mt="md">
+      <Tabs.Panel {...tabsPanelProps} value="ranking">
         <RankingTab eventId={event.id} />
       </Tabs.Panel>
 
-      <Tabs.Panel value="welcome" mt="md">
+      <Tabs.Panel {...tabsPanelProps} value="welcome">
         <WelcomeContentControls event={event} refetch={refetchEvent} />
       </Tabs.Panel>
 
-      <Tabs.Panel value="documentation" mt="md">
+      <Tabs.Panel {...tabsPanelProps} value="documentation">
         <DocumentationContentControls event={event} refetch={refetchEvent} />
       </Tabs.Panel>
 
-      <Tabs.Panel value="discord" mt="md">
+      <Tabs.Panel {...tabsPanelProps} value="discord">
         <DiscordControls event={event} refetch={refetchEvent} />
       </Tabs.Panel>
     </Tabs>

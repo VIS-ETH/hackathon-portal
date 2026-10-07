@@ -16,8 +16,8 @@ import {
   cardSectionProps,
   iconProps,
   inputProps,
-  secondaryButtonProps,
   segmentedControlProps,
+  toolbarButtonProps,
 } from "@/styles/common";
 
 import { ReactNode, useMemo, useState } from "react";
@@ -121,8 +121,7 @@ const SecretsGrid = ({
       <Card.Section {...cardSectionProps}>
         <Group>
           <Button
-            {...secondaryButtonProps}
-            size="sm"
+            {...toolbarButtonProps}
             leftSection={<IconRefresh {...iconProps} />}
             onClick={() => {
               refetch();
@@ -139,8 +138,7 @@ const SecretsGrid = ({
             onKeyDown={(e) => e.key === "Enter" && handleCreate()}
           />
           <Button
-            {...secondaryButtonProps}
-            size="sm"
+            {...toolbarButtonProps}
             leftSection={<IconPlus {...iconProps} />}
             onClick={handleCreate}
             disabled={newName.trim() === "" || createSecretMutation.isPending}

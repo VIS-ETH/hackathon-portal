@@ -91,7 +91,9 @@ const TeamRankingEntry = ({
                   <Grid.Col span={3}>
                     <Group>
                       <Text>{entry.team_name}</Text>
-                      <Text ff="mono">{fmtTeamIndex(entry.team_index)}</Text>
+                      <Text ff="monospace">
+                        {fmtTeamIndex(entry.team_index)}
+                      </Text>
                     </Group>
                   </Grid.Col>
                   <Grid.Col span={8}>

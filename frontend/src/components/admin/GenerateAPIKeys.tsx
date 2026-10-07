@@ -2,7 +2,7 @@
 
 import { useCreateTeamAiApiKey } from "@/api/gen";
 import { SecretSubject } from "@/api/gen/schemas";
-import { iconProps, secondaryButtonProps } from "@/styles/common";
+import { iconProps, toolbarButtonProps } from "@/styles/common";
 
 import { useState } from "react";
 
@@ -88,8 +88,7 @@ const GenerateAPIKeys = ({ teams, refetch }: GenerateAPIKeysProps) => {
       </Modal>
 
       <Button
-        {...secondaryButtonProps}
-        size="sm"
+        {...toolbarButtonProps}
         leftSection={<IconRobot {...iconProps} />}
         onClick={open}
       >

@@ -1,6 +1,7 @@
 "use client";
 
 import { useGetEvent, usePostEventDiscordOauth } from "@/api/gen";
+import { alertProps } from "@/styles/common";
 
 import { useEffect, useState } from "react";
 
@@ -75,7 +76,7 @@ const DiscordOauth = () => {
           </>
         )}
         {status === "success" && (
-          <Alert radius="md" color="green" title="Success">
+          <Alert {...alertProps} color="green" title="Success">
             <Text>
               Your Discord account has been successfully linked! Redirecting you
               back to the portal...
@@ -83,7 +84,7 @@ const DiscordOauth = () => {
           </Alert>
         )}
         {status === "error" && (
-          <Alert radius="md" color="red" title="Error">
+          <Alert {...alertProps} color="red" title="Error">
             <Text>
               Authorization with Discord failed. Please try again later or
               contact support if the problem persists. Back{" "}

@@ -5,9 +5,9 @@ import {
   cardProps,
   cardSectionProps,
   iconProps,
-  secondaryButtonProps,
   segmentedControlProps,
   textareaProps,
+  toolbarButtonProps,
 } from "@/styles/common";
 
 import { useState } from "react";
@@ -91,8 +91,7 @@ const InvitationControls = ({ event }: InvitationControlsProps) => {
       </Card.Section>
       <Card.Section {...cardSectionProps}>
         <Button
-          {...secondaryButtonProps}
-          size="sm"
+          {...toolbarButtonProps}
           leftSection={<IconPlayerPlay {...iconProps} />}
           onClick={handleRun}
         >

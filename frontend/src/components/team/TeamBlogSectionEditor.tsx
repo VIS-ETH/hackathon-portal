@@ -1,10 +1,9 @@
+import CardHeader from "../CardHeader";
 import Uploader from "../Uploader";
 import TeamImage from "./TeamImage";
 
 import { BlogSectionLayout } from "@/api/gen/schemas";
 import {
-  cardHeaderSectionProps,
-  cardHeaderTextProps,
   cardProps,
   cardSectionProps,
   iconProps,
@@ -93,9 +92,9 @@ const TeamBlogSectionEditor = ({
 
   return (
     <Card {...cardProps}>
-      <Card.Section {...cardHeaderSectionProps}>
-        <Group justify="space-between">
-          <Text {...cardHeaderTextProps}>Section {index + 1}</Text>
+      <CardHeader
+        title={`Section ${index + 1}`}
+        actions={
           <Group gap="xs">
             <ActionIcon
               variant="subtle"
@@ -122,8 +121,8 @@ const TeamBlogSectionEditor = ({
               <IconTrash {...iconProps} />
             </ActionIcon>
           </Group>
-        </Group>
-      </Card.Section>
+        }
+      />
       <Card.Section {...cardSectionProps} withBorder={false}>
         <Stack>
           {section.image_url ? (

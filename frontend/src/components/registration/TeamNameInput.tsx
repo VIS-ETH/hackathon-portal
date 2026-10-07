@@ -1,9 +1,9 @@
+import CardHeader from "../CardHeader";
+
 import { useUpdateTeam } from "@/api/gen";
 import { Team } from "@/api/gen/schemas";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import {
-  cardHeaderSectionProps,
-  cardHeaderTextProps,
   cardProps,
   cardSectionProps,
   inputProps,
@@ -12,14 +12,7 @@ import {
 
 import { useState } from "react";
 
-import {
-  Button,
-  Card,
-  Group,
-  Text,
-  TextInput,
-  TextInputProps,
-} from "@mantine/core";
+import { Button, Card, Group, TextInput, TextInputProps } from "@mantine/core";
 
 type TeamNameInputProps = {
   team: Team;
@@ -59,9 +52,7 @@ const TeamNameInput = ({ team, refetch }: TeamNameInputProps) => {
 
   return (
     <Card {...cardProps}>
-      <Card.Section {...cardHeaderSectionProps}>
-        <Text {...cardHeaderTextProps}>Team Name</Text>
-      </Card.Section>
+      <CardHeader title="Team Name" />
       <Card.Section {...cardSectionProps}>
         <Group align="center">
           <TextInput

@@ -9,6 +9,7 @@ import {
   cardHeaderTextProps,
   cardProps,
   cardSectionProps,
+  podiumPlaces,
 } from "@/styles/common";
 import { fmtScore } from "@/utils";
 
@@ -69,12 +70,6 @@ const RatingFeedbackCard = ({
       })),
     [entry.technical.answers, event?.id],
   );
-
-  const placements = [
-    { id: 1, place: "first", icon: <IconTrophy size={20} color="gold" /> },
-    { id: 2, place: "second", icon: <IconTrophy size={20} color="silver" /> },
-    { id: 3, place: "third", icon: <IconTrophy size={20} color="#CD7F32" /> },
-  ];
 
   if (!event) {
     return <Loader />;
@@ -154,14 +149,14 @@ const RatingFeedbackCard = ({
           </Card.Section>
           <Card.Section {...cardSectionProps}>
             <Group justify="space-between">
-              {placements.map(({ id, place, icon }) => (
-                <Group key={id}>
-                  {icon}
+              {podiumPlaces.map(({ place, title, color }) => (
+                <Group key={place}>
+                  <IconTrophy size={20} color={color} />
                   <Text fw={600} size="lg">
-                    {entry.public.votes[id] || 0}
+                    {entry.public.votes[place] || 0}
                   </Text>
                   <Text c="dimmed" size="sm">
-                    {place} place votes
+                    {title.toLowerCase()} votes
                   </Text>
                 </Group>
               ))}

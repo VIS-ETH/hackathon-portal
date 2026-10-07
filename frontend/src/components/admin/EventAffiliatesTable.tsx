@@ -8,8 +8,8 @@ import {
   cardProps,
   cardSectionProps,
   iconProps,
-  secondaryButtonProps,
   segmentedControlProps,
+  toolbarButtonProps,
 } from "@/styles/common";
 
 import { useState } from "react";
@@ -68,8 +68,7 @@ const EventAffiliatesTable = ({ event }: EventAffiliatesTableProps) => {
       <Card.Section {...cardSectionProps}>
         <Group>
           <Button
-            {...secondaryButtonProps}
-            size="sm"
+            {...toolbarButtonProps}
             leftSection={<IconRefresh {...iconProps} />}
             onClick={() => {
               refetchAffiliates();

@@ -1,4 +1,5 @@
 import {
+  AlertProps,
   BadgeProps,
   ButtonProps,
   CSSProperties,
@@ -10,6 +11,8 @@ import {
   ModalProps,
   SegmentedControlProps,
   SkeletonProps,
+  TabsPanelProps,
+  TabsProps,
   TextProps,
   TextareaProps,
   TooltipProps,
@@ -34,6 +37,14 @@ export const textareaProps: Partial<TextareaProps> = {
   autosize: true,
 };
 
+// data-monospace is Mantine's own switch for a monospace input, as used by JsonInput
+export const codeTextareaProps: Partial<TextareaProps> & {
+  "data-monospace": boolean;
+} = {
+  ...textareaProps,
+  "data-monospace": true,
+};
+
 export const segmentedControlProps: Partial<SegmentedControlProps> = {
   size: "sm",
   radius: "md",
@@ -49,6 +60,11 @@ export const primaryButtonProps: Partial<ButtonProps> = {
 export const secondaryButtonProps: Partial<ButtonProps> = {
   radius: "md",
   size: "xs",
+};
+
+export const toolbarButtonProps: Partial<ButtonProps> = {
+  ...secondaryButtonProps,
+  size: "sm",
 };
 
 export const tooltipProps: Partial<TooltipProps> = {
@@ -105,6 +121,18 @@ export const modalProps: Partial<ModalProps> = {
   radius: "md",
 };
 
+export const alertProps: Partial<AlertProps> = {
+  radius: "md",
+};
+
+export const pageTabsProps: Partial<TabsProps> = {
+  mt: "-md",
+};
+
+export const tabsPanelProps: Partial<TabsPanelProps> = {
+  mt: "md",
+};
+
 export const iconProps: Partial<IconProps> = {
   size: 16,
   stroke: 1.5,
@@ -136,6 +164,12 @@ export const linkStyle: CSSProperties = {
   textDecoration: "none",
   color: "inherit",
 };
+
+export const podiumPlaces = [
+  { place: 1, title: "First Place", color: "#D4AF37" }, // gold
+  { place: 2, title: "Second Place", color: "#C0C0C0" }, // silver
+  { place: 3, title: "Third Place", color: "#CD7F32" }, // bronze
+];
 
 export const hiddenScrollbarStyle: CSSProperties = {
   overflowY: "scroll",

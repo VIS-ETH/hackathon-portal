@@ -1,3 +1,4 @@
+import CardHeader from "../CardHeader";
 import EventAffiliateSelect from "../select/EventAffiliateSelect";
 
 import {
@@ -8,8 +9,6 @@ import {
 } from "@/api/gen";
 import { EventAffiliate, EventRole, Team, TeamRole } from "@/api/gen/schemas";
 import {
-  cardHeaderSectionProps,
-  cardHeaderTextProps,
   cardProps,
   cardSectionProps,
   iconProps,
@@ -82,9 +81,7 @@ const TeamMembersInput = ({ team, refetch }: TeamMembersInputProps) => {
 
   return (
     <Card {...cardProps}>
-      <Card.Section {...cardHeaderSectionProps}>
-        <Text {...cardHeaderTextProps}>Team Members</Text>
-      </Card.Section>
+      <CardHeader title="Team Members" />
       <Card.Section {...cardSectionProps}>
         <Group justify="space-between">
           <EventAffiliateSelect

@@ -27,7 +27,7 @@ const TeamSelectCard = ({ team }: TeamSelectCardProps) => {
 
       <Group justify="space-between" mt="md" mb="xs">
         <Group>
-          <Text ff="mono">{fmtTeamIndex(team.index)}</Text>
+          <Text ff="monospace">{fmtTeamIndex(team.index)}</Text>
           <Text fw={500}>{team.name}</Text>
         </Group>
         <Text>{project?.name}</Text>

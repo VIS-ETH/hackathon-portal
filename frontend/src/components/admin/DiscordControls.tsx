@@ -1,7 +1,7 @@
 import { useUpdateEvent } from "@/api/gen";
 import { Event } from "@/api/gen/schemas";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
-import { iconProps, largeIconProps } from "@/styles/common";
+import { alertProps, iconProps, largeIconProps } from "@/styles/common";
 
 import React, { useMemo, useState } from "react";
 
@@ -718,9 +718,9 @@ const DiscordConfigPage = ({ event, refetch }: DiscordControlsProps) => {
 
       <Box>
         <Alert
+          {...alertProps}
           icon={<IconAlertCircle {...largeIconProps} />}
           color="red"
-          radius="md"
           title="RISK OF DATA LOSS!"
           mb="md"
         >

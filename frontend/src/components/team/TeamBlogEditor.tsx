@@ -12,11 +12,13 @@ import {
 } from "@/api/gen/schemas";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import {
+  alertProps,
   cardProps,
   iconProps,
   largeIconProps,
   primaryButtonProps,
   secondaryButtonProps,
+  tabsPanelProps,
 } from "@/styles/common";
 
 import { useState } from "react";
@@ -165,9 +167,9 @@ const TeamBlogEditor = ({
     <Stack>
       {hasConflict ? (
         <Alert
+          {...alertProps}
           icon={<IconAlertCircle {...largeIconProps} />}
           color="yellow"
-          radius="md"
           title="Someone else has changed the blog"
         >
           <Stack align="flex-start">
@@ -188,9 +190,9 @@ const TeamBlogEditor = ({
         </Alert>
       ) : (
         <Alert
+          {...alertProps}
           icon={<IconInfoCircle {...iconProps} />}
           color="gray"
-          radius="md"
         >
           <Text size="sm">
             Saving replaces the whole blog. If someone else saves while you are
@@ -211,7 +213,7 @@ const TeamBlogEditor = ({
           </Tabs.Tab>
         </Tabs.List>
 
-        <Tabs.Panel value="edit" pt="md">
+        <Tabs.Panel {...tabsPanelProps} value="edit">
           <Stack>
             {sections.map((section, index) => (
               <TeamBlogSectionEditor
@@ -241,7 +243,7 @@ const TeamBlogEditor = ({
           </Stack>
         </Tabs.Panel>
 
-        <Tabs.Panel value="preview" pt="md">
+        <Tabs.Panel {...tabsPanelProps} value="preview">
           <Card {...cardProps}>
             <Stack gap="xl">
               {sections.map((section) => (

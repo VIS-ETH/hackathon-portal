@@ -11,7 +11,7 @@ import {
   cardProps,
   cardSectionProps,
   iconProps,
-  secondaryButtonProps,
+  toolbarButtonProps,
 } from "@/styles/common";
 
 import { Button, Card, Group, Stack, Table } from "@mantine/core";
@@ -52,8 +52,7 @@ const AttemptsTableForParticipant = ({
         <Card.Section {...cardSectionProps}>
           <Group justify="space-between">
             <Button
-              {...secondaryButtonProps}
-              size="sm"
+              {...toolbarButtonProps}
               leftSection={<IconRefresh {...iconProps} />}
               onClick={() => {
                 refetchAttempts();

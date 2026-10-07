@@ -1,5 +1,5 @@
 import { useDiscord } from "@/hooks/useDiscord";
-import { largeIconProps } from "@/styles/common";
+import { alertProps, largeIconProps } from "@/styles/common";
 
 import { Alert, Anchor, Box, Text } from "@mantine/core";
 
@@ -12,9 +12,9 @@ const DiscordBanner = () => {
     showBanner && (
       <Box mb="lg" role="button" tabIndex={0} aria-label="Connect Discord">
         <Alert
+          {...alertProps}
           icon={<IconAlertCircle {...largeIconProps} />}
           color="yellow"
-          radius="md"
           withCloseButton
           onClose={dismissBanner}
           title="Please connect your Discord account"

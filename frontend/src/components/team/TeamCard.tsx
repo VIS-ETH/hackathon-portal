@@ -43,7 +43,7 @@ const TeamCard = ({ team, highlight }: TeamCardProps) => {
       href={`/events/${event?.slug}/teams/${team.slug}`}
       title={team.name}
       highlight={highlight}
-      prefix={<Text ff="mono">{fmtTeamIndex(team.index)}</Text>}
+      prefix={<Text ff="monospace">{fmtTeamIndex(team.index)}</Text>}
       detail={
         projectName && (
           <IconTextGroup Icon={IconListDetails}>

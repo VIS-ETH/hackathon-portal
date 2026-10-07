@@ -14,8 +14,8 @@ import {
   cardProps,
   cardSectionProps,
   iconProps,
-  secondaryButtonProps,
   segmentedControlProps,
+  toolbarButtonProps,
 } from "@/styles/common";
 
 import { useState } from "react";
@@ -106,8 +106,7 @@ const TeamsTable = ({ event }: TeamsTableProps) => {
         <Card.Section {...cardSectionProps}>
           <Group>
             <Button
-              {...secondaryButtonProps}
-              size="sm"
+              {...toolbarButtonProps}
               leftSection={<IconRefresh {...iconProps} />}
               onClick={() => {
                 refetchTeams();
@@ -116,8 +115,7 @@ const TeamsTable = ({ event }: TeamsTableProps) => {
               Refresh
             </Button>
             <Button
-              {...secondaryButtonProps}
-              size="sm"
+              {...toolbarButtonProps}
               color="red"
               leftSection={<IconListNumbers {...iconProps} />}
               onClick={handleIndexTeams}

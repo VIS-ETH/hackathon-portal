@@ -8,7 +8,7 @@ import HistoryChart from "@/components/sidequest/HistoryChart";
 import OverviewLeaderboardTable from "@/components/sidequest/OverviewLeaderboardTable";
 import SidequestsList from "@/components/sidequest/SidequestsList";
 import { useResolveParams } from "@/hooks/useResolveParams";
-import { iconProps } from "@/styles/common";
+import { iconProps, pageTabsProps, tabsPanelProps } from "@/styles/common";
 
 import { useEffect, useState } from "react";
 
@@ -48,7 +48,7 @@ const Sidequests = () => {
     isParticipant || policies.can_manage_sidequest_attempt;
 
   return (
-    <Tabs value={activeTab} onChange={handleTabChange} mt="-md">
+    <Tabs {...pageTabsProps} value={activeTab} onChange={handleTabChange}>
       <Tabs.List>
         <Tabs.Tab
           value="leaderboard"
@@ -72,18 +72,18 @@ const Sidequests = () => {
         )}
       </Tabs.List>
 
-      <Tabs.Panel value="leaderboard" mt="md">
+      <Tabs.Panel {...tabsPanelProps} value="leaderboard">
         <Stack>
           <HistoryChart eventId={event.id} />
           <OverviewLeaderboardTable eventId={event.id} />
         </Stack>
       </Tabs.Panel>
 
-      <Tabs.Panel value="sidequests" mt="md">
+      <Tabs.Panel {...tabsPanelProps} value="sidequests">
         <SidequestsList event={event} manage={policies.can_manage_sidequest} />
       </Tabs.Panel>
 
-      <Tabs.Panel value="attempts" mt="md">
+      <Tabs.Panel {...tabsPanelProps} value="attempts">
         <Stack>
           {policies.can_manage_sidequest_attempt && (
             <AttemptsTableForSidequestMaster eventId={event.id} />

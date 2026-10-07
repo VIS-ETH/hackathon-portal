@@ -2,10 +2,10 @@ import { useUpdateSecretValues } from "@/api/gen";
 import { Secret, SecretScope, SecretSubject } from "@/api/gen/schemas";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import {
+  codeTextareaProps,
   iconProps,
   inputProps,
-  secondaryButtonProps,
-  textareaProps,
+  toolbarButtonProps,
 } from "@/styles/common";
 
 import { useState } from "react";
@@ -185,13 +185,10 @@ const SecretImportControls = ({
   return (
     <Stack>
       <Textarea
-        {...(textareaProps as TextareaProps)}
+        {...(codeTextareaProps as TextareaProps)}
         value={input}
         onChange={(event) => setInput(event.currentTarget.value)}
         placeholder={placeholder}
-        styles={{
-          input: { fontFamily: "var(--mantine-font-family-monospace)" },
-        }}
         description="Import values as YAML. Empty values are skipped."
         disabled={disabled}
       />
@@ -208,8 +205,7 @@ const SecretImportControls = ({
           onChange={setSecretId}
         />
         <Button
-          {...secondaryButtonProps}
-          size="sm"
+          {...toolbarButtonProps}
           leftSection={<IconPlayerPlay {...iconProps} />}
           onClick={handleRun}
           disabled={
@@ -222,8 +218,7 @@ const SecretImportControls = ({
           Import
         </Button>
         <Button
-          {...secondaryButtonProps}
-          size="sm"
+          {...toolbarButtonProps}
           leftSection={<IconCopy {...iconProps} />}
           onClick={handleCopyTemplate}
           disabled={disabled || !templateSubjects.length}

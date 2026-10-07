@@ -11,7 +11,7 @@ import {
 } from "@/api/gen";
 import { Team } from "@/api/gen/schemas";
 import { useResolveParams } from "@/hooks/useResolveParams";
-import { cardProps } from "@/styles/common";
+import { cardProps, podiumPlaces } from "@/styles/common";
 import { seededShuffle } from "@/utils";
 
 import { useMemo, useState } from "react";
@@ -34,32 +34,13 @@ type RankingCardProps = {
   team?: Team;
   place: number;
 };
-const places = [
-  {
-    rank: "1st",
-    title: "First Place",
-    color: "#D4AF37", // Gold
-    accent: "rgba(212,175,55,0.12)",
-    emoji: "🏆",
-    height: 300,
-  },
-  {
-    rank: "2nd",
-    title: "Second Place",
-    color: "#C0C0C0", // Silver
-    accent: "rgba(192,192,192,0.12)",
-    emoji: "🥈",
-    height: 280,
-  },
-  {
-    rank: "3rd",
-    title: "Third Place",
-    color: "#CD7F32", // Bronze
-    accent: "rgba(205,127,50,0.12)",
-    emoji: "🥉",
-    height: 260,
-  },
+// in podiumPlaces order
+const placeStyles = [
+  { accent: "rgba(212,175,55,0.12)", emoji: "🏆", height: 300 },
+  { accent: "rgba(192,192,192,0.12)", emoji: "🥈", height: 280 },
+  { accent: "rgba(205,127,50,0.12)", emoji: "🥉", height: 260 },
 ];
+const places = podiumPlaces.map((p, i) => ({ ...p, ...placeStyles[i] }));
 
 const RankingCard = ({ team, place }: RankingCardProps) => {
   const p = places[place - 1];

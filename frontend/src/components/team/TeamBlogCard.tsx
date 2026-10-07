@@ -1,17 +1,16 @@
+import CardHeader from "../CardHeader";
 import TeamBlogSection from "./TeamBlogSection";
 
 import { useGetEvent, useGetTeamBlog } from "@/api/gen";
 import { Team } from "@/api/gen/schemas";
 import {
-  cardHeaderSectionProps,
-  cardHeaderTextProps,
   cardProps,
   cardSectionProps,
   iconProps,
   secondaryButtonProps,
 } from "@/styles/common";
 
-import { Button, Card, Group, Stack, Text } from "@mantine/core";
+import { Button, Card, Stack, Text } from "@mantine/core";
 
 import { IconPencil } from "@tabler/icons-react";
 import Link from "next/link";
@@ -33,10 +32,11 @@ const TeamBlogCard = ({ team, canUpdate }: TeamBlogCardProps) => {
 
   return (
     <Card {...cardProps}>
-      <Card.Section {...cardHeaderSectionProps}>
-        <Group justify="space-between">
-          <Text {...cardHeaderTextProps}>Blog</Text>
-          {canUpdate && event && (
+      <CardHeader
+        title="Blog"
+        actions={
+          canUpdate &&
+          event && (
             <Button
               {...secondaryButtonProps}
               component={Link}
@@ -45,9 +45,9 @@ const TeamBlogCard = ({ team, canUpdate }: TeamBlogCardProps) => {
             >
               Edit Blog
             </Button>
-          )}
-        </Group>
-      </Card.Section>
+          )
+        }
+      />
       <Card.Section {...cardSectionProps} withBorder={false}>
         {sections.length > 0 ? (
           <Stack gap="xl">

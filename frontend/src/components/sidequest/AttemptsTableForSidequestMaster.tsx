@@ -12,6 +12,7 @@ import {
   cardSectionProps,
   iconProps,
   secondaryButtonProps,
+  toolbarButtonProps,
 } from "@/styles/common";
 
 import { useState } from "react";
@@ -61,8 +62,7 @@ const AttemptsTableForSidequestMaster = ({
         <Card.Section {...cardSectionProps}>
           <Group>
             <Button
-              {...secondaryButtonProps}
-              size="sm"
+              {...toolbarButtonProps}
               leftSection={<IconRefresh {...iconProps} />}
               onClick={() => {
                 refetchAttempts();
