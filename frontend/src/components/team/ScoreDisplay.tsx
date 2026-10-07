@@ -12,8 +12,8 @@ const ScoreDisplay = ({ entry, maxTotalPoints }: ScoreDisplayProps) => {
   const sections = [
     { label: "Technical", points: entry.technical.points, color: "cyan" },
     { label: "Jury", points: entry.jury.points, color: "pink" },
-    { label: "Sidequests", points: entry.sidequest.points, color: "orange" },
     { label: "Public", points: entry.public.points, color: "teal" },
+    { label: "Sidequests", points: entry.sidequest.points, color: "orange" },
     { label: "Extra", points: entry.extra_points, color: "green" },
   ];
 
@@ -22,7 +22,7 @@ const ScoreDisplay = ({ entry, maxTotalPoints }: ScoreDisplayProps) => {
     maxTotalPoints === 0 ? 0 : (points / maxTotalPoints) * 100;
 
   return (
-    <Progress.Root size={30}>
+    <Progress.Root size={30} radius="md">
       {sections.map(({ label, points, color }) => (
         <Tooltip key={label} label={`${label}: ${fmtScore(points)}`} withArrow>
           <Progress.Section value={percentage(points)} color={color}>

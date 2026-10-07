@@ -7,9 +7,9 @@ import PageSkeleton from "@/components/PageSkeleton";
 import SidequestLeaderboardTable from "@/components/sidequest/SidequestLeaderboardTable";
 import UpdateSidequestDrawer from "@/components/sidequest/UpdateSidequestDrawer";
 import { useResolveParams } from "@/hooks/useResolveParams";
-import { iconProps, secondaryButtonProps } from "@/styles/common";
+import { cardProps, iconProps, secondaryButtonProps } from "@/styles/common";
 
-import { Button, Group, Stack, Text, Title } from "@mantine/core";
+import { Button, Card, Group, Stack, Text, Title } from "@mantine/core";
 
 import { useDisclosure } from "@mantine/hooks";
 
@@ -94,7 +94,11 @@ const Sidequest = () => {
           </IconTextGroup>
         )}
         <MarkdownCard trusted content={sidequest.description} />
-        <SidequestLeaderboardTable sidequest={sidequest} />
+        <Card {...cardProps}>
+          <Card.Section>
+            <SidequestLeaderboardTable sidequest={sidequest} />
+          </Card.Section>
+        </Card>
       </Stack>
       <UpdateSidequestDrawer
         sidequest={sidequest}

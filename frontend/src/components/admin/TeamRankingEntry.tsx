@@ -1,7 +1,7 @@
 import IconTextGroup from "../IconTextGroup";
-import RatingFeedbackCard from "../team/RatingFeedbackCard";
 import ScoreDisplay from "../team/ScoreDisplay";
 import TeamImage from "../team/TeamImage";
+import TeamFeedback from "../team/feedback/TeamFeedback";
 
 import { useUpdateTeam } from "@/api/gen";
 import { AdminTeam, TeamRanking } from "@/api/gen/schemas";
@@ -135,7 +135,7 @@ const TeamRankingEntry = ({
                     />
                     {teamWebpage}
                   </Group>
-                  <RatingFeedbackCard entry={entry} adminView />
+                  <TeamFeedback entry={entry} adminView />
                 </Stack>
               )}
             </Accordion.Panel>

@@ -8,11 +8,16 @@ import HistoryChart from "@/components/sidequest/HistoryChart";
 import OverviewLeaderboardTable from "@/components/sidequest/OverviewLeaderboardTable";
 import SidequestsList from "@/components/sidequest/SidequestsList";
 import { useResolveParams } from "@/hooks/useResolveParams";
-import { iconProps, pageTabsProps, tabsPanelProps } from "@/styles/common";
+import {
+  cardProps,
+  iconProps,
+  pageTabsProps,
+  tabsPanelProps,
+} from "@/styles/common";
 
 import { useEffect, useState } from "react";
 
-import { Stack, Tabs } from "@mantine/core";
+import { Card, Stack, Tabs } from "@mantine/core";
 
 import { IconStopwatch, IconTicTac, IconTrophy } from "@tabler/icons-react";
 
@@ -75,7 +80,11 @@ const Sidequests = () => {
       <Tabs.Panel {...tabsPanelProps} value="leaderboard">
         <Stack>
           <HistoryChart eventId={event.id} />
-          <OverviewLeaderboardTable eventId={event.id} />
+          <Card {...cardProps}>
+            <Card.Section>
+              <OverviewLeaderboardTable eventId={event.id} />
+            </Card.Section>
+          </Card>
         </Stack>
       </Tabs.Panel>
 

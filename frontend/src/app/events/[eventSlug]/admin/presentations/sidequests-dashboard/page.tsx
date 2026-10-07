@@ -4,8 +4,9 @@ import PageLoader from "@/components/PageLoader";
 import HistoryChart from "@/components/sidequest/HistoryChart";
 import OverviewLeaderboardTable from "@/components/sidequest/OverviewLeaderboardTable";
 import { useResolveParams } from "@/hooks/useResolveParams";
+import { cardProps } from "@/styles/common";
 
-import { Box, Stack } from "@mantine/core";
+import { Box, Card, Stack } from "@mantine/core";
 
 const SidequestsDashboard = () => {
   const { event } = useResolveParams();
@@ -20,7 +21,11 @@ const SidequestsDashboard = () => {
         <HistoryChart eventId={event.id} grow />
       </Box>
       <Box style={{ flex: 1, flexGrow: 0 }}>
-        <OverviewLeaderboardTable eventId={event.id} limit={3} />
+        <Card {...cardProps}>
+          <Card.Section>
+            <OverviewLeaderboardTable eventId={event.id} limit={3} />
+          </Card.Section>
+        </Card>
       </Box>
     </Stack>
   );

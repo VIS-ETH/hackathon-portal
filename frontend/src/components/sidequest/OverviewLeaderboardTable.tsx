@@ -1,9 +1,9 @@
 import NoEntriesTr from "../NoEntriesTr";
 
 import { useGetSidequestsLeaderboard } from "@/api/gen";
-import { cardProps } from "@/styles/common";
+import { fmtScore } from "@/utils";
 
-import { Card, Table } from "@mantine/core";
+import { Table } from "@mantine/core";
 
 type OverviewLeaderboardTableProps = {
   eventId: string;
@@ -20,33 +20,39 @@ const OverviewLeaderboardTable = ({
     },
   });
 
+  // competition ranking, as in the team ranking: tied scores share a rank
+  const rank = (score: number) =>
+    1 + leaderboard.filter((other) => other.score > score).length;
+
   return (
-    <Card {...cardProps}>
-      <Card.Section>
-        <Table.ScrollContainer minWidth={350}>
-          <Table striped>
-            <Table.Thead>
-              <Table.Tr>
-                <Table.Th>Team</Table.Th>
-                <Table.Th>Score</Table.Th>
+    <Table.ScrollContainer minWidth={350}>
+      <Table striped horizontalSpacing="md">
+        <Table.Thead>
+          <Table.Tr>
+            <Table.Th w={40} ta="right">
+              #
+            </Table.Th>
+            <Table.Th>Team</Table.Th>
+            <Table.Th w={100} ta="right">
+              Score
+            </Table.Th>
+          </Table.Tr>
+        </Table.Thead>
+        <Table.Tbody>
+          {leaderboard.length ? (
+            leaderboard.slice(0, limit).map((entry) => (
+              <Table.Tr key={entry.team_id}>
+                <Table.Td ta="right">{rank(entry.score)}</Table.Td>
+                <Table.Td>{entry.team_name}</Table.Td>
+                <Table.Td ta="right">{fmtScore(entry.score)}</Table.Td>
               </Table.Tr>
-            </Table.Thead>
-            <Table.Tbody>
-              {leaderboard.length ? (
-                leaderboard.slice(0, limit).map((entry) => (
-                  <Table.Tr key={entry.team_id}>
-                    <Table.Td>{entry.team_name}</Table.Td>
-                    <Table.Td>{Math.round(entry.score * 100) / 100}</Table.Td>
-                  </Table.Tr>
-                ))
-              ) : (
-                <NoEntriesTr colSpan={2} />
-              )}
-            </Table.Tbody>
-          </Table>
-        </Table.ScrollContainer>
-      </Card.Section>
-    </Card>
+            ))
+          ) : (
+            <NoEntriesTr colSpan={3} />
+          )}
+        </Table.Tbody>
+      </Table>
+    </Table.ScrollContainer>
   );
 };
 

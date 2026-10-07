@@ -2,11 +2,11 @@
 
 import { useGetTeamRanking } from "@/api/gen";
 import PageSkeleton from "@/components/PageSkeleton";
-import RatingFeedbackCard from "@/components/team/RatingFeedbackCard";
 import TeamAffiliatesCard from "@/components/team/TeamAffiliatesCard";
 import TeamBlogCard from "@/components/team/TeamBlogCard";
 import TeamDetailsCard from "@/components/team/TeamDetailsCard";
 import TeamMenu from "@/components/team/TeamMenu";
+import TeamFeedback from "@/components/team/feedback/TeamFeedback";
 import { useResolveParams } from "@/hooks/useResolveParams";
 import { badgeProps } from "@/styles/common";
 
@@ -25,32 +25,34 @@ const Team = () => {
   }
 
   return (
-    <Stack>
-      <Group justify="space-between">
-        <Group>
-          <Title order={2}>{team.name}</Title>
-          {team.finalist && <Badge {...badgeProps}>Finalist</Badge>}
+    <Stack gap="xl">
+      <Stack>
+        <Group justify="space-between">
+          <Group>
+            <Title order={2}>{team.name}</Title>
+            {team.finalist && <Badge {...badgeProps}>Finalist</Badge>}
+          </Group>
+          <TeamMenu team={team} refetchTeam={refetchTeam} policies={policies} />
         </Group>
-        <TeamMenu team={team} refetchTeam={refetchTeam} policies={policies} />
-      </Group>
-      <SimpleGrid
-        cols={{ xs: 1, sm: policies.can_view_event_internal ? 2 : 1 }}
-      >
-        <TeamDetailsCard
-          team={team}
-          canViewProject={policies.can_view_project}
-        />
-        {policies.can_view_event_internal && (
-          <TeamAffiliatesCard teamId={team.id} />
-        )}
-      </SimpleGrid>
+        <SimpleGrid
+          cols={{ xs: 1, sm: policies.can_view_event_internal ? 2 : 1 }}
+        >
+          <TeamDetailsCard
+            team={team}
+            canViewProject={policies.can_view_project}
+          />
+          {policies.can_view_event_internal && (
+            <TeamAffiliatesCard teamId={team.id} />
+          )}
+        </SimpleGrid>
 
-      {policies.can_view_team_blog && (
-        <TeamBlogCard team={team} canUpdate={policies.can_update_team_blog} />
-      )}
+        {policies.can_view_team_blog && (
+          <TeamBlogCard team={team} canUpdate={policies.can_update_team_blog} />
+        )}
+      </Stack>
 
       {policies.can_view_team_feedback && ranking && (
-        <RatingFeedbackCard
+        <TeamFeedback
           entry={ranking.team}
           maxTotalPoints={ranking.max_total_points}
         />

@@ -2,7 +2,7 @@ import { cardHeaderSectionProps, cardHeaderTextProps } from "@/styles/common";
 
 import { ReactNode } from "react";
 
-import { Card, Group, Text } from "@mantine/core";
+import { Card, Flex, Text } from "@mantine/core";
 
 type CardHeaderProps = {
   title: ReactNode;
@@ -12,10 +12,16 @@ type CardHeaderProps = {
 const CardHeader = ({ title, actions }: CardHeaderProps) => {
   return (
     <Card.Section {...cardHeaderSectionProps}>
-      <Group justify="space-between" wrap="nowrap">
+      <Flex
+        justify="space-between"
+        align="center"
+        wrap="wrap"
+        columnGap="md"
+        rowGap="xs"
+      >
         <Text {...cardHeaderTextProps}>{title}</Text>
         {actions}
-      </Group>
+      </Flex>
     </Card.Section>
   );
 };
