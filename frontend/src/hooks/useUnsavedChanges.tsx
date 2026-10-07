@@ -10,6 +10,11 @@ let savingCount = 0;
 export const confirmDiscard = () =>
   unsavedCount === savingCount || window.confirm(MESSAGE);
 
+// For discarding the changes of particular components, e.g. the editors of a
+// list but not its create form.
+export const confirmDiscardIf = (unsaved: boolean) =>
+  !unsaved || window.confirm(MESSAGE);
+
 const warnBeforeUnload = (event: BeforeUnloadEvent) => event.preventDefault();
 
 // Runs in the capture phase, so it can cancel a click before Next's <Link>
@@ -63,5 +68,5 @@ export const useUnsavedChanges = (unsaved: boolean, saving = false) => {
     };
   }, [unsaved, saving]);
 
-  return () => !unsaved || saving || window.confirm(MESSAGE);
+  return () => saving || confirmDiscardIf(unsaved);
 };
