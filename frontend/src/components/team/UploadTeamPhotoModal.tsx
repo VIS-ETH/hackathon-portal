@@ -4,7 +4,7 @@ import { useUpdateTeam } from "@/api/gen";
 import { Team } from "@/api/gen/schemas";
 import { modalProps } from "@/styles/common";
 
-import { Modal } from "@mantine/core";
+import { Modal, Stack, Text } from "@mantine/core";
 
 import { MIME_TYPES } from "@mantine/dropzone";
 
@@ -46,13 +46,18 @@ const UploadTeamPhotoModal = ({
       onClose={onClose}
       title="Upload Team Photo"
     >
-      <Uploader
-        eventId={team.event_id}
-        usage="TeamPhoto"
-        maxSizeMB={10}
-        accept={[MIME_TYPES.png, MIME_TYPES.jpeg]}
-        onUploaded={handleUploaded}
-      />
+      <Stack>
+        <Text size="sm" c="dimmed">
+          Team photos are shown in landscape format (4:3) and cropped to fit.
+        </Text>
+        <Uploader
+          eventId={team.event_id}
+          usage="TeamPhoto"
+          maxSizeMB={10}
+          accept={[MIME_TYPES.png, MIME_TYPES.jpeg]}
+          onUploaded={handleUploaded}
+        />
+      </Stack>
     </Modal>
   );
 };

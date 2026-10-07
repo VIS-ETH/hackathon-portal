@@ -1,3 +1,5 @@
+import TeamImage from "./TeamImage";
+
 import { useGetTeam } from "@/api/gen";
 import { TeamRanking } from "@/api/gen/schemas";
 import { cardProps, cardSectionProps } from "@/styles/common";
@@ -5,7 +7,7 @@ import { cardProps, cardSectionProps } from "@/styles/common";
 import { useEffect, useState } from "react";
 import Confetti from "react-confetti";
 
-import { Card, Center, Container, Image, Stack, Title } from "@mantine/core";
+import { Card, Center, Container, Stack, Title } from "@mantine/core";
 
 import { useDebouncedValue, useHotkeys } from "@mantine/hooks";
 
@@ -47,7 +49,7 @@ const TeamRankSlide = ({ entry, isActive }: TeamRankSlideProps) => {
   const photoCard = team?.photo_url && (
     <Card {...cardProps} w={600}>
       <Card.Section {...cardSectionProps} p={0} mah="50vh">
-        <Image src={team.photo_url} alt="Team Photo" fit="cover" />
+        <TeamImage url={team.photo_url} alt="Team Photo" />
       </Card.Section>
     </Card>
   );

@@ -1,10 +1,18 @@
 import { useGetTeams } from "@/api/gen";
 import { Team } from "@/api/gen/schemas";
 import { inputProps } from "@/styles/common";
+import { fmtTeamIndex } from "@/utils";
 
 import { useMemo } from "react";
 
-import { Select, SelectProps } from "@mantine/core";
+import {
+  ComboboxItem,
+  Group,
+  OptionsFilter,
+  Select,
+  SelectProps,
+  Text,
+} from "@mantine/core";
 
 type TeamSelectProps = SelectProps & {
   eventId: string;
@@ -31,6 +39,28 @@ const TeamSelect = ({
     [teams],
   );
 
+  // the index is rendered next to the name, in monospace
+  const indexById = useMemo(
+    () =>
+      new Map((teams ?? []).map((team) => [team.id, fmtTeamIndex(team.index)])),
+    [teams],
+  );
+  const teamIndex = (id: string) => (
+    <Text span inherit ff="monospace" c="dimmed">
+      {indexById.get(id)}
+    </Text>
+  );
+
+  // matches the index as well as the name
+  const filter: OptionsFilter = ({ options, search }) => {
+    const query = search.toLowerCase().trim();
+    return (options as ComboboxItem[]).filter(
+      (option) =>
+        option.label.toLowerCase().includes(query) ||
+        indexById.get(option.value)?.includes(query),
+    );
+  };
+
   return (
     <Select
       {...(inputProps as SelectProps)}
@@ -45,6 +75,14 @@ const TeamSelect = ({
           setTeam(teams?.find((team) => team.id === value));
         }
       }}
+      leftSection={teamId ? teamIndex(teamId) : undefined}
+      renderOption={({ option }) => (
+        <Group gap="xs" wrap="nowrap" align="baseline">
+          {teamIndex(option.value)}
+          {option.label}
+        </Group>
+      )}
+      filter={filter}
       placeholder={`Select team`}
       searchable
       clearable

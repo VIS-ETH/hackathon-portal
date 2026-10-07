@@ -131,9 +131,7 @@ const TeamRankingEntry = ({
                     <TeamImage
                       url={team?.photo_url}
                       width={240}
-                      height={160}
                       alt={entry.team_name}
-                      fit="contain"
                     />
                     {teamWebpage}
                   </Group>

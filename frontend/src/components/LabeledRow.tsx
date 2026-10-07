@@ -7,13 +7,24 @@ type LabeledRowProps = {
   description?: string | null;
   // the value or control, right-aligned
   children: ReactNode;
+  // center the value vertically next to the label (from sm up)
+  centered?: boolean;
 };
 
-const LabeledRow = ({ label, description, children }: LabeledRowProps) => {
+const LabeledRow = ({
+  label,
+  description,
+  children,
+  centered,
+}: LabeledRowProps) => {
   const trimmedDescription = description?.trimEnd();
 
   return (
-    <Flex direction={{ base: "column", sm: "row" }} gap="md">
+    <Flex
+      direction={{ base: "column", sm: "row" }}
+      align={centered ? { sm: "center" } : undefined}
+      gap="md"
+    >
       <Stack gap={0} flex={1}>
         <Text fw={600}>{label}</Text>
         {trimmedDescription && (

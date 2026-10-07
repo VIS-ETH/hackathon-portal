@@ -1,8 +1,10 @@
+import LabeledRow from "../../LabeledRow";
+
 import { JuryRatingCategory } from "@/api/gen/schemas";
 
 import { useState } from "react";
 
-import { Group, Rating, Stack, Text, Tooltip } from "@mantine/core";
+import { Group, Rating, Tooltip } from "@mantine/core";
 
 export type JuryRatingGenericProps = {
   teamId: string;
@@ -30,29 +32,27 @@ const JuryRating = ({
   const scaleDescription = SCALE_DESCRIPTIONS.get(Math.floor(hover / 2) * 2);
 
   return (
-    <Group align="center" justify="space-between">
-      <Stack gap={0}>
-        <Text>{category}</Text>
-        {description && <Text c="dimmed">{description}</Text>}
-      </Stack>
-      <Tooltip
-        label={
-          feedbackOnly
-            ? `${hover.toFixed(1)}`
-            : `${hover.toFixed(1)}: ${scaleDescription}`
-        }
-        disabled={feedbackOnly}
-      >
-        <Rating
-          count={Math.max(...Array.from(SCALE_DESCRIPTIONS.keys()))}
-          fractions={2}
-          value={rating ?? 0}
-          onChange={(value) => setRating?.(value)}
-          onHover={setHover}
-          readOnly={feedbackOnly}
-        />
-      </Tooltip>
-    </Group>
+    <LabeledRow label={category} description={description} centered>
+      <Group justify="flex-end">
+        <Tooltip
+          label={
+            feedbackOnly
+              ? `${hover.toFixed(1)}`
+              : `${hover.toFixed(1)}: ${scaleDescription}`
+          }
+          disabled={feedbackOnly}
+        >
+          <Rating
+            count={Math.max(...Array.from(SCALE_DESCRIPTIONS.keys()))}
+            fractions={2}
+            value={rating ?? 0}
+            onChange={(value) => setRating?.(value)}
+            onHover={setHover}
+            readOnly={feedbackOnly}
+          />
+        </Tooltip>
+      </Group>
+    </LabeledRow>
   );
 };
 

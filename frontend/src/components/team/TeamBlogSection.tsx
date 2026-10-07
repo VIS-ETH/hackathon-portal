@@ -1,9 +1,8 @@
 import Markdown from "../Markdown";
-import TeamImage from "./TeamImage";
 
 import { BlogSectionLayout } from "@/api/gen/schemas";
 
-import { Grid, Stack } from "@mantine/core";
+import { Grid, Image, Stack } from "@mantine/core";
 
 type TeamBlogSectionProps = {
   content: string;
@@ -23,7 +22,7 @@ const TeamBlogSection = ({
   }
 
   const image = (
-    <TeamImage url={imageUrl} alt="Blog Image" width="100%" fit="contain" />
+    <Image src={imageUrl} w="100%" alt="Blog Image" fit="contain" />
   );
 
   switch (layout) {

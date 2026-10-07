@@ -1,6 +1,5 @@
 import CardHeader from "../CardHeader";
 import Uploader from "../Uploader";
-import TeamImage from "./TeamImage";
 
 import { BlogSectionLayout } from "@/api/gen/schemas";
 import {
@@ -18,6 +17,7 @@ import {
   Button,
   Card,
   Group,
+  Image,
   Modal,
   SegmentedControl,
   Stack,
@@ -127,10 +127,10 @@ const TeamBlogSectionEditor = ({
         <Stack>
           {section.image_url ? (
             <Stack gap="xs">
-              <TeamImage
-                url={section.image_url}
+              <Image
+                src={section.image_url}
+                h={200}
                 alt="Blog Image"
-                height={200}
                 fit="contain"
               />
               <Group justify="space-between">

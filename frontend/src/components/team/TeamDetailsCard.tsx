@@ -58,15 +58,11 @@ const TeamDetailsCard = ({ team, canViewProject }: TeamDetailsCardProps) => {
 
   return (
     <Card {...cardProps}>
-      <Card.Section {...cardSectionProps} p={0}>
-        <TeamImage
-          url={team.photo_url}
-          alt="Team Photo"
-          width="100%"
-          height={300}
-          fit="cover"
-        />
-      </Card.Section>
+      {team.photo_url && (
+        <Card.Section {...cardSectionProps} p={0}>
+          <TeamImage url={team.photo_url} alt="Team Photo" />
+        </Card.Section>
+      )}
 
       <Card.Section {...cardSectionProps}>
         <Stack gap="sm" justify="space-between" h="100%">
