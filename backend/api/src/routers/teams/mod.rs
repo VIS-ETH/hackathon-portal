@@ -322,8 +322,7 @@ pub async fn get_team(
     State(state): State<ApiState>,
     Path(team_id): Path<Uuid>,
 ) -> ApiJson<Team> {
-    let team = state.team_service.get_team(team_id).await?;
-    let event = state.event_service.get_event(team.event_id).await?;
+    let (team, event) = state.team_service.get_team_with_event(team_id).await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
     if !groups.can_view_event(event.visibility) {
@@ -339,8 +338,6 @@ pub async fn get_team(
     );
 
     let can_view_finalists = groups.can_view_finalists(event.visibility, event.finalists_visible);
-
-    let team = state.team_service.get_team(team_id).await?;
 
     Ok(Json(Team::from((
         team,
@@ -362,8 +359,7 @@ pub async fn get_admin_team(
     State(state): State<ApiState>,
     Path(team_id): Path<Uuid>,
 ) -> ApiJson<AdminTeam> {
-    let team = state.team_service.get_team(team_id).await?;
-    let event = state.event_service.get_event(team.event_id).await?;
+    let (team, event) = state.team_service.get_team_with_event(team_id).await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
     if !groups.can_manage_event() {
@@ -389,8 +385,7 @@ pub async fn update_team(
     Path(team_id): Path<Uuid>,
     Json(body): Json<TeamForUpdate>,
 ) -> ApiJson<Team> {
-    let team = state.team_service.get_team(team_id).await?;
-    let event = state.event_service.get_event(team.event_id).await?;
+    let (team, event) = state.team_service.get_team_with_event(team_id).await?;
     let groups = Groups::from_event_and_team(ctx.roles(), event.id, team.id);
 
     if !groups.can_view_event(event.visibility) {
@@ -472,8 +467,7 @@ pub async fn delete_team(
     State(state): State<ApiState>,
     Path(team_id): Path<Uuid>,
 ) -> ApiJson<Team> {
-    let team = state.team_service.get_team(team_id).await?;
-    let event = state.event_service.get_event(team.event_id).await?;
+    let (team, event) = state.team_service.get_team_with_event(team_id).await?;
     let groups = Groups::from_event_and_team(ctx.roles(), event.id, team.id);
 
     if !groups.can_manage_team(event.visibility, event.phase, event.read_only) {
@@ -526,8 +520,7 @@ pub async fn put_team_roles(
     Path(team_id): Path<Uuid>,
     Json(body): Json<HashMap<Uuid, HashSet<TeamRole>>>,
 ) -> ApiJson<AffectedRows> {
-    let team = state.team_service.get_team(team_id).await?;
-    let event = state.event_service.get_event(team.event_id).await?;
+    let (team, event) = state.team_service.get_team_with_event(team_id).await?;
     let groups = Groups::from_event_and_team(ctx.roles(), event.id, team.id);
 
     let mut contains_member_roles = false;
@@ -592,8 +585,7 @@ pub async fn delete_team_roles(
     Path(team_id): Path<Uuid>,
     Json(body): Json<HashMap<Uuid, HashSet<TeamRole>>>,
 ) -> ApiJson<AffectedRows> {
-    let team = state.team_service.get_team(team_id).await?;
-    let event = state.event_service.get_event(team.event_id).await?;
+    let (team, event) = state.team_service.get_team_with_event(team_id).await?;
     let groups = Groups::from_event_and_team(ctx.roles(), event.id, team.id);
 
     let mut contains_member_roles = false;
@@ -661,8 +653,7 @@ pub async fn get_team_affiliates(
     Path(team_id): Path<Uuid>,
     Query(query): Query<TeamRoleOptQuery>,
 ) -> ApiJsonVec<TeamAffiliate> {
-    let team = state.team_service.get_team(team_id).await?;
-    let event = state.event_service.get_event(team.event_id).await?;
+    let (team, event) = state.team_service.get_team_with_event(team_id).await?;
     let groups = Groups::from_event_and_team(ctx.roles(), event.id, team.id);
 
     if !groups.can_view_event_internal(event.visibility) {
@@ -692,8 +683,7 @@ pub async fn get_team_project_preferences(
     State(state): State<ApiState>,
     Path(team_id): Path<Uuid>,
 ) -> ApiJsonVec<Uuid> {
-    let team = state.team_service.get_team(team_id).await?;
-    let event = state.event_service.get_event(team.event_id).await?;
+    let (team, event) = state.team_service.get_team_with_event(team_id).await?;
     let groups = Groups::from_event_and_team(ctx.roles(), event.id, team.id);
 
     if !groups.can_view_team_confidential(event.visibility) {
@@ -724,8 +714,7 @@ pub async fn update_team_project_preferences(
     Path(team_id): Path<Uuid>,
     Json(body): Json<Vec<Uuid>>,
 ) -> ApiJsonVec<Uuid> {
-    let team = state.team_service.get_team(team_id).await?;
-    let event = state.event_service.get_event(team.event_id).await?;
+    let (team, event) = state.team_service.get_team_with_event(team_id).await?;
     let groups = Groups::from_event_and_team(ctx.roles(), event.id, team.id);
 
     if !groups.can_manage_team(event.visibility, event.phase, event.read_only) {
@@ -755,8 +744,7 @@ pub async fn get_team_blog(
     State(state): State<ApiState>,
     Path(team_id): Path<Uuid>,
 ) -> ApiJson<TeamBlog> {
-    let team = state.team_service.get_team(team_id).await?;
-    let event = state.event_service.get_event(team.event_id).await?;
+    let (team, event) = state.team_service.get_team_with_event(team_id).await?;
     let groups = Groups::from_event_and_team(ctx.roles(), event.id, team.id);
 
     if !groups.can_view_team_blog(event.visibility, event.phase) {
@@ -785,8 +773,7 @@ pub async fn update_team_blog(
     Path(team_id): Path<Uuid>,
     Json(body): Json<TeamBlogForUpdate>,
 ) -> ApiJson<TeamBlog> {
-    let team = state.team_service.get_team(team_id).await?;
-    let event = state.event_service.get_event(team.event_id).await?;
+    let (team, event) = state.team_service.get_team_with_event(team_id).await?;
     let groups = Groups::from_event_and_team(ctx.roles(), event.id, team.id);
 
     if !groups.can_update_team_blog(event.visibility, event.phase, event.read_only) {
@@ -816,8 +803,7 @@ pub async fn get_team_secrets(
     State(state): State<ApiState>,
     Path(team_id): Path<Uuid>,
 ) -> ApiJsonVec<SecretValue> {
-    let team = state.team_service.get_team(team_id).await?;
-    let event = state.event_service.get_event(team.event_id).await?;
+    let (team, event) = state.team_service.get_team_with_event(team_id).await?;
     let groups = Groups::from_event_and_team(ctx.roles(), event.id, team.id);
 
     if !groups.can_view_team_confidential(event.visibility) {
@@ -845,8 +831,7 @@ pub async fn create_team_ai_api_key(
     Path(team_id): Path<Uuid>,
     Json(body): Json<CreateTeamAPIKey>,
 ) -> ApiJson<String> {
-    let team = state.team_service.get_team(team_id).await?;
-    let event = state.event_service.get_event(team.event_id).await?;
+    let (team, event) = state.team_service.get_team_with_event(team_id).await?;
     let groups = Groups::from_event_and_team(ctx.roles(), event.id, team.id);
     if !groups.can_manage_event() {
         return Err(ApiError::Forbidden {
@@ -875,8 +860,7 @@ pub async fn get_team_ranking(
     State(state): State<ApiState>,
     Path(team_id): Path<Uuid>,
 ) -> ApiJson<Option<TeamRankingView>> {
-    let team = state.team_service.get_team(team_id).await?;
-    let event = state.event_service.get_event(team.event_id).await?;
+    let (team, event) = state.team_service.get_team_with_event(team_id).await?;
     let groups = Groups::from_event_and_team(ctx.roles(), event.id, team.id);
 
     if !groups.can_view_team_feedback(event.visibility, event.phase, event.feedback_visible) {

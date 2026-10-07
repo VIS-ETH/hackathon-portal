@@ -1,5 +1,5 @@
 use crate::db::generated::sea_orm_active_enums::EventRole;
-use crate::db::generated::{event_role_assignment, user};
+use crate::db::generated::{event_role_assignment, stakeholder_project, user};
 use crate::db::OrFailExt;
 use crate::{RepositoryError, RepositoryResult};
 use sea_orm::prelude::*;
@@ -45,6 +45,18 @@ impl UserRepository {
     ) -> RepositoryResult<Vec<user::Model>> {
         user::Entity::find()
             .filter(user::Column::AuthId.is_in(auth_ids.iter().map(String::as_str)))
+            .all(db)
+            .await
+            .map_err(RepositoryError::from)
+    }
+
+    pub async fn fetch_all_stakeholders_by_project_id<C: ConnectionTrait>(
+        db: &C,
+        project_id: Uuid,
+    ) -> RepositoryResult<Vec<user::Model>> {
+        user::Entity::find()
+            .inner_join(stakeholder_project::Entity)
+            .filter(stakeholder_project::Column::ProjectId.eq(project_id))
             .all(db)
             .await
             .map_err(RepositoryError::from)

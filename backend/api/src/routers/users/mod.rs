@@ -73,8 +73,7 @@ pub async fn get_my_policies(
         let groups = Groups::from_event(ctx.roles(), event.id);
         (event, groups)
     } else if let Some(team_id) = query.team_id {
-        let team = state.team_service.get_team(team_id).await?;
-        let event = state.event_service.get_event(team.event_id).await?;
+        let (team, event) = state.team_service.get_team_with_event(team_id).await?;
         let groups = Groups::from_event_and_team(ctx.roles(), event.id, team.id);
         (event, groups)
     } else {

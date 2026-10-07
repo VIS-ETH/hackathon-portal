@@ -54,13 +54,36 @@ impl ProjectRepository {
             .or_fail(project::Entity.table_name(), id)
     }
 
-    pub async fn fetch_by_slug<C: ConnectionTrait>(
+    #[expect(
+        clippy::missing_panics_doc,
+        reason = "the foreign key constraint guarantees the event exists"
+    )]
+    pub async fn fetch_by_id_with_event<C: ConnectionTrait>(
+        db: &C,
+        id: Uuid,
+    ) -> RepositoryResult<(project::Model, event::Model)> {
+        let (project, event) = project::Entity::find_by_id(id)
+            .find_also_related(event::Entity)
+            .one(db)
+            .await?
+            .or_fail(project::Entity.table_name(), id)?;
+
+        let event = event.expect("Foreign key constraint ensures event exists");
+
+        Ok((project, event))
+    }
+
+    #[expect(
+        clippy::missing_panics_doc,
+        reason = "the foreign key constraint guarantees the event exists"
+    )]
+    pub async fn fetch_by_slug_with_event<C: ConnectionTrait>(
         db: &C,
         event_slug: &str,
         project_slug: &str,
-    ) -> RepositoryResult<project::Model> {
-        project::Entity::find()
-            .inner_join(event::Entity)
+    ) -> RepositoryResult<(project::Model, event::Model)> {
+        let (project, event) = project::Entity::find()
+            .find_also_related(event::Entity)
             .filter(
                 Condition::all()
                     .add(event::Column::Slug.eq(event_slug))
@@ -71,7 +94,11 @@ impl ProjectRepository {
             .or_fail(
                 project::Entity.table_name(),
                 format!("{event_slug}/{project_slug}"),
-            )
+            )?;
+
+        let event = event.expect("Foreign key constraint ensures event exists");
+
+        Ok((project, event))
     }
 
     pub async fn count_conflicting_by_slug<C: ConnectionTrait>(

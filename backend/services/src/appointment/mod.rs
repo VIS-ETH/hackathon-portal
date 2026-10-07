@@ -1,6 +1,7 @@
 pub mod models;
 
 use crate::appointment::models::{Appointment, AppointmentForCreate, AppointmentForUpdate};
+use crate::event::models::Event;
 use crate::ServiceResult;
 use hackathon_portal_repositories::db::{db_appointment, AppointmentRepository};
 use hackathon_portal_repositories::DbRepository;
@@ -46,10 +47,15 @@ impl AppointmentService {
         Ok(appointments)
     }
 
-    pub async fn get_appointment(&self, appointment_id: Uuid) -> ServiceResult<Appointment> {
-        let appointment =
-            AppointmentRepository::fetch_by_id(self.db_repo.conn(), appointment_id).await?;
-        Ok(appointment.into())
+    pub async fn get_appointment_with_event(
+        &self,
+        appointment_id: Uuid,
+    ) -> ServiceResult<(Appointment, Event)> {
+        let (appointment, event) =
+            AppointmentRepository::fetch_by_id_with_event(self.db_repo.conn(), appointment_id)
+                .await?;
+
+        Ok((appointment.into(), event.into()))
     }
 
     pub async fn update_appointment(

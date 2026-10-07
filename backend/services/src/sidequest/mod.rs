@@ -2,6 +2,7 @@ pub mod models;
 
 use crate::{ranking, ServiceError, ServiceResult};
 use chrono::{NaiveDateTime, Utc};
+use futures::TryFutureExt;
 use hackathon_portal_repositories::DbRepository;
 use models::{AttemptForCreate, SidequestForCreate, SidequestForUpdate};
 use std::collections::HashMap;
@@ -9,6 +10,7 @@ use std::sync::Arc;
 
 use crate::authorization::groups::Group;
 use crate::authorization::AuthorizationService;
+use crate::event::models::Event;
 use crate::sidequest::models::{
     Attempt, AttemptForUpdate, Cooldown, HistoryEntry, Sidequest, TeamLeaderboardEntry,
     UserLeaderboardEntry,
@@ -24,6 +26,7 @@ use sea_orm::{
     IntoActiveModel, JoinType, QueryOrder, QuerySelect, QueryTrait, TransactionTrait,
 };
 use slug::slugify;
+use tokio::try_join;
 
 pub struct SidequestService {
     authorization_service: Arc<AuthorizationService>,
@@ -73,21 +76,29 @@ impl SidequestService {
         Ok(sidequests)
     }
 
-    pub async fn get_sidequest(&self, sidequest_id: Uuid) -> ServiceResult<Sidequest> {
-        let sidequest = SidequestRepository::fetch_by_id(self.db_repo.conn(), sidequest_id).await?;
-        Ok(sidequest.into())
+    pub async fn get_sidequest_with_event(
+        &self,
+        sidequest_id: Uuid,
+    ) -> ServiceResult<(Sidequest, Event)> {
+        let (sidequest, event) =
+            SidequestRepository::fetch_by_id_with_event(self.db_repo.conn(), sidequest_id).await?;
+
+        Ok((sidequest.into(), event.into()))
     }
 
-    pub async fn get_sidequest_by_slug(
+    pub async fn get_sidequest_by_slug_with_event(
         &self,
         event_slug: &str,
         sidequest_slug: &str,
-    ) -> ServiceResult<Sidequest> {
-        let sidequest =
-            SidequestRepository::fetch_by_slug(self.db_repo.conn(), event_slug, sidequest_slug)
-                .await?;
+    ) -> ServiceResult<(Sidequest, Event)> {
+        let (sidequest, event) = SidequestRepository::fetch_by_slug_with_event(
+            self.db_repo.conn(),
+            event_slug,
+            sidequest_slug,
+        )
+        .await?;
 
-        Ok(sidequest.into())
+        Ok((sidequest.into(), event.into()))
     }
 
     pub async fn update_sidequest(
@@ -270,10 +281,15 @@ impl SidequestService {
         Ok(attempts)
     }
 
-    pub async fn get_attempt(&self, attempt_id: Uuid) -> ServiceResult<Attempt> {
-        let attempt =
-            SidequestAttemptRepository::fetch_by_id(self.db_repo.conn(), attempt_id).await?;
-        Ok(attempt.into())
+    pub async fn get_attempt_with_event(
+        &self,
+        attempt_id: Uuid,
+    ) -> ServiceResult<(Attempt, Event)> {
+        let (attempt, event) =
+            SidequestAttemptRepository::fetch_by_id_with_event(self.db_repo.conn(), attempt_id)
+                .await?;
+
+        Ok((attempt.into(), event.into()))
     }
 
     pub async fn update_attempt(
@@ -302,15 +318,16 @@ impl SidequestService {
     }
 
     pub async fn get_cooldown(&self, event_id: Uuid, user_id: Uuid) -> ServiceResult<Cooldown> {
-        let event = EventRepository::fetch_by_id(self.db_repo.conn(), event_id).await?;
-        let duration = chrono::Duration::minutes(i64::from(event.sidequest_cooldown));
+        let (event, last_attempt) = try_join!(
+            EventRepository::fetch_by_id(self.db_repo.conn(), event_id),
+            SidequestAttemptRepository::fetch_latest_by_event_user_id_opt(
+                self.db_repo.conn(),
+                event_id,
+                user_id,
+            ),
+        )?;
 
-        let last_attempt = SidequestAttemptRepository::fetch_latest_by_event_user_id_opt(
-            self.db_repo.conn(),
-            event_id,
-            user_id,
-        )
-        .await?;
+        let duration = chrono::Duration::minutes(i64::from(event.sidequest_cooldown));
 
         let last_attempt = last_attempt.map(|attempt| attempt.attempted_at);
 
@@ -437,15 +454,15 @@ impl SidequestService {
             event_id,
         )
         .await?;
-        let best_results = SidequestAttemptRepository::fetch_best_results_by_event_id(
-            self.db_repo.conn(),
-            sidequest.event_id,
-        )
-        .await?;
-        let users = self
-            .authorization_service
-            .get_event_affiliates(sidequest.event_id, Some(EventRole::Participant))
-            .await?;
+        let (best_results, users) = try_join!(
+            SidequestAttemptRepository::fetch_best_results_by_event_id(
+                self.db_repo.conn(),
+                sidequest.event_id,
+            )
+            .err_into(),
+            self.authorization_service
+                .get_event_affiliates(sidequest.event_id, Some(EventRole::Participant)),
+        )?;
         let participant_count = users.len() as u64;
 
         let user_mapping = users

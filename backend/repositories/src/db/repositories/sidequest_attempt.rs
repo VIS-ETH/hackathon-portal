@@ -1,4 +1,4 @@
-use crate::db::generated::{sidequest, sidequest_attempt, team_role_assignment, user};
+use crate::db::generated::{event, sidequest, sidequest_attempt, team_role_assignment, user};
 use crate::db::OrFailExt;
 use crate::{RepositoryError, RepositoryResult};
 use sea_orm::prelude::*;
@@ -129,6 +129,30 @@ impl SidequestAttemptRepository {
             .one(db)
             .await?
             .or_fail(sidequest_attempt::Entity.table_name(), id)
+    }
+
+    #[expect(
+        clippy::missing_panics_doc,
+        reason = "the foreign key constraints guarantee the event exists"
+    )]
+    pub async fn fetch_by_id_with_event<C: ConnectionTrait>(
+        db: &C,
+        id: Uuid,
+    ) -> RepositoryResult<(sidequest_attempt::Model, event::Model)> {
+        let (sidequest_attempt, event) = sidequest_attempt::Entity::find_by_id(id)
+            .join(
+                JoinType::InnerJoin,
+                sidequest_attempt::Relation::Sidequest.def(),
+            )
+            .join(JoinType::InnerJoin, sidequest::Relation::Event.def())
+            .select_also(event::Entity)
+            .one(db)
+            .await?
+            .or_fail(sidequest_attempt::Entity.table_name(), id)?;
+
+        let event = event.expect("Foreign key constraints ensure event exists");
+
+        Ok((sidequest_attempt, event))
     }
 
     pub async fn fetch_latest_by_event_user_id_opt<C: ConnectionTrait>(

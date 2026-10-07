@@ -1,4 +1,5 @@
 pub mod models;
+use crate::event::models::Event;
 use crate::rating::models::{
     CreateTechnicalQuestion, JuryRating, JuryRatingForCreate, JuryRatingForUpdate, PublicVote,
     TechnicalQuestion, TechnicalQuestionResult, UpdateTechnicalQuestion, Vote,
@@ -88,9 +89,14 @@ impl RatingService {
         Ok(ratings)
     }
 
-    pub async fn get_jury_rating(&self, rating_id: Uuid) -> ServiceResult<JuryRating> {
-        let rating = JuryRatingRepository::fetch_by_id(self.db_repo.conn(), rating_id).await?;
-        Ok(rating.into())
+    pub async fn get_jury_rating_with_event(
+        &self,
+        rating_id: Uuid,
+    ) -> ServiceResult<(JuryRating, Event)> {
+        let (rating, event) =
+            JuryRatingRepository::fetch_by_id_with_event(self.db_repo.conn(), rating_id).await?;
+
+        Ok((rating.into(), event.into()))
     }
 
     pub async fn update_jury_rating(

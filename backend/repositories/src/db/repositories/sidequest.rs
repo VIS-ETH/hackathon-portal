@@ -41,13 +41,36 @@ impl SidequestRepository {
             .or_fail(sidequest::Entity.table_name(), id)
     }
 
-    pub async fn fetch_by_slug<C: ConnectionTrait>(
+    #[expect(
+        clippy::missing_panics_doc,
+        reason = "the foreign key constraint guarantees the event exists"
+    )]
+    pub async fn fetch_by_id_with_event<C: ConnectionTrait>(
+        db: &C,
+        id: Uuid,
+    ) -> RepositoryResult<(sidequest::Model, event::Model)> {
+        let (sidequest, event) = sidequest::Entity::find_by_id(id)
+            .find_also_related(event::Entity)
+            .one(db)
+            .await?
+            .or_fail(sidequest::Entity.table_name(), id)?;
+
+        let event = event.expect("Foreign key constraint ensures event exists");
+
+        Ok((sidequest, event))
+    }
+
+    #[expect(
+        clippy::missing_panics_doc,
+        reason = "the foreign key constraint guarantees the event exists"
+    )]
+    pub async fn fetch_by_slug_with_event<C: ConnectionTrait>(
         db: &C,
         event_slug: &str,
         sidequest_slug: &str,
-    ) -> RepositoryResult<sidequest::Model> {
-        sidequest::Entity::find()
-            .inner_join(event::Entity)
+    ) -> RepositoryResult<(sidequest::Model, event::Model)> {
+        let (sidequest, event) = sidequest::Entity::find()
+            .find_also_related(event::Entity)
             .filter(
                 Condition::all()
                     .add(event::Column::Slug.eq(event_slug))
@@ -58,7 +81,11 @@ impl SidequestRepository {
             .or_fail(
                 sidequest::Entity.table_name(),
                 format!("{event_slug}/{sidequest_slug}"),
-            )
+            )?;
+
+        let event = event.expect("Foreign key constraint ensures event exists");
+
+        Ok((sidequest, event))
     }
 
     pub async fn count_conflicting_by_slug<C: ConnectionTrait>(

@@ -2,11 +2,12 @@ mod matching;
 pub mod models;
 use crate::authorization::groups::Group;
 use crate::authorization::AuthorizationService;
+use crate::event::models::Event;
 use crate::project::models::{Project, ProjectForCreate, ProjectForUpdate};
 use crate::{ServiceError, ServiceResult};
 use hackathon_portal_repositories::db::{
-    db_project, db_stakeholder_project, db_team, db_user, EventRepository,
-    ProjectPreferenceRepository, ProjectRepository, TeamRepository,
+    db_project, db_stakeholder_project, db_team, EventRepository, ProjectPreferenceRepository,
+    ProjectRepository, TeamRepository, UserRepository,
 };
 use hackathon_portal_repositories::DbRepository;
 use matching::GroupAssignment;
@@ -14,6 +15,7 @@ use sea_orm::prelude::*;
 use sea_orm::{ActiveModelTrait, IntoActiveModel, QueryFilter, Set, TransactionTrait};
 use slug::slugify;
 use std::collections::HashMap;
+use tokio::try_join;
 
 #[derive(Clone)]
 pub struct ProjectService {
@@ -59,18 +61,42 @@ impl ProjectService {
     }
 
     pub async fn get_project(&self, project_id: Uuid) -> ServiceResult<Project> {
-        let project = ProjectRepository::fetch_by_id(self.db_repo.conn(), project_id).await?;
-        self.with_stakeholders(self.db_repo.conn(), project).await
+        let (project, stakeholders) = try_join!(
+            ProjectRepository::fetch_by_id(self.db_repo.conn(), project_id),
+            UserRepository::fetch_all_stakeholders_by_project_id(self.db_repo.conn(), project_id),
+        )?;
+
+        Ok((project, stakeholders).into())
     }
 
-    pub async fn get_project_by_slug(
+    pub async fn get_project_with_event(
+        &self,
+        project_id: Uuid,
+    ) -> ServiceResult<(Project, Event)> {
+        let ((project, event), stakeholders) = try_join!(
+            ProjectRepository::fetch_by_id_with_event(self.db_repo.conn(), project_id),
+            UserRepository::fetch_all_stakeholders_by_project_id(self.db_repo.conn(), project_id),
+        )?;
+
+        Ok(((project, stakeholders).into(), event.into()))
+    }
+
+    pub async fn get_project_by_slug_with_event(
         &self,
         event_slug: &str,
         project_slug: &str,
-    ) -> ServiceResult<Project> {
-        let project =
-            ProjectRepository::fetch_by_slug(self.db_repo.conn(), event_slug, project_slug).await?;
-        self.with_stakeholders(self.db_repo.conn(), project).await
+    ) -> ServiceResult<(Project, Event)> {
+        let (project, event) = ProjectRepository::fetch_by_slug_with_event(
+            self.db_repo.conn(),
+            event_slug,
+            project_slug,
+        )
+        .await?;
+        let stakeholders =
+            UserRepository::fetch_all_stakeholders_by_project_id(self.db_repo.conn(), project.id)
+                .await?;
+
+        Ok(((project, stakeholders).into(), event.into()))
     }
 
     pub async fn update_project(
@@ -162,16 +188,6 @@ impl ProjectService {
         Ok(())
     }
 
-    async fn with_stakeholders<C: ConnectionTrait>(
-        &self,
-        db: &C,
-        project: db_project::Model,
-    ) -> ServiceResult<Project> {
-        let stakeholders = project.find_related(db_user::Entity).all(db).await?;
-
-        Ok((project, stakeholders).into())
-    }
-
     /// Fails if the project is still assigned to a team.
     pub async fn delete_project(&self, project_id: Uuid) -> ServiceResult<()> {
         let project = ProjectRepository::fetch_by_id(self.db_repo.conn(), project_id).await?;
@@ -197,28 +213,26 @@ impl ProjectService {
     }
 
     pub async fn get_matching(&self, event_id: Uuid) -> ServiceResult<HashMap<Uuid, Uuid>> {
-        let projects =
-            ProjectRepository::fetch_all_by_event_id(self.db_repo.conn(), event_id).await?;
-        let event = EventRepository::fetch_by_id(self.db_repo.conn(), event_id).await?;
-        let project_ids = projects.into_iter().map(|p| p.id).collect::<Vec<_>>();
+        let (projects, event, teams, preferences) = try_join!(
+            ProjectRepository::fetch_all_by_event_id(self.db_repo.conn(), event_id),
+            EventRepository::fetch_by_id(self.db_repo.conn(), event_id),
+            TeamRepository::fetch_all_by_event_id(self.db_repo.conn(), event_id),
+            ProjectPreferenceRepository::fetch_all_by_event_id(self.db_repo.conn(), event_id),
+        )?;
 
-        let teams = TeamRepository::fetch_all_by_event_id(self.db_repo.conn(), event_id).await?;
+        let project_ids = projects.into_iter().map(|p| p.id).collect::<Vec<_>>();
         let team_ids = teams.iter().map(|t| t.id).collect::<Vec<_>>();
 
         // Mapping from team_id -> project_id -> preference
-        let mut preference =
-            ProjectPreferenceRepository::fetch_all_by_event_id(self.db_repo.conn(), event_id)
-                .await?
-                .into_iter()
-                .fold(
-                    HashMap::<Uuid, HashMap<Uuid, i32>>::new(),
-                    |mut acc, pref| {
-                        acc.entry(pref.team_id)
-                            .or_default()
-                            .insert(pref.project_id, pref.score);
-                        acc
-                    },
-                );
+        let mut preference = preferences.into_iter().fold(
+            HashMap::<Uuid, HashMap<Uuid, i32>>::new(),
+            |mut acc, pref| {
+                acc.entry(pref.team_id)
+                    .or_default()
+                    .insert(pref.project_id, pref.score);
+                acc
+            },
+        );
 
         // Teams without preferences still take part in the matching
         for team in teams {

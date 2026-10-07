@@ -2,6 +2,7 @@ pub mod models;
 
 use crate::authorization::AuthorizationService;
 use crate::crypto::CryptoService;
+use crate::event::models::Event;
 use crate::infrastructure::models::IngressConfig;
 use crate::secret::models::AI_API_KEY_SECRET_NAME;
 use crate::secret::SecretService;
@@ -23,6 +24,7 @@ use sea_orm::{ActiveModelTrait, IntoActiveModel, Set, TransactionTrait};
 use slug::slugify;
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
+use tokio::try_join;
 
 #[derive(Clone)]
 pub struct TeamService {
@@ -101,13 +103,15 @@ impl TeamService {
         reason = "the foreign key constraint guarantees the event exists"
     )]
     pub async fn get_all_teams(&self) -> ServiceResult<Vec<Team>> {
-        let events = EventRepository::fetch_all(self.db_repo.conn())
-            .await?
+        let (events, teams) = try_join!(
+            EventRepository::fetch_all(self.db_repo.conn()),
+            TeamRepository::fetch_all(self.db_repo.conn()),
+        )?;
+
+        let events = events
             .into_iter()
             .map(|e| (e.id, e))
             .collect::<HashMap<_, _>>();
-
-        let teams = TeamRepository::fetch_all(self.db_repo.conn()).await?;
 
         try_join_all(teams.into_iter().map(|team| {
             let event = events
@@ -120,8 +124,10 @@ impl TeamService {
     }
 
     pub async fn get_teams(&self, event_id: Uuid) -> ServiceResult<Vec<Team>> {
-        let event = EventRepository::fetch_by_id(self.db_repo.conn(), event_id).await?;
-        let teams = TeamRepository::fetch_all_by_event_id(self.db_repo.conn(), event_id).await?;
+        let (event, teams) = try_join!(
+            EventRepository::fetch_by_id(self.db_repo.conn(), event_id),
+            TeamRepository::fetch_all_by_event_id(self.db_repo.conn(), event_id),
+        )?;
 
         try_join_all(
             teams
@@ -136,6 +142,14 @@ impl TeamService {
             TeamRepository::fetch_by_id_with_event(self.db_repo.conn(), team_id).await?;
 
         self.assemble_team(team, &event).await
+    }
+
+    pub async fn get_team_with_event(&self, team_id: Uuid) -> ServiceResult<(Team, Event)> {
+        let (team, event) =
+            TeamRepository::fetch_by_id_with_event(self.db_repo.conn(), team_id).await?;
+        let team = self.assemble_team(team, &event).await?;
+
+        Ok((team, event.into()))
     }
 
     pub async fn get_team_by_slug(&self, event_slug: &str, team_slug: &str) -> ServiceResult<Team> {
@@ -652,9 +666,10 @@ impl TeamService {
         budget: f64,
         event_id: Uuid,
     ) -> ServiceResult<String> {
-        let event: db_event::Model =
-            EventRepository::fetch_by_id(self.db_repo.conn(), event_id).await?;
-        let team = TeamRepository::fetch_by_id(self.db_repo.conn(), team_id).await?;
+        let (event, team) = try_join!(
+            EventRepository::fetch_by_id(self.db_repo.conn(), event_id),
+            TeamRepository::fetch_by_id(self.db_repo.conn(), team_id),
+        )?;
 
         let master_api_key = event
             .master_ai_api_key

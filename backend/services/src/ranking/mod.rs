@@ -11,6 +11,7 @@ use hackathon_portal_repositories::db::{
 use hackathon_portal_repositories::{DbRepository, RepositoryError};
 use sea_orm::prelude::*;
 use sea_orm::{ActiveModelTrait, IntoActiveModel, Set, TransactionTrait};
+use tokio::try_join;
 
 #[derive(Clone)]
 pub struct RankingService {
@@ -57,10 +58,10 @@ impl RankingService {
     }
 
     pub async fn list_snapshots(&self, event_id: Uuid) -> ServiceResult<Vec<RankingSnapshotInfo>> {
-        let event = EventRepository::fetch_by_id(self.db_repo.conn(), event_id).await?;
-        let rows =
-            RankingSnapshotRepository::fetch_infos_by_event_id(self.db_repo.conn(), event_id)
-                .await?;
+        let (event, rows) = try_join!(
+            EventRepository::fetch_by_id(self.db_repo.conn(), event_id),
+            RankingSnapshotRepository::fetch_infos_by_event_id(self.db_repo.conn(), event_id),
+        )?;
 
         Ok(rows
             .into_iter()

@@ -1,4 +1,4 @@
-use crate::db::generated::{jury_rating, team};
+use crate::db::generated::{event, jury_rating, team};
 use crate::db::OrFailExt;
 use crate::{RepositoryError, RepositoryResult};
 use sea_orm::prelude::*;
@@ -40,5 +40,26 @@ impl JuryRatingRepository {
             .one(db)
             .await?
             .or_fail(jury_rating::Entity.table_name(), id)
+    }
+
+    #[expect(
+        clippy::missing_panics_doc,
+        reason = "the foreign key constraints guarantee the event exists"
+    )]
+    pub async fn fetch_by_id_with_event<C: ConnectionTrait>(
+        db: &C,
+        id: Uuid,
+    ) -> RepositoryResult<(jury_rating::Model, event::Model)> {
+        let (jury_rating, event) = jury_rating::Entity::find_by_id(id)
+            .join(JoinType::InnerJoin, jury_rating::Relation::Team.def())
+            .join(JoinType::InnerJoin, team::Relation::Event.def())
+            .select_also(event::Entity)
+            .one(db)
+            .await?
+            .or_fail(jury_rating::Entity.table_name(), id)?;
+
+        let event = event.expect("Foreign key constraints ensure event exists");
+
+        Ok((jury_rating, event))
     }
 }

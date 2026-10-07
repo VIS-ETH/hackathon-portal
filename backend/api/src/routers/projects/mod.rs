@@ -93,12 +93,10 @@ pub async fn get_project_by_slug(
     State(state): State<ApiState>,
     Path((event_slug, project_slug)): Path<(String, String)>,
 ) -> ApiJson<Project> {
-    let project = state
+    let (project, event) = state
         .project_service
-        .get_project_by_slug(&event_slug, &project_slug)
+        .get_project_by_slug_with_event(&event_slug, &project_slug)
         .await?;
-
-    let event = state.event_service.get_event(project.event_id).await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
     if !groups.can_view_project(event.visibility, event.projects_visible) {
@@ -123,8 +121,10 @@ pub async fn get_project(
     State(state): State<ApiState>,
     Path(project_id): Path<Uuid>,
 ) -> ApiJson<Project> {
-    let project = state.project_service.get_project(project_id).await?;
-    let event = state.event_service.get_event(project.event_id).await?;
+    let (project, event) = state
+        .project_service
+        .get_project_with_event(project_id)
+        .await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
     if !groups.can_view_project(event.visibility, event.projects_visible) {
@@ -150,8 +150,10 @@ pub async fn update_project(
     Path(project_id): Path<Uuid>,
     Json(body): Json<ProjectForUpdate>,
 ) -> ApiJson<Project> {
-    let project = state.project_service.get_project(project_id).await?;
-    let event = state.event_service.get_event(project.event_id).await?;
+    let (_, event) = state
+        .project_service
+        .get_project_with_event(project_id)
+        .await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
     if !groups.can_manage_project(event.visibility, event.phase, event.read_only) {
@@ -181,8 +183,10 @@ pub async fn delete_project(
     State(state): State<ApiState>,
     Path(project_id): Path<Uuid>,
 ) -> ApiJson<Project> {
-    let project = state.project_service.get_project(project_id).await?;
-    let event = state.event_service.get_event(project.event_id).await?;
+    let (project, event) = state
+        .project_service
+        .get_project_with_event(project_id)
+        .await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
     if !groups.can_manage_project(event.visibility, event.phase, event.read_only) {

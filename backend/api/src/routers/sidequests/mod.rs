@@ -98,12 +98,10 @@ pub async fn get_sidequest_by_slug(
     State(state): State<ApiState>,
     Path((event_slug, sidequest_slug)): Path<(String, String)>,
 ) -> ApiJson<Sidequest> {
-    let sidequest = state
+    let (sidequest, event) = state
         .sidequest_service
-        .get_sidequest_by_slug(&event_slug, &sidequest_slug)
+        .get_sidequest_by_slug_with_event(&event_slug, &sidequest_slug)
         .await?;
-
-    let event = state.event_service.get_event(sidequest.event_id).await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
     if !groups.can_view_sidequest(event.visibility, event.phase) {
@@ -128,8 +126,10 @@ pub async fn get_sidequest(
     State(state): State<ApiState>,
     Path(sidequest_id): Path<Uuid>,
 ) -> ApiJson<Sidequest> {
-    let sidequest = state.sidequest_service.get_sidequest(sidequest_id).await?;
-    let event = state.event_service.get_event(sidequest.event_id).await?;
+    let (sidequest, event) = state
+        .sidequest_service
+        .get_sidequest_with_event(sidequest_id)
+        .await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
     if !groups.can_view_sidequest(event.visibility, event.phase) {
@@ -137,8 +137,6 @@ pub async fn get_sidequest(
             action: "view this sidequest".to_string(),
         });
     }
-
-    let sidequest = state.sidequest_service.get_sidequest(sidequest_id).await?;
 
     Ok(Json(sidequest))
 }
@@ -157,8 +155,10 @@ pub async fn update_sidequest(
     Path(sidequest_id): Path<Uuid>,
     Json(body): Json<SidequestForUpdate>,
 ) -> ApiJson<Sidequest> {
-    let sidequest = state.sidequest_service.get_sidequest(sidequest_id).await?;
-    let event = state.event_service.get_event(sidequest.event_id).await?;
+    let (_, event) = state
+        .sidequest_service
+        .get_sidequest_with_event(sidequest_id)
+        .await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
     if !groups.can_manage_sidequest(event.visibility, event.read_only) {
@@ -188,8 +188,10 @@ pub async fn delete_sidequest(
     State(state): State<ApiState>,
     Path(sidequest_id): Path<Uuid>,
 ) -> ApiJson<Sidequest> {
-    let sidequest = state.sidequest_service.get_sidequest(sidequest_id).await?;
-    let event = state.event_service.get_event(sidequest.event_id).await?;
+    let (sidequest, event) = state
+        .sidequest_service
+        .get_sidequest_with_event(sidequest_id)
+        .await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
     if !groups.can_manage_sidequest(event.visibility, event.read_only) {

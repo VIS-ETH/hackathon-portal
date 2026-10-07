@@ -93,12 +93,10 @@ pub async fn get_appointment(
     State(state): State<ApiState>,
     Path(appointment_id): Path<Uuid>,
 ) -> ApiJson<Appointment> {
-    let appointment = state
+    let (appointment, event) = state
         .appointment_service
-        .get_appointment(appointment_id)
+        .get_appointment_with_event(appointment_id)
         .await?;
-
-    let event = state.event_service.get_event(appointment.event_id).await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
     if !groups.can_view_event_internal(event.visibility) {
@@ -124,12 +122,10 @@ pub async fn update_appointment(
     Path(appointment_id): Path<Uuid>,
     Json(body): Json<AppointmentForUpdate>,
 ) -> ApiJson<Appointment> {
-    let appointment = state
+    let (_, event) = state
         .appointment_service
-        .get_appointment(appointment_id)
+        .get_appointment_with_event(appointment_id)
         .await?;
-
-    let event = state.event_service.get_event(appointment.event_id).await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
     if !groups.can_manage_event() {
@@ -159,12 +155,10 @@ pub async fn delete_appointment(
     State(state): State<ApiState>,
     Path(appointment_id): Path<Uuid>,
 ) -> ApiJson<Appointment> {
-    let appointment = state
+    let (appointment, event) = state
         .appointment_service
-        .get_appointment(appointment_id)
+        .get_appointment_with_event(appointment_id)
         .await?;
-
-    let event = state.event_service.get_event(appointment.event_id).await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
     if !groups.can_manage_event() {

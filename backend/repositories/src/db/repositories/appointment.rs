@@ -1,4 +1,4 @@
-use crate::db::generated::appointment;
+use crate::db::generated::{appointment, event};
 use crate::db::OrFailExt;
 use crate::{RepositoryError, RepositoryResult};
 use sea_orm::prelude::*;
@@ -27,5 +27,24 @@ impl AppointmentRepository {
             .one(db)
             .await?
             .or_fail(appointment::Entity.table_name(), id)
+    }
+
+    #[expect(
+        clippy::missing_panics_doc,
+        reason = "the foreign key constraint guarantees the event exists"
+    )]
+    pub async fn fetch_by_id_with_event<C: ConnectionTrait>(
+        db: &C,
+        id: Uuid,
+    ) -> RepositoryResult<(appointment::Model, event::Model)> {
+        let (appointment, event) = appointment::Entity::find_by_id(id)
+            .find_also_related(event::Entity)
+            .one(db)
+            .await?
+            .or_fail(appointment::Entity.table_name(), id)?;
+
+        let event = event.expect("Foreign key constraint ensures event exists");
+
+        Ok((appointment, event))
     }
 }

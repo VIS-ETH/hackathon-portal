@@ -40,11 +40,10 @@ pub async fn create_sidequest_attempt(
     State(state): State<ApiState>,
     Json(body): Json<AttemptForCreate>,
 ) -> ApiJson<Attempt> {
-    let sidequest = state
+    let (_, event) = state
         .sidequest_service
-        .get_sidequest(body.sidequest_id)
+        .get_sidequest_with_event(body.sidequest_id)
         .await?;
-    let event = state.event_service.get_event(sidequest.event_id).await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
     if !groups.can_manage_sidequest_attempt(event.visibility, event.phase, event.read_only) {
@@ -190,15 +189,10 @@ pub async fn get_sidequest_attempt(
     State(state): State<ApiState>,
     Path(sidequest_attempt_id): Path<Uuid>,
 ) -> ApiJson<Attempt> {
-    let attempt = state
+    let (attempt, event) = state
         .sidequest_service
-        .get_attempt(sidequest_attempt_id)
+        .get_attempt_with_event(sidequest_attempt_id)
         .await?;
-    let sidequest = state
-        .sidequest_service
-        .get_sidequest(attempt.sidequest_id)
-        .await?;
-    let event = state.event_service.get_event(sidequest.event_id).await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
     if !groups.can_view_sidequest_attempt(event.visibility) {
@@ -224,15 +218,10 @@ pub async fn update_sidequest_attempt(
     Path(sidequest_attempt_id): Path<Uuid>,
     Json(body): Json<AttemptForUpdate>,
 ) -> ApiJson<Attempt> {
-    let attempt = state
+    let (_, event) = state
         .sidequest_service
-        .get_attempt(sidequest_attempt_id)
+        .get_attempt_with_event(sidequest_attempt_id)
         .await?;
-    let sidequest = state
-        .sidequest_service
-        .get_sidequest(attempt.sidequest_id)
-        .await?;
-    let event = state.event_service.get_event(sidequest.event_id).await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
     if !groups.can_manage_sidequest_attempt(event.visibility, event.phase, event.read_only) {
@@ -262,15 +251,10 @@ pub async fn delete_sidequest_attempt(
     State(state): State<ApiState>,
     Path(sidequest_attempt_id): Path<Uuid>,
 ) -> ApiJson<()> {
-    let attempt = state
+    let (_, event) = state
         .sidequest_service
-        .get_attempt(sidequest_attempt_id)
+        .get_attempt_with_event(sidequest_attempt_id)
         .await?;
-    let sidequest = state
-        .sidequest_service
-        .get_sidequest(attempt.sidequest_id)
-        .await?;
-    let event = state.event_service.get_event(sidequest.event_id).await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
     if !groups.can_manage_sidequest_attempt(event.visibility, event.phase, event.read_only) {

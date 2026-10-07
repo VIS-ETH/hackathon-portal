@@ -32,8 +32,7 @@ pub async fn get_technical_team_rating(
     State(state): State<ApiState>,
     Path(team_id): Path<Uuid>,
 ) -> ApiJsonVec<TechnicalQuestionResult> {
-    let team = state.team_service.get_team(team_id).await?;
-    let event = state.event_service.get_event(team.event_id).await?;
+    let (_, event) = state.team_service.get_team_with_event(team_id).await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
     if !groups.can_manage_event() {
@@ -60,8 +59,7 @@ pub async fn set_technical_team_rating(
     Path(team_id): Path<Uuid>,
     Json(body): Json<SetTechnicalRating>,
 ) -> ApiJson<TechnicalQuestionResult> {
-    let team = state.team_service.get_team(team_id).await?;
-    let event = state.event_service.get_event(team.event_id).await?;
+    let (_, event) = state.team_service.get_team_with_event(team_id).await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
     if !groups.can_manage_event() {

@@ -35,8 +35,7 @@ pub async fn create_jury_rating(
     State(state): State<ApiState>,
     Json(body): Json<JuryRatingForCreate>,
 ) -> ApiJson<JuryRating> {
-    let team = state.team_service.get_team(body.team_id).await?;
-    let event = state.event_service.get_event(team.event_id).await?;
+    let (_, event) = state.team_service.get_team_with_event(body.team_id).await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
     if !groups.can_manage_jury_rating(
@@ -74,8 +73,10 @@ pub async fn get_jury_ratings(
     State(state): State<ApiState>,
     Query(query): Query<TeamIdQuery>,
 ) -> ApiJsonVec<JuryRating> {
-    let team = state.team_service.get_team(query.team_id).await?;
-    let event = state.event_service.get_event(team.event_id).await?;
+    let (_, event) = state
+        .team_service
+        .get_team_with_event(query.team_id)
+        .await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
     if !groups.can_manage_jury_rating(
@@ -112,10 +113,10 @@ pub async fn get_jury_rating(
     State(state): State<ApiState>,
     Path(rating_id): Path<Uuid>,
 ) -> ApiJson<JuryRating> {
-    // TODO: think about joins...
-    let rating = state.rating_service.get_jury_rating(rating_id).await?;
-    let team = state.team_service.get_team(rating.team_id).await?;
-    let event = state.event_service.get_event(team.event_id).await?;
+    let (rating, event) = state
+        .rating_service
+        .get_jury_rating_with_event(rating_id)
+        .await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
     let user_policy_pass = rating.user_id == ctx.user().id || groups.can_manage_event();
@@ -149,10 +150,10 @@ pub async fn update_jury_rating(
     Path(rating_id): Path<Uuid>,
     Json(body): Json<JuryRatingForUpdate>,
 ) -> ApiJson<JuryRating> {
-    let rating = state.rating_service.get_jury_rating(rating_id).await?;
-
-    let team = state.team_service.get_team(rating.team_id).await?;
-    let event = state.event_service.get_event(team.event_id).await?;
+    let (rating, event) = state
+        .rating_service
+        .get_jury_rating_with_event(rating_id)
+        .await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
     let user_policy_pass = rating.user_id == ctx.user().id || groups.can_manage_event();
@@ -190,10 +191,10 @@ pub async fn delete_jury_rating(
     State(state): State<ApiState>,
     Path(rating_id): Path<Uuid>,
 ) -> ApiJson<JuryRating> {
-    let rating = state.rating_service.get_jury_rating(rating_id).await?;
-
-    let team = state.team_service.get_team(rating.team_id).await?;
-    let event = state.event_service.get_event(team.event_id).await?;
+    let (rating, event) = state
+        .rating_service
+        .get_jury_rating_with_event(rating_id)
+        .await?;
     let groups = Groups::from_event(ctx.roles(), event.id);
 
     let user_policy_pass = rating.user_id == ctx.user().id || groups.can_manage_event();

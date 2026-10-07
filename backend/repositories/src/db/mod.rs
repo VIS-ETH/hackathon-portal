@@ -3,7 +3,7 @@ pub mod generated; // needs to be public for Utoipa
 mod repositories;
 
 use crate::{RepositoryError, RepositoryResult};
-use sea_orm::{Database, DbConn};
+use sea_orm::{ConnectOptions, Database, DbConn};
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
 use tokio::time::timeout;
@@ -48,6 +48,16 @@ pub use generated::sea_orm_active_enums::{
 #[serde(deny_unknown_fields)]
 pub struct DbConfig {
     pub url: String,
+
+    #[serde(default = "DbConfig::default_max_connections")]
+    pub max_connections: u32,
+}
+
+impl DbConfig {
+    #[must_use]
+    pub const fn default_max_connections() -> u32 {
+        30
+    }
 }
 
 #[derive(Clone)]
@@ -63,7 +73,12 @@ impl DbRepository {
 
     pub async fn from_config(config: &DbConfig) -> RepositoryResult<Self> {
         let result = Self {
-            conn: Database::connect(config.url.clone()).await?,
+            conn: Database::connect(
+                ConnectOptions::new(&config.url)
+                    .max_connections(config.max_connections)
+                    .to_owned(),
+            )
+            .await?,
         };
 
         Ok(result)

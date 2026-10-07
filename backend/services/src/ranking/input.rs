@@ -6,7 +6,9 @@ use hackathon_portal_repositories::db::{
     TeamRepository, TeamRole, TeamRoleAssignmentRepository, TechnicalQuestionRepository,
     TechnicalRatingRepository, VoteRepository,
 };
+use hackathon_portal_repositories::RepositoryResult;
 use sea_orm::ConnectionTrait;
+use tokio::try_join;
 use uuid::Uuid;
 
 /// Everything the ranking of one event is computed from.
@@ -34,15 +36,13 @@ pub struct SidequestInput {
 }
 
 pub async fn load<C: ConnectionTrait>(db: &C, event_id: Uuid) -> ServiceResult<RankingInput> {
-    let teams = TeamRepository::fetch_ranking_inputs_by_event_id(db, event_id).await?;
-    let technical_questions =
-        TechnicalQuestionRepository::fetch_all_by_event_id(db, event_id).await?;
-    let technical_ratings = TechnicalRatingRepository::fetch_all_by_event_id(db, event_id).await?;
-    let jury_ratings = JuryRatingRepository::fetch_all_by_event_id(db, event_id).await?;
-    let votes = VoteRepository::fetch_all_by_event_id(db, event_id).await?;
-
-    let team_ids = teams.iter().map(|team| team.id).collect();
-    let sidequest = load_sidequest_input_for_teams(db, event_id, team_ids).await?;
+    let ((teams, sidequest), technical_questions, technical_ratings, jury_ratings, votes) = try_join!(
+        load_teams_and_sidequest_input(db, event_id),
+        TechnicalQuestionRepository::fetch_all_by_event_id(db, event_id),
+        TechnicalRatingRepository::fetch_all_by_event_id(db, event_id),
+        JuryRatingRepository::fetch_all_by_event_id(db, event_id),
+        VoteRepository::fetch_all_by_event_id(db, event_id),
+    )?;
 
     Ok(RankingInput {
         teams,
@@ -58,38 +58,40 @@ pub async fn load_sidequest_input<C: ConnectionTrait>(
     db: &C,
     event_id: Uuid,
 ) -> ServiceResult<SidequestInput> {
-    let teams = TeamRepository::fetch_ranking_inputs_by_event_id(db, event_id).await?;
-    let team_ids = teams.into_iter().map(|team| team.id).collect();
+    let (_, sidequest) = load_teams_and_sidequest_input(db, event_id).await?;
 
-    load_sidequest_input_for_teams(db, event_id, team_ids).await
+    Ok(sidequest)
 }
 
-async fn load_sidequest_input_for_teams<C: ConnectionTrait>(
+async fn load_teams_and_sidequest_input<C: ConnectionTrait>(
     db: &C,
     event_id: Uuid,
-    team_ids: Vec<Uuid>,
-) -> ServiceResult<SidequestInput> {
-    let sidequests = SidequestRepository::fetch_all_by_event_id(db, event_id).await?;
-    let best_results =
-        SidequestAttemptRepository::fetch_best_results_by_event_id(db, event_id).await?;
-    let members = TeamRoleAssignmentRepository::fetch_all_by_event_id_and_role(
-        db,
-        event_id,
-        TeamRole::Member,
-    )
-    .await?;
-    let participant_count = EventRoleAssignmentRepository::count_by_event_id_and_role(
-        db,
-        event_id,
-        EventRole::Participant,
-    )
-    .await?;
+) -> RepositoryResult<(Vec<TeamRankingInput>, SidequestInput)> {
+    let (teams, sidequests, best_results, members, participant_count) = try_join!(
+        TeamRepository::fetch_ranking_inputs_by_event_id(db, event_id),
+        SidequestRepository::fetch_all_by_event_id(db, event_id),
+        SidequestAttemptRepository::fetch_best_results_by_event_id(db, event_id),
+        TeamRoleAssignmentRepository::fetch_all_by_event_id_and_role(
+            db,
+            event_id,
+            TeamRole::Member
+        ),
+        EventRoleAssignmentRepository::count_by_event_id_and_role(
+            db,
+            event_id,
+            EventRole::Participant
+        ),
+    )?;
 
-    Ok(SidequestInput {
+    let team_ids = teams.iter().map(|team| team.id).collect();
+
+    let sidequest = SidequestInput {
         team_ids,
         sidequests,
         best_results,
         participant_count,
         members,
-    })
+    };
+
+    Ok((teams, sidequest))
 }
