@@ -1,12 +1,16 @@
-use crate::mw::mw_map_response;
+use crate::error::PublicError;
+use crate::mw::mw_log_request;
 use crate::{ApiError, ApiResult};
 use axum::extract::Request;
-use axum::http::HeaderValue;
+use axum::http::{HeaderValue, StatusCode};
+use axum::response::{IntoResponse, Response};
 use axum::{middleware, Router};
 use itertools::iproduct;
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use tokio::net::TcpListener;
+use tower_http::catch_panic::CatchPanicLayer;
 use tower_http::cors::{Any, CorsLayer};
+use tracing::error;
 
 pub struct Server {
     name: &'static str,
@@ -77,7 +81,9 @@ impl Server {
 
         router = router
             .fallback(handle_404)
-            .layer(middleware::map_response(mw_map_response))
+            // Inside the logger, so panics are logged as 500s instead of dropping the connection.
+            .layer(CatchPanicLayer::custom(handle_panic))
+            .layer(middleware::from_fn(mw_log_request))
             .layer(cors);
 
         Ok(router)
@@ -107,4 +113,20 @@ async fn handle_404(request: Request) -> ApiResult<()> {
     Err(ApiError::UrlNotFound {
         url: request.uri().to_string(),
     })
+}
+
+#[expect(
+    clippy::needless_pass_by_value,
+    reason = "signature required by tower_http's ResponseForPanic"
+)]
+fn handle_panic(err: Box<dyn std::any::Any + Send + 'static>) -> Response {
+    let message = err
+        .downcast_ref::<String>()
+        .map(String::as_str)
+        .or_else(|| err.downcast_ref::<&str>().copied())
+        .unwrap_or("unknown panic payload");
+
+    error!(panic = message, "Request handler panicked");
+
+    PublicError::new(StatusCode::INTERNAL_SERVER_ERROR, "Internal server error").into_response()
 }
