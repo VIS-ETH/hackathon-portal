@@ -16,12 +16,21 @@ struct NewKeyRequest {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LiteLLMConfig {
-    pub host: String,
+    /// e.g. `https://llm.hackathon.ethz.ch`
+    pub url: String,
+}
+
+impl LiteLLMConfig {
+    /// The configured URL without trailing slashes, so that paths can be appended.
+    #[must_use]
+    pub fn base_url(&self) -> &str {
+        self.url.trim_end_matches('/')
+    }
 }
 
 #[derive(Debug, Clone)]
 pub struct LiteLLMRepository {
-    pub host: String,
+    pub base_url: String,
     pub client: Client,
 }
 
@@ -29,7 +38,7 @@ impl LiteLLMRepository {
     #[must_use]
     pub fn new(config: &LiteLLMConfig) -> Self {
         Self {
-            host: config.host.clone(),
+            base_url: config.base_url().to_string(),
             client: Client::new(),
         }
     }
@@ -47,7 +56,7 @@ impl LiteLLMRepository {
     ) -> RepositoryResult<serde_json::Value> {
         let res = self
             .client
-            .post(format!("https://{}{}", self.host, endpoint))
+            .post(format!("{}{}", self.base_url, endpoint))
             .header("Authorization", format!("Bearer {key}"))
             .header("Content-Type", "application/json")
             .json(&payload)

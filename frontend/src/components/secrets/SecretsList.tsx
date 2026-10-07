@@ -1,6 +1,7 @@
+import { useGetConfig } from "@/api/gen";
 import { SecretValue } from "@/api/gen/schemas";
+import { AI_API_KEY_SECRET_NAME, getKeyInfo } from "@/api/litellm";
 import { inputProps } from "@/styles/common";
-import { AI_API_KEY_SECRET_NAME, getKeyInfo } from "@/utils";
 
 import { useEffect, useState } from "react";
 
@@ -13,19 +14,20 @@ import {
 } from "@mantine/core";
 
 type AIKeyUsageProps = {
+  liteLLMUrl: string;
   apiKey: string;
 };
 
-const AIKeyUsage = ({ apiKey }: AIKeyUsageProps) => {
+const AIKeyUsage = ({ liteLLMUrl, apiKey }: AIKeyUsageProps) => {
   const [usedBudget, setUsedBudget] = useState<number | null>(null);
   const [maxBudget, setMaxBudget] = useState<number | null>(null);
 
   useEffect(() => {
-    getKeyInfo(apiKey).then(({ usedBudget, maxBudget }) => {
+    getKeyInfo(liteLLMUrl, apiKey).then(({ usedBudget, maxBudget }) => {
       setUsedBudget(usedBudget);
       setMaxBudget(maxBudget);
     });
-  }, [apiKey]);
+  }, [liteLLMUrl, apiKey]);
 
   return (
     <>
@@ -45,6 +47,11 @@ type SecretsListProps = {
 };
 
 const SecretsList = ({ secrets }: SecretsListProps) => {
+  const { data: config } = useGetConfig({
+    query: { staleTime: Infinity },
+  });
+  const liteLLMUrl = config?.litellm_url;
+
   return (
     <Stack>
       {secrets.map((secret) => (
@@ -56,8 +63,8 @@ const SecretsList = ({ secrets }: SecretsListProps) => {
             value={secret.value}
             readOnly
           />
-          {secret.name === AI_API_KEY_SECRET_NAME && (
-            <AIKeyUsage apiKey={secret.value} />
+          {secret.name === AI_API_KEY_SECRET_NAME && liteLLMUrl && (
+            <AIKeyUsage liteLLMUrl={liteLLMUrl} apiKey={secret.value} />
           )}
         </Stack>
       ))}

@@ -107,6 +107,8 @@ pub enum ServiceError {
 
     MissingMasterAIAPIKey,
 
+    LiteLLMNotConfigured,
+
     SecretNameNotUnique {
         name: String,
     },

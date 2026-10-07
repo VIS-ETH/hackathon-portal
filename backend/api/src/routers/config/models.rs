@@ -4,4 +4,5 @@ use utoipa::ToSchema;
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
 pub struct ClientConfig {
     pub logout_url: Option<String>,
+    pub litellm_url: Option<String>,
 }

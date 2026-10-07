@@ -1,5 +1,5 @@
 mod appointments;
-mod config;
+pub mod config;
 mod docs;
 mod events;
 mod projects;

@@ -55,7 +55,8 @@ pub struct ApiConfig {
     pub postgres: DbConfig,
     pub s3: S3Config,
     pub discord: DiscordConfig,
-    pub litellm: LiteLLMConfig,
+    /// Team AI API keys can't be generated if unset.
+    pub litellm: Option<LiteLLMConfig>,
     pub crypto: CryptoConfig,
     #[serde(skip, default = "ApiConfig::default_dirs")]
     pub dirs: ProjectDirs,

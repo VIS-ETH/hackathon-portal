@@ -284,6 +284,10 @@ impl From<&ServiceError> for PublicError {
                 StatusCode::BAD_REQUEST,
                 "The master AI API key is missing".to_string(),
             ),
+            ServiceError::LiteLLMNotConfigured => (
+                StatusCode::BAD_REQUEST,
+                "LiteLLM is not configured".to_string(),
+            ),
             ServiceError::SecretNameNotUnique { name } => (
                 StatusCode::CONFLICT,
                 format!("A secret named '{name}' already exists"),

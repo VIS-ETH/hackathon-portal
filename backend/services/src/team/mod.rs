@@ -33,7 +33,7 @@ pub struct TeamService {
     crypto_service: Arc<CryptoService>,
     secret_service: Arc<SecretService>,
     db_repo: DbRepository,
-    lite_llm_repo: LiteLLMRepository,
+    lite_llm_repo: Option<LiteLLMRepository>,
 }
 
 impl TeamService {
@@ -44,7 +44,7 @@ impl TeamService {
         crypto_service: Arc<CryptoService>,
         secret_service: Arc<SecretService>,
         db_repo: DbRepository,
-        lite_llm_repo: LiteLLMRepository,
+        lite_llm_repo: Option<LiteLLMRepository>,
     ) -> Self {
         Self {
             authorization_service,
@@ -666,6 +666,11 @@ impl TeamService {
         budget: f64,
         event_id: Uuid,
     ) -> ServiceResult<String> {
+        let lite_llm_repo = self
+            .lite_llm_repo
+            .as_ref()
+            .ok_or(ServiceError::LiteLLMNotConfigured)?;
+
         let (event, team) = try_join!(
             EventRepository::fetch_by_id(self.db_repo.conn(), event_id),
             TeamRepository::fetch_by_id(self.db_repo.conn(), team_id),
@@ -677,8 +682,7 @@ impl TeamService {
 
         let api_key = self.crypto_service.decrypt(&master_api_key)?;
 
-        let generated_key = self
-            .lite_llm_repo
+        let generated_key = lite_llm_repo
             .generate_team_key(team.index, budget, &api_key)
             .await
             .map_err(ServiceError::Repository)?;

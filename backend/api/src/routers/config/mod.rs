@@ -22,7 +22,5 @@ pub fn get_router(state: &ApiState) -> Router {
     ),
 )]
 pub async fn get_config(State(state): State<ApiState>) -> ApiJson<ClientConfig> {
-    Ok(Json(ClientConfig {
-        logout_url: state.logout_url.clone(),
-    }))
+    Ok(Json(ClientConfig::clone(&state.client_config)))
 }

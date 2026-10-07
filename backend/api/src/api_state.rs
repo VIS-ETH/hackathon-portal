@@ -1,5 +1,6 @@
 use crate::api_config::ApiConfig;
 use crate::auth::Authenticator;
+use crate::routers::config::models::ClientConfig;
 use crate::ApiResult;
 use hackathon_portal_repositories::discord::DiscordConfig;
 use hackathon_portal_repositories::lite_llm::LiteLLMRepository;
@@ -30,7 +31,7 @@ use std::time::Duration;
 pub struct ApiState {
     pub authenticator: Authenticator,
     pub discord_config: Arc<DiscordConfig>,
-    pub logout_url: Option<String>,
+    pub client_config: Arc<ClientConfig>,
     pub health_service: Arc<HealthService>,
     pub authorization_service: Arc<AuthorizationService>,
     pub user_service: Arc<UserService>,
@@ -57,7 +58,11 @@ impl ApiState {
         let s3_repo = S3Repository::from_config(&config.s3);
 
         let discord_config = Arc::new(config.discord.clone());
-        let lite_llm_repo = LiteLLMRepository::from_config(&config.litellm);
+        let client_config = Arc::new(ClientConfig {
+            logout_url: config.server.logout_url.clone(),
+            litellm_url: config.litellm.as_ref().map(|c| c.base_url().to_string()),
+        });
+        let lite_llm_repo = config.litellm.as_ref().map(LiteLLMRepository::from_config);
 
         let crypto_service = Arc::new(CryptoService::from_config(&config.crypto)?);
 
@@ -112,7 +117,7 @@ impl ApiState {
         Ok(Self {
             authenticator,
             discord_config,
-            logout_url: config.server.logout_url.clone(),
+            client_config,
             health_service,
             authorization_service,
             user_service,

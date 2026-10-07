@@ -7,5 +7,7 @@
 
 export interface ClientConfig {
   /** @nullable */
+  litellm_url?: string | null;
+  /** @nullable */
   logout_url?: string | null;
 }
