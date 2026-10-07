@@ -2,7 +2,7 @@ pub mod models;
 
 use crate::api_state::ApiState;
 use crate::ctx::Ctx;
-use crate::error::{ApiJson, ApiJsonVec};
+use crate::error::{ApiJson, ApiJsonVec, PublicError};
 use crate::models::AffectedRows;
 use crate::routers::events::models::EventIdQuery;
 use crate::routers::teams::models::{AdminTeam, CreateTeamAPIKey, Team, TeamRankingView};
@@ -29,31 +29,32 @@ pub fn get_router(state: &ApiState) -> Router {
         .route("/roles", get(get_teams_roles))
         .route("/affiliates", get(get_teams_affiliates))
         .route("/project-preferences", get(get_teams_project_preferences))
-        .route("/slug/:event_slug/:team_slug", get(get_team_by_slug))
-        .route("/:team_id", get(get_team))
-        .route("/:team_id", patch(update_team))
-        .route("/:team_id", delete(delete_team))
-        .route("/:team_id/admin", get(get_admin_team))
-        .route("/:team_id/roles", get(get_team_roles))
-        .route("/:team_id/roles", put(put_team_roles))
-        .route("/:team_id/roles", delete(delete_team_roles))
-        .route("/:team_id/affiliates", get(get_team_affiliates))
+        .route("/slug/{event_slug}/{team_slug}", get(get_team_by_slug))
+        .route("/{team_id}", get(get_team))
+        .route("/{team_id}", patch(update_team))
+        .route("/{team_id}", delete(delete_team))
+        .route("/{team_id}/admin", get(get_admin_team))
+        .route("/{team_id}/roles", get(get_team_roles))
+        .route("/{team_id}/roles", put(put_team_roles))
+        .route("/{team_id}/roles", delete(delete_team_roles))
+        .route("/{team_id}/affiliates", get(get_team_affiliates))
         .route(
-            "/:team_id/project-preferences",
+            "/{team_id}/project-preferences",
             get(get_team_project_preferences),
         )
         .route(
-            "/:team_id/project-preferences",
+            "/{team_id}/project-preferences",
             patch(update_team_project_preferences),
         )
-        .route("/:team_id/blog", get(get_team_blog))
-        .route("/:team_id/blog", put(update_team_blog))
-        .route("/:team_id/secrets", get(get_team_secrets))
-        .route("/:team_id/ranking", get(get_team_ranking))
-        .route("/:team_id/ai-api-keys", post(create_team_ai_api_key))
+        .route("/{team_id}/blog", get(get_team_blog))
+        .route("/{team_id}/blog", put(update_team_blog))
+        .route("/{team_id}/secrets", get(get_team_secrets))
+        .route("/{team_id}/ranking", get(get_team_ranking))
+        .route("/{team_id}/ai-api-keys", post(create_team_ai_api_key))
         .with_state(state.clone())
 }
 
+/// Create a team
 #[utoipa::path(
     post,
     path = "/api/teams",
@@ -61,6 +62,7 @@ pub fn get_router(state: &ApiState) -> Router {
         (status = StatusCode::OK, body = Team),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
+    extensions(("x-policies" = json!(["create_team"]))),
 )]
 pub async fn create_team(
     ctx: Ctx,
@@ -81,6 +83,9 @@ pub async fn create_team(
     Ok(Json(Team::from((team, false, false))))
 }
 
+/// Get all teams of an event
+///
+/// `project_id` requires `view_project_assignment` and `finalist` requires `view_finalists`.
 #[utoipa::path(
     get,
     path = "/api/teams",
@@ -88,9 +93,8 @@ pub async fn create_team(
         (status = StatusCode::OK, body = Vec<Team>),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
-    params(
-        ("event_id"= Uuid, Query, description = "Filter by event id"),
-    )
+    params(EventIdQuery),
+    extensions(("x-policies" = json!(["view_event"]))),
 )]
 pub async fn get_teams(
     ctx: Ctx,
@@ -125,6 +129,7 @@ pub async fn get_teams(
     Ok(Json(teams))
 }
 
+/// Get all teams of an event with their internal fields
 #[utoipa::path(
     get,
     path = "/api/teams/admin",
@@ -132,9 +137,8 @@ pub async fn get_teams(
         (status = StatusCode::OK, body = Vec<AdminTeam>),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
-    params(
-        ("event_id"= Uuid, Query, description = "Filter by event id"),
-    )
+    params(EventIdQuery),
+    extensions(("x-policies" = json!(["manage_event"]))),
 )]
 pub async fn get_admin_teams(
     ctx: Ctx,
@@ -161,6 +165,7 @@ pub async fn get_admin_teams(
     Ok(Json(teams))
 }
 
+/// Get my roles on all teams of an event
 #[utoipa::path(
     get,
     path = "/api/teams/roles",
@@ -168,9 +173,8 @@ pub async fn get_admin_teams(
         (status = StatusCode::OK, body = HashMap<Uuid, HashSet<TeamRole>>),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
-    params(
-        ("event_id"= Uuid, Query, description = "Filter by event id"),
-    )
+    params(EventIdQuery),
+    extensions(("x-policies" = json!(["view_event"]))),
 )]
 pub async fn get_teams_roles(
     ctx: Ctx,
@@ -201,6 +205,7 @@ pub async fn get_teams_roles(
     Ok(Json(roles))
 }
 
+/// Get the users on all teams of an event
 #[utoipa::path(
     get,
     path = "/api/teams/affiliates",
@@ -208,9 +213,8 @@ pub async fn get_teams_roles(
         (status = StatusCode::OK, body = HashMap<Uuid, Vec<TeamAffiliate>>),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
-    params(
-        ("event_id"= Uuid, Query, description = "Filter by event id"),
-    )
+    params(EventIdQuery),
+    extensions(("x-policies" = json!(["manage_event"]))),
 )]
 pub async fn get_teams_affiliates(
     ctx: Ctx,
@@ -234,6 +238,7 @@ pub async fn get_teams_affiliates(
     Ok(Json(affiliates))
 }
 
+/// Get the project preferences of all teams of an event
 #[utoipa::path(
     get,
     path = "/api/teams/project-preferences",
@@ -241,9 +246,8 @@ pub async fn get_teams_affiliates(
         (status = StatusCode::OK, body = HashMap<Uuid, Vec<Uuid>>),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
-    params(
-        ("event_id"= Uuid, Query, description = "Filter by event id"),
-    )
+    params(EventIdQuery),
+    extensions(("x-policies" = json!(["manage_event"]))),
 )]
 pub async fn get_teams_project_preferences(
     ctx: Ctx,
@@ -267,6 +271,9 @@ pub async fn get_teams_project_preferences(
     Ok(Json(pps))
 }
 
+/// Get a team by slug
+///
+/// `project_id` requires `view_project_assignment` and `finalist` requires `view_finalists`.
 #[utoipa::path(
     get,
     path = "/api/teams/slug/{event_slug}/{team_slug}",
@@ -274,6 +281,7 @@ pub async fn get_teams_project_preferences(
         (status = StatusCode::OK, body = Team),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
+    extensions(("x-policies" = json!(["view_event"]))),
 )]
 pub async fn get_team_by_slug(
     ctx: Ctx,
@@ -309,6 +317,9 @@ pub async fn get_team_by_slug(
     ))))
 }
 
+/// Get a team by id
+///
+/// `project_id` requires `view_project_assignment` and `finalist` requires `view_finalists`.
 #[utoipa::path(
     get,
     path = "/api/teams/{team_id}",
@@ -316,6 +327,7 @@ pub async fn get_team_by_slug(
         (status = StatusCode::OK, body = Team),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
+    extensions(("x-policies" = json!(["view_event"]))),
 )]
 pub async fn get_team(
     ctx: Ctx,
@@ -346,6 +358,7 @@ pub async fn get_team(
     ))))
 }
 
+/// Get a team with its internal fields
 #[utoipa::path(
     get,
     path = "/api/teams/{team_id}/admin",
@@ -353,6 +366,7 @@ pub async fn get_team(
         (status = StatusCode::OK, body = AdminTeam),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
+    extensions(("x-policies" = json!(["manage_event"]))),
 )]
 pub async fn get_admin_team(
     ctx: Ctx,
@@ -371,6 +385,9 @@ pub async fn get_admin_team(
     Ok(Json(AdminTeam::from(team)))
 }
 
+/// Update a team
+///
+/// Requires `view_event`. Changing the name, photo or ingress config requires `update_team_name`, `update_team_photo` or `update_team_ingress_config`. All other fields require `manage_event`.
 #[utoipa::path(
     patch,
     path = "/api/teams/{team_id}",
@@ -378,6 +395,7 @@ pub async fn get_admin_team(
         (status = StatusCode::OK, body = Team),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
+    extensions(("x-policies" = json!(["view_event", "update_team_name", "update_team_photo", "update_team_ingress_config", "manage_event"]))),
 )]
 pub async fn update_team(
     ctx: Ctx,
@@ -454,6 +472,7 @@ pub async fn update_team(
     ))))
 }
 
+/// Delete a team
 #[utoipa::path(
     delete,
     path = "/api/teams/{team_id}",
@@ -461,6 +480,7 @@ pub async fn update_team(
         (status = StatusCode::OK, body = Team),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
+    extensions(("x-policies" = json!(["manage_team"]))),
 )]
 pub async fn delete_team(
     ctx: Ctx,
@@ -493,6 +513,7 @@ pub async fn delete_team(
     ))))
 }
 
+/// Get my roles on a team
 #[utoipa::path(
     get,
     path = "/api/teams/{team_id}/roles",
@@ -506,13 +527,17 @@ pub async fn get_team_roles(ctx: Ctx, Path(team_id): Path<Uuid>) -> ApiJson<Team
     Ok(Json(roles))
 }
 
+/// Add team role assignments
+///
+/// Member roles require `manage_team`, mentor and stakeholder roles require `manage_event`.
 #[utoipa::path(
     put,
     path = "/api/teams/{team_id}/roles",
     responses(
         (status = StatusCode::OK, body = AffectedRows),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
-    )
+    ),
+    extensions(("x-policies" = json!(["manage_team", "manage_event"]))),
 )]
 pub async fn put_team_roles(
     ctx: Ctx,
@@ -571,13 +596,17 @@ pub async fn put_team_roles(
     Ok(Json(affected_rows))
 }
 
+/// Remove team role assignments
+///
+/// Member roles require `manage_team`, mentor and stakeholder roles require `manage_event`.
 #[utoipa::path(
     delete,
     path = "/api/teams/{team_id}/roles",
     responses(
         (status = StatusCode::OK, body = AffectedRows),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
-    )
+    ),
+    extensions(("x-policies" = json!(["manage_team", "manage_event"]))),
 )]
 pub async fn delete_team_roles(
     ctx: Ctx,
@@ -636,6 +665,7 @@ pub async fn delete_team_roles(
     Ok(Json(affected_rows))
 }
 
+/// Get the users on a team
 #[utoipa::path(
     get,
     path = "/api/teams/{team_id}/affiliates",
@@ -643,9 +673,8 @@ pub async fn delete_team_roles(
         (status = StatusCode::OK, body = Vec<TeamAffiliate>),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
-    params(
-        ("role" = Option<TeamRole>, Query, description = "Filter by team role"),
-    )
+    params(TeamRoleOptQuery),
+    extensions(("x-policies" = json!(["view_event_internal"]))),
 )]
 pub async fn get_team_affiliates(
     ctx: Ctx,
@@ -670,6 +699,7 @@ pub async fn get_team_affiliates(
     Ok(Json(affiliates))
 }
 
+/// Get the project preferences of a team
 #[utoipa::path(
     get,
     path = "/api/teams/{team_id}/project-preferences",
@@ -677,6 +707,7 @@ pub async fn get_team_affiliates(
         (status = StatusCode::OK, body = Vec<Uuid>),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
+    extensions(("x-policies" = json!(["view_team_confidential"]))),
 )]
 pub async fn get_team_project_preferences(
     ctx: Ctx,
@@ -700,6 +731,9 @@ pub async fn get_team_project_preferences(
     Ok(Json(pps))
 }
 
+/// Set the project preferences of a team
+///
+/// Expects exactly 3 distinct project ids.
 #[utoipa::path(
     patch,
     path = "/api/teams/{team_id}/project-preferences",
@@ -707,6 +741,7 @@ pub async fn get_team_project_preferences(
         (status = StatusCode::OK, body = Vec<Uuid>),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
+    extensions(("x-policies" = json!(["manage_team"]))),
 )]
 pub async fn update_team_project_preferences(
     ctx: Ctx,
@@ -731,6 +766,7 @@ pub async fn update_team_project_preferences(
     Ok(Json(pps))
 }
 
+/// Get the blog sections of a team
 #[utoipa::path(
     get,
     path = "/api/teams/{team_id}/blog",
@@ -738,6 +774,7 @@ pub async fn update_team_project_preferences(
         (status = StatusCode::OK, body = TeamBlog),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
+    extensions(("x-policies" = json!(["view_team_blog"]))),
 )]
 pub async fn get_team_blog(
     ctx: Ctx,
@@ -758,6 +795,7 @@ pub async fn get_team_blog(
     Ok(Json(blog))
 }
 
+/// Replace the blog sections of a team
 #[utoipa::path(
     put,
     path = "/api/teams/{team_id}/blog",
@@ -766,6 +804,7 @@ pub async fn get_team_blog(
         (status = StatusCode::CONFLICT, body = PublicError),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
+    extensions(("x-policies" = json!(["update_team_blog"]))),
 )]
 pub async fn update_team_blog(
     ctx: Ctx,
@@ -790,6 +829,7 @@ pub async fn update_team_blog(
     Ok(Json(blog))
 }
 
+/// Get the values of the secrets of a team
 #[utoipa::path(
     get,
     path = "/api/teams/{team_id}/secrets",
@@ -797,6 +837,7 @@ pub async fn update_team_blog(
         (status = StatusCode::OK, body = Vec<SecretValue>),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
+    extensions(("x-policies" = json!(["view_team_confidential"]))),
 )]
 pub async fn get_team_secrets(
     ctx: Ctx,
@@ -817,6 +858,9 @@ pub async fn get_team_secrets(
     Ok(Json(secrets))
 }
 
+/// Create an AI API key for a team
+///
+/// Creates a `LiteLLM` key with the given budget.
 #[utoipa::path(
     post,
     path = "/api/teams/{team_id}/ai-api-keys",
@@ -824,6 +868,7 @@ pub async fn get_team_secrets(
         (status = StatusCode::OK, body = ()),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
+    extensions(("x-policies" = json!(["manage_event"]))),
 )]
 pub async fn create_team_ai_api_key(
     ctx: Ctx,
@@ -847,6 +892,7 @@ pub async fn create_team_ai_api_key(
     Ok(Json(key))
 }
 
+/// Get the entry of a team in the current ranking snapshot
 #[utoipa::path(
     get,
     path = "/api/teams/{team_id}/ranking",
@@ -854,6 +900,7 @@ pub async fn create_team_ai_api_key(
         (status = StatusCode::OK, body = Option<TeamRankingView>),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
+    extensions(("x-policies" = json!(["view_team_feedback"]))),
 )]
 pub async fn get_team_ranking(
     ctx: Ctx,

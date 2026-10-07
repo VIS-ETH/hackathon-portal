@@ -2,7 +2,7 @@ pub mod models;
 
 use crate::api_state::ApiState;
 use crate::ctx::Ctx;
-use crate::error::{ApiJson, ApiJsonVec};
+use crate::error::{ApiJson, ApiJsonVec, PublicError};
 use crate::routers::events::models::EventIdQuery;
 use crate::ApiError;
 use axum::extract::{Path, Query, State};
@@ -16,13 +16,17 @@ pub fn get_router(state: &ApiState) -> Router {
     Router::new()
         .route("/", post(create_project))
         .route("/", get(get_projects))
-        .route("/slug/:event_slug/:project_slug", get(get_project_by_slug))
-        .route("/:project_id", get(get_project))
-        .route("/:project_id", patch(update_project))
-        .route("/:project_id", delete(delete_project))
+        .route(
+            "/slug/{event_slug}/{project_slug}",
+            get(get_project_by_slug),
+        )
+        .route("/{project_id}", get(get_project))
+        .route("/{project_id}", patch(update_project))
+        .route("/{project_id}", delete(delete_project))
         .with_state(state.clone())
 }
 
+/// Create a project
 #[utoipa::path(
     post,
     path = "/api/projects",
@@ -30,6 +34,7 @@ pub fn get_router(state: &ApiState) -> Router {
         (status = StatusCode::OK, body = Project),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
+    extensions(("x-policies" = json!(["manage_project"]))),
 )]
 pub async fn create_project(
     ctx: Ctx,
@@ -50,6 +55,7 @@ pub async fn create_project(
     Ok(Json(project))
 }
 
+/// Get all projects of an event
 #[utoipa::path(
     get,
     path = "/api/projects",
@@ -57,9 +63,8 @@ pub async fn create_project(
         (status = StatusCode::OK, body = Vec<Project>),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
-    params(
-        ("event_id"= Uuid, Query, description = "Filter by event id"),
-    )
+    params(EventIdQuery),
+    extensions(("x-policies" = json!(["view_project"]))),
 )]
 pub async fn get_projects(
     ctx: Ctx,
@@ -80,6 +85,7 @@ pub async fn get_projects(
     Ok(Json(projects))
 }
 
+/// Get a project by slug
 #[utoipa::path(
     get,
     path = "/api/projects/slug/{event_slug}/{project_slug}",
@@ -87,6 +93,7 @@ pub async fn get_projects(
         (status = StatusCode::OK, body = Project),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
+    extensions(("x-policies" = json!(["view_project"]))),
 )]
 pub async fn get_project_by_slug(
     ctx: Ctx,
@@ -108,6 +115,7 @@ pub async fn get_project_by_slug(
     Ok(Json(project))
 }
 
+/// Get a project by id
 #[utoipa::path(
     get,
     path = "/api/projects/{project_id}",
@@ -115,6 +123,7 @@ pub async fn get_project_by_slug(
         (status = StatusCode::OK, body = Project),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
+    extensions(("x-policies" = json!(["view_project"]))),
 )]
 pub async fn get_project(
     ctx: Ctx,
@@ -136,13 +145,17 @@ pub async fn get_project(
     Ok(Json(project))
 }
 
+/// Update a project
+///
+/// Optionally replaces its stakeholders.
 #[utoipa::path(
     patch,
     path = "/api/projects/{project_id}",
     responses(
-        (status = StatusCode::OK, body = Appointment),
+        (status = StatusCode::OK, body = Project),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
+    extensions(("x-policies" = json!(["manage_project"]))),
 )]
 pub async fn update_project(
     ctx: Ctx,
@@ -170,6 +183,7 @@ pub async fn update_project(
     Ok(Json(project))
 }
 
+/// Delete a project
 #[utoipa::path(
     delete,
     path = "/api/projects/{project_id}",
@@ -177,6 +191,7 @@ pub async fn update_project(
         (status = StatusCode::OK, body = Project),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
+    extensions(("x-policies" = json!(["manage_project"]))),
 )]
 pub async fn delete_project(
     ctx: Ctx,

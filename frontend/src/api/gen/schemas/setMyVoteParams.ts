@@ -7,7 +7,7 @@
 
 export type SetMyVoteParams = {
   /**
-   * Chose event to vote in
+   * Filter by event id
    */
   event_id: string;
 };

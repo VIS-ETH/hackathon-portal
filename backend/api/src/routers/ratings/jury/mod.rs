@@ -1,6 +1,6 @@
 use crate::api_state::ApiState;
 use crate::ctx::Ctx;
-use crate::error::{ApiJson, ApiJsonVec};
+use crate::error::{ApiJson, ApiJsonVec, PublicError};
 use crate::routers::teams::models::TeamIdQuery;
 use crate::ApiError;
 use axum::extract::{Path, Query, State};
@@ -16,12 +16,13 @@ pub fn get_router(state: &ApiState) -> Router {
     Router::new()
         .route("/", post(create_jury_rating))
         .route("/", get(get_jury_ratings))
-        .route("/:rating_id", get(get_jury_rating))
-        .route("/:rating_id", patch(update_jury_rating))
-        .route("/:rating_id", delete(delete_jury_rating))
+        .route("/{rating_id}", get(get_jury_rating))
+        .route("/{rating_id}", patch(update_jury_rating))
+        .route("/{rating_id}", delete(delete_jury_rating))
         .with_state(state.clone())
 }
 
+/// Create a jury rating
 #[utoipa::path(
     post,
     path = "/api/ratings/jury",
@@ -29,6 +30,7 @@ pub fn get_router(state: &ApiState) -> Router {
         (status = StatusCode::OK, body = JuryRating),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
+    extensions(("x-policies" = json!(["manage_jury_rating"]))),
 )]
 pub async fn create_jury_rating(
     ctx: Ctx,
@@ -57,6 +59,9 @@ pub async fn create_jury_rating(
     Ok(Json(rating))
 }
 
+/// Get the jury ratings of a team
+///
+/// Only returns my own ratings unless I have `manage_event`.
 #[utoipa::path(
     get,
     path = "/api/ratings/jury",
@@ -64,9 +69,8 @@ pub async fn create_jury_rating(
         (status = StatusCode::OK, body = Vec<JuryRating>),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
-    params(
-        ("team_id" = Uuid, Query, description = "Filter by team id"),
-    )
+    params(TeamIdQuery),
+    extensions(("x-policies" = json!(["manage_jury_rating", "manage_event"]))),
 )]
 pub async fn get_jury_ratings(
     ctx: Ctx,
@@ -100,6 +104,9 @@ pub async fn get_jury_ratings(
     Ok(Json(ratings))
 }
 
+/// Get a jury rating
+///
+/// Ratings of others require `manage_event`.
 #[utoipa::path(
     get,
     path = "/api/ratings/jury/{rating_id}",
@@ -107,6 +114,7 @@ pub async fn get_jury_ratings(
         (status = StatusCode::OK, body = JuryRating),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
+    extensions(("x-policies" = json!(["manage_jury_rating", "manage_event"]))),
 )]
 pub async fn get_jury_rating(
     ctx: Ctx,
@@ -136,6 +144,9 @@ pub async fn get_jury_rating(
     Ok(Json(rating))
 }
 
+/// Update a jury rating
+///
+/// Ratings of others require `manage_event`.
 #[utoipa::path(
     patch,
     path = "/api/ratings/jury/{rating_id}",
@@ -143,6 +154,7 @@ pub async fn get_jury_rating(
         (status = StatusCode::OK, body = JuryRating),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
+    extensions(("x-policies" = json!(["manage_jury_rating", "manage_event"]))),
 )]
 pub async fn update_jury_rating(
     ctx: Ctx,
@@ -178,6 +190,9 @@ pub async fn update_jury_rating(
     Ok(Json(rating))
 }
 
+/// Delete a jury rating
+///
+/// Ratings of others require `manage_event`.
 #[utoipa::path(
     delete,
     path = "/api/ratings/jury/{rating_id}",
@@ -185,6 +200,7 @@ pub async fn update_jury_rating(
         (status = StatusCode::OK, body = JuryRating),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
+    extensions(("x-policies" = json!(["manage_jury_rating", "manage_event"]))),
 )]
 pub async fn delete_jury_rating(
     ctx: Ctx,

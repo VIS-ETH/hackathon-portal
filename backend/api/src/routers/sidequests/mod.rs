@@ -3,7 +3,7 @@ pub mod models;
 use super::events::models::EventIdQuery;
 use crate::api_state::ApiState;
 use crate::ctx::Ctx;
-use crate::error::{ApiJson, ApiJsonVec};
+use crate::error::{ApiJson, ApiJsonVec, PublicError};
 use crate::ApiError;
 use axum::extract::{Path, Query, State};
 use axum::routing::{delete, get, patch, post};
@@ -19,15 +19,16 @@ pub fn get_router(state: &ApiState) -> Router {
         .route("/", post(create_sidequest))
         .route("/", get(get_sidequests))
         .route(
-            "/slug/:event_slug/:sidequest_slug",
+            "/slug/{event_slug}/{sidequest_slug}",
             get(get_sidequest_by_slug),
         )
-        .route("/:sidequest_id", get(get_sidequest))
-        .route("/:sidequest_id", patch(update_sidequest))
-        .route("/:sidequest_id", delete(delete_sidequest))
+        .route("/{sidequest_id}", get(get_sidequest))
+        .route("/{sidequest_id}", patch(update_sidequest))
+        .route("/{sidequest_id}", delete(delete_sidequest))
         .with_state(state.clone())
 }
 
+/// Create a sidequest
 #[utoipa::path(
     post,
     path = "/api/sidequests",
@@ -35,6 +36,7 @@ pub fn get_router(state: &ApiState) -> Router {
         (status = StatusCode::OK, body = SidequestForCreate),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
+    extensions(("x-policies" = json!(["manage_sidequest"]))),
 )]
 pub async fn create_sidequest(
     ctx: Ctx,
@@ -55,6 +57,7 @@ pub async fn create_sidequest(
     Ok(Json(sidequest))
 }
 
+/// Get all sidequests of an event
 #[utoipa::path(
     get,
     path = "/api/sidequests",
@@ -62,9 +65,8 @@ pub async fn create_sidequest(
         (status = StatusCode::OK, body = Vec<Sidequest>),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
-    params(
-        ("event_id"= Uuid, Query, description= "Filter by event ID"),
-    )
+    params(EventIdQuery),
+    extensions(("x-policies" = json!(["view_sidequest"]))),
 )]
 pub async fn get_sidequests(
     ctx: Ctx,
@@ -85,6 +87,7 @@ pub async fn get_sidequests(
     Ok(Json(sidequests))
 }
 
+/// Get a sidequest by slug
 #[utoipa::path(
     get,
     path = "/api/sidequests/slug/{event_slug}/{sidequest_slug}",
@@ -92,6 +95,7 @@ pub async fn get_sidequests(
         (status = StatusCode::OK, body = Sidequest),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
+    extensions(("x-policies" = json!(["view_sidequest"]))),
 )]
 pub async fn get_sidequest_by_slug(
     ctx: Ctx,
@@ -113,13 +117,15 @@ pub async fn get_sidequest_by_slug(
     Ok(Json(sidequest))
 }
 
+/// Get a sidequest by id
 #[utoipa::path(
     get,
     path = "/api/sidequests/{sidequest_id}",
     responses(
         (status = StatusCode::OK, body = Sidequest),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
-    )
+    ),
+    extensions(("x-policies" = json!(["view_sidequest"]))),
 )]
 pub async fn get_sidequest(
     ctx: Ctx,
@@ -141,6 +147,7 @@ pub async fn get_sidequest(
     Ok(Json(sidequest))
 }
 
+/// Update a sidequest
 #[utoipa::path(
     patch,
     path = "/api/sidequests/{sidequest_id}",
@@ -148,6 +155,7 @@ pub async fn get_sidequest(
         (status = StatusCode::OK, body = Sidequest),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
+    extensions(("x-policies" = json!(["manage_sidequest"]))),
 )]
 pub async fn update_sidequest(
     ctx: Ctx,
@@ -175,6 +183,7 @@ pub async fn update_sidequest(
     Ok(Json(sidequest))
 }
 
+/// Delete a sidequest
 #[utoipa::path(
     delete,
     path = "/api/sidequests/{sidequest_id}",
@@ -182,6 +191,7 @@ pub async fn update_sidequest(
         (status = StatusCode::OK, body = ()),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
+    extensions(("x-policies" = json!(["manage_sidequest"]))),
 )]
 pub async fn delete_sidequest(
     ctx: Ctx,

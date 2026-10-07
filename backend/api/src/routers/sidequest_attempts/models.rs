@@ -1,16 +1,23 @@
 use crate::{ApiError, ApiResult};
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
-use utoipa::ToSchema;
+use utoipa::IntoParams;
 use uuid::Uuid;
 
-#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+#[derive(Serialize, Deserialize, Debug, Clone, IntoParams)]
+#[into_params(parameter_in = Query)]
 pub struct SidequestAttemptsQuery {
+    /// Filter by event id
     pub event_id: Uuid,
+    /// Filter by sidequest id
     pub sidequest_id: Option<Uuid>,
+    /// Filter by team id
     pub team_id: Option<Uuid>,
+    /// Filter by user id
     pub user_id: Option<Uuid>,
+    /// Only attempts after this time
     pub after: Option<NaiveDateTime>,
+    /// Only attempts before this time
     pub before: Option<NaiveDateTime>,
 }
 
@@ -32,8 +39,11 @@ impl SidequestAttemptsQuery {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+#[derive(Serialize, Deserialize, Debug, Clone, IntoParams)]
+#[into_params(parameter_in = Query)]
 pub struct SidequestAttemptsCooldownQuery {
+    /// Filter by event id
     pub event_id: Uuid,
+    /// Filter by user id. Defaults to the current user.
     pub user_id: Option<Uuid>,
 }

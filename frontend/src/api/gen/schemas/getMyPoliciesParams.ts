@@ -7,13 +7,11 @@
 
 export type GetMyPoliciesParams = {
   /**
-   * Get policies for this event
-   * @nullable
+   * Get the policies for this event
    */
-  event_id?: string | null;
+  event_id?: string;
   /**
-   * Get policies for this team
-   * @nullable
+   * Get the policies for this team
    */
-  team_id?: string | null;
+  team_id?: string;
 };

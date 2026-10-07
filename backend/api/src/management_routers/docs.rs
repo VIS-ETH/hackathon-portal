@@ -1,8 +1,4 @@
-#![expect(
-    clippy::needless_for_each,
-    reason = "emitted by the utoipa OpenApi derive"
-)]
-
+use crate::routers::docs::DocsDefaults;
 use utoipa::OpenApi;
 use utoipauto::utoipauto;
 
@@ -14,5 +10,6 @@ use utoipauto::utoipauto;
     tags(
         (name = "Hackathon Portal", description = "Swagger for the Hackathon Portal Backend by VIScon HackTech"),
     ),
+    modifiers(&DocsDefaults),
 )]
 pub struct Docs;

@@ -3,7 +3,7 @@ use axum::extract::{Path, State};
 
 use crate::api_state::ApiState;
 use crate::ctx::Ctx;
-use crate::error::{ApiJson, ApiJsonVec};
+use crate::error::{ApiJson, ApiJsonVec, PublicError};
 use crate::routers::ratings::technical::models::SetTechnicalRating;
 use crate::ApiError;
 use axum::routing::{get, post};
@@ -14,11 +14,12 @@ use uuid::Uuid;
 
 pub fn get_router(state: &ApiState) -> Router {
     Router::new()
-        .route("/:team_id", get(get_technical_team_rating))
-        .route("/:team_id", post(set_technical_team_rating))
+        .route("/{team_id}", get(get_technical_team_rating))
+        .route("/{team_id}", post(set_technical_team_rating))
         .with_state(state.clone())
 }
 
+/// Get the technical rating of a team
 #[utoipa::path(
     get,
     path = "/api/ratings/technical/{team_id}",
@@ -26,6 +27,7 @@ pub fn get_router(state: &ApiState) -> Router {
         (status = StatusCode::OK, body = Vec<TechnicalQuestionResult>),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
+    extensions(("x-policies" = json!(["manage_event"]))),
 )]
 pub async fn get_technical_team_rating(
     ctx: Ctx,
@@ -45,6 +47,7 @@ pub async fn get_technical_team_rating(
     Ok(Json(ratings))
 }
 
+/// Set the technical rating of a team
 #[utoipa::path(
     post,
     path = "/api/ratings/technical/{team_id}",
@@ -52,6 +55,7 @@ pub async fn get_technical_team_rating(
         (status = StatusCode::OK, body = TechnicalQuestionResult),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
+    extensions(("x-policies" = json!(["manage_event"]))),
 )]
 pub async fn set_technical_team_rating(
     ctx: Ctx,

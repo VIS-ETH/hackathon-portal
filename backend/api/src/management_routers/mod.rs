@@ -8,7 +8,7 @@ use crate::mw::mw_resolve_ctx;
 use axum::{middleware, Router};
 use docs::Docs;
 use utoipa::OpenApi;
-use utoipa_swagger_ui::SwaggerUi;
+use utoipa_swagger_ui::{Config, SwaggerUi};
 
 pub fn get_router(state: ApiState) -> Router {
     Router::new()
@@ -21,5 +21,6 @@ pub fn get_router(state: ApiState) -> Router {
 pub fn get_docs() -> Router {
     SwaggerUi::new("/docs")
         .url("/docs/openapi.json", Docs::openapi())
+        .config(Config::default().show_extensions(true))
         .into()
 }

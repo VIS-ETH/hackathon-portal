@@ -1,5 +1,5 @@
 use crate::api_state::ApiState;
-use crate::error::ApiJson;
+use crate::error::{ApiJson, PublicError};
 use axum::extract::State;
 use axum::routing::get;
 use axum::{Json, Router};
@@ -11,6 +11,9 @@ pub fn get_router(state: &ApiState) -> Router {
         .with_state(state.clone())
 }
 
+/// Get the Traefik dynamic config
+///
+/// Routes the managed addresses of the teams.
 #[utoipa::path(
     get,
     path = "/api/infrastructure/traefik",

@@ -10,5 +10,5 @@ export type GetTeamAffiliatesParams = {
   /**
    * Filter by team role
    */
-  role?: TeamRole | null;
+  role?: TeamRole;
 };

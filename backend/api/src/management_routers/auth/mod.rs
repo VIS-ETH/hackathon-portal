@@ -1,5 +1,6 @@
 use crate::api_state::ApiState;
 use crate::ctx::Ctx;
+use crate::error::PublicError;
 use crate::{ApiError, ApiResult};
 use axum::extract::State;
 use axum::http::{HeaderMap, HeaderValue};
@@ -17,11 +18,17 @@ pub fn get_router(state: &ApiState) -> Router {
         .with_state(state.clone())
 }
 
+/// Authorize a request to the managed ingress of a team
+///
+/// Forward-auth endpoint for Traefik. Matches `X-Forwarded-Host` to a team.
 #[utoipa::path(
     get,
     path = "/api/auth/authorization",
     responses(
-        (status = StatusCode::OK, body = ()),
+        (status = StatusCode::OK, body = (), headers(
+            ("X-User-Id" = String, description = "Auth id of the user, unless access control is off"),
+            ("X-User-Name" = String, description = "Name of the user, unless access control is off"),
+        )),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
 )]

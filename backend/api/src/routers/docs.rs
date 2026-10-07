@@ -1,9 +1,6 @@
-#![expect(
-    clippy::needless_for_each,
-    reason = "emitted by the utoipa OpenApi derive"
-)]
-
-use utoipa::OpenApi;
+use axum::http::StatusCode;
+use utoipa::openapi::RefOr;
+use utoipa::{Modify, OpenApi};
 use utoipauto::utoipauto;
 
 #[utoipauto(
@@ -14,8 +11,52 @@ use utoipauto::utoipauto;
     tags(
         (name = "Hackathon Portal", description = "Swagger for the Hackathon Portal Backend by VIScon HackTech"),
     ),
+    modifiers(&DocsDefaults),
 )]
 pub struct Docs;
+
+/// Fills in what the `#[utoipa::path]` macros leave out, so they can stay short.
+pub struct DocsDefaults;
+
+impl Modify for DocsDefaults {
+    fn modify(&self, openapi: &mut utoipa::openapi::OpenApi) {
+        for item in openapi.paths.paths.values_mut() {
+            let operations = [
+                &mut item.get,
+                &mut item.put,
+                &mut item.post,
+                &mut item.delete,
+                &mut item.options,
+                &mut item.head,
+                &mut item.patch,
+                &mut item.trace,
+            ];
+
+            for operation in operations.into_iter().flatten() {
+                // group by `events` instead of `crate::routers::events`
+                for tag in operation.tags.iter_mut().flatten() {
+                    if let Some((_, short)) = tag.split_once("routers::") {
+                        *tag = short.to_string();
+                    }
+                }
+
+                // OpenAPI requires a description on every response
+                for (status, response) in &mut operation.responses.responses {
+                    let RefOr::T(response) = response else {
+                        continue;
+                    };
+                    if response.description.is_empty() {
+                        response.description = StatusCode::from_bytes(status.as_bytes())
+                            .ok()
+                            .and_then(|status| status.canonical_reason())
+                            .unwrap_or(status)
+                            .to_string();
+                    }
+                }
+            }
+        }
+    }
+}
 
 #[cfg(test)]
 mod tests {

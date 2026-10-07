@@ -2,11 +2,13 @@ use hackathon_portal_services::infrastructure::models::IngressConfig;
 use hackathon_portal_services::ranking::models::TeamRanking;
 use hackathon_portal_services::team::models::Team as TeamBO;
 use serde::{Deserialize, Serialize};
-use utoipa::ToSchema;
+use utoipa::{IntoParams, ToSchema};
 use uuid::Uuid;
 
-#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+#[derive(Serialize, Deserialize, Debug, Clone, IntoParams)]
+#[into_params(parameter_in = Query)]
 pub struct TeamIdQuery {
+    /// Filter by team id
     pub team_id: Uuid,
 }
 

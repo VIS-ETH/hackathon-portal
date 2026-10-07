@@ -2,7 +2,7 @@ pub mod models;
 
 use crate::api_state::ApiState;
 use crate::ctx::Ctx;
-use crate::error::{ApiJson, ApiJsonVec};
+use crate::error::{ApiJson, ApiJsonVec, PublicError};
 use crate::routers::events::models::EventIdQuery;
 use crate::ApiError;
 use axum::extract::{Path, Query, State};
@@ -18,12 +18,13 @@ pub fn get_router(state: &ApiState) -> Router {
     Router::new()
         .route("/", post(create_appointment))
         .route("/", get(get_appointments))
-        .route("/:appointment_id", get(get_appointment))
-        .route("/:appointment_id", patch(update_appointment))
-        .route("/:appointment_id", delete(delete_appointment))
+        .route("/{appointment_id}", get(get_appointment))
+        .route("/{appointment_id}", patch(update_appointment))
+        .route("/{appointment_id}", delete(delete_appointment))
         .with_state(state.clone())
 }
 
+/// Create an appointment
 #[utoipa::path(
     post,
     path = "/api/appointments",
@@ -31,6 +32,7 @@ pub fn get_router(state: &ApiState) -> Router {
         (status = StatusCode::OK, body = Appointment),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
+    extensions(("x-policies" = json!(["manage_event"]))),
 )]
 pub async fn create_appointment(
     ctx: Ctx,
@@ -50,6 +52,7 @@ pub async fn create_appointment(
     Ok(Json(appointment))
 }
 
+/// Get all appointments of an event
 #[utoipa::path(
     get,
     path = "/api/appointments",
@@ -57,9 +60,8 @@ pub async fn create_appointment(
         (status = StatusCode::OK, body = Vec<Appointment>),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
-    params(
-        ("event_id"= Uuid, Query, description = "Filter by event id"),
-    )
+    params(EventIdQuery),
+    extensions(("x-policies" = json!(["view_event_internal"]))),
 )]
 pub async fn get_appointments(
     ctx: Ctx,
@@ -80,6 +82,7 @@ pub async fn get_appointments(
     Ok(Json(appointments))
 }
 
+/// Get an appointment
 #[utoipa::path(
     get,
     path = "/api/appointments/{appointment_id}",
@@ -87,6 +90,7 @@ pub async fn get_appointments(
         (status = StatusCode::OK, body = Appointment),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
+    extensions(("x-policies" = json!(["view_event_internal"]))),
 )]
 pub async fn get_appointment(
     ctx: Ctx,
@@ -108,6 +112,7 @@ pub async fn get_appointment(
     Ok(Json(appointment))
 }
 
+/// Update an appointment
 #[utoipa::path(
     patch,
     path = "/api/appointments/{appointment_id}",
@@ -115,6 +120,7 @@ pub async fn get_appointment(
         (status = StatusCode::OK, body = Appointment),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
+    extensions(("x-policies" = json!(["manage_event"]))),
 )]
 pub async fn update_appointment(
     ctx: Ctx,
@@ -142,6 +148,7 @@ pub async fn update_appointment(
     Ok(Json(appointment))
 }
 
+/// Delete an appointment
 #[utoipa::path(
     delete,
     path = "/api/appointments/{appointment_id}",
@@ -149,6 +156,7 @@ pub async fn update_appointment(
         (status = StatusCode::OK, body = Appointment),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
+    extensions(("x-policies" = json!(["manage_event"]))),
 )]
 pub async fn delete_appointment(
     ctx: Ctx,

@@ -2,7 +2,7 @@ pub mod models;
 
 use crate::api_state::ApiState;
 use crate::ctx::Ctx;
-use crate::error::ApiJson;
+use crate::error::{ApiJson, PublicError};
 use crate::routers::uploads::models::CreateUploadDTO;
 use crate::ApiError;
 use axum::extract::State;
@@ -20,6 +20,9 @@ pub fn get_router(state: &ApiState) -> Router {
         .with_state(state.clone())
 }
 
+/// Create an upload
+///
+/// Returns the presigned URL to upload the file to.
 #[utoipa::path(
     post,
     path = "/api/uploads",
@@ -27,6 +30,7 @@ pub fn get_router(state: &ApiState) -> Router {
         (status = StatusCode::OK, body = UploadUrl),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
+    extensions(("x-policies" = json!(["create_upload"]))),
 )]
 pub async fn create_upload(
     ctx: Ctx,

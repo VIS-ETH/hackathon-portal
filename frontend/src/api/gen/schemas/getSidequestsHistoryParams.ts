@@ -7,13 +7,11 @@
 
 export type GetSidequestsHistoryParams = {
   /**
-   * Filter by after date
-   * @nullable
+   * Only runs after this time
    */
-  after?: string | null;
+  after?: string;
   /**
-   * Filter by before date
-   * @nullable
+   * Only runs before this time
    */
-  before?: string | null;
+  before?: string;
 };

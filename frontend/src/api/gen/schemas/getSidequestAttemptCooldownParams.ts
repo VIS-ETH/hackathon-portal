@@ -7,12 +7,11 @@
 
 export type GetSidequestAttemptCooldownParams = {
   /**
-   * Filter by event ID
+   * Filter by event id
    */
   event_id: string;
   /**
-   * Filter by user ID. Leave empty to use the current user.
-   * @nullable
+   * Filter by user id. Defaults to the current user.
    */
-  user_id?: string | null;
+  user_id?: string;
 };

@@ -1,6 +1,6 @@
 use crate::api_state::ApiState;
 use crate::ctx::Ctx;
-use crate::error::{ApiJson, ApiJsonVec};
+use crate::error::{ApiJson, ApiJsonVec, PublicError};
 use crate::routers::events::models::EventIdQuery;
 use crate::ApiError;
 use axum::extract::{Path, Query, State};
@@ -18,11 +18,12 @@ pub fn get_router(state: &ApiState) -> Router {
         .route("/", get(get_event_secrets))
         .route("/", post(create_secret))
         .route("/me", get(get_my_secrets))
-        .route("/:secret_id", delete(delete_secret))
-        .route("/:secret_id/values", put(update_secret_values))
+        .route("/{secret_id}", delete(delete_secret))
+        .route("/{secret_id}/values", put(update_secret_values))
         .with_state(state.clone())
 }
 
+/// Get the secrets, teams and users of an event
 #[utoipa::path(
     get,
     path = "/api/secrets",
@@ -30,9 +31,8 @@ pub fn get_router(state: &ApiState) -> Router {
         (status = StatusCode::OK, body = EventSecrets),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
-    params(
-        ("event_id"= Uuid, Query, description = "Filter by event id"),
-    )
+    params(EventIdQuery),
+    extensions(("x-policies" = json!(["manage_event"]))),
 )]
 pub async fn get_event_secrets(
     ctx: Ctx,
@@ -53,6 +53,7 @@ pub async fn get_event_secrets(
     Ok(Json(secrets))
 }
 
+/// Create a team or user secret
 #[utoipa::path(
     post,
     path = "/api/secrets",
@@ -60,6 +61,7 @@ pub async fn get_event_secrets(
         (status = StatusCode::OK, body = Secret),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
+    extensions(("x-policies" = json!(["manage_event"]))),
 )]
 pub async fn create_secret(
     ctx: Ctx,
@@ -80,6 +82,7 @@ pub async fn create_secret(
     Ok(Json(secret))
 }
 
+/// Get the values of my user secrets
 #[utoipa::path(
     get,
     path = "/api/secrets/me",
@@ -87,9 +90,8 @@ pub async fn create_secret(
         (status = StatusCode::OK, body = Vec<SecretValue>),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
-    params(
-        ("event_id"= Uuid, Query, description = "Filter by event id"),
-    )
+    params(EventIdQuery),
+    extensions(("x-policies" = json!(["view_event_internal"]))),
 )]
 pub async fn get_my_secrets(
     ctx: Ctx,
@@ -113,6 +115,7 @@ pub async fn get_my_secrets(
     Ok(Json(secrets))
 }
 
+/// Delete a secret and its values
 #[utoipa::path(
     delete,
     path = "/api/secrets/{secret_id}",
@@ -120,6 +123,7 @@ pub async fn get_my_secrets(
         (status = StatusCode::OK, body = ()),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
+    extensions(("x-policies" = json!(["manage_event"]))),
 )]
 pub async fn delete_secret(
     ctx: Ctx,
@@ -140,6 +144,7 @@ pub async fn delete_secret(
     Ok(Json(()))
 }
 
+/// Set the values of a secret for some teams or users
 #[utoipa::path(
     put,
     path = "/api/secrets/{secret_id}/values",
@@ -148,6 +153,7 @@ pub async fn delete_secret(
         (status = StatusCode::OK, body = Secret),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
+    extensions(("x-policies" = json!(["manage_event"]))),
 )]
 pub async fn update_secret_values(
     ctx: Ctx,

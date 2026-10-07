@@ -1,5 +1,5 @@
 use crate::api_state::ApiState;
-use crate::error::ApiJson;
+use crate::error::{ApiJson, PublicError};
 use axum::extract::State;
 use axum::routing::get;
 use axum::{Json, Router};
@@ -11,6 +11,7 @@ pub fn get_router(state: &ApiState) -> Router {
         .with_state(state.clone())
 }
 
+/// Check liveness
 #[utoipa::path(
     get,
     path = "/api/health/liveness",
@@ -24,6 +25,7 @@ pub async fn get_liveness(State(state): State<ApiState>) -> ApiJson<()> {
     Ok(Json(()))
 }
 
+/// Check readiness
 #[utoipa::path(
     get,
     path = "/api/health/readiness",

@@ -3,7 +3,7 @@ pub mod ranking;
 
 use crate::api_state::ApiState;
 use crate::ctx::Ctx;
-use crate::error::{ApiJson, ApiJsonVec};
+use crate::error::{ApiJson, ApiJsonVec, PublicError};
 use crate::models::AffectedRows;
 use crate::routers::events::models::{
     CreateTechnicalQuestionDTO, DiscordOauthBody, EventDiscordResponse, InviteUsersDTO,
@@ -35,67 +35,74 @@ pub fn get_router(state: &ApiState) -> Router {
     Router::new()
         .route("/", get(get_events))
         .route("/roles", get(get_events_roles))
-        .route("/slug/:event_slug", get(get_event_by_slug))
-        .route("/:event_id", get(get_event))
-        .route("/:event_id", patch(update_event))
-        .route("/:event_id/discord", get(get_event_discord_oauth))
-        .route("/:event_id/discord", post(post_event_discord_oauth))
-        .route("/:event_id/roles", get(get_event_roles))
-        .route("/:event_id/roles", put(put_event_roles))
-        .route("/:event_id/roles", delete(delete_event_roles))
-        .route("/:event_id/invite", post(invite_users))
-        .route("/:event_id/affiliates", get(get_event_affiliates))
-        .route("/:event_id/teams/index", post(index_teams))
-        .route("/:event_id/projects/matching", get(get_projects_matching))
-        .route("/:event_id/ranking", get(ranking::get_ranking))
-        .route("/:event_id/ranking/live", get(ranking::get_live_ranking))
+        .route("/slug/{event_slug}", get(get_event_by_slug))
+        .route("/{event_id}", get(get_event))
+        .route("/{event_id}", patch(update_event))
+        .route("/{event_id}/discord", get(get_event_discord_oauth))
+        .route("/{event_id}/discord", post(post_event_discord_oauth))
+        .route("/{event_id}/roles", get(get_event_roles))
+        .route("/{event_id}/roles", put(put_event_roles))
+        .route("/{event_id}/roles", delete(delete_event_roles))
+        .route("/{event_id}/invite", post(invite_users))
+        .route("/{event_id}/affiliates", get(get_event_affiliates))
+        .route("/{event_id}/teams/index", post(index_teams))
+        .route("/{event_id}/projects/matching", get(get_projects_matching))
+        .route("/{event_id}/ranking", get(ranking::get_ranking))
+        .route("/{event_id}/ranking/live", get(ranking::get_live_ranking))
         .route(
-            "/:event_id/ranking/snapshots",
+            "/{event_id}/ranking/snapshots",
             get(ranking::get_ranking_snapshots),
         )
         .route(
-            "/:event_id/ranking/snapshots",
+            "/{event_id}/ranking/snapshots",
             post(ranking::create_ranking_snapshot),
         )
         .route(
-            "/:event_id/ranking/current",
+            "/{event_id}/ranking/current",
             put(ranking::set_current_ranking_snapshot),
         )
         .route(
-            "/:event_id/sidequests/leaderboard",
+            "/{event_id}/sidequests/leaderboard",
             get(get_sidequests_leaderboard),
         )
         .route(
-            "/:event_id/sidequests/user-leaderboard",
+            "/{event_id}/sidequests/user-leaderboard",
             get(get_sidequests_user_leaderboard),
         )
-        .route("/:event_id/sidequests/history", get(get_sidequests_history))
         .route(
-            "/:event_id/technical-questions",
+            "/{event_id}/sidequests/history",
+            get(get_sidequests_history),
+        )
+        .route(
+            "/{event_id}/technical-questions",
             get(get_technical_questions),
         )
         .route(
-            "/:event_id/technical-questions",
+            "/{event_id}/technical-questions",
             post(create_technical_questions),
         )
         .route(
-            "/:event_id/technical-questions/:question_id",
+            "/{event_id}/technical-questions/{question_id}",
             delete(delete_technical_questions),
         )
         .route(
-            "/:event_id/technical-questions/:question_id",
+            "/{event_id}/technical-questions/{question_id}",
             put(update_technical_questions),
         )
         .with_state(state.clone())
 }
 
+/// Get all events
+///
+/// Only returns the events that pass `view_event`. The Discord fields require `manage_event`.
 #[utoipa::path(
     get,
     path = "/api/events",
     responses(
         (status = StatusCode::OK, body = Vec<Event>),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
-    )
+    ),
+    extensions(("x-policies" = json!(["view_event"]))),
 )]
 pub async fn get_events(ctx: Ctx, State(state): State<ApiState>) -> ApiJsonVec<Event> {
     let events = state.event_service.get_events().await?;
@@ -121,6 +128,7 @@ pub async fn get_events(ctx: Ctx, State(state): State<ApiState>) -> ApiJsonVec<E
     Ok(Json(events))
 }
 
+/// Get my roles on all events
 #[utoipa::path(
     get,
     path = "/api/events/roles",
@@ -134,13 +142,17 @@ pub async fn get_events_roles(ctx: Ctx) -> ApiJson<EventRolesMap> {
     Ok(Json(roles))
 }
 
+/// Get an event by slug
+///
+/// The Discord fields require `manage_event`.
 #[utoipa::path(
     get,
     path = "/api/events/slug/{event_slug}",
     responses(
         (status = StatusCode::OK, body = Event),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
-    )
+    ),
+    extensions(("x-policies" = json!(["view_event"]))),
 )]
 pub async fn get_event_by_slug(
     ctx: Ctx,
@@ -170,13 +182,17 @@ pub async fn get_event_by_slug(
     Ok(Json(event))
 }
 
+/// Get an event by id
+///
+/// The Discord fields require `manage_event`.
 #[utoipa::path(
     get,
     path = "/api/events/{event_id}",
     responses(
         (status = StatusCode::OK, body = Event),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
-    )
+    ),
+    extensions(("x-policies" = json!(["view_event"]))),
 )]
 pub async fn get_event(
     ctx: Ctx,
@@ -206,13 +222,15 @@ pub async fn get_event(
     Ok(Json(event))
 }
 
+/// Update an event
 #[utoipa::path(
     patch,
     path = "/api/events/{event_id}",
     responses(
         (status = StatusCode::OK, body = Event),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
-    )
+    ),
+    extensions(("x-policies" = json!(["manage_event"]))),
 )]
 pub async fn update_event(
     ctx: Ctx,
@@ -233,6 +251,7 @@ pub async fn update_event(
     Ok(Json(event))
 }
 
+/// Get my roles on an event
 #[utoipa::path(
     get,
     path = "/api/events/{event_id}/roles",
@@ -247,13 +266,15 @@ pub async fn get_event_roles(ctx: Ctx, Path(event_id): Path<Uuid>) -> ApiJson<Ev
     Ok(Json(roles))
 }
 
+/// Add event role assignments
 #[utoipa::path(
     put,
     path = "/api/events/{event_id}/roles",
     responses(
         (status = StatusCode::OK, body = AffectedRows),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
-    )
+    ),
+    extensions(("x-policies" = json!(["manage_event"]))),
 )]
 pub async fn put_event_roles(
     ctx: Ctx,
@@ -280,13 +301,15 @@ pub async fn put_event_roles(
     Ok(Json(affected_rows))
 }
 
+/// Remove event role assignments
 #[utoipa::path(
     delete,
     path = "/api/events/{event_id}/roles",
     responses(
         (status = StatusCode::OK, body = AffectedRows),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
-    )
+    ),
+    extensions(("x-policies" = json!(["manage_event"]))),
 )]
 pub async fn delete_event_roles(
     ctx: Ctx,
@@ -313,13 +336,17 @@ pub async fn delete_event_roles(
     Ok(Json(affected_rows))
 }
 
+/// Invite users to an event
+///
+/// Creates the users that don't exist yet and assigns the roles to all of them.
 #[utoipa::path(
     post,
     path = "/api/events/{event_id}/invite",
     responses(
         (status = StatusCode::OK, body = Vec<ReducedUser>),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
-    )
+    ),
+    extensions(("x-policies" = json!(["manage_event"]))),
 )]
 pub async fn invite_users(
     ctx: Ctx,
@@ -344,6 +371,7 @@ pub async fn invite_users(
     Ok(Json(new_users))
 }
 
+/// Get the users on an event
 #[utoipa::path(
     get,
     path = "/api/events/{event_id}/affiliates",
@@ -351,9 +379,8 @@ pub async fn invite_users(
         (status = StatusCode::OK, body = Vec<EventAffiliate>),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
-    params(
-        ("role" = Option<EventRole>, Query, description = "Filter by event role"),
-    )
+    params(EventRoleOptQuery),
+    extensions(("x-policies" = json!(["view_event_internal"]))),
 )]
 pub async fn get_event_affiliates(
     ctx: Ctx,
@@ -378,13 +405,15 @@ pub async fn get_event_affiliates(
     Ok(Json(affiliates))
 }
 
+/// Recalculate the index of each team
 #[utoipa::path(
     post,
     path = "/api/events/{event_id}/teams/index",
     responses(
         (status = StatusCode::OK, body = ()),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
-    )
+    ),
+    extensions(("x-policies" = json!(["manage_event"]))),
 )]
 pub async fn index_teams(
     ctx: Ctx,
@@ -405,13 +434,15 @@ pub async fn index_teams(
     Ok(())
 }
 
+/// Match the teams to projects based on their preferences
 #[utoipa::path(
     get,
     path = "/api/events/{event_id}/projects/matching",
     responses(
         (status = StatusCode::OK, body = HashMap<Uuid, Uuid>),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
-    )
+    ),
+    extensions(("x-policies" = json!(["manage_event"]))),
 )]
 pub async fn get_projects_matching(
     ctx: Ctx,
@@ -432,13 +463,15 @@ pub async fn get_projects_matching(
     Ok(Json(matching))
 }
 
+/// Get the team leaderboard from the latest aggregator run
 #[utoipa::path(
     get,
     path = "/api/events/{event_id}/sidequests/leaderboard",
     responses(
         (status = StatusCode::OK, body = Vec<TeamLeaderboardEntry>),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
-    )
+    ),
+    extensions(("x-policies" = json!(["view_event_internal"]))),
 )]
 pub async fn get_sidequests_leaderboard(
     ctx: Ctx,
@@ -459,6 +492,7 @@ pub async fn get_sidequests_leaderboard(
     Ok(Json(leaderboard))
 }
 
+/// Get the user leaderboard for a sidequest
 #[utoipa::path(
     get,
     path = "/api/events/{event_id}/sidequests/user-leaderboard",
@@ -466,9 +500,8 @@ pub async fn get_sidequests_leaderboard(
         (status = StatusCode::OK, body = Vec<UserLeaderboardEntry>),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
-    params(
-        ("sidequest_id" = Uuid, Query, description = "Filter by sidequest id"),
-    )
+    params(SidequestIdQuery),
+    extensions(("x-policies" = json!(["view_event_internal"]))),
 )]
 pub async fn get_sidequests_user_leaderboard(
     ctx: Ctx,
@@ -493,6 +526,7 @@ pub async fn get_sidequests_user_leaderboard(
     Ok(Json(leaderboard))
 }
 
+/// Get the team scores of all aggregator runs
 #[utoipa::path(
     get,
     path = "/api/events/{event_id}/sidequests/history",
@@ -500,10 +534,8 @@ pub async fn get_sidequests_user_leaderboard(
         (status = StatusCode::OK, body = HashMap<Uuid, Vec<HistoryEntry>>),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
-    params(
-        ("after" = Option<NaiveDateTime>, Query, description = "Filter by after date"),
-        ("before" = Option<NaiveDateTime>, Query, description = "Filter by before date"),
-    )
+    params(SidequestsHistoryQuery),
+    extensions(("x-policies" = json!(["view_event_internal"]))),
 )]
 pub async fn get_sidequests_history(
     ctx: Ctx,
@@ -528,6 +560,7 @@ pub async fn get_sidequests_history(
     Ok(Json(history))
 }
 
+/// Get my Discord user id for an event
 #[utoipa::path(
     get,
     path = "/api/events/{event_id}/discord",
@@ -536,6 +569,7 @@ pub async fn get_sidequests_history(
         (status = StatusCode::BAD_REQUEST, body = PublicError),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
+    extensions(("x-policies" = json!(["view_event"]))),
 )]
 pub async fn get_event_discord_oauth(
     ctx: Ctx,
@@ -566,6 +600,9 @@ pub async fn get_event_discord_oauth(
     Ok(Json(response))
 }
 
+/// Join the Discord server of an event
+///
+/// Exchanges the OAuth `code` for a token, adds me to the server and stores my Discord user id.
 #[utoipa::path(
     post,
     path = "/api/events/{event_id}/discord",
@@ -574,6 +611,7 @@ pub async fn get_event_discord_oauth(
         (status = StatusCode::BAD_REQUEST, body = PublicError),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
+    extensions(("x-policies" = json!(["view_event_internal"]))),
 )]
 pub async fn post_event_discord_oauth(
     ctx: Ctx,
@@ -667,13 +705,15 @@ pub async fn post_event_discord_oauth(
     Ok(())
 }
 
+/// Get the technical questions of an event
 #[utoipa::path(
     get,
     path = "/api/events/{event_id}/technical-questions",
     responses(
         (status = StatusCode::OK, body = Vec<TechnicalQuestion>),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
-    )
+    ),
+    extensions(("x-policies" = json!(["view_event_internal"]))),
 )]
 pub async fn get_technical_questions(
     ctx: Ctx,
@@ -695,13 +735,15 @@ pub async fn get_technical_questions(
     Ok(Json(questions))
 }
 
+/// Create a technical question
 #[utoipa::path(
     post,
     path = "/api/events/{event_id}/technical-questions",
     responses(
         (status = StatusCode::OK, body = TechnicalQuestion),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
-    )
+    ),
+    extensions(("x-policies" = json!(["manage_event"]))),
 )]
 pub async fn create_technical_questions(
     ctx: Ctx,
@@ -734,13 +776,15 @@ pub async fn create_technical_questions(
     Ok(Json(questions))
 }
 
+/// Delete a technical question
 #[utoipa::path(
     delete,
     path = "/api/events/{event_id}/technical-questions/{question_id}",
     responses(
         (status = StatusCode::OK, body = AffectedRows),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
-    )
+    ),
+    extensions(("x-policies" = json!(["manage_event"]))),
 )]
 pub async fn delete_technical_questions(
     ctx: Ctx,
@@ -767,13 +811,15 @@ pub async fn delete_technical_questions(
     Ok(Json(rows_affected))
 }
 
+/// Update a technical question
 #[utoipa::path(
     put,
     path = "/api/events/{event_id}/technical-questions/{question_id}",
     responses(
         (status = StatusCode::OK, body = TechnicalQuestion),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
-    )
+    ),
+    extensions(("x-policies" = json!(["manage_event"]))),
 )]
 pub async fn update_technical_questions(
     ctx: Ctx,

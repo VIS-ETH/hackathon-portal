@@ -7,8 +7,7 @@
 
 export type GetRankingParams = {
   /**
-   * Snapshot to return; defaults to the current one
-   * @nullable
+   * Snapshot to return. Defaults to the current one.
    */
-  snapshot_id?: string | null;
+  snapshot_id?: string;
 };

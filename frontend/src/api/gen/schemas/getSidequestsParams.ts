@@ -7,7 +7,7 @@
 
 export type GetSidequestsParams = {
   /**
-   * Filter by event ID
+   * Filter by event id
    */
   event_id: string;
 };

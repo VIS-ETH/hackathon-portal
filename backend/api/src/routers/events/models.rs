@@ -3,7 +3,7 @@ use hackathon_portal_repositories::db::EventRole;
 use hackathon_portal_services::user::models::UserForCreate;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
-use utoipa::ToSchema;
+use utoipa::{IntoParams, ToSchema};
 use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
@@ -12,19 +12,26 @@ pub struct InviteUsersDTO {
     pub roles: HashSet<EventRole>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+#[derive(Serialize, Deserialize, Debug, Clone, IntoParams)]
+#[into_params(parameter_in = Query)]
 pub struct EventIdQuery {
+    /// Filter by event id
     pub event_id: Uuid,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+#[derive(Serialize, Deserialize, Debug, Clone, IntoParams)]
+#[into_params(parameter_in = Query)]
 pub struct SidequestsHistoryQuery {
+    /// Only runs after this time
     pub after: Option<NaiveDateTime>,
+    /// Only runs before this time
     pub before: Option<NaiveDateTime>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+#[derive(Serialize, Deserialize, Debug, Clone, IntoParams)]
+#[into_params(parameter_in = Query)]
 pub struct RankingQuery {
+    /// Snapshot to return. Defaults to the current one.
     pub snapshot_id: Option<Uuid>,
 }
 

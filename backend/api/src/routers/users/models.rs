@@ -1,22 +1,29 @@
 use crate::{ApiError, ApiResult};
 use hackathon_portal_repositories::db::{EventRole, TeamRole};
 use serde::{Deserialize, Serialize};
-use utoipa::ToSchema;
+use utoipa::IntoParams;
 use uuid::Uuid;
 
-#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+#[derive(Serialize, Deserialize, Debug, Clone, IntoParams)]
+#[into_params(parameter_in = Query)]
 pub struct EventRoleOptQuery {
+    /// Filter by event role
     pub role: Option<EventRole>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+#[derive(Serialize, Deserialize, Debug, Clone, IntoParams)]
+#[into_params(parameter_in = Query)]
 pub struct TeamRoleOptQuery {
+    /// Filter by team role
     pub role: Option<TeamRole>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+#[derive(Serialize, Deserialize, Debug, Clone, IntoParams)]
+#[into_params(parameter_in = Query)]
 pub struct PoliciesQuery {
+    /// Get the policies for this event
     pub event_id: Option<Uuid>,
+    /// Get the policies for this team
     pub team_id: Option<Uuid>,
 }
 

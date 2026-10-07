@@ -1,5 +1,5 @@
 use crate::api_state::ApiState;
-use crate::error::ApiJson;
+use crate::error::{ApiJson, PublicError};
 use crate::routers::config::models::ClientConfig;
 use axum::extract::State;
 use axum::routing::get;
@@ -13,6 +13,7 @@ pub fn get_router(state: &ApiState) -> Router {
         .with_state(state.clone())
 }
 
+/// Get the client config
 #[utoipa::path(
     get,
     path = "/api/config",

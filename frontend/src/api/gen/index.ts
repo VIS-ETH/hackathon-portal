@@ -135,6 +135,9 @@ const withQueryKey = <T extends object, K>(
   return result;
 };
 
+/**
+ * @summary Get all appointments of an event
+ */
 export const getAppointments = (
   params: GetAppointmentsParams,
   options?: SecondParameter<typeof customInstance>,
@@ -259,6 +262,9 @@ export function useGetAppointments<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get all appointments of an event
+ */
 
 export function useGetAppointments<
   TData = Awaited<ReturnType<typeof getAppointments>>,
@@ -289,6 +295,9 @@ export function useGetAppointments<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * @summary Create an appointment
+ */
 export const createAppointment = (
   appointmentForCreate: AppointmentForCreate,
   options?: SecondParameter<typeof customInstance>,
@@ -354,6 +363,9 @@ export type CreateAppointmentMutationBody = AppointmentForCreate;
 export type CreateAppointmentMutationError = PublicError;
 export type CreateAppointmentMutationVariables = { data: AppointmentForCreate };
 
+/**
+ * @summary Create an appointment
+ */
 export const useCreateAppointment = <TError = PublicError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -374,6 +386,9 @@ export const useCreateAppointment = <TError = PublicError, TContext = unknown>(
   return useMutation(getCreateAppointmentMutationOptions(options), queryClient);
 };
 
+/**
+ * @summary Get an appointment
+ */
 export const getAppointment = (
   appointmentId: string,
   options?: SecondParameter<typeof customInstance>,
@@ -488,6 +503,9 @@ export function useGetAppointment<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get an appointment
+ */
 
 export function useGetAppointment<
   TData = Awaited<ReturnType<typeof getAppointment>>,
@@ -514,6 +532,9 @@ export function useGetAppointment<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * @summary Delete an appointment
+ */
 export const deleteAppointment = (
   appointmentId: string,
   options?: SecondParameter<typeof customInstance>,
@@ -573,6 +594,9 @@ export type DeleteAppointmentMutationResult = NonNullable<
 export type DeleteAppointmentMutationError = PublicError;
 export type DeleteAppointmentMutationVariables = { appointmentId: string };
 
+/**
+ * @summary Delete an appointment
+ */
 export const useDeleteAppointment = <TError = PublicError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -593,6 +617,9 @@ export const useDeleteAppointment = <TError = PublicError, TContext = unknown>(
   return useMutation(getDeleteAppointmentMutationOptions(options), queryClient);
 };
 
+/**
+ * @summary Update an appointment
+ */
 export const updateAppointment = (
   appointmentId: string,
   appointmentForUpdate: AppointmentForUpdate,
@@ -662,6 +689,9 @@ export type UpdateAppointmentMutationVariables = {
   data: AppointmentForUpdate;
 };
 
+/**
+ * @summary Update an appointment
+ */
 export const useUpdateAppointment = <TError = PublicError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -682,6 +712,9 @@ export const useUpdateAppointment = <TError = PublicError, TContext = unknown>(
   return useMutation(getUpdateAppointmentMutationOptions(options), queryClient);
 };
 
+/**
+ * @summary Get the client config
+ */
 export const getConfig = (
   options?: SecondParameter<typeof customInstance>,
   signal?: AbortSignal,
@@ -783,6 +816,9 @@ export function useGetConfig<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get the client config
+ */
 
 export function useGetConfig<
   TData = Awaited<ReturnType<typeof getConfig>>,
@@ -808,6 +844,10 @@ export function useGetConfig<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * Only returns the events that pass `view_event`. The Discord fields require `manage_event`.
+ * @summary Get all events
+ */
 export const getEvents = (
   options?: SecondParameter<typeof customInstance>,
   signal?: AbortSignal,
@@ -909,6 +949,9 @@ export function useGetEvents<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get all events
+ */
 
 export function useGetEvents<
   TData = Awaited<ReturnType<typeof getEvents>>,
@@ -934,6 +977,9 @@ export function useGetEvents<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * @summary Get my roles on all events
+ */
 export const getEventsRoles = (
   options?: SecondParameter<typeof customInstance>,
   signal?: AbortSignal,
@@ -1035,6 +1081,9 @@ export function useGetEventsRoles<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get my roles on all events
+ */
 
 export function useGetEventsRoles<
   TData = Awaited<ReturnType<typeof getEventsRoles>>,
@@ -1060,6 +1109,10 @@ export function useGetEventsRoles<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * The Discord fields require `manage_event`.
+ * @summary Get an event by slug
+ */
 export const getEventBySlug = (
   eventSlug: string,
   options?: SecondParameter<typeof customInstance>,
@@ -1174,6 +1227,9 @@ export function useGetEventBySlug<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get an event by slug
+ */
 
 export function useGetEventBySlug<
   TData = Awaited<ReturnType<typeof getEventBySlug>>,
@@ -1200,6 +1256,10 @@ export function useGetEventBySlug<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * The Discord fields require `manage_event`.
+ * @summary Get an event by id
+ */
 export const getEvent = (
   eventId: string,
   options?: SecondParameter<typeof customInstance>,
@@ -1311,6 +1371,9 @@ export function useGetEvent<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get an event by id
+ */
 
 export function useGetEvent<
   TData = Awaited<ReturnType<typeof getEvent>>,
@@ -1337,6 +1400,9 @@ export function useGetEvent<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * @summary Update an event
+ */
 export const updateEvent = (
   eventId: string,
   eventForUpdate: EventForUpdate,
@@ -1405,6 +1471,9 @@ export type UpdateEventMutationVariables = {
   data: EventForUpdate;
 };
 
+/**
+ * @summary Update an event
+ */
 export const useUpdateEvent = <TError = PublicError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -1425,6 +1494,9 @@ export const useUpdateEvent = <TError = PublicError, TContext = unknown>(
   return useMutation(getUpdateEventMutationOptions(options), queryClient);
 };
 
+/**
+ * @summary Get the users on an event
+ */
 export const getEventAffiliates = (
   eventId: string,
   params?: GetEventAffiliatesParams,
@@ -1567,6 +1639,9 @@ export function useGetEventAffiliates<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get the users on an event
+ */
 
 export function useGetEventAffiliates<
   TData = Awaited<ReturnType<typeof getEventAffiliates>>,
@@ -1602,6 +1677,9 @@ export function useGetEventAffiliates<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * @summary Get my Discord user id for an event
+ */
 export const getEventDiscordOauth = (
   eventId: string,
   options?: SecondParameter<typeof customInstance>,
@@ -1732,6 +1810,9 @@ export function useGetEventDiscordOauth<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get my Discord user id for an event
+ */
 
 export function useGetEventDiscordOauth<
   TData = Awaited<ReturnType<typeof getEventDiscordOauth>>,
@@ -1762,13 +1843,17 @@ export function useGetEventDiscordOauth<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * Exchanges the OAuth `code` for a token, adds me to the server and stores my Discord user id.
+ * @summary Join the Discord server of an event
+ */
 export const postEventDiscordOauth = (
   eventId: string,
   discordOauthBody: DiscordOauthBody,
   options?: SecondParameter<typeof customInstance>,
   signal?: AbortSignal,
 ) => {
-  return customInstance<unknown | null>(
+  return customInstance<unknown>(
     {
       url: `/api/events/${eventId}/discord`,
       method: "POST",
@@ -1831,6 +1916,9 @@ export type PostEventDiscordOauthMutationVariables = {
   data: DiscordOauthBody;
 };
 
+/**
+ * @summary Join the Discord server of an event
+ */
 export const usePostEventDiscordOauth = <
   TError = PublicError,
   TContext = unknown,
@@ -1857,6 +1945,10 @@ export const usePostEventDiscordOauth = <
   );
 };
 
+/**
+ * Creates the users that don't exist yet and assigns the roles to all of them.
+ * @summary Invite users to an event
+ */
 export const inviteUsers = (
   eventId: string,
   inviteUsersDTO: InviteUsersDTO,
@@ -1925,6 +2017,9 @@ export type InviteUsersMutationVariables = {
   data: InviteUsersDTO;
 };
 
+/**
+ * @summary Invite users to an event
+ */
 export const useInviteUsers = <TError = PublicError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -1945,6 +2040,9 @@ export const useInviteUsers = <TError = PublicError, TContext = unknown>(
   return useMutation(getInviteUsersMutationOptions(options), queryClient);
 };
 
+/**
+ * @summary Match the teams to projects based on their preferences
+ */
 export const getProjectsMatching = (
   eventId: string,
   options?: SecondParameter<typeof customInstance>,
@@ -2075,6 +2173,9 @@ export function useGetProjectsMatching<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Match the teams to projects based on their preferences
+ */
 
 export function useGetProjectsMatching<
   TData = Awaited<ReturnType<typeof getProjectsMatching>>,
@@ -2105,6 +2206,9 @@ export function useGetProjectsMatching<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * @summary Get a ranking snapshot
+ */
 export const getRanking = (
   eventId: string,
   params?: GetRankingParams,
@@ -2230,6 +2334,9 @@ export function useGetRanking<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get a ranking snapshot
+ */
 
 export function useGetRanking<
   TData = Awaited<ReturnType<typeof getRanking>>,
@@ -2257,6 +2364,9 @@ export function useGetRanking<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * @summary Make another snapshot current
+ */
 export const setCurrentRankingSnapshot = (
   eventId: string,
   setCurrentRankingSnapshotBody: SetCurrentRankingSnapshot,
@@ -2326,6 +2436,9 @@ export type SetCurrentRankingSnapshotMutationVariables = {
   data: SetCurrentRankingSnapshot;
 };
 
+/**
+ * @summary Make another snapshot current
+ */
 export const useSetCurrentRankingSnapshot = <
   TError = PublicError,
   TContext = unknown,
@@ -2352,6 +2465,9 @@ export const useSetCurrentRankingSnapshot = <
   );
 };
 
+/**
+ * @summary Compute the ranking live
+ */
 export const getLiveRanking = (
   eventId: string,
   options?: SecondParameter<typeof customInstance>,
@@ -2465,6 +2581,9 @@ export function useGetLiveRanking<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Compute the ranking live
+ */
 
 export function useGetLiveRanking<
   TData = Awaited<ReturnType<typeof getLiveRanking>>,
@@ -2491,6 +2610,9 @@ export function useGetLiveRanking<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * @summary List the ranking snapshots, newest first
+ */
 export const getRankingSnapshots = (
   eventId: string,
   options?: SecondParameter<typeof customInstance>,
@@ -2621,6 +2743,9 @@ export function useGetRankingSnapshots<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary List the ranking snapshots, newest first
+ */
 
 export function useGetRankingSnapshots<
   TData = Awaited<ReturnType<typeof getRankingSnapshots>>,
@@ -2651,6 +2776,9 @@ export function useGetRankingSnapshots<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * @summary Store the live ranking as a snapshot and make it current
+ */
 export const createRankingSnapshot = (
   eventId: string,
   options?: SecondParameter<typeof customInstance>,
@@ -2710,6 +2838,9 @@ export type CreateRankingSnapshotMutationResult = NonNullable<
 export type CreateRankingSnapshotMutationError = PublicError;
 export type CreateRankingSnapshotMutationVariables = { eventId: string };
 
+/**
+ * @summary Store the live ranking as a snapshot and make it current
+ */
 export const useCreateRankingSnapshot = <
   TError = PublicError,
   TContext = unknown,
@@ -2736,6 +2867,9 @@ export const useCreateRankingSnapshot = <
   );
 };
 
+/**
+ * @summary Get my roles on an event
+ */
 export const getEventRoles = (
   eventId: string,
   options?: SecondParameter<typeof customInstance>,
@@ -2849,6 +2983,9 @@ export function useGetEventRoles<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get my roles on an event
+ */
 
 export function useGetEventRoles<
   TData = Awaited<ReturnType<typeof getEventRoles>>,
@@ -2875,6 +3012,9 @@ export function useGetEventRoles<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * @summary Add event role assignments
+ */
 export const putEventRoles = (
   eventId: string,
   putEventRolesBody: PutEventRolesBody,
@@ -2943,6 +3083,9 @@ export type PutEventRolesMutationVariables = {
   data: PutEventRolesBody;
 };
 
+/**
+ * @summary Add event role assignments
+ */
 export const usePutEventRoles = <TError = PublicError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -2963,6 +3106,9 @@ export const usePutEventRoles = <TError = PublicError, TContext = unknown>(
   return useMutation(getPutEventRolesMutationOptions(options), queryClient);
 };
 
+/**
+ * @summary Remove event role assignments
+ */
 export const deleteEventRoles = (
   eventId: string,
   deleteEventRolesBody: DeleteEventRolesBody,
@@ -3032,6 +3178,9 @@ export type DeleteEventRolesMutationVariables = {
   data: DeleteEventRolesBody;
 };
 
+/**
+ * @summary Remove event role assignments
+ */
 export const useDeleteEventRoles = <TError = PublicError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -3052,6 +3201,9 @@ export const useDeleteEventRoles = <TError = PublicError, TContext = unknown>(
   return useMutation(getDeleteEventRolesMutationOptions(options), queryClient);
 };
 
+/**
+ * @summary Get the team scores of all aggregator runs
+ */
 export const getSidequestsHistory = (
   eventId: string,
   params?: GetSidequestsHistoryParams,
@@ -3199,6 +3351,9 @@ export function useGetSidequestsHistory<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get the team scores of all aggregator runs
+ */
 
 export function useGetSidequestsHistory<
   TData = Awaited<ReturnType<typeof getSidequestsHistory>>,
@@ -3234,6 +3389,9 @@ export function useGetSidequestsHistory<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * @summary Get the team leaderboard from the latest aggregator run
+ */
 export const getSidequestsLeaderboard = (
   eventId: string,
   options?: SecondParameter<typeof customInstance>,
@@ -3368,6 +3526,9 @@ export function useGetSidequestsLeaderboard<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get the team leaderboard from the latest aggregator run
+ */
 
 export function useGetSidequestsLeaderboard<
   TData = Awaited<ReturnType<typeof getSidequestsLeaderboard>>,
@@ -3401,6 +3562,9 @@ export function useGetSidequestsLeaderboard<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * @summary Get the user leaderboard for a sidequest
+ */
 export const getSidequestsUserLeaderboard = (
   eventId: string,
   params: GetSidequestsUserLeaderboardParams,
@@ -3549,6 +3713,9 @@ export function useGetSidequestsUserLeaderboard<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get the user leaderboard for a sidequest
+ */
 
 export function useGetSidequestsUserLeaderboard<
   TData = Awaited<ReturnType<typeof getSidequestsUserLeaderboard>>,
@@ -3584,12 +3751,15 @@ export function useGetSidequestsUserLeaderboard<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * @summary Recalculate the index of each team
+ */
 export const indexTeams = (
   eventId: string,
   options?: SecondParameter<typeof customInstance>,
   signal?: AbortSignal,
 ) => {
-  return customInstance<unknown | null>(
+  return customInstance<unknown>(
     { url: `/api/events/${eventId}/teams/index`, method: "POST", signal },
     options,
   );
@@ -3642,6 +3812,9 @@ export type IndexTeamsMutationResult = NonNullable<
 export type IndexTeamsMutationError = PublicError;
 export type IndexTeamsMutationVariables = { eventId: string };
 
+/**
+ * @summary Recalculate the index of each team
+ */
 export const useIndexTeams = <TError = PublicError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -3662,6 +3835,9 @@ export const useIndexTeams = <TError = PublicError, TContext = unknown>(
   return useMutation(getIndexTeamsMutationOptions(options), queryClient);
 };
 
+/**
+ * @summary Get the technical questions of an event
+ */
 export const getTechnicalQuestions = (
   eventId: string,
   options?: SecondParameter<typeof customInstance>,
@@ -3796,6 +3972,9 @@ export function useGetTechnicalQuestions<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get the technical questions of an event
+ */
 
 export function useGetTechnicalQuestions<
   TData = Awaited<ReturnType<typeof getTechnicalQuestions>>,
@@ -3826,6 +4005,9 @@ export function useGetTechnicalQuestions<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * @summary Create a technical question
+ */
 export const createTechnicalQuestions = (
   eventId: string,
   createTechnicalQuestionDTO: CreateTechnicalQuestionDTO,
@@ -3895,6 +4077,9 @@ export type CreateTechnicalQuestionsMutationVariables = {
   data: CreateTechnicalQuestionDTO;
 };
 
+/**
+ * @summary Create a technical question
+ */
 export const useCreateTechnicalQuestions = <
   TError = PublicError,
   TContext = unknown,
@@ -3921,6 +4106,9 @@ export const useCreateTechnicalQuestions = <
   );
 };
 
+/**
+ * @summary Update a technical question
+ */
 export const updateTechnicalQuestions = (
   eventId: string,
   questionId: string,
@@ -3992,6 +4180,9 @@ export type UpdateTechnicalQuestionsMutationVariables = {
   data: UpdateTechnicalQuestionDTO;
 };
 
+/**
+ * @summary Update a technical question
+ */
 export const useUpdateTechnicalQuestions = <
   TError = PublicError,
   TContext = unknown,
@@ -4018,6 +4209,9 @@ export const useUpdateTechnicalQuestions = <
   );
 };
 
+/**
+ * @summary Delete a technical question
+ */
 export const deleteTechnicalQuestions = (
   eventId: string,
   questionId: string,
@@ -4085,6 +4279,9 @@ export type DeleteTechnicalQuestionsMutationVariables = {
   questionId: string;
 };
 
+/**
+ * @summary Delete a technical question
+ */
 export const useDeleteTechnicalQuestions = <
   TError = PublicError,
   TContext = unknown,
@@ -4111,6 +4308,9 @@ export const useDeleteTechnicalQuestions = <
   );
 };
 
+/**
+ * @summary Get all projects of an event
+ */
 export const getProjects = (
   params: GetProjectsParams,
   options?: SecondParameter<typeof customInstance>,
@@ -4219,6 +4419,9 @@ export function useGetProjects<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get all projects of an event
+ */
 
 export function useGetProjects<
   TData = Awaited<ReturnType<typeof getProjects>>,
@@ -4245,6 +4448,9 @@ export function useGetProjects<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * @summary Create a project
+ */
 export const createProject = (
   projectForCreate: ProjectForCreate,
   options?: SecondParameter<typeof customInstance>,
@@ -4309,6 +4515,9 @@ export type CreateProjectMutationBody = ProjectForCreate;
 export type CreateProjectMutationError = PublicError;
 export type CreateProjectMutationVariables = { data: ProjectForCreate };
 
+/**
+ * @summary Create a project
+ */
 export const useCreateProject = <TError = PublicError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -4329,6 +4538,9 @@ export const useCreateProject = <TError = PublicError, TContext = unknown>(
   return useMutation(getCreateProjectMutationOptions(options), queryClient);
 };
 
+/**
+ * @summary Get a project by slug
+ */
 export const getProjectBySlug = (
   eventSlug: string,
   projectSlug: string,
@@ -4477,6 +4689,9 @@ export function useGetProjectBySlug<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get a project by slug
+ */
 
 export function useGetProjectBySlug<
   TData = Awaited<ReturnType<typeof getProjectBySlug>>,
@@ -4512,6 +4727,9 @@ export function useGetProjectBySlug<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * @summary Get a project by id
+ */
 export const getProject = (
   projectId: string,
   options?: SecondParameter<typeof customInstance>,
@@ -4625,6 +4843,9 @@ export function useGetProject<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get a project by id
+ */
 
 export function useGetProject<
   TData = Awaited<ReturnType<typeof getProject>>,
@@ -4651,6 +4872,9 @@ export function useGetProject<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * @summary Delete a project
+ */
 export const deleteProject = (
   projectId: string,
   options?: SecondParameter<typeof customInstance>,
@@ -4709,6 +4933,9 @@ export type DeleteProjectMutationResult = NonNullable<
 export type DeleteProjectMutationError = PublicError;
 export type DeleteProjectMutationVariables = { projectId: string };
 
+/**
+ * @summary Delete a project
+ */
 export const useDeleteProject = <TError = PublicError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -4729,13 +4956,17 @@ export const useDeleteProject = <TError = PublicError, TContext = unknown>(
   return useMutation(getDeleteProjectMutationOptions(options), queryClient);
 };
 
+/**
+ * Optionally replaces its stakeholders.
+ * @summary Update a project
+ */
 export const updateProject = (
   projectId: string,
   projectForUpdate: ProjectForUpdate,
   options?: SecondParameter<typeof customInstance>,
   signal?: AbortSignal,
 ) => {
-  return customInstance<Appointment>(
+  return customInstance<Project>(
     {
       url: `/api/projects/${projectId}`,
       method: "PATCH",
@@ -4797,6 +5028,9 @@ export type UpdateProjectMutationVariables = {
   data: ProjectForUpdate;
 };
 
+/**
+ * @summary Update a project
+ */
 export const useUpdateProject = <TError = PublicError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -4817,6 +5051,10 @@ export const useUpdateProject = <TError = PublicError, TContext = unknown>(
   return useMutation(getUpdateProjectMutationOptions(options), queryClient);
 };
 
+/**
+ * Only returns my own ratings unless I have `manage_event`.
+ * @summary Get the jury ratings of a team
+ */
 export const getJuryRatings = (
   params: GetJuryRatingsParams,
   options?: SecondParameter<typeof customInstance>,
@@ -4925,6 +5163,9 @@ export function useGetJuryRatings<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get the jury ratings of a team
+ */
 
 export function useGetJuryRatings<
   TData = Awaited<ReturnType<typeof getJuryRatings>>,
@@ -4951,6 +5192,9 @@ export function useGetJuryRatings<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * @summary Create a jury rating
+ */
 export const createJuryRating = (
   juryRatingForCreate: JuryRatingForCreate,
   options?: SecondParameter<typeof customInstance>,
@@ -5016,6 +5260,9 @@ export type CreateJuryRatingMutationBody = JuryRatingForCreate;
 export type CreateJuryRatingMutationError = PublicError;
 export type CreateJuryRatingMutationVariables = { data: JuryRatingForCreate };
 
+/**
+ * @summary Create a jury rating
+ */
 export const useCreateJuryRating = <TError = PublicError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -5036,6 +5283,10 @@ export const useCreateJuryRating = <TError = PublicError, TContext = unknown>(
   return useMutation(getCreateJuryRatingMutationOptions(options), queryClient);
 };
 
+/**
+ * Ratings of others require `manage_event`.
+ * @summary Get a jury rating
+ */
 export const getJuryRating = (
   ratingId: string,
   options?: SecondParameter<typeof customInstance>,
@@ -5149,6 +5400,9 @@ export function useGetJuryRating<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get a jury rating
+ */
 
 export function useGetJuryRating<
   TData = Awaited<ReturnType<typeof getJuryRating>>,
@@ -5175,6 +5429,10 @@ export function useGetJuryRating<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * Ratings of others require `manage_event`.
+ * @summary Delete a jury rating
+ */
 export const deleteJuryRating = (
   ratingId: string,
   options?: SecondParameter<typeof customInstance>,
@@ -5234,6 +5492,9 @@ export type DeleteJuryRatingMutationResult = NonNullable<
 export type DeleteJuryRatingMutationError = PublicError;
 export type DeleteJuryRatingMutationVariables = { ratingId: string };
 
+/**
+ * @summary Delete a jury rating
+ */
 export const useDeleteJuryRating = <TError = PublicError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -5254,6 +5515,10 @@ export const useDeleteJuryRating = <TError = PublicError, TContext = unknown>(
   return useMutation(getDeleteJuryRatingMutationOptions(options), queryClient);
 };
 
+/**
+ * Ratings of others require `manage_event`.
+ * @summary Update a jury rating
+ */
 export const updateJuryRating = (
   ratingId: string,
   juryRatingForUpdate: JuryRatingForUpdate,
@@ -5323,6 +5588,9 @@ export type UpdateJuryRatingMutationVariables = {
   data: JuryRatingForUpdate;
 };
 
+/**
+ * @summary Update a jury rating
+ */
 export const useUpdateJuryRating = <TError = PublicError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -5343,6 +5611,9 @@ export const useUpdateJuryRating = <TError = PublicError, TContext = unknown>(
   return useMutation(getUpdateJuryRatingMutationOptions(options), queryClient);
 };
 
+/**
+ * @summary Get my public votes for an event
+ */
 export const getMyVotes = (
   params: GetMyVotesParams,
   options?: SecondParameter<typeof customInstance>,
@@ -5451,6 +5722,9 @@ export function useGetMyVotes<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get my public votes for an event
+ */
 
 export function useGetMyVotes<
   TData = Awaited<ReturnType<typeof getMyVotes>>,
@@ -5477,6 +5751,10 @@ export function useGetMyVotes<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * Only finalists can be voted for on places 1 to 3, and not my own team.
+ * @summary Set my public vote for a place
+ */
 export const setMyVote = (
   vote: Vote,
   params: SetMyVoteParams,
@@ -5546,6 +5824,9 @@ export type SetMyVoteMutationVariables = {
   params: SetMyVoteParams;
 };
 
+/**
+ * @summary Set my public vote for a place
+ */
 export const useSetMyVote = <TError = PublicError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -5566,6 +5847,9 @@ export const useSetMyVote = <TError = PublicError, TContext = unknown>(
   return useMutation(getSetMyVoteMutationOptions(options), queryClient);
 };
 
+/**
+ * @summary Get the technical rating of a team
+ */
 export const getTechnicalTeamRating = (
   teamId: string,
   options?: SecondParameter<typeof customInstance>,
@@ -5696,6 +5980,9 @@ export function useGetTechnicalTeamRating<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get the technical rating of a team
+ */
 
 export function useGetTechnicalTeamRating<
   TData = Awaited<ReturnType<typeof getTechnicalTeamRating>>,
@@ -5726,6 +6013,9 @@ export function useGetTechnicalTeamRating<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * @summary Set the technical rating of a team
+ */
 export const setTechnicalTeamRating = (
   teamId: string,
   setTechnicalRating: SetTechnicalRating,
@@ -5795,6 +6085,9 @@ export type SetTechnicalTeamRatingMutationVariables = {
   data: SetTechnicalRating;
 };
 
+/**
+ * @summary Set the technical rating of a team
+ */
 export const useSetTechnicalTeamRating = <
   TError = PublicError,
   TContext = unknown,
@@ -5821,6 +6114,9 @@ export const useSetTechnicalTeamRating = <
   );
 };
 
+/**
+ * @summary Get the secrets, teams and users of an event
+ */
 export const getEventSecrets = (
   params: GetEventSecretsParams,
   options?: SecondParameter<typeof customInstance>,
@@ -5945,6 +6241,9 @@ export function useGetEventSecrets<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get the secrets, teams and users of an event
+ */
 
 export function useGetEventSecrets<
   TData = Awaited<ReturnType<typeof getEventSecrets>>,
@@ -5975,6 +6274,9 @@ export function useGetEventSecrets<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * @summary Create a team or user secret
+ */
 export const createSecret = (
   secretForCreate: SecretForCreate,
   options?: SecondParameter<typeof customInstance>,
@@ -6039,6 +6341,9 @@ export type CreateSecretMutationBody = SecretForCreate;
 export type CreateSecretMutationError = PublicError;
 export type CreateSecretMutationVariables = { data: SecretForCreate };
 
+/**
+ * @summary Create a team or user secret
+ */
 export const useCreateSecret = <TError = PublicError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -6059,6 +6364,9 @@ export const useCreateSecret = <TError = PublicError, TContext = unknown>(
   return useMutation(getCreateSecretMutationOptions(options), queryClient);
 };
 
+/**
+ * @summary Get the values of my user secrets
+ */
 export const getMySecrets = (
   params: GetMySecretsParams,
   options?: SecondParameter<typeof customInstance>,
@@ -6167,6 +6475,9 @@ export function useGetMySecrets<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get the values of my user secrets
+ */
 
 export function useGetMySecrets<
   TData = Awaited<ReturnType<typeof getMySecrets>>,
@@ -6193,12 +6504,15 @@ export function useGetMySecrets<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * @summary Delete a secret and its values
+ */
 export const deleteSecret = (
   secretId: string,
   options?: SecondParameter<typeof customInstance>,
   signal?: AbortSignal,
 ) => {
-  return customInstance<unknown | null>(
+  return customInstance<unknown>(
     { url: `/api/secrets/${secretId}`, method: "DELETE", signal },
     options,
   );
@@ -6251,6 +6565,9 @@ export type DeleteSecretMutationResult = NonNullable<
 export type DeleteSecretMutationError = PublicError;
 export type DeleteSecretMutationVariables = { secretId: string };
 
+/**
+ * @summary Delete a secret and its values
+ */
 export const useDeleteSecret = <TError = PublicError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -6271,6 +6588,9 @@ export const useDeleteSecret = <TError = PublicError, TContext = unknown>(
   return useMutation(getDeleteSecretMutationOptions(options), queryClient);
 };
 
+/**
+ * @summary Set the values of a secret for some teams or users
+ */
 export const updateSecretValues = (
   secretId: string,
   updateSecretValuesBody: UpdateSecretValuesBody,
@@ -6340,6 +6660,9 @@ export type UpdateSecretValuesMutationVariables = {
   data: UpdateSecretValuesBody;
 };
 
+/**
+ * @summary Set the values of a secret for some teams or users
+ */
 export const useUpdateSecretValues = <TError = PublicError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -6363,6 +6686,12 @@ export const useUpdateSecretValues = <TError = PublicError, TContext = unknown>(
   );
 };
 
+/**
+ * At most one of `sidequest_id`, `team_id` and `user_id` may be set.
+ *
+ * Requires `view_sidequest_attempt`, except that `view_team_confidential` suffices for `team_id`, and that `user_id` only requires `view_event` for other users and nothing for me.
+ * @summary Get the sidequest attempts of an event
+ */
 export const getSidequestAttempts = (
   params: GetSidequestAttemptsParams,
   options?: SecondParameter<typeof customInstance>,
@@ -6490,6 +6819,9 @@ export function useGetSidequestAttempts<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get the sidequest attempts of an event
+ */
 
 export function useGetSidequestAttempts<
   TData = Awaited<ReturnType<typeof getSidequestAttempts>>,
@@ -6520,6 +6852,9 @@ export function useGetSidequestAttempts<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * @summary Create a sidequest attempt
+ */
 export const createSidequestAttempt = (
   attemptForCreate: AttemptForCreate,
   options?: SecondParameter<typeof customInstance>,
@@ -6587,6 +6922,9 @@ export type CreateSidequestAttemptMutationVariables = {
   data: AttemptForCreate;
 };
 
+/**
+ * @summary Create a sidequest attempt
+ */
 export const useCreateSidequestAttempt = <
   TError = PublicError,
   TContext = unknown,
@@ -6613,6 +6951,10 @@ export const useCreateSidequestAttempt = <
   );
 };
 
+/**
+ * Other users than me require `view_sidequest_attempt`.
+ * @summary Get the sidequest cooldown of a user
+ */
 export const getSidequestAttemptCooldown = (
   params: GetSidequestAttemptCooldownParams,
   options?: SecondParameter<typeof customInstance>,
@@ -6744,6 +7086,9 @@ export function useGetSidequestAttemptCooldown<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get the sidequest cooldown of a user
+ */
 
 export function useGetSidequestAttemptCooldown<
   TData = Awaited<ReturnType<typeof getSidequestAttemptCooldown>>,
@@ -6777,6 +7122,9 @@ export function useGetSidequestAttemptCooldown<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * @summary Get a sidequest attempt
+ */
 export const getSidequestAttempt = (
   sidequestAttemptId: string,
   options?: SecondParameter<typeof customInstance>,
@@ -6913,6 +7261,9 @@ export function useGetSidequestAttempt<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get a sidequest attempt
+ */
 
 export function useGetSidequestAttempt<
   TData = Awaited<ReturnType<typeof getSidequestAttempt>>,
@@ -6946,12 +7297,15 @@ export function useGetSidequestAttempt<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * @summary Delete a sidequest attempt
+ */
 export const deleteSidequestAttempt = (
   sidequestAttemptId: string,
   options?: SecondParameter<typeof customInstance>,
   signal?: AbortSignal,
 ) => {
-  return customInstance<unknown | null>(
+  return customInstance<unknown>(
     {
       url: `/api/sidequest-attempts/${sidequestAttemptId}`,
       method: "DELETE",
@@ -7011,6 +7365,9 @@ export type DeleteSidequestAttemptMutationVariables = {
   sidequestAttemptId: string;
 };
 
+/**
+ * @summary Delete a sidequest attempt
+ */
 export const useDeleteSidequestAttempt = <
   TError = PublicError,
   TContext = unknown,
@@ -7037,6 +7394,9 @@ export const useDeleteSidequestAttempt = <
   );
 };
 
+/**
+ * @summary Update a sidequest attempt
+ */
 export const updateSidequestAttempt = (
   sidequestAttemptId: string,
   attemptForUpdate: AttemptForUpdate,
@@ -7106,6 +7466,9 @@ export type UpdateSidequestAttemptMutationVariables = {
   data: AttemptForUpdate;
 };
 
+/**
+ * @summary Update a sidequest attempt
+ */
 export const useUpdateSidequestAttempt = <
   TError = PublicError,
   TContext = unknown,
@@ -7132,6 +7495,9 @@ export const useUpdateSidequestAttempt = <
   );
 };
 
+/**
+ * @summary Get all sidequests of an event
+ */
 export const getSidequests = (
   params: GetSidequestsParams,
   options?: SecondParameter<typeof customInstance>,
@@ -7240,6 +7606,9 @@ export function useGetSidequests<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get all sidequests of an event
+ */
 
 export function useGetSidequests<
   TData = Awaited<ReturnType<typeof getSidequests>>,
@@ -7266,6 +7635,9 @@ export function useGetSidequests<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * @summary Create a sidequest
+ */
 export const createSidequest = (
   sidequestForCreate: SidequestForCreate,
   options?: SecondParameter<typeof customInstance>,
@@ -7330,6 +7702,9 @@ export type CreateSidequestMutationBody = SidequestForCreate;
 export type CreateSidequestMutationError = PublicError;
 export type CreateSidequestMutationVariables = { data: SidequestForCreate };
 
+/**
+ * @summary Create a sidequest
+ */
 export const useCreateSidequest = <TError = PublicError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -7350,6 +7725,9 @@ export const useCreateSidequest = <TError = PublicError, TContext = unknown>(
   return useMutation(getCreateSidequestMutationOptions(options), queryClient);
 };
 
+/**
+ * @summary Get a sidequest by slug
+ */
 export const getSidequestBySlug = (
   eventSlug: string,
   sidequestSlug: string,
@@ -7498,6 +7876,9 @@ export function useGetSidequestBySlug<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get a sidequest by slug
+ */
 
 export function useGetSidequestBySlug<
   TData = Awaited<ReturnType<typeof getSidequestBySlug>>,
@@ -7533,6 +7914,9 @@ export function useGetSidequestBySlug<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * @summary Get a sidequest by id
+ */
 export const getSidequest = (
   sidequestId: string,
   options?: SecondParameter<typeof customInstance>,
@@ -7647,6 +8031,9 @@ export function useGetSidequest<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get a sidequest by id
+ */
 
 export function useGetSidequest<
   TData = Awaited<ReturnType<typeof getSidequest>>,
@@ -7673,12 +8060,15 @@ export function useGetSidequest<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * @summary Delete a sidequest
+ */
 export const deleteSidequest = (
   sidequestId: string,
   options?: SecondParameter<typeof customInstance>,
   signal?: AbortSignal,
 ) => {
-  return customInstance<unknown | null>(
+  return customInstance<unknown>(
     { url: `/api/sidequests/${sidequestId}`, method: "DELETE", signal },
     options,
   );
@@ -7731,6 +8121,9 @@ export type DeleteSidequestMutationResult = NonNullable<
 export type DeleteSidequestMutationError = PublicError;
 export type DeleteSidequestMutationVariables = { sidequestId: string };
 
+/**
+ * @summary Delete a sidequest
+ */
 export const useDeleteSidequest = <TError = PublicError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -7751,6 +8144,9 @@ export const useDeleteSidequest = <TError = PublicError, TContext = unknown>(
   return useMutation(getDeleteSidequestMutationOptions(options), queryClient);
 };
 
+/**
+ * @summary Update a sidequest
+ */
 export const updateSidequest = (
   sidequestId: string,
   sidequestForUpdate: SidequestForUpdate,
@@ -7819,6 +8215,9 @@ export type UpdateSidequestMutationVariables = {
   data: SidequestForUpdate;
 };
 
+/**
+ * @summary Update a sidequest
+ */
 export const useUpdateSidequest = <TError = PublicError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -7839,6 +8238,10 @@ export const useUpdateSidequest = <TError = PublicError, TContext = unknown>(
   return useMutation(getUpdateSidequestMutationOptions(options), queryClient);
 };
 
+/**
+ * `project_id` requires `view_project_assignment` and `finalist` requires `view_finalists`.
+ * @summary Get all teams of an event
+ */
 export const getTeams = (
   params: GetTeamsParams,
   options?: SecondParameter<typeof customInstance>,
@@ -7947,6 +8350,9 @@ export function useGetTeams<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get all teams of an event
+ */
 
 export function useGetTeams<
   TData = Awaited<ReturnType<typeof getTeams>>,
@@ -7973,6 +8379,9 @@ export function useGetTeams<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * @summary Create a team
+ */
 export const createTeam = (
   teamForCreate: TeamForCreate,
   options?: SecondParameter<typeof customInstance>,
@@ -8037,6 +8446,9 @@ export type CreateTeamMutationBody = TeamForCreate;
 export type CreateTeamMutationError = PublicError;
 export type CreateTeamMutationVariables = { data: TeamForCreate };
 
+/**
+ * @summary Create a team
+ */
 export const useCreateTeam = <TError = PublicError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -8057,6 +8469,9 @@ export const useCreateTeam = <TError = PublicError, TContext = unknown>(
   return useMutation(getCreateTeamMutationOptions(options), queryClient);
 };
 
+/**
+ * @summary Get all teams of an event with their internal fields
+ */
 export const getAdminTeams = (
   params: GetAdminTeamsParams,
   options?: SecondParameter<typeof customInstance>,
@@ -8165,6 +8580,9 @@ export function useGetAdminTeams<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get all teams of an event with their internal fields
+ */
 
 export function useGetAdminTeams<
   TData = Awaited<ReturnType<typeof getAdminTeams>>,
@@ -8191,6 +8609,9 @@ export function useGetAdminTeams<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * @summary Get the users on all teams of an event
+ */
 export const getTeamsAffiliates = (
   params: GetTeamsAffiliatesParams,
   options?: SecondParameter<typeof customInstance>,
@@ -8318,6 +8739,9 @@ export function useGetTeamsAffiliates<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get the users on all teams of an event
+ */
 
 export function useGetTeamsAffiliates<
   TData = Awaited<ReturnType<typeof getTeamsAffiliates>>,
@@ -8348,6 +8772,9 @@ export function useGetTeamsAffiliates<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * @summary Get the project preferences of all teams of an event
+ */
 export const getTeamsProjectPreferences = (
   params: GetTeamsProjectPreferencesParams,
   options?: SecondParameter<typeof customInstance>,
@@ -8479,6 +8906,9 @@ export function useGetTeamsProjectPreferences<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get the project preferences of all teams of an event
+ */
 
 export function useGetTeamsProjectPreferences<
   TData = Awaited<ReturnType<typeof getTeamsProjectPreferences>>,
@@ -8512,6 +8942,9 @@ export function useGetTeamsProjectPreferences<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * @summary Get my roles on all teams of an event
+ */
 export const getTeamsRoles = (
   params: GetTeamsRolesParams,
   options?: SecondParameter<typeof customInstance>,
@@ -8620,6 +9053,9 @@ export function useGetTeamsRoles<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get my roles on all teams of an event
+ */
 
 export function useGetTeamsRoles<
   TData = Awaited<ReturnType<typeof getTeamsRoles>>,
@@ -8646,6 +9082,10 @@ export function useGetTeamsRoles<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * `project_id` requires `view_project_assignment` and `finalist` requires `view_finalists`.
+ * @summary Get a team by slug
+ */
 export const getTeamBySlug = (
   eventSlug: string,
   teamSlug: string,
@@ -8772,6 +9212,9 @@ export function useGetTeamBySlug<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get a team by slug
+ */
 
 export function useGetTeamBySlug<
   TData = Awaited<ReturnType<typeof getTeamBySlug>>,
@@ -8803,6 +9246,10 @@ export function useGetTeamBySlug<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * `project_id` requires `view_project_assignment` and `finalist` requires `view_finalists`.
+ * @summary Get a team by id
+ */
 export const getTeam = (
   teamId: string,
   options?: SecondParameter<typeof customInstance>,
@@ -8914,6 +9361,9 @@ export function useGetTeam<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get a team by id
+ */
 
 export function useGetTeam<
   TData = Awaited<ReturnType<typeof getTeam>>,
@@ -8940,6 +9390,9 @@ export function useGetTeam<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * @summary Delete a team
+ */
 export const deleteTeam = (
   teamId: string,
   options?: SecondParameter<typeof customInstance>,
@@ -8998,6 +9451,9 @@ export type DeleteTeamMutationResult = NonNullable<
 export type DeleteTeamMutationError = PublicError;
 export type DeleteTeamMutationVariables = { teamId: string };
 
+/**
+ * @summary Delete a team
+ */
 export const useDeleteTeam = <TError = PublicError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -9018,6 +9474,10 @@ export const useDeleteTeam = <TError = PublicError, TContext = unknown>(
   return useMutation(getDeleteTeamMutationOptions(options), queryClient);
 };
 
+/**
+ * Requires `view_event`. Changing the name, photo or ingress config requires `update_team_name`, `update_team_photo` or `update_team_ingress_config`. All other fields require `manage_event`.
+ * @summary Update a team
+ */
 export const updateTeam = (
   teamId: string,
   teamForUpdate: TeamForUpdate,
@@ -9086,6 +9546,9 @@ export type UpdateTeamMutationVariables = {
   data: TeamForUpdate;
 };
 
+/**
+ * @summary Update a team
+ */
 export const useUpdateTeam = <TError = PublicError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -9106,6 +9569,9 @@ export const useUpdateTeam = <TError = PublicError, TContext = unknown>(
   return useMutation(getUpdateTeamMutationOptions(options), queryClient);
 };
 
+/**
+ * @summary Get a team with its internal fields
+ */
 export const getAdminTeam = (
   teamId: string,
   options?: SecondParameter<typeof customInstance>,
@@ -9219,6 +9685,9 @@ export function useGetAdminTeam<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get a team with its internal fields
+ */
 
 export function useGetAdminTeam<
   TData = Awaited<ReturnType<typeof getAdminTeam>>,
@@ -9245,6 +9714,9 @@ export function useGetAdminTeam<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * @summary Get the users on a team
+ */
 export const getTeamAffiliates = (
   teamId: string,
   params?: GetTeamAffiliatesParams,
@@ -9386,6 +9858,9 @@ export function useGetTeamAffiliates<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get the users on a team
+ */
 
 export function useGetTeamAffiliates<
   TData = Awaited<ReturnType<typeof getTeamAffiliates>>,
@@ -9421,13 +9896,17 @@ export function useGetTeamAffiliates<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * Creates a `LiteLLM` key with the given budget.
+ * @summary Create an AI API key for a team
+ */
 export const createTeamAiApiKey = (
   teamId: string,
   createTeamAPIKey: CreateTeamAPIKey,
   options?: SecondParameter<typeof customInstance>,
   signal?: AbortSignal,
 ) => {
-  return customInstance<unknown | null>(
+  return customInstance<unknown>(
     {
       url: `/api/teams/${teamId}/ai-api-keys`,
       method: "POST",
@@ -9490,6 +9969,9 @@ export type CreateTeamAiApiKeyMutationVariables = {
   data: CreateTeamAPIKey;
 };
 
+/**
+ * @summary Create an AI API key for a team
+ */
 export const useCreateTeamAiApiKey = <TError = PublicError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -9513,6 +9995,9 @@ export const useCreateTeamAiApiKey = <TError = PublicError, TContext = unknown>(
   );
 };
 
+/**
+ * @summary Get the blog sections of a team
+ */
 export const getTeamBlog = (
   teamId: string,
   options?: SecondParameter<typeof customInstance>,
@@ -9626,6 +10111,9 @@ export function useGetTeamBlog<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get the blog sections of a team
+ */
 
 export function useGetTeamBlog<
   TData = Awaited<ReturnType<typeof getTeamBlog>>,
@@ -9652,6 +10140,9 @@ export function useGetTeamBlog<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * @summary Replace the blog sections of a team
+ */
 export const updateTeamBlog = (
   teamId: string,
   teamBlogForUpdate: TeamBlogForUpdate,
@@ -9720,6 +10211,9 @@ export type UpdateTeamBlogMutationVariables = {
   data: TeamBlogForUpdate;
 };
 
+/**
+ * @summary Replace the blog sections of a team
+ */
 export const useUpdateTeamBlog = <TError = PublicError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -9740,6 +10234,9 @@ export const useUpdateTeamBlog = <TError = PublicError, TContext = unknown>(
   return useMutation(getUpdateTeamBlogMutationOptions(options), queryClient);
 };
 
+/**
+ * @summary Get the project preferences of a team
+ */
 export const getTeamProjectPreferences = (
   teamId: string,
   options?: SecondParameter<typeof customInstance>,
@@ -9870,6 +10367,9 @@ export function useGetTeamProjectPreferences<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get the project preferences of a team
+ */
 
 export function useGetTeamProjectPreferences<
   TData = Awaited<ReturnType<typeof getTeamProjectPreferences>>,
@@ -9903,6 +10403,10 @@ export function useGetTeamProjectPreferences<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * Expects exactly 3 distinct project ids.
+ * @summary Set the project preferences of a team
+ */
 export const updateTeamProjectPreferences = (
   teamId: string,
   updateTeamProjectPreferencesBody: string[],
@@ -9972,6 +10476,9 @@ export type UpdateTeamProjectPreferencesMutationVariables = {
   data: string[];
 };
 
+/**
+ * @summary Set the project preferences of a team
+ */
 export const useUpdateTeamProjectPreferences = <
   TError = PublicError,
   TContext = unknown,
@@ -9998,6 +10505,9 @@ export const useUpdateTeamProjectPreferences = <
   );
 };
 
+/**
+ * @summary Get the entry of a team in the current ranking snapshot
+ */
 export const getTeamRanking = (
   teamId: string,
   options?: SecondParameter<typeof customInstance>,
@@ -10111,6 +10621,9 @@ export function useGetTeamRanking<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get the entry of a team in the current ranking snapshot
+ */
 
 export function useGetTeamRanking<
   TData = Awaited<ReturnType<typeof getTeamRanking>>,
@@ -10137,6 +10650,9 @@ export function useGetTeamRanking<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * @summary Get my roles on a team
+ */
 export const getTeamRoles = (
   teamId: string,
   options?: SecondParameter<typeof customInstance>,
@@ -10250,6 +10766,9 @@ export function useGetTeamRoles<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get my roles on a team
+ */
 
 export function useGetTeamRoles<
   TData = Awaited<ReturnType<typeof getTeamRoles>>,
@@ -10276,6 +10795,10 @@ export function useGetTeamRoles<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * Member roles require `manage_team`, mentor and stakeholder roles require `manage_event`.
+ * @summary Add team role assignments
+ */
 export const putTeamRoles = (
   teamId: string,
   putTeamRolesBody: PutTeamRolesBody,
@@ -10344,6 +10867,9 @@ export type PutTeamRolesMutationVariables = {
   data: PutTeamRolesBody;
 };
 
+/**
+ * @summary Add team role assignments
+ */
 export const usePutTeamRoles = <TError = PublicError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -10364,6 +10890,10 @@ export const usePutTeamRoles = <TError = PublicError, TContext = unknown>(
   return useMutation(getPutTeamRolesMutationOptions(options), queryClient);
 };
 
+/**
+ * Member roles require `manage_team`, mentor and stakeholder roles require `manage_event`.
+ * @summary Remove team role assignments
+ */
 export const deleteTeamRoles = (
   teamId: string,
   deleteTeamRolesBody: DeleteTeamRolesBody,
@@ -10432,6 +10962,9 @@ export type DeleteTeamRolesMutationVariables = {
   data: DeleteTeamRolesBody;
 };
 
+/**
+ * @summary Remove team role assignments
+ */
 export const useDeleteTeamRoles = <TError = PublicError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -10452,6 +10985,9 @@ export const useDeleteTeamRoles = <TError = PublicError, TContext = unknown>(
   return useMutation(getDeleteTeamRolesMutationOptions(options), queryClient);
 };
 
+/**
+ * @summary Get the values of the secrets of a team
+ */
 export const getTeamSecrets = (
   teamId: string,
   options?: SecondParameter<typeof customInstance>,
@@ -10565,6 +11101,9 @@ export function useGetTeamSecrets<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get the values of the secrets of a team
+ */
 
 export function useGetTeamSecrets<
   TData = Awaited<ReturnType<typeof getTeamSecrets>>,
@@ -10591,6 +11130,10 @@ export function useGetTeamSecrets<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * Returns the presigned URL to upload the file to.
+ * @summary Create an upload
+ */
 export const createUpload = (
   createUploadDTO: CreateUploadDTO,
   options?: SecondParameter<typeof customInstance>,
@@ -10655,6 +11198,9 @@ export type CreateUploadMutationBody = CreateUploadDTO;
 export type CreateUploadMutationError = PublicError;
 export type CreateUploadMutationVariables = { data: CreateUploadDTO };
 
+/**
+ * @summary Create an upload
+ */
 export const useCreateUpload = <TError = PublicError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -10675,6 +11221,9 @@ export const useCreateUpload = <TError = PublicError, TContext = unknown>(
   return useMutation(getCreateUploadMutationOptions(options), queryClient);
 };
 
+/**
+ * @summary Get the current user
+ */
 export const getMe = (
   options?: SecondParameter<typeof customInstance>,
   signal?: AbortSignal,
@@ -10774,6 +11323,9 @@ export function useGetMe<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get the current user
+ */
 
 export function useGetMe<
   TData = Awaited<ReturnType<typeof getMe>>,
@@ -10799,6 +11351,9 @@ export function useGetMe<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * @summary Update the current user
+ */
 export const updateMe = (
   userForUpdate: UserForUpdate,
   options?: SecondParameter<typeof customInstance>,
@@ -10863,6 +11418,9 @@ export type UpdateMeMutationBody = UserForUpdate;
 export type UpdateMeMutationError = PublicError;
 export type UpdateMeMutationVariables = { data: UserForUpdate };
 
+/**
+ * @summary Update the current user
+ */
 export const useUpdateMe = <TError = PublicError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -10883,6 +11441,10 @@ export const useUpdateMe = <TError = PublicError, TContext = unknown>(
   return useMutation(getUpdateMeMutationOptions(options), queryClient);
 };
 
+/**
+ * Exactly one of `event_id` and `team_id` must be set.
+ * @summary Get my policies for an event or team
+ */
 export const getMyPolicies = (
   params?: GetMyPoliciesParams,
   options?: SecondParameter<typeof customInstance>,
@@ -10991,6 +11553,9 @@ export function useGetMyPolicies<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get my policies for an event or team
+ */
 
 export function useGetMyPolicies<
   TData = Awaited<ReturnType<typeof getMyPolicies>>,

@@ -1,7 +1,11 @@
 pub mod models;
 
 use crate::{
-    api_state::ApiState, ctx::Ctx, error::ApiJson, routers::events::models::EventIdQuery, ApiError,
+    api_state::ApiState,
+    ctx::Ctx,
+    error::{ApiJson, PublicError},
+    routers::events::models::EventIdQuery,
+    ApiError,
 };
 use axum::{
     extract::{Query, State},
@@ -18,6 +22,7 @@ pub fn get_router(state: &ApiState) -> Router {
         .with_state(state.clone())
 }
 
+/// Get my public votes for an event
 #[utoipa::path(
     get,
     path = "/api/ratings/public",
@@ -25,9 +30,8 @@ pub fn get_router(state: &ApiState) -> Router {
         (status = StatusCode::OK, body = Vec<PublicVote>),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
-    params(
-        ("event_id" = Uuid, Query, description = "Filter by event id"),
-    )
+    params(EventIdQuery),
+    extensions(("x-policies" = json!(["manage_public_vote"]))),
 )]
 pub async fn get_my_votes(
     ctx: Ctx,
@@ -56,6 +60,9 @@ pub async fn get_my_votes(
     Ok(Json(votes))
 }
 
+/// Set my public vote for a place
+///
+/// Only finalists can be voted for on places 1 to 3, and not my own team.
 #[utoipa::path(
     put,
     path = "/api/ratings/public",
@@ -63,9 +70,8 @@ pub async fn get_my_votes(
         (status = StatusCode::OK, body = Vote),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
-    params(
-        ("event_id" = Uuid, Query, description = "Chose event to vote in"),
-    )
+    params(EventIdQuery),
+    extensions(("x-policies" = json!(["manage_public_vote"]))),
 )]
 pub async fn set_my_vote(
     ctx: Ctx,

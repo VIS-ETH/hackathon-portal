@@ -7,32 +7,27 @@
 
 export type GetSidequestAttemptsParams = {
   /**
-   * Filter by event ID
+   * Filter by event id
    */
   event_id: string;
   /**
-   * Filter by sidequest ID
-   * @nullable
+   * Filter by sidequest id
    */
-  sidequest_id?: string | null;
+  sidequest_id?: string;
   /**
-   * Filter by team ID
-   * @nullable
+   * Filter by team id
    */
-  team_id?: string | null;
+  team_id?: string;
   /**
-   * Filter by user ID
-   * @nullable
+   * Filter by user id
    */
-  user_id?: string | null;
+  user_id?: string;
   /**
-   * Filter by attempts after this time
-   * @nullable
+   * Only attempts after this time
    */
-  after?: string | null;
+  after?: string;
   /**
-   * Filter by attempts before this time
-   * @nullable
+   * Only attempts before this time
    */
-  before?: string | null;
+  before?: string;
 };

@@ -10,5 +10,5 @@ export type GetEventAffiliatesParams = {
   /**
    * Filter by event role
    */
-  role?: EventRole | null;
+  role?: EventRole;
 };

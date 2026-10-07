@@ -1,6 +1,6 @@
 use crate::api_state::ApiState;
 use crate::ctx::Ctx;
-use crate::error::ApiJson;
+use crate::error::{ApiJson, PublicError};
 use crate::routers::users::models::PoliciesQuery;
 use axum::extract::{Query, State};
 use axum::routing::{get, patch};
@@ -19,6 +19,7 @@ pub fn get_router(state: &ApiState) -> Router {
         .with_state(state.clone())
 }
 
+/// Get the current user
 #[utoipa::path(
     get,
     path = "/api/users/me",
@@ -32,6 +33,7 @@ pub async fn get_me(ctx: Ctx) -> ApiJson<User> {
     Ok(Json(me))
 }
 
+/// Update the current user
 #[utoipa::path(
     patch,
     path = "/api/users/me",
@@ -49,6 +51,9 @@ pub async fn update_me(
     Ok(Json(me))
 }
 
+/// Get my policies for an event or team
+///
+/// Exactly one of `event_id` and `team_id` must be set.
 #[utoipa::path(
     get,
     path = "/api/users/me/policies",
@@ -56,10 +61,7 @@ pub async fn update_me(
         (status = StatusCode::OK, body = Policies),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
-    params(
-        ("event_id" = Option<Uuid>, Query, description= "Get policies for this event"),
-        ("team_id" = Option<Uuid>, Query, description= "Get policies for this team"),
-    ),
+    params(PoliciesQuery),
 )]
 pub async fn get_my_policies(
     ctx: Ctx,

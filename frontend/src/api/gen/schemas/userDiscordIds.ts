@@ -6,5 +6,5 @@
  */
 
 export interface UserDiscordIds {
-  discord_ids: (string & string)[][];
+  discord_ids: [string, string][];
 }

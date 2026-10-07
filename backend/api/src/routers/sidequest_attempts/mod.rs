@@ -2,7 +2,7 @@ pub mod models;
 
 use crate::api_state::ApiState;
 use crate::ctx::Ctx;
-use crate::error::{ApiJson, ApiJsonVec};
+use crate::error::{ApiJson, ApiJsonVec, PublicError};
 use crate::routers::sidequest_attempts::models::{
     SidequestAttemptsCooldownQuery, SidequestAttemptsQuery,
 };
@@ -21,12 +21,13 @@ pub fn get_router(state: &ApiState) -> Router {
         .route("/", post(create_sidequest_attempt))
         .route("/", get(get_sidequest_attempts))
         .route("/cooldown", get(get_sidequest_attempt_cooldown))
-        .route("/:sidequest_attempt_id", get(get_sidequest_attempt))
-        .route("/:sidequest_attempt_id", patch(update_sidequest_attempt))
-        .route("/:sidequest_attempt_id", delete(delete_sidequest_attempt))
+        .route("/{sidequest_attempt_id}", get(get_sidequest_attempt))
+        .route("/{sidequest_attempt_id}", patch(update_sidequest_attempt))
+        .route("/{sidequest_attempt_id}", delete(delete_sidequest_attempt))
         .with_state(state.clone())
 }
 
+/// Create a sidequest attempt
 #[utoipa::path(
     post,
     path = "/api/sidequest-attempts",
@@ -34,6 +35,7 @@ pub fn get_router(state: &ApiState) -> Router {
         (status = StatusCode::OK, body = Attempt),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
+    extensions(("x-policies" = json!(["manage_sidequest_attempt"]))),
 )]
 pub async fn create_sidequest_attempt(
     ctx: Ctx,
@@ -57,6 +59,11 @@ pub async fn create_sidequest_attempt(
     Ok(Json(attempt))
 }
 
+/// Get the sidequest attempts of an event
+///
+/// At most one of `sidequest_id`, `team_id` and `user_id` may be set.
+///
+/// Requires `view_sidequest_attempt`, except that `view_team_confidential` suffices for `team_id`, and that `user_id` only requires `view_event` for other users and nothing for me.
 #[utoipa::path(
     get,
     path = "/api/sidequest-attempts",
@@ -64,14 +71,8 @@ pub async fn create_sidequest_attempt(
         (status = StatusCode::OK, body = Vec<Attempt>),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
-    params(
-        ("event_id" = Uuid, Query, description= "Filter by event ID"),
-        ("sidequest_id" = Option<Uuid>, Query, description= "Filter by sidequest ID"),
-        ("team_id" = Option<Uuid>, Query, description= "Filter by team ID"),
-        ("user_id" = Option<Uuid>, Query, description= "Filter by user ID"),
-        ("after" = Option<NaiveDateTime>, Query, description= "Filter by attempts after this time"),
-        ("before" = Option<NaiveDateTime>, Query, description= "Filter by attempts before this time"),
-    )
+    params(SidequestAttemptsQuery),
+    extensions(("x-policies" = json!(["view_sidequest_attempt", "view_team_confidential", "view_event"]))),
 )]
 pub async fn get_sidequest_attempts(
     ctx: Ctx,
@@ -136,6 +137,9 @@ pub async fn get_sidequest_attempts(
     Ok(Json(attempts))
 }
 
+/// Get the sidequest cooldown of a user
+///
+/// Other users than me require `view_sidequest_attempt`.
 #[utoipa::path(
     get,
     path = "/api/sidequest-attempts/cooldown",
@@ -143,10 +147,8 @@ pub async fn get_sidequest_attempts(
         (status = StatusCode::OK, body = Cooldown),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
-    params(
-        ("event_id"= Uuid, Query, description= "Filter by event ID"),
-        ("user_id"= Option<Uuid>, Query, description= "Filter by user ID. Leave empty to use the current user."),
-    )
+    params(SidequestAttemptsCooldownQuery),
+    extensions(("x-policies" = json!(["view_sidequest_attempt"]))),
 )]
 pub async fn get_sidequest_attempt_cooldown(
     ctx: Ctx,
@@ -176,13 +178,15 @@ pub async fn get_sidequest_attempt_cooldown(
     Ok(Json(cooldown))
 }
 
+/// Get a sidequest attempt
 #[utoipa::path(
     get,
     path = "/api/sidequest-attempts/{sidequest_attempt_id}",
     responses(
         (status = StatusCode::OK, body = Attempt),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
-    )
+    ),
+    extensions(("x-policies" = json!(["view_sidequest_attempt"]))),
 )]
 pub async fn get_sidequest_attempt(
     ctx: Ctx,
@@ -204,13 +208,15 @@ pub async fn get_sidequest_attempt(
     Ok(Json(attempt))
 }
 
+/// Update a sidequest attempt
 #[utoipa::path(
     patch,
     path = "/api/sidequest-attempts/{sidequest_attempt_id}",
     responses(
         (status = StatusCode::OK, body = Attempt),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
-    )
+    ),
+    extensions(("x-policies" = json!(["manage_sidequest_attempt"]))),
 )]
 pub async fn update_sidequest_attempt(
     ctx: Ctx,
@@ -238,13 +244,15 @@ pub async fn update_sidequest_attempt(
     Ok(Json(attempt))
 }
 
+/// Delete a sidequest attempt
 #[utoipa::path(
     delete,
     path = "/api/sidequest-attempts/{sidequest_attempt_id}",
     responses(
         (status = StatusCode::OK, body = ()),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
-    )
+    ),
+    extensions(("x-policies" = json!(["manage_sidequest_attempt"]))),
 )]
 pub async fn delete_sidequest_attempt(
     ctx: Ctx,
