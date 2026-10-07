@@ -30,6 +30,7 @@ use std::time::Duration;
 pub struct ApiState {
     pub authenticator: Authenticator,
     pub discord_config: Arc<DiscordConfig>,
+    pub logout_url: Option<String>,
     pub health_service: Arc<HealthService>,
     pub authorization_service: Arc<AuthorizationService>,
     pub user_service: Arc<UserService>,
@@ -111,6 +112,7 @@ impl ApiState {
         Ok(Self {
             authenticator,
             discord_config,
+            logout_url: config.server.logout_url.clone(),
             health_service,
             authorization_service,
             user_service,

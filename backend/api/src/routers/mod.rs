@@ -1,4 +1,5 @@
 mod appointments;
+mod config;
 mod docs;
 mod events;
 mod projects;
@@ -19,6 +20,7 @@ use utoipa_swagger_ui::SwaggerUi;
 
 pub fn get_router(state: ApiState) -> Router {
     Router::new()
+        .nest("/config", config::get_router(&state))
         .nest("/users", users::get_router(&state))
         .nest("/events", events::get_router(&state))
         .nest("/teams", teams::get_router(&state))

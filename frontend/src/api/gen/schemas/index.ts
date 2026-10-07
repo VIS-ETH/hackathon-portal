@@ -15,6 +15,7 @@ export * from "./attempt";
 export * from "./attemptForCreate";
 export * from "./attemptForUpdate";
 export * from "./blogSectionLayout";
+export * from "./clientConfig";
 export * from "./cooldown";
 export * from "./createTeamAPIKey";
 export * from "./createTechnicalQuestion";

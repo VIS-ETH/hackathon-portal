@@ -3,6 +3,7 @@ import classes from "./UserMenu.module.css";
 import { useGetMe } from "@/api/gen";
 import UserSecretsModal from "@/components/secrets/UserSecretsModal";
 import { useDiscord } from "@/hooks/useDiscord";
+import { useLogoutUrl } from "@/hooks/useLogoutUrl";
 import { useMySecrets } from "@/hooks/useMySecrets";
 import { iconProps, menuProps } from "@/styles/common";
 
@@ -24,6 +25,7 @@ const UserMenu = () => {
   const { discordAuthUrl } = useDiscord();
   const mySecrets = useMySecrets();
   const [secretsOpened, secretsHandles] = useDisclosure();
+  const logoutUrl = useLogoutUrl();
 
   return (
     <>
@@ -66,13 +68,15 @@ const UserMenu = () => {
               My Secrets
             </Menu.Item>
           )}
-          <Menu.Item
-            component="a"
-            href="https://auth.viscon-hackathon.ch"
-            leftSection={<IconLogout {...iconProps} />}
-          >
-            Logout
-          </Menu.Item>
+          {logoutUrl && (
+            <Menu.Item
+              component="a"
+              href={logoutUrl}
+              leftSection={<IconLogout {...iconProps} />}
+            >
+              Logout
+            </Menu.Item>
+          )}
         </Menu.Dropdown>
       </Menu>
       <UserSecretsModal

@@ -14,6 +14,7 @@ import type {
   Attempt,
   AttemptForCreate,
   AttemptForUpdate,
+  ClientConfig,
   Cooldown,
   CreateTeamAPIKey,
   CreateTechnicalQuestionDTO,
@@ -680,6 +681,132 @@ export const useUpdateAppointment = <TError = PublicError, TContext = unknown>(
 > => {
   return useMutation(getUpdateAppointmentMutationOptions(options), queryClient);
 };
+
+export const getConfig = (
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<ClientConfig>(
+    { url: `/api/config`, method: "GET", signal },
+    options,
+  );
+};
+
+export const getGetConfigQueryKey = () => {
+  return [`/api/config`] as const;
+};
+
+export const getGetConfigQueryOptions = <
+  TData = Awaited<ReturnType<typeof getConfig>>,
+  TError = PublicError,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<Awaited<ReturnType<typeof getConfig>>, TError, TData>
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetConfigQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getConfig>>> = ({
+    signal,
+  }) => getConfig(requestOptions, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getConfig>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetConfigQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getConfig>>
+>;
+export type GetConfigQueryError = PublicError;
+
+export function useGetConfig<
+  TData = Awaited<ReturnType<typeof getConfig>>,
+  TError = PublicError,
+>(
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getConfig>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getConfig>>,
+          TError,
+          Awaited<ReturnType<typeof getConfig>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetConfig<
+  TData = Awaited<ReturnType<typeof getConfig>>,
+  TError = PublicError,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getConfig>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getConfig>>,
+          TError,
+          Awaited<ReturnType<typeof getConfig>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetConfig<
+  TData = Awaited<ReturnType<typeof getConfig>>,
+  TError = PublicError,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getConfig>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetConfig<
+  TData = Awaited<ReturnType<typeof getConfig>>,
+  TError = PublicError,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getConfig>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetConfigQueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
 
 export const getEvents = (
   options?: SecondParameter<typeof customInstance>,

@@ -175,6 +175,30 @@
         }
       }
     },
+    "/api/config": {
+      "get": {
+        "tags": ["crate::routers::config"],
+        "operationId": "get_config",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ClientConfig" }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/events": {
       "get": {
         "tags": ["crate::routers::events"],
@@ -3448,6 +3472,10 @@
       "BlogSectionLayout": {
         "type": "string",
         "enum": ["ImageTop", "ImageBottom", "ImageLeft", "ImageRight"]
+      },
+      "ClientConfig": {
+        "type": "object",
+        "properties": { "logout_url": { "type": "string", "nullable": true } }
       },
       "Cooldown": {
         "type": "object",

@@ -6,6 +6,7 @@ import UserMenu from "./UserMenu";
 import { useGetMe } from "@/api/gen";
 import UserSecretsModal from "@/components/secrets/UserSecretsModal";
 import { useDiscord } from "@/hooks/useDiscord";
+import { useLogoutUrl } from "@/hooks/useLogoutUrl";
 import { useMySecrets } from "@/hooks/useMySecrets";
 import { useResolveParams } from "@/hooks/useResolveParams";
 import { badgeProps, containerProps } from "@/styles/common";
@@ -40,6 +41,7 @@ const Navbar = () => {
   const { discordAuthUrl } = useDiscord();
   const mySecrets = useMySecrets();
   const [secretsOpened, secretsHandles] = useDisclosure(false);
+  const logoutUrl = useLogoutUrl();
 
   const tabs = [
     {
@@ -181,13 +183,12 @@ const Navbar = () => {
                   My Secrets
                 </UnstyledButton>
               )}
-              <Link
-                href="https://auth.viscon-hackathon.ch"
-                referrerPolicy="no-referrer"
-                className={cx(classes.mobileLink)}
-              >
-                Logout
-              </Link>
+              {logoutUrl && (
+                // plain anchor: the logout URL is not a Next.js route and must not be prefetched
+                <a href={logoutUrl} className={cx(classes.mobileLink)}>
+                  Logout
+                </a>
+              )}
               <Divider my="sm" />
               <Box px="md">
                 <Text size="sm" c="dimmed">

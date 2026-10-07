@@ -2,10 +2,12 @@
 
 import { useGetEvents, useGetEventsRoles } from "@/api/gen";
 import EventCard from "@/components/event/EventCard";
-import { cardProps, skeletonProps } from "@/styles/common";
+import { useLogoutUrl } from "@/hooks/useLogoutUrl";
+import { cardProps, iconProps, skeletonProps } from "@/styles/common";
 
 import {
   Box,
+  Button,
   Card,
   Center,
   Container,
@@ -17,9 +19,12 @@ import {
   Title,
 } from "@mantine/core";
 
+import { IconLogout } from "@tabler/icons-react";
+
 const Home = () => {
   const { data: events } = useGetEvents();
   const { data: eventRoles } = useGetEventsRoles();
+  const logoutUrl = useLogoutUrl();
 
   const visibleEventIds = events?.map((event) => event.id);
   const affiliatedEventIds = Object.keys(eventRoles || {});
@@ -73,6 +78,20 @@ const Home = () => {
             <Skeleton {...skeletonProps} h={58} />
             <Skeleton {...skeletonProps} h={58} />
           </>
+        )}
+        {logoutUrl && (
+          <Center mt="md">
+            <Button
+              component="a"
+              href={logoutUrl}
+              variant="subtle"
+              color="gray"
+              size="compact-sm"
+              leftSection={<IconLogout {...iconProps} />}
+            >
+              Logout
+            </Button>
+          </Center>
         )}
       </Stack>
     </Container>
