@@ -9,29 +9,31 @@ import { useState } from "react";
 
 import { Button, Group, Stack, Textarea, TextareaProps } from "@mantine/core";
 
-type DocumentationContentControlsProps = {
+type EventContentControlsProps = {
   event: Event;
+  field: "welcome_content" | "documentation_content";
+  label: string;
   refetch?: () => void;
 };
 
-const DocumentationContentControls = ({
+const EventContentControls = ({
   event,
+  field,
+  label,
   refetch,
-}: DocumentationContentControlsProps) => {
-  const [localContent, setLocalContent] = useState(
-    event.documentation_content || "",
-  );
+}: EventContentControlsProps) => {
+  const [localContent, setLocalContent] = useState(event[field] || "");
 
   const updateEventMutation = useUpdateEvent();
 
-  const hasChanges = localContent !== (event.documentation_content ?? "");
+  const hasChanges = localContent !== (event[field] ?? "");
   useUnsavedChanges(hasChanges);
 
   const handleSave = async () => {
     await updateEventMutation.mutateAsync({
       eventId: event.id,
       data: {
-        documentation_content: localContent,
+        [field]: localContent,
       },
     });
 
@@ -44,8 +46,13 @@ const DocumentationContentControls = ({
         {...(textareaProps as TextareaProps)}
         value={localContent}
         onChange={(e) => setLocalContent(e.currentTarget.value)}
-        label="Documentation Content"
-        description="Supports Markdown. Concurrent editing causes DATA LOSS."
+        label={label}
+        description={
+          <>
+            Supports Markdown and HTML. Concurrent editing causes{" "}
+            <strong>data loss</strong>.
+          </>
+        }
       />
       <Group>
         <Button
@@ -56,9 +63,9 @@ const DocumentationContentControls = ({
           Save
         </Button>
       </Group>
-      <MarkdownCard trusted content={localContent} />
+      <MarkdownCard trusted content={localContent} allowHtml />
     </Stack>
   );
 };
 
-export default DocumentationContentControls;
+export default EventContentControls;

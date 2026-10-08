@@ -2,13 +2,11 @@
 
 import PageSkeleton from "@/components/PageSkeleton";
 import DiscordControls from "@/components/admin/DiscordControls";
-import DocumentationContentControls from "@/components/admin/DocumentationContentControls";
 import EventAffiliatesTable from "@/components/admin/EventAffiliatesTable";
+import EventContentTab from "@/components/admin/EventContentTab";
 import EventSettings from "@/components/admin/EventSettings";
-import InvitationControls from "@/components/admin/InvitationControls";
 import RankingTab from "@/components/admin/RankingTab";
 import TeamsTable from "@/components/admin/TeamsTable";
-import WelcomeContentControls from "@/components/admin/WelcomeContentControls";
 import SecretsTab from "@/components/admin/secrets/SecretsTab";
 import { useResolveParams } from "@/hooks/useResolveParams";
 import { confirmDiscard } from "@/hooks/useUnsavedChanges";
@@ -16,11 +14,11 @@ import { iconProps, pageTabsProps, tabsPanelProps } from "@/styles/common";
 
 import { useEffect, useState } from "react";
 
-import { Stack, Tabs } from "@mantine/core";
+import { Tabs } from "@mantine/core";
 
 import {
-  IconAlignJustified,
   IconBrandDiscord,
+  IconFileText,
   IconKey,
   IconSettings,
   IconShieldHalf,
@@ -40,8 +38,7 @@ const Admin = () => {
       "teams",
       "secrets",
       "ranking",
-      "welcome",
-      "documentation",
+      "content",
       "discord",
     ];
     if (validTabs.includes(hash)) {
@@ -84,17 +81,8 @@ const Admin = () => {
         <Tabs.Tab value="ranking" leftSection={<IconTrophy {...iconProps} />}>
           Ranking
         </Tabs.Tab>
-        <Tabs.Tab
-          value="welcome"
-          leftSection={<IconAlignJustified {...iconProps} />}
-        >
-          Welcome Content
-        </Tabs.Tab>
-        <Tabs.Tab
-          value="documentation"
-          leftSection={<IconAlignJustified {...iconProps} />}
-        >
-          Documentation Content
+        <Tabs.Tab value="content" leftSection={<IconFileText {...iconProps} />}>
+          Content
         </Tabs.Tab>
         <Tabs.Tab
           value="discord"
@@ -109,10 +97,7 @@ const Admin = () => {
       </Tabs.Panel>
 
       <Tabs.Panel {...tabsPanelProps} value="roles">
-        <Stack>
-          <EventAffiliatesTable event={event} />
-          <InvitationControls event={event} />
-        </Stack>
+        <EventAffiliatesTable event={event} />
       </Tabs.Panel>
 
       <Tabs.Panel {...tabsPanelProps} value="teams">
@@ -127,12 +112,8 @@ const Admin = () => {
         <RankingTab eventId={event.id} />
       </Tabs.Panel>
 
-      <Tabs.Panel {...tabsPanelProps} value="welcome">
-        <WelcomeContentControls event={event} refetch={refetchEvent} />
-      </Tabs.Panel>
-
-      <Tabs.Panel {...tabsPanelProps} value="documentation">
-        <DocumentationContentControls event={event} refetch={refetchEvent} />
+      <Tabs.Panel {...tabsPanelProps} value="content">
+        <EventContentTab event={event} refetch={refetchEvent} />
       </Tabs.Panel>
 
       <Tabs.Panel {...tabsPanelProps} value="discord">

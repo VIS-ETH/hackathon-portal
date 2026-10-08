@@ -1,13 +1,15 @@
-import IconTextGroup from "../IconTextGroup";
 import NoEntriesTr from "../NoEntriesTr";
 import EventAffiliatesTableRow from "./EventAffiliatesTableRow";
+import InvitationControls from "./InvitationControls";
 
 import { useGetEventAffiliates } from "@/api/gen";
 import { Event, EventRole } from "@/api/gen/schemas";
 import {
+  alertProps,
   cardProps,
   cardSectionProps,
   iconProps,
+  largeIconProps,
   segmentedControlProps,
   toolbarButtonProps,
 } from "@/styles/common";
@@ -15,16 +17,18 @@ import {
 import { useState } from "react";
 
 import {
+  Alert,
   Button,
   Card,
   Checkbox,
   Group,
   SegmentedControl,
+  Stack,
   Table,
   Text,
 } from "@mantine/core";
 
-import { IconAlertTriangle, IconRefresh } from "@tabler/icons-react";
+import { IconAlertCircle, IconRefresh } from "@tabler/icons-react";
 
 type EventAffiliatesTableProps = {
   event: Event;
@@ -57,70 +61,80 @@ const EventAffiliatesTable = ({ event }: EventAffiliatesTableProps) => {
   });
 
   return (
-    <Card {...cardProps}>
-      <Card.Section {...cardSectionProps}>
-        <IconTextGroup Icon={IconAlertTriangle} iconProps={{ color: "red" }} lg>
-          <Text c="red" fw={600}>
-            All changes are APPLIED IMMEDIATELY.
-          </Text>
-        </IconTextGroup>
-      </Card.Section>
-      <Card.Section {...cardSectionProps}>
-        <Group>
-          <Button
-            {...toolbarButtonProps}
-            leftSection={<IconRefresh {...iconProps} />}
-            onClick={() => {
-              refetchAffiliates();
-            }}
-          >
-            Refresh
-          </Button>
-          <SegmentedControl
-            {...segmentedControlProps}
-            data={roleFilterTabs}
-            value={roleFilterValue}
-            onChange={(value) =>
-              setRoleFilter(value === "All" ? undefined : (value as EventRole))
-            }
-          />
-          <Checkbox
-            checked={dangerous}
-            onChange={(event) => setDangerous(event.currentTarget.checked)}
-            label="Accept dangerous changes"
-          />
-        </Group>
-      </Card.Section>
-      <Card.Section>
-        <Table.ScrollContainer minWidth={750}>
-          <Table striped layout="fixed">
-            <Table.Thead>
-              <Table.Tr>
-                <Table.Th>Name</Table.Th>
-                {Object.values(EventRole).map((role) => (
-                  <Table.Th key={role}>{role}</Table.Th>
-                ))}
-              </Table.Tr>
-            </Table.Thead>
-            <Table.Tbody>
-              {filteredAffiliates.length ? (
-                filteredAffiliates.map((affiliate) => (
-                  <EventAffiliatesTableRow
-                    key={affiliate.id}
-                    event={event}
-                    affiliate={affiliate}
-                    dangerous={dangerous}
-                    refetch={refetchAffiliates}
-                  />
-                ))
-              ) : (
-                <NoEntriesTr colSpan={Object.values(EventRole).length + 1} />
-              )}
-            </Table.Tbody>
-          </Table>
-        </Table.ScrollContainer>
-      </Card.Section>
-    </Card>
+    <Stack>
+      <Alert
+        {...alertProps}
+        icon={<IconAlertCircle {...largeIconProps} />}
+        color="red"
+        title="Role changes apply immediately"
+      >
+        <Text>
+          Ticking or unticking a role saves it right away. Giving or taking the
+          admin role and removing someone&apos;s last role ask for confirmation
+          first, unless <strong>Accept dangerous changes</strong> is ticked.
+        </Text>
+      </Alert>
+      <InvitationControls event={event} onInvite={refetchAffiliates} />
+      <Card {...cardProps}>
+        <Card.Section {...cardSectionProps}>
+          <Group>
+            <Button
+              {...toolbarButtonProps}
+              leftSection={<IconRefresh {...iconProps} />}
+              onClick={() => {
+                refetchAffiliates();
+              }}
+            >
+              Refresh
+            </Button>
+            <SegmentedControl
+              {...segmentedControlProps}
+              data={roleFilterTabs}
+              value={roleFilterValue}
+              onChange={(value) =>
+                setRoleFilter(
+                  value === "All" ? undefined : (value as EventRole),
+                )
+              }
+            />
+            <Checkbox
+              checked={dangerous}
+              onChange={(event) => setDangerous(event.currentTarget.checked)}
+              label="Accept dangerous changes"
+            />
+          </Group>
+        </Card.Section>
+        <Card.Section>
+          <Table.ScrollContainer minWidth={750}>
+            <Table striped layout="fixed" horizontalSpacing="md">
+              <Table.Thead>
+                <Table.Tr>
+                  <Table.Th>Name</Table.Th>
+                  {Object.values(EventRole).map((role) => (
+                    <Table.Th key={role}>{role}</Table.Th>
+                  ))}
+                </Table.Tr>
+              </Table.Thead>
+              <Table.Tbody>
+                {filteredAffiliates.length ? (
+                  filteredAffiliates.map((affiliate) => (
+                    <EventAffiliatesTableRow
+                      key={affiliate.id}
+                      event={event}
+                      affiliate={affiliate}
+                      dangerous={dangerous}
+                      refetch={refetchAffiliates}
+                    />
+                  ))
+                ) : (
+                  <NoEntriesTr colSpan={Object.values(EventRole).length + 1} />
+                )}
+              </Table.Tbody>
+            </Table>
+          </Table.ScrollContainer>
+        </Card.Section>
+      </Card>
+    </Stack>
   );
 };
 

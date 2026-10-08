@@ -9,14 +9,24 @@ import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import {
   cardHeaderTextProps,
   cardProps,
+  codeInputProps,
+  codeTextareaProps,
+  iconProps,
   inputProps,
   primaryButtonProps,
 } from "@/styles/common";
+import {
+  fromUtcDate,
+  modifiedFields,
+  modifiedValues,
+  toUtcDate,
+} from "@/utils/form";
 
 import { useEffect } from "react";
 
 import {
   Anchor,
+  Badge,
   Button,
   Card,
   Checkbox,
@@ -33,12 +43,14 @@ import {
   TextInputProps,
   Textarea,
   TextareaProps,
+  Tooltip,
+  UnstyledButton,
 } from "@mantine/core";
 
 import { DateTimePicker, DateTimePickerProps } from "@mantine/dates";
-import { useForm } from "@mantine/form";
+import { isInRange, isNotEmpty, useForm } from "@mantine/form";
 
-import { produce } from "immer";
+import { IconArrowBackUp } from "@tabler/icons-react";
 import { stringify } from "yaml";
 
 type EventSettingsProps = {
@@ -46,105 +58,121 @@ type EventSettingsProps = {
   refetch?: () => void;
 };
 
+type ModifiedBadgeProps = {
+  label: string;
+  onReset: () => void;
+};
+
+// Marks a modified field. It sits inside the field's label, so the click must
+// not reach the label.
+const ModifiedBadge = ({ label, onReset }: ModifiedBadgeProps) => (
+  <Tooltip label="Reset to the saved value">
+    <UnstyledButton
+      aria-label={`Reset ${label}`}
+      display="flex"
+      onClick={(event) => {
+        event.preventDefault();
+        onReset();
+      }}
+    >
+      <Badge
+        component="span"
+        size="xs"
+        color="yellow"
+        variant="light"
+        rightSection={<IconArrowBackUp {...iconProps} size={10} />}
+      >
+        Modified
+      </Badge>
+    </UnstyledButton>
+  </Tooltip>
+);
+
+const atLeast = (min: number) => isInRange({ min }, `Must be at least ${min}`);
+
+// Initial values in the format the inputs emit, so that untouched fields
+// aren't modified.
+const toFormValues = (event: Event): EventForUpdate => ({
+  name: event.name,
+  start: fromUtcDate(event.start),
+  end: fromUtcDate(event.end),
+  visibility: event.visibility,
+  phase: event.phase,
+  max_team_size: event.max_team_size,
+  sidequest_cooldown: event.sidequest_cooldown,
+  max_teams_per_project: event.max_teams_per_project,
+  master_ai_api_key: "",
+  blog_max_sections: event.blog_max_sections,
+  blog_max_images: event.blog_max_images,
+  blog_max_characters: event.blog_max_characters,
+  blog_max_image_size_mb: event.blog_max_image_size_mb,
+  managed_address_template: event.managed_address_template ?? "",
+  direct_address_template: event.direct_address_template ?? "",
+  private_address_template: event.private_address_template ?? "",
+  ssh_config_template: event.ssh_config_template ?? "",
+  read_only: event.read_only,
+  projects_visible: event.projects_visible,
+  project_assignments_visible: event.project_assignments_visible,
+  finalists_visible: event.finalists_visible,
+  public_vote_open: event.public_vote_open,
+  jury_rating_open: event.jury_rating_open,
+  feedback_visible: event.feedback_visible,
+});
+
 const EventSettings = ({ event, refetch }: EventSettingsProps) => {
   const form = useForm<EventForUpdate>({
     mode: "controlled",
-    transformValues: (values) =>
-      produce(values, (draft) => {
-        // TODO: reconsider the correctness of this approach
-
-        if (!draft.name) {
-          delete draft.name;
-        }
-
-        if (!draft.start) {
-          delete draft.start;
-        }
-
-        if (!draft.end) {
-          delete draft.end;
-        }
-
-        if (!draft.visibility) {
-          delete draft.visibility;
-        }
-
-        if (!draft.phase) {
-          delete draft.phase;
-        }
-
-        if (!draft.max_team_size && draft.max_team_size !== 0) {
-          delete draft.max_team_size;
-        }
-
-        if (!draft.max_teams_per_project && draft.max_teams_per_project !== 0) {
-          delete draft.max_teams_per_project;
-        }
-
-        if (!draft.sidequest_cooldown && draft.sidequest_cooldown !== 0) {
-          delete draft.sidequest_cooldown;
-        }
-
-        if (!draft.blog_max_sections && draft.blog_max_sections !== 0) {
-          delete draft.blog_max_sections;
-        }
-
-        if (!draft.blog_max_images && draft.blog_max_images !== 0) {
-          delete draft.blog_max_images;
-        }
-
-        if (!draft.blog_max_characters && draft.blog_max_characters !== 0) {
-          delete draft.blog_max_characters;
-        }
-
-        if (
-          !draft.blog_max_image_size_mb &&
-          draft.blog_max_image_size_mb !== 0
-        ) {
-          delete draft.blog_max_image_size_mb;
-        }
-
-        if (draft.read_only == event.read_only) {
-          delete draft.read_only;
-        }
-
-        if (draft.projects_visible == event.projects_visible) {
-          delete draft.projects_visible;
-        }
-
-        if (
-          draft.project_assignments_visible == event.project_assignments_visible
-        ) {
-          delete draft.project_assignments_visible;
-        }
-
-        if (draft.feedback_visible == event.feedback_visible) {
-          delete draft.feedback_visible;
-        }
-
-        return draft;
-      }),
+    initialValues: toFormValues(event),
+    validateInputOnChange: true,
+    validate: {
+      name: isNotEmpty("Name must not be empty"),
+      max_team_size: atLeast(1),
+      sidequest_cooldown: atLeast(0),
+      max_teams_per_project: atLeast(0),
+      blog_max_sections: atLeast(0),
+      blog_max_images: atLeast(0),
+      blog_max_characters: atLeast(0),
+      blog_max_image_size_mb: atLeast(1),
+    },
+    transformValues: (values) => ({
+      ...values,
+      start: values.start && toUtcDate(values.start),
+      end: values.end && toUtcDate(values.end),
+    }),
   });
 
   const updateEventMutation = useUpdateEvent();
 
   useEffect(() => {
-    const flags = {
-      read_only: event.read_only,
-      projects_visible: event.projects_visible,
-      project_assignments_visible: event.project_assignments_visible,
-      finalists_visible: event.finalists_visible,
-      public_vote_open: event.public_vote_open,
-      jury_rating_open: event.jury_rating_open,
-      feedback_visible: event.feedback_visible,
-    };
-    form.setInitialValues(flags);
-    form.setValues(flags);
-  }, [form.setInitialValues, form.setValues, event]);
+    form.setInitialValues(toFormValues(event));
+    form.reset();
+  }, [form.setInitialValues, form.reset, event]);
 
   useUnsavedChanges(form.isDirty());
 
-  const handleSubmit = async (data: EventForUpdate) => {
+  const modifiedCount = modifiedFields(form).length;
+
+  const modifiedBadge = (label: string, path: keyof EventForUpdate) =>
+    form.isDirty(path) && (
+      <ModifiedBadge
+        label={label}
+        // resetField would keep the field dirty
+        onReset={() => form.setFieldValue(path, form.getInitialValues()[path])}
+      />
+    );
+
+  const fieldLabel = (label: string, path: keyof EventForUpdate) => ({
+    label: (
+      <Group component="span" justify="space-between" wrap="nowrap">
+        {label}
+        {modifiedBadge(label, path)}
+      </Group>
+    ),
+    labelProps: { w: "100%" },
+  });
+
+  const handleSubmit = async (values: EventForUpdate) => {
+    const data = modifiedValues(form, values);
     const dataToPrint = { ...data };
     if (dataToPrint.master_ai_api_key) {
       dataToPrint.master_ai_api_key =
@@ -159,11 +187,12 @@ const EventSettings = ({ event, refetch }: EventSettingsProps) => {
       return;
     }
 
-    await updateEventMutation.mutateAsync({
+    const updatedEvent = await updateEventMutation.mutateAsync({
       eventId: event.id,
       data,
     });
 
+    form.setInitialValues(toFormValues(updatedEvent));
     form.reset();
     refetch?.();
   };
@@ -177,47 +206,39 @@ const EventSettings = ({ event, refetch }: EventSettingsProps) => {
               {...(inputProps as TextInputProps)}
               {...form.getInputProps("name")}
               key={form.key("name")}
-              label="Name"
-              placeholder={event.name}
+              {...fieldLabel("Name", "name")}
             />
             <DateTimePicker
               {...(inputProps as DateTimePickerProps)}
               {...form.getInputProps("start")}
               key={form.key("start")}
-              label="Start"
-              placeholder={event.start + " UTC"}
+              {...fieldLabel("Start", "start")}
             />
             <DateTimePicker
               {...(inputProps as DateTimePickerProps)}
               {...form.getInputProps("end")}
               key={form.key("end")}
-              label="End"
-              placeholder={event.end + " UTC"}
+              {...fieldLabel("End", "end")}
             />
             <Select
               {...(inputProps as SelectProps)}
               {...form.getInputProps("visibility")}
               key={form.key("visibility")}
               data={Object.values(EventVisibility)}
-              label="Visibility"
-              placeholder={event.visibility}
-              clearable
+              {...fieldLabel("Visibility", "visibility")}
             />
             <Select
               {...(inputProps as SelectProps)}
               {...form.getInputProps("phase")}
               key={form.key("phase")}
               data={Object.values(EventPhase)}
-              label="Phase"
-              placeholder={event.phase}
-              clearable
+              {...fieldLabel("Phase", "phase")}
             />
             <NumberInput
               {...(inputProps as NumberInputProps)}
               {...form.getInputProps("max_team_size")}
               key={form.key("max_team_size")}
-              label="Max team size"
-              placeholder={event.max_team_size.toString()}
+              {...fieldLabel("Max team size", "max_team_size")}
               min={1}
               step={1}
             />
@@ -225,8 +246,10 @@ const EventSettings = ({ event, refetch }: EventSettingsProps) => {
               {...(inputProps as NumberInputProps)}
               {...form.getInputProps("sidequest_cooldown")}
               key={form.key("sidequest_cooldown")}
-              label="Sidequest cooldown (minutes)"
-              placeholder={event.sidequest_cooldown.toString()}
+              {...fieldLabel(
+                "Sidequest cooldown (minutes)",
+                "sidequest_cooldown",
+              )}
               min={0}
               step={1}
             />
@@ -234,8 +257,7 @@ const EventSettings = ({ event, refetch }: EventSettingsProps) => {
               {...(inputProps as NumberInputProps)}
               {...form.getInputProps("max_teams_per_project")}
               key={form.key("max_teams_per_project")}
-              label="Max team per project"
-              placeholder={event.max_teams_per_project.toString()}
+              {...fieldLabel("Max teams per project", "max_teams_per_project")}
               min={0}
               step={1}
             />
@@ -243,7 +265,7 @@ const EventSettings = ({ event, refetch }: EventSettingsProps) => {
               {...(inputProps as TextInputProps)}
               {...form.getInputProps("master_ai_api_key")}
               key={form.key("master_ai_api_key")}
-              label="Master AI API Key"
+              {...fieldLabel("Master AI API key", "master_ai_api_key")}
               type="password"
             />
           </SimpleGrid>
@@ -253,8 +275,7 @@ const EventSettings = ({ event, refetch }: EventSettingsProps) => {
               {...(inputProps as NumberInputProps)}
               {...form.getInputProps("blog_max_sections")}
               key={form.key("blog_max_sections")}
-              label="Max sections per blog"
-              placeholder={event.blog_max_sections.toString()}
+              {...fieldLabel("Max sections per blog", "blog_max_sections")}
               min={0}
               step={1}
             />
@@ -262,8 +283,7 @@ const EventSettings = ({ event, refetch }: EventSettingsProps) => {
               {...(inputProps as NumberInputProps)}
               {...form.getInputProps("blog_max_images")}
               key={form.key("blog_max_images")}
-              label="Max images per blog"
-              placeholder={event.blog_max_images.toString()}
+              {...fieldLabel("Max images per blog", "blog_max_images")}
               min={0}
               step={1}
             />
@@ -271,8 +291,7 @@ const EventSettings = ({ event, refetch }: EventSettingsProps) => {
               {...(inputProps as NumberInputProps)}
               {...form.getInputProps("blog_max_characters")}
               key={form.key("blog_max_characters")}
-              label="Max characters per blog"
-              placeholder={event.blog_max_characters.toString()}
+              {...fieldLabel("Max characters per blog", "blog_max_characters")}
               min={0}
               step={1}
             />
@@ -280,8 +299,10 @@ const EventSettings = ({ event, refetch }: EventSettingsProps) => {
               {...(inputProps as NumberInputProps)}
               {...form.getInputProps("blog_max_image_size_mb")}
               key={form.key("blog_max_image_size_mb")}
-              label="Max blog image size (MB)"
-              placeholder={event.blog_max_image_size_mb.toString()}
+              {...fieldLabel(
+                "Max blog image size (MB)",
+                "blog_max_image_size_mb",
+              )}
               min={1}
               step={1}
             />
@@ -289,86 +310,139 @@ const EventSettings = ({ event, refetch }: EventSettingsProps) => {
           <Divider label="Infrastructure" labelPosition="left" />
           <SimpleGrid cols={{ xs: 1, md: 3 }}>
             <TextInput
-              {...(inputProps as TextInputProps)}
+              {...(codeInputProps as TextInputProps)}
               {...form.getInputProps("managed_address_template")}
               key={form.key("managed_address_template")}
-              label="Managed Address Template"
-              placeholder={event.managed_address_template || "N/A"}
+              {...fieldLabel(
+                "Managed address template",
+                "managed_address_template",
+              )}
             />
             <TextInput
-              {...(inputProps as TextInputProps)}
+              {...(codeInputProps as TextInputProps)}
               {...form.getInputProps("direct_address_template")}
               key={form.key("direct_address_template")}
-              label="Direct Address Template"
-              placeholder={event.direct_address_template || "N/A"}
+              {...fieldLabel(
+                "Direct address template",
+                "direct_address_template",
+              )}
             />
             <TextInput
-              {...(inputProps as TextInputProps)}
+              {...(codeInputProps as TextInputProps)}
               {...form.getInputProps("private_address_template")}
               key={form.key("private_address_template")}
-              label="Private Address Template"
-              placeholder={event.private_address_template || "N/A"}
+              {...fieldLabel(
+                "Private address template",
+                "private_address_template",
+              )}
             />
             <Textarea
-              {...(inputProps as TextareaProps)}
+              {...(codeTextareaProps as TextareaProps)}
               {...form.getInputProps("ssh_config_template")}
               key={form.key("ssh_config_template")}
-              label="SSH Config Template"
-              placeholder={event.ssh_config_template || "N/A"}
+              {...fieldLabel("SSH config template", "ssh_config_template")}
+              minRows={3}
+              wrap="off"
             />
           </SimpleGrid>
           <Divider label="Permissions" labelPosition="left" />
           <SimpleGrid cols={{ xs: 1, md: 3 }}>
-            <Checkbox
-              {...form.getInputProps("read_only", { type: "checkbox" })}
-              key={form.key("read_only")}
-              label="Read only"
-            />
-            <Checkbox
-              {...form.getInputProps("projects_visible", { type: "checkbox" })}
-              key={form.key("projects_visible")}
-              label="Projects visible"
-            />
-            <Checkbox
-              {...form.getInputProps("project_assignments_visible", {
-                type: "checkbox",
-              })}
-              key={form.key("project_assignments_visible")}
-              label="Project assignments visible"
-            />
-            <Checkbox
-              {...form.getInputProps("finalists_visible", {
-                type: "checkbox",
-              })}
-              key={form.key("finalists_visible")}
-              label="Finalists visible"
-            />
-            <Checkbox
-              {...form.getInputProps("public_vote_open", {
-                type: "checkbox",
-              })}
-              key={form.key("public_vote_open")}
-              label="Public vote open"
-            />
-            <Checkbox
-              {...form.getInputProps("jury_rating_open", {
-                type: "checkbox",
-              })}
-              key={form.key("jury_rating_open")}
-              label="Jury rating open"
-            />
-            <Checkbox
-              {...form.getInputProps("feedback_visible", {
-                type: "checkbox",
-              })}
-              key={form.key("feedback_visible")}
-              label="Feedback visible"
-            />
+            <Group justify="space-between" wrap="nowrap">
+              <Checkbox
+                {...form.getInputProps("read_only", { type: "checkbox" })}
+                key={form.key("read_only")}
+                label="Read only"
+              />
+              {modifiedBadge("Read only", "read_only")}
+            </Group>
+            <Group justify="space-between" wrap="nowrap">
+              <Checkbox
+                {...form.getInputProps("projects_visible", {
+                  type: "checkbox",
+                })}
+                key={form.key("projects_visible")}
+                label="Projects visible"
+              />
+              {modifiedBadge("Projects visible", "projects_visible")}
+            </Group>
+            <Group justify="space-between" wrap="nowrap">
+              <Checkbox
+                {...form.getInputProps("project_assignments_visible", {
+                  type: "checkbox",
+                })}
+                key={form.key("project_assignments_visible")}
+                label="Project assignments visible"
+              />
+              {modifiedBadge(
+                "Project assignments visible",
+                "project_assignments_visible",
+              )}
+            </Group>
+            <Group justify="space-between" wrap="nowrap">
+              <Checkbox
+                {...form.getInputProps("finalists_visible", {
+                  type: "checkbox",
+                })}
+                key={form.key("finalists_visible")}
+                label="Finalists visible"
+              />
+              {modifiedBadge("Finalists visible", "finalists_visible")}
+            </Group>
+            <Group justify="space-between" wrap="nowrap">
+              <Checkbox
+                {...form.getInputProps("public_vote_open", {
+                  type: "checkbox",
+                })}
+                key={form.key("public_vote_open")}
+                label="Public vote open"
+              />
+              {modifiedBadge("Public vote open", "public_vote_open")}
+            </Group>
+            <Group justify="space-between" wrap="nowrap">
+              <Checkbox
+                {...form.getInputProps("jury_rating_open", {
+                  type: "checkbox",
+                })}
+                key={form.key("jury_rating_open")}
+                label="Jury rating open"
+              />
+              {modifiedBadge("Jury rating open", "jury_rating_open")}
+            </Group>
+            <Group justify="space-between" wrap="nowrap">
+              <Checkbox
+                {...form.getInputProps("feedback_visible", {
+                  type: "checkbox",
+                })}
+                key={form.key("feedback_visible")}
+                label="Feedback visible"
+              />
+              {modifiedBadge("Feedback visible", "feedback_visible")}
+            </Group>
           </SimpleGrid>
-          <Group align="end">
-            <Button {...primaryButtonProps} type="submit">
-              Update
-            </Button>
+          <Group justify="flex-end" gap="xs">
+            <Text c="dimmed" size="sm">
+              {modifiedCount === 0
+                ? "No changes"
+                : `${modifiedCount} ${modifiedCount === 1 ? "field" : "fields"} modified`}
+            </Text>
+            <Group gap="xs" wrap="nowrap">
+              <Button
+                {...primaryButtonProps}
+                variant="default"
+                disabled={modifiedCount === 0}
+                onClick={form.reset}
+              >
+                Discard Changes
+              </Button>
+              <Button
+                {...primaryButtonProps}
+                type="submit"
+                disabled={modifiedCount === 0}
+                loading={updateEventMutation.isPending}
+              >
+                Update
+              </Button>
+            </Group>
           </Group>
         </Stack>
       </form>

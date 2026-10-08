@@ -1,8 +1,8 @@
 import { Team } from "@/api/gen/schemas";
 import {
-  inputProps,
+  codeInputProps,
+  codeTextareaProps,
   modalProps,
-  textareaProps,
   tooltipProps,
 } from "@/styles/common";
 
@@ -14,6 +14,7 @@ import {
   TextInput,
   TextInputProps,
   Textarea,
+  TextareaProps,
   Tooltip,
 } from "@mantine/core";
 
@@ -34,7 +35,7 @@ const AccessDetailsModal = ({
       label="This address points to our reverse proxy, which applies security policies and then forwards traffic to your team VM. It can be used for web traffic only."
     >
       <TextInput
-        {...(inputProps as TextInputProps)}
+        {...(codeInputProps as TextInputProps)}
         size="sm"
         label="Managed Address"
         value={team.managed_address}
@@ -49,7 +50,7 @@ const AccessDetailsModal = ({
       label="This address points directly to your VM's public interface. If you expose custom services on your VM, they will be accessible via this address."
     >
       <TextInput
-        {...(inputProps as TextInputProps)}
+        {...(codeInputProps as TextInputProps)}
         size="sm"
         label="Direct Address"
         value={team.direct_address}
@@ -64,9 +65,10 @@ const AccessDetailsModal = ({
       label="This is a ready-to-use SSH configuration snippet. You can copy-paste it into your ~/.ssh/config file (or equivalent) to easily connect to your team VM using the 'ssh' command."
     >
       <Textarea
-        {...textareaProps}
+        {...(codeTextareaProps as TextareaProps)}
         size="sm"
         minRows={0}
+        wrap="off"
         label="SSH Configuration"
         value={team.ssh_config}
         readOnly

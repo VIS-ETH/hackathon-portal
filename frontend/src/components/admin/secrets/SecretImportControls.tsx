@@ -1,7 +1,11 @@
+import { fmtYamlLines } from "./fmtYaml";
+
 import { useUpdateSecretValues } from "@/api/gen";
 import { Secret, SecretScope, SecretSubject } from "@/api/gen/schemas";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import {
+  cardProps,
+  cardSectionProps,
   codeTextareaProps,
   iconProps,
   inputProps,
@@ -12,6 +16,7 @@ import { useState } from "react";
 
 import {
   Button,
+  Card,
   Group,
   Select,
   SelectProps,
@@ -20,31 +25,8 @@ import {
   TextareaProps,
 } from "@mantine/core";
 
-import { useClipboard } from "@mantine/hooks";
-
-import { IconCopy, IconPlayerPlay } from "@tabler/icons-react";
+import { IconPlayerPlay } from "@tabler/icons-react";
 import { parse } from "yaml";
-
-// Quotes keys that are not plain YAML scalars, e.g. auth ids containing an `@`.
-const fmtYamlKey = (key: string) =>
-  /^[\w.-]+$/.test(key) ? key : JSON.stringify(key);
-
-// Pads each column to its widest entry plus one space, so the values and
-// comments line up in columns that can be selected across all lines at once.
-const fmtYamlLines = (
-  rows: { key: string; value: string; comment: string }[],
-) => {
-  const keys = rows.map((row) => `${fmtYamlKey(row.key)}:`);
-  const keyWidth = Math.max(...keys.map((key) => key.length)) + 1;
-  const valueWidth = Math.max(...rows.map((row) => row.value.length)) + 1;
-
-  return rows
-    .map(
-      (row, i) =>
-        `${keys[i].padEnd(keyWidth)}${row.value.padEnd(valueWidth)}# ${row.comment}`,
-    )
-    .join("\n");
-};
 
 // Teams are matched by their index, so `team-1` works as well as `team-01`.
 const findSubject = (subjects: SecretSubject[], key: string) => {
@@ -61,8 +43,6 @@ type SecretImportControlsProps = {
   scope: SecretScope;
   secrets: Secret[];
   subjects: SecretSubject[];
-  // The subjects currently shown in the grid, which the template is made of.
-  templateSubjects: SecretSubject[];
   disabled?: boolean;
   onSecretChange: (secret: Secret) => void;
 };
@@ -71,13 +51,11 @@ const SecretImportControls = ({
   scope,
   secrets,
   subjects,
-  templateSubjects,
   disabled,
   onSecretChange,
 }: SecretImportControlsProps) => {
   const [secretId, setSecretId] = useState<string | null>(null);
   const [input, setInput] = useState("");
-  const clipboard = useClipboard();
 
   const updateSecretValuesMutation = useUpdateSecretValues();
 
@@ -86,18 +64,6 @@ const SecretImportControls = ({
   const secret = secrets.find((secret) => secret.id === secretId);
   const placeholder =
     scope === SecretScope.Team ? PLACEHOLDER_TEAM : PLACEHOLDER_USER;
-
-  const handleCopyTemplate = () => {
-    clipboard.copy(
-      fmtYamlLines(
-        templateSubjects.map((subject) => ({
-          key: subject.key,
-          value: '""',
-          comment: subject.label,
-        })),
-      ),
-    );
-  };
 
   const handleRun = async () => {
     if (!secret) {
@@ -183,52 +149,46 @@ const SecretImportControls = ({
   };
 
   return (
-    <Stack>
-      <Textarea
-        {...(codeTextareaProps as TextareaProps)}
-        value={input}
-        onChange={(event) => setInput(event.currentTarget.value)}
-        placeholder={placeholder}
-        description="Import values as YAML. Empty values are skipped."
-        disabled={disabled}
-      />
-      <Group>
-        <Select
-          {...(inputProps as SelectProps)}
-          size="sm"
-          placeholder="Secret"
-          data={secrets.map((secret) => ({
-            value: secret.id,
-            label: secret.name,
-          }))}
-          value={secretId}
-          onChange={setSecretId}
-        />
-        <Button
-          {...toolbarButtonProps}
-          leftSection={<IconPlayerPlay {...iconProps} />}
-          onClick={handleRun}
-          disabled={
-            disabled ||
-            !secret ||
-            input.trim() === "" ||
-            updateSecretValuesMutation.isPending
-          }
-        >
-          Import
-        </Button>
-        <Button
-          {...toolbarButtonProps}
-          leftSection={<IconCopy {...iconProps} />}
-          onClick={handleCopyTemplate}
-          disabled={disabled || !templateSubjects.length}
-        >
-          {clipboard.copied
-            ? "Copied"
-            : `Copy Template (${templateSubjects.length})`}
-        </Button>
-      </Group>
-    </Stack>
+    <Card {...cardProps}>
+      <Card.Section {...cardSectionProps}>
+        <Stack>
+          <Textarea
+            {...(codeTextareaProps as TextareaProps)}
+            value={input}
+            onChange={(event) => setInput(event.currentTarget.value)}
+            placeholder={placeholder}
+            description="Import values as YAML. Empty values are skipped."
+            disabled={disabled}
+          />
+          <Group justify="space-between">
+            <Select
+              {...(inputProps as SelectProps)}
+              size="sm"
+              placeholder="Secret"
+              data={secrets.map((secret) => ({
+                value: secret.id,
+                label: secret.name,
+              }))}
+              value={secretId}
+              onChange={setSecretId}
+            />
+            <Button
+              {...toolbarButtonProps}
+              leftSection={<IconPlayerPlay {...iconProps} />}
+              onClick={handleRun}
+              disabled={
+                disabled ||
+                !secret ||
+                input.trim() === "" ||
+                updateSecretValuesMutation.isPending
+              }
+            >
+              Import
+            </Button>
+          </Group>
+        </Stack>
+      </Card.Section>
+    </Card>
   );
 };
 

@@ -4,9 +4,9 @@ import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import {
   cardProps,
   cardSectionProps,
+  codeTextareaProps,
   iconProps,
   segmentedControlProps,
-  textareaProps,
   toolbarButtonProps,
 } from "@/styles/common";
 
@@ -27,9 +27,10 @@ import { IconPlayerPlay } from "@tabler/icons-react";
 
 type InvitationControlsProps = {
   event: Event;
+  onInvite?: () => void;
 };
 
-const InvitationControls = ({ event }: InvitationControlsProps) => {
+const InvitationControls = ({ event, onInvite }: InvitationControlsProps) => {
   const [input, setInput] = useState("");
   const [role, setRole] = useState<EventRole>(EventRole.Participant);
 
@@ -62,9 +63,8 @@ const InvitationControls = ({ event }: InvitationControlsProps) => {
       },
     });
 
-    alert("Users invited");
-
     setInput("");
+    onInvite?.();
   };
 
   return (
@@ -72,31 +72,32 @@ const InvitationControls = ({ event }: InvitationControlsProps) => {
       <Card.Section {...cardSectionProps}>
         <Stack>
           <Textarea
-            {...(textareaProps as TextareaProps)}
+            {...(codeTextareaProps as TextareaProps)}
             value={input}
             onChange={(event) => setInput(event.currentTarget.value)}
             description="User Auth IDs. ETH email addresses must be normalized, e.g. be of the form 'ethzusername@ethz.ch'."
             placeholder={PLACEHOLDER}
           />
-          <Group>
-            <Text>Default Role</Text>
-            <SegmentedControl
-              {...segmentedControlProps}
-              data={Object.values(EventRole)}
-              value={role}
-              onChange={(value) => setRole(value as EventRole)}
-            />
+          <Group justify="space-between">
+            <Group>
+              <Text size="sm">Default role</Text>
+              <SegmentedControl
+                {...segmentedControlProps}
+                data={Object.values(EventRole)}
+                value={role}
+                onChange={(value) => setRole(value as EventRole)}
+              />
+            </Group>
+            <Button
+              {...toolbarButtonProps}
+              leftSection={<IconPlayerPlay {...iconProps} />}
+              onClick={handleRun}
+              disabled={input.trim() === "" || inviteUsersMutation.isPending}
+            >
+              Invite Users
+            </Button>
           </Group>
         </Stack>
-      </Card.Section>
-      <Card.Section {...cardSectionProps}>
-        <Button
-          {...toolbarButtonProps}
-          leftSection={<IconPlayerPlay {...iconProps} />}
-          onClick={handleRun}
-        >
-          Invite Users
-        </Button>
       </Card.Section>
     </Card>
   );

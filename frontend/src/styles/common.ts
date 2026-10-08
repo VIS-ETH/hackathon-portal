@@ -38,6 +38,13 @@ export const textareaProps: Partial<TextareaProps> = {
 };
 
 // data-monospace is Mantine's own switch for a monospace input, as used by JsonInput
+export const codeInputProps: Partial<InputProps> & {
+  "data-monospace": boolean;
+} = {
+  ...inputProps,
+  "data-monospace": true,
+};
+
 export const codeTextareaProps: Partial<TextareaProps> & {
   "data-monospace": boolean;
 } = {
