@@ -5,9 +5,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface SecretValue {
-  /** @nullable */
-  description?: string | null;
-  name: string;
-  value: string;
+export interface SecretForUpdate {
+  /** A blank description removes the description. */
+  description: string;
 }

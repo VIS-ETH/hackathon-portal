@@ -8,6 +8,11 @@ import type { SecretScope } from "./secretScope";
 import type { SecretValues } from "./secretValues";
 
 export interface Secret {
+  /**
+   * Markdown shown to the teams or users together with their values.
+   * @nullable
+   */
+  description?: string | null;
   event_id: string;
   id: string;
   name: string;

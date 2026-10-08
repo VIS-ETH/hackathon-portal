@@ -4,11 +4,11 @@ use crate::error::{ApiJson, ApiJsonVec, PublicError};
 use crate::routers::events::models::EventIdQuery;
 use crate::ApiError;
 use axum::extract::{Path, Query, State};
-use axum::routing::{delete, get, post, put};
+use axum::routing::{delete, get, patch, post, put};
 use axum::{Json, Router};
 use hackathon_portal_services::authorization::groups::Groups;
 use hackathon_portal_services::secret::models::{
-    EventSecrets, Secret, SecretForCreate, SecretValue,
+    EventSecrets, Secret, SecretForCreate, SecretForUpdate, SecretValue,
 };
 use std::collections::HashMap;
 use uuid::Uuid;
@@ -18,6 +18,7 @@ pub fn get_router(state: &ApiState) -> Router {
         .route("/", get(get_event_secrets))
         .route("/", post(create_secret))
         .route("/me", get(get_my_secrets))
+        .route("/{secret_id}", patch(update_secret))
         .route("/{secret_id}", delete(delete_secret))
         .route("/{secret_id}/values", put(update_secret_values))
         .with_state(state.clone())
@@ -113,6 +114,36 @@ pub async fn get_my_secrets(
         .await?;
 
     Ok(Json(secrets))
+}
+
+/// Update the description of a secret, the values are left out of the response
+#[utoipa::path(
+    patch,
+    path = "/api/secrets/{secret_id}",
+    responses(
+        (status = StatusCode::OK, body = Secret),
+        (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
+    ),
+    extensions(("x-policies" = json!(["manage_event"]))),
+)]
+pub async fn update_secret(
+    ctx: Ctx,
+    State(state): State<ApiState>,
+    Path(secret_id): Path<Uuid>,
+    Json(body): Json<SecretForUpdate>,
+) -> ApiJson<Secret> {
+    let event_id = state.secret_service.get_secret_event_id(secret_id).await?;
+    let groups = Groups::from_event(ctx.roles(), event_id);
+
+    if !groups.can_manage_event() {
+        return Err(ApiError::Forbidden {
+            action: "edit this secret".to_string(),
+        });
+    }
+
+    let secret = state.secret_service.update_secret(secret_id, body).await?;
+
+    Ok(Json(secret))
 }
 
 /// Delete a secret and its values

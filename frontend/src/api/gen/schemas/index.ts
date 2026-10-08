@@ -90,6 +90,7 @@ export * from "./rankingSnapshotInfo";
 export * from "./reducedUser";
 export * from "./secret";
 export * from "./secretForCreate";
+export * from "./secretForUpdate";
 export * from "./secretScope";
 export * from "./secretSubject";
 export * from "./secretValue";

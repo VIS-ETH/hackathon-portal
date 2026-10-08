@@ -1,3 +1,4 @@
+import SecretDescriptionModal from "./SecretDescriptionModal";
 import SecretImportControls from "./SecretImportControls";
 import SecretsGridRow from "./SecretsGridRow";
 import { fmtYamlLines } from "./fmtYaml";
@@ -38,6 +39,7 @@ import { useClipboard } from "@mantine/hooks";
 
 import {
   IconCopy,
+  IconFileDescription,
   IconPlus,
   IconRefresh,
   IconTrash,
@@ -48,7 +50,7 @@ type SecretsGridProps = {
   scope: SecretScope;
   subjects: SecretSubject[];
   secrets: Secret[];
-  onSecretChange: (secret: Secret) => void;
+  onSecretChange: (secret: Pick<Secret, "id"> & Partial<Secret>) => void;
   refetch: () => Promise<unknown>;
   actions?: ReactNode;
 };
@@ -68,6 +70,7 @@ const SecretsGrid = ({
     EventRole.Participant,
   );
   const [newName, setNewName] = useState("");
+  const [describedSecret, setDescribedSecret] = useState<Secret | null>(null);
   const clipboard = useClipboard();
 
   const createSecretMutation = useCreateSecret();
@@ -222,15 +225,25 @@ const SecretsGrid = ({
                         <Text size="sm" fw={700}>
                           {secret.name}
                         </Text>
-                        <ActionIcon
-                          variant="subtle"
-                          color="red"
-                          aria-label={`Delete ${secret.name}`}
-                          onClick={() => handleDelete(secret)}
-                          disabled={deleteSecretMutation.isPending}
-                        >
-                          <IconTrash {...iconProps} />
-                        </ActionIcon>
+                        <Group gap={0} wrap="nowrap">
+                          <ActionIcon
+                            variant="subtle"
+                            color={secret.description ? undefined : "gray"}
+                            aria-label={`Edit the description of ${secret.name}`}
+                            onClick={() => setDescribedSecret(secret)}
+                          >
+                            <IconFileDescription {...iconProps} />
+                          </ActionIcon>
+                          <ActionIcon
+                            variant="subtle"
+                            color="red"
+                            aria-label={`Delete ${secret.name}`}
+                            onClick={() => handleDelete(secret)}
+                            disabled={deleteSecretMutation.isPending}
+                          >
+                            <IconTrash {...iconProps} />
+                          </ActionIcon>
+                        </Group>
                       </Group>
                     </Table.Th>
                   ))}
@@ -254,6 +267,13 @@ const SecretsGrid = ({
           </Table.ScrollContainer>
         </Card.Section>
       </Card>
+      {describedSecret && (
+        <SecretDescriptionModal
+          secret={describedSecret}
+          onSecretChange={onSecretChange}
+          onClose={() => setDescribedSecret(null)}
+        />
+      )}
     </Stack>
   );
 };

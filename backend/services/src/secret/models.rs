@@ -13,6 +13,8 @@ pub struct Secret {
     pub event_id: Uuid,
     pub scope: SecretScope,
     pub name: String,
+    /// Markdown shown to the teams or users together with their values.
+    pub description: Option<String>,
     /// Values keyed by the id of the team or user, depending on the scope.
     pub values: HashMap<Uuid, String>,
 }
@@ -22,6 +24,12 @@ pub struct SecretForCreate {
     pub event_id: Uuid,
     pub scope: SecretScope,
     pub name: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+pub struct SecretForUpdate {
+    /// A blank description removes the description.
+    pub description: String,
 }
 
 /// A team or user that secret values can be distributed to.
@@ -47,5 +55,6 @@ pub struct EventSecrets {
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
 pub struct SecretValue {
     pub name: String,
+    pub description: Option<String>,
     pub value: String,
 }

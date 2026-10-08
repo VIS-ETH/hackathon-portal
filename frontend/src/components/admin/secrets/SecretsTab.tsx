@@ -55,13 +55,15 @@ const SecretsTab = ({ event }: SecretsTabProps) => {
   // Patches a saved secret into the cache instead of refetching all secrets, so
   // only the rows whose values changed re-render.
   const handleSecretChange = useCallback(
-    (secret: Secret) => {
+    (secret: Pick<Secret, "id"> & Partial<Secret>) => {
       queryClient.setQueryData<EventSecrets>(
         getGetEventSecretsQueryKey({ event_id: event.id }),
         (old) =>
           old && {
             ...old,
-            secrets: old.secrets.map((s) => (s.id === secret.id ? secret : s)),
+            secrets: old.secrets.map((s) =>
+              s.id === secret.id ? { ...s, ...secret } : s,
+            ),
           },
       );
     },

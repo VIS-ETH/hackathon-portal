@@ -1960,6 +1960,46 @@
           }
         },
         "x-policies": ["manage_event"]
+      },
+      "patch": {
+        "tags": ["secrets"],
+        "summary": "Update the description of a secret, the values are left out of the response",
+        "operationId": "update_secret",
+        "parameters": [
+          {
+            "name": "secret_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/SecretForUpdate" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Secret" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicError" }
+              }
+            }
+          }
+        },
+        "x-policies": ["manage_event"]
       }
     },
     "/api/secrets/{secret_id}/values": {
@@ -4240,6 +4280,10 @@
         "type": "object",
         "required": ["id", "event_id", "scope", "name", "values"],
         "properties": {
+          "description": {
+            "type": ["string", "null"],
+            "description": "Markdown shown to the teams or users together with their values."
+          },
           "event_id": { "type": "string", "format": "uuid" },
           "id": { "type": "string", "format": "uuid" },
           "name": { "type": "string" },
@@ -4259,6 +4303,16 @@
           "event_id": { "type": "string", "format": "uuid" },
           "name": { "type": "string" },
           "scope": { "$ref": "#/components/schemas/SecretScope" }
+        }
+      },
+      "SecretForUpdate": {
+        "type": "object",
+        "required": ["description"],
+        "properties": {
+          "description": {
+            "type": "string",
+            "description": "A blank description removes the description."
+          }
         }
       },
       "SecretScope": { "type": "string", "enum": ["Team", "User"] },
@@ -4289,6 +4343,7 @@
         "type": "object",
         "required": ["name", "value"],
         "properties": {
+          "description": { "type": ["string", "null"] },
           "name": { "type": "string" },
           "value": { "type": "string" }
         }

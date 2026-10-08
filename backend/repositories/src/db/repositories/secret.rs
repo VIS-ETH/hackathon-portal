@@ -101,17 +101,19 @@ impl SecretRepository {
             .map_err(RepositoryError::from)
     }
 
-    /// Returns the values of the team together with the names of their secrets, ordered by name.
+    /// Returns the values of the team together with the names and descriptions of their secrets,
+    /// ordered by name.
     pub async fn fetch_all_named_values_by_team_id<C: ConnectionTrait>(
         db: &C,
         team_id: Uuid,
-    ) -> RepositoryResult<Vec<(String, Vec<u8>)>> {
+    ) -> RepositoryResult<Vec<(String, Option<String>, Vec<u8>)>> {
         team_secret::Entity::find()
             .join(JoinType::InnerJoin, team_secret::Relation::Secret.def())
             .filter(team_secret::Column::TeamId.eq(team_id))
             .order_by_asc(secret::Column::Name)
             .select_only()
             .column(secret::Column::Name)
+            .column(secret::Column::Description)
             .column(team_secret::Column::Value)
             .into_tuple()
             .all(db)
@@ -119,13 +121,13 @@ impl SecretRepository {
             .map_err(RepositoryError::from)
     }
 
-    /// Returns the values of the user in the event together with the names of their secrets,
-    /// ordered by name.
+    /// Returns the values of the user in the event together with the names and descriptions of
+    /// their secrets, ordered by name.
     pub async fn fetch_all_named_values_by_event_id_and_user_id<C: ConnectionTrait>(
         db: &C,
         event_id: Uuid,
         user_id: Uuid,
-    ) -> RepositoryResult<Vec<(String, Vec<u8>)>> {
+    ) -> RepositoryResult<Vec<(String, Option<String>, Vec<u8>)>> {
         user_secret::Entity::find()
             .join(JoinType::InnerJoin, user_secret::Relation::Secret.def())
             .filter(secret::Column::EventId.eq(event_id))
@@ -133,6 +135,7 @@ impl SecretRepository {
             .order_by_asc(secret::Column::Name)
             .select_only()
             .column(secret::Column::Name)
+            .column(secret::Column::Description)
             .column(user_secret::Column::Value)
             .into_tuple()
             .all(db)

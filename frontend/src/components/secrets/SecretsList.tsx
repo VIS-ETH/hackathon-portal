@@ -1,11 +1,23 @@
 import { useGetConfig } from "@/api/gen";
 import { SecretValue } from "@/api/gen/schemas";
 import { AI_API_KEY_SECRET_NAME, getKeyInfo } from "@/api/litellm";
-import { inputProps } from "@/styles/common";
+import Markdown from "@/components/Markdown";
+import { iconProps, inputProps } from "@/styles/common";
 
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 
-import { PasswordInput, Progress, Stack, Text } from "@mantine/core";
+import {
+  ActionIcon,
+  CopyButton,
+  Divider,
+  Group,
+  PasswordInput,
+  Progress,
+  Stack,
+  Text,
+} from "@mantine/core";
+
+import { IconCheck, IconCopy } from "@tabler/icons-react";
 
 type AIKeyUsageProps = {
   liteLLMUrl: string;
@@ -58,20 +70,55 @@ const SecretsList = ({ secrets }: SecretsListProps) => {
   const liteLLMUrl = config?.litellm_url;
 
   return (
-    <Stack>
-      {secrets.map((secret) => (
-        <Stack key={secret.name} gap="xs">
-          <PasswordInput
-            {...inputProps}
-            size="sm"
-            label={secret.name}
-            value={secret.value}
-            readOnly
-          />
-          {secret.name === AI_API_KEY_SECRET_NAME && liteLLMUrl && (
-            <AIKeyUsage liteLLMUrl={liteLLMUrl} apiKey={secret.value} />
-          )}
-        </Stack>
+    <Stack gap="lg">
+      {secrets.map((secret, index) => (
+        <Fragment key={secret.name}>
+          {/* the modal body's padding, so the divider spans the whole modal */}
+          {index > 0 && <Divider mx="-md" />}
+          <Stack gap="xs">
+            <Text fw={700}>{secret.name}</Text>
+            {secret.description && (
+              // Long links, e.g. redeem URLs, would overflow the modal.
+              <Text
+                size="sm"
+                component="div"
+                style={{ overflowWrap: "anywhere" }}
+              >
+                <Markdown trusted allowHtml content={secret.description} />
+              </Text>
+            )}
+            <Group gap="xs" wrap="nowrap">
+              <PasswordInput
+                {...inputProps}
+                size="sm"
+                aria-label={secret.name}
+                value={secret.value}
+                readOnly
+                flex={1}
+              />
+              <CopyButton value={secret.value}>
+                {({ copied, copy }) => (
+                  <ActionIcon
+                    variant="default"
+                    size="input-sm"
+                    radius={inputProps.radius}
+                    aria-label={copied ? "Copied" : `Copy ${secret.name}`}
+                    onClick={copy}
+                  >
+                    {copied ? (
+                      <IconCheck {...iconProps} />
+                    ) : (
+                      <IconCopy {...iconProps} />
+                    )}
+                  </ActionIcon>
+                )}
+              </CopyButton>
+            </Group>
+            {secret.name === AI_API_KEY_SECRET_NAME && liteLLMUrl && (
+              <AIKeyUsage liteLLMUrl={liteLLMUrl} apiKey={secret.value} />
+            )}
+          </Stack>
+        </Fragment>
       ))}
     </Stack>
   );

@@ -19,6 +19,7 @@ const TeamSecretsModal = ({ team, opened, onClose }: TeamSecretsModalProps) => {
   return (
     <Modal
       {...modalProps}
+      size="lg"
       opened={opened}
       onClose={onClose}
       title="Team Secrets"

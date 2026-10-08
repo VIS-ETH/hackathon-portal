@@ -72,6 +72,7 @@ import type {
   ReducedUser,
   Secret,
   SecretForCreate,
+  SecretForUpdate,
   SecretValue,
   SetCurrentRankingSnapshot,
   SetMyVoteParams,
@@ -6586,6 +6587,100 @@ export const useDeleteSecret = <TError = PublicError, TContext = unknown>(
   TContext
 > => {
   return useMutation(getDeleteSecretMutationOptions(options), queryClient);
+};
+
+/**
+ * @summary Update the description of a secret, the values are left out of the response
+ */
+export const updateSecret = (
+  secretId: string,
+  secretForUpdate: SecretForUpdate,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<Secret>(
+    {
+      url: `/api/secrets/${secretId}`,
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      data: secretForUpdate,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getUpdateSecretMutationKey = () => ["updateSecret"] as const;
+
+export const getUpdateSecretMutationOptions = <
+  TError = PublicError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateSecret>>,
+    TError,
+    UpdateSecretMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateSecret>>,
+  TError,
+  UpdateSecretMutationVariables,
+  TContext
+> => {
+  const mutationKey = getUpdateSecretMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateSecret>>,
+    UpdateSecretMutationVariables
+  > = (props) => {
+    const { secretId, data } = props ?? {};
+
+    return updateSecret(secretId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateSecretMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateSecret>>
+>;
+export type UpdateSecretMutationBody = SecretForUpdate;
+export type UpdateSecretMutationError = PublicError;
+export type UpdateSecretMutationVariables = {
+  secretId: string;
+  data: SecretForUpdate;
+};
+
+/**
+ * @summary Update the description of a secret, the values are left out of the response
+ */
+export const useUpdateSecret = <TError = PublicError, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof updateSecret>>,
+      TError,
+      UpdateSecretMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof updateSecret>>,
+  TError,
+  UpdateSecretMutationVariables,
+  TContext
+> => {
+  return useMutation(getUpdateSecretMutationOptions(options), queryClient);
 };
 
 /**

@@ -17,7 +17,13 @@ const UserSecretsModal = ({
   onClose,
 }: UserSecretsModalProps) => {
   return (
-    <Modal {...modalProps} opened={opened} onClose={onClose} title="My Secrets">
+    <Modal
+      {...modalProps}
+      size="lg"
+      opened={opened}
+      onClose={onClose}
+      title="My Secrets"
+    >
       <SecretsList secrets={secrets} />
     </Modal>
   );

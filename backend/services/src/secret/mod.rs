@@ -1,7 +1,9 @@
 pub mod models;
 
 use crate::crypto::CryptoService;
-use crate::secret::models::{EventSecrets, Secret, SecretForCreate, SecretSubject, SecretValue};
+use crate::secret::models::{
+    EventSecrets, Secret, SecretForCreate, SecretForUpdate, SecretSubject, SecretValue,
+};
 use crate::team::fmt_team_index;
 use crate::user::fmt_user_name;
 use crate::{ServiceError, ServiceResult};
@@ -12,7 +14,10 @@ use hackathon_portal_repositories::db::{
 use hackathon_portal_repositories::DbRepository;
 use sea_orm::prelude::*;
 use sea_orm::sea_query::OnConflict;
-use sea_orm::{QuerySelect, QueryTrait, Set, TransactionTrait, TryInsertResult};
+use sea_orm::{
+    ActiveModelTrait, IntoActiveModel, QuerySelect, QueryTrait, Set, TransactionTrait,
+    TryInsertResult,
+};
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 
@@ -129,6 +134,25 @@ impl SecretService {
             .ok_or_else(|| ServiceError::SecretNameNotUnique {
                 name: name.to_string(),
             })?;
+
+        Ok(assemble_secret(secret, HashMap::new()))
+    }
+
+    pub async fn update_secret(
+        &self,
+        secret_id: Uuid,
+        secret_fu: SecretForUpdate,
+    ) -> ServiceResult<Secret> {
+        let conn = self.db_repo.conn();
+        let mut secret = SecretRepository::fetch_by_id(conn, secret_id)
+            .await?
+            .into_active_model();
+
+        // Not trimmed: leading indents and trailing hard breaks are Markdown.
+        let description = secret_fu.description;
+        secret.description = Set((!description.trim().is_empty()).then_some(description));
+
+        let secret = secret.update(conn).await?;
 
         Ok(assemble_secret(secret, HashMap::new()))
     }
@@ -378,13 +402,14 @@ impl SecretService {
 
     fn decrypt_named_values(
         &self,
-        values: Vec<(String, Vec<u8>)>,
+        values: Vec<(String, Option<String>, Vec<u8>)>,
     ) -> ServiceResult<Vec<SecretValue>> {
         values
             .into_iter()
-            .map(|(name, value)| {
+            .map(|(name, description, value)| {
                 Ok(SecretValue {
                     name,
+                    description,
                     value: self.crypto_service.decrypt(&value)?,
                 })
             })
@@ -425,6 +450,7 @@ async fn insert_secret_opt<C: ConnectionTrait>(
             event_id,
             scope,
             name: name.to_string(),
+            description: None,
         })),
         TryInsertResult::Conflicted | TryInsertResult::Empty => Ok(None),
     }
@@ -436,6 +462,7 @@ fn assemble_secret(secret: db_secret::Model, values: HashMap<Uuid, String>) -> S
         event_id: secret.event_id,
         scope: secret.scope,
         name: secret.name,
+        description: secret.description,
         values,
     }
 }

@@ -13,6 +13,8 @@ pub struct Model {
     pub scope: SecretScope,
     #[sea_orm(column_type = "Text")]
     pub name: String,
+    #[sea_orm(column_type = "Text", nullable)]
+    pub description: Option<String>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
