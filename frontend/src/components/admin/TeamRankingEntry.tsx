@@ -194,7 +194,14 @@ const TeamRankingEntry = ({
       {expanded && (
         <Card.Section {...cardSectionProps} bg={DETAILS_BG}>
           <Stack>
-            {team && <TeamDetails team={team} canViewProject teamPage />}
+            {team && (
+              <TeamDetails
+                team={team}
+                canViewProject
+                teamPage
+                canViewRepository
+              />
+            )}
             <TeamFeedback entry={entry} adminView />
           </Stack>
         </Card.Section>

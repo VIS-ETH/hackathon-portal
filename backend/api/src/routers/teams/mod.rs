@@ -5,7 +5,9 @@ use crate::ctx::Ctx;
 use crate::error::{ApiJson, ApiJsonVec, PublicError};
 use crate::models::AffectedRows;
 use crate::routers::events::models::EventIdQuery;
-use crate::routers::teams::models::{AdminTeam, CreateTeamAPIKey, Team, TeamRankingView};
+use crate::routers::teams::models::{
+    AdminTeam, CreateTeamAPIKey, Team, TeamRankingView, TeamViewPermissions,
+};
 use crate::routers::users::models::TeamRoleOptQuery;
 use crate::ApiError;
 use axum::extract::{Path, Query, State};
@@ -80,12 +82,13 @@ pub async fn create_team(
 
     let team = state.team_service.create_team(ctx.user().id, body).await?;
 
-    Ok(Json(Team::from((team, false, false))))
+    Ok(Json(Team::from((team, TeamViewPermissions::default()))))
 }
 
 /// Get all teams of an event
 ///
-/// `project_id` requires `view_project_assignment` and `finalist` requires `view_finalists`.
+/// `project_id` requires `view_project_assignment`, `finalist` requires `view_finalists` and
+/// `repository_url` requires `view_team_blog`.
 #[utoipa::path(
     get,
     path = "/api/teams",
@@ -110,20 +113,25 @@ pub async fn get_teams(
         });
     }
 
-    let can_view_project_assignment = groups.can_view_project_assignment(
-        event.visibility,
-        event.projects_visible,
-        event.project_assignments_visible,
-    );
-
-    let can_view_finalists = groups.can_view_finalists(event.visibility, event.finalists_visible);
+    let permissions = TeamViewPermissions::new(&groups, &event);
 
     let teams = state
         .team_service
         .get_teams(event.id)
         .await?
         .into_iter()
-        .map(|team| Team::from((team, can_view_project_assignment, can_view_finalists)))
+        .map(|team| {
+            // the user's roles on a team may additionally reveal its repository
+            let permissions =
+                if permissions.repository || ctx.roles().get_team_roles(&team.id).is_empty() {
+                    permissions
+                } else {
+                    let groups = Groups::from_event_and_team(ctx.roles(), event.id, team.id);
+                    TeamViewPermissions::new(&groups, &event)
+                };
+
+            Team::from((team, permissions))
+        })
         .collect();
 
     Ok(Json(teams))
@@ -273,7 +281,8 @@ pub async fn get_teams_project_preferences(
 
 /// Get a team by slug
 ///
-/// `project_id` requires `view_project_assignment` and `finalist` requires `view_finalists`.
+/// `project_id` requires `view_project_assignment`, `finalist` requires `view_finalists` and
+/// `repository_url` requires `view_team_blog`.
 #[utoipa::path(
     get,
     path = "/api/teams/slug/{event_slug}/{team_slug}",
@@ -297,29 +306,21 @@ pub async fn get_team_by_slug(
         });
     }
 
-    let can_view_project_assignment = groups.can_view_project_assignment(
-        event.visibility,
-        event.projects_visible,
-        event.project_assignments_visible,
-    );
-
-    let can_view_finalists = groups.can_view_finalists(event.visibility, event.finalists_visible);
-
     let team = state
         .team_service
         .get_team_by_slug(&event_slug, &team_slug)
         .await?;
 
-    Ok(Json(Team::from((
-        team,
-        can_view_project_assignment,
-        can_view_finalists,
-    ))))
+    let groups = Groups::from_event_and_team(ctx.roles(), event.id, team.id);
+    let permissions = TeamViewPermissions::new(&groups, &event);
+
+    Ok(Json(Team::from((team, permissions))))
 }
 
 /// Get a team by id
 ///
-/// `project_id` requires `view_project_assignment` and `finalist` requires `view_finalists`.
+/// `project_id` requires `view_project_assignment`, `finalist` requires `view_finalists` and
+/// `repository_url` requires `view_team_blog`.
 #[utoipa::path(
     get,
     path = "/api/teams/{team_id}",
@@ -335,7 +336,7 @@ pub async fn get_team(
     Path(team_id): Path<Uuid>,
 ) -> ApiJson<Team> {
     let (team, event) = state.team_service.get_team_with_event(team_id).await?;
-    let groups = Groups::from_event(ctx.roles(), event.id);
+    let groups = Groups::from_event_and_team(ctx.roles(), event.id, team.id);
 
     if !groups.can_view_event(event.visibility) {
         return Err(ApiError::Forbidden {
@@ -343,19 +344,9 @@ pub async fn get_team(
         });
     }
 
-    let can_view_project_assignment = groups.can_view_project_assignment(
-        event.visibility,
-        event.projects_visible,
-        event.project_assignments_visible,
-    );
+    let permissions = TeamViewPermissions::new(&groups, &event);
 
-    let can_view_finalists = groups.can_view_finalists(event.visibility, event.finalists_visible);
-
-    Ok(Json(Team::from((
-        team,
-        can_view_project_assignment,
-        can_view_finalists,
-    ))))
+    Ok(Json(Team::from((team, permissions))))
 }
 
 /// Get a team with its internal fields
@@ -387,7 +378,7 @@ pub async fn get_admin_team(
 
 /// Update a team
 ///
-/// Requires `view_event`. Changing the name, photo or ingress config requires `update_team_name`, `update_team_photo` or `update_team_ingress_config`. All other fields require `manage_event`.
+/// Requires `view_event`. Changing the name, photo, repository or ingress config requires `update_team_name`, `update_team_photo`, `update_team_blog` or `update_team_ingress_config`. All other fields require `manage_event`.
 #[utoipa::path(
     patch,
     path = "/api/teams/{team_id}",
@@ -395,7 +386,7 @@ pub async fn get_admin_team(
         (status = StatusCode::OK, body = Team),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
-    extensions(("x-policies" = json!(["view_event", "update_team_name", "update_team_photo", "update_team_ingress_config", "manage_event"]))),
+    extensions(("x-policies" = json!(["view_event", "update_team_name", "update_team_photo", "update_team_blog", "update_team_ingress_config", "manage_event"]))),
 )]
 pub async fn update_team(
     ctx: Ctx,
@@ -428,6 +419,14 @@ pub async fn update_team(
         });
     }
 
+    if body.repository_url.is_some()
+        && !groups.can_update_team_blog(event.visibility, event.phase, event.read_only)
+    {
+        return Err(ApiError::Forbidden {
+            action: "edit the code repository of this team".to_string(),
+        });
+    }
+
     if body.ingress_config.is_some()
         && !groups.can_update_team_ingress_config(event.visibility, event.phase, event.read_only)
     {
@@ -457,19 +456,9 @@ pub async fn update_team(
         .update_team(team_id, ctx.user().id, body)
         .await?;
 
-    let can_view_project_assignment = groups.can_view_project_assignment(
-        event.visibility,
-        event.projects_visible,
-        event.project_assignments_visible,
-    );
+    let permissions = TeamViewPermissions::new(&groups, &event);
 
-    let can_view_finalists = groups.can_view_finalists(event.visibility, event.finalists_visible);
-
-    Ok(Json(Team::from((
-        team,
-        can_view_project_assignment,
-        can_view_finalists,
-    ))))
+    Ok(Json(Team::from((team, permissions))))
 }
 
 /// Delete a team
@@ -498,19 +487,9 @@ pub async fn delete_team(
 
     state.team_service.delete_team(team_id).await?;
 
-    let can_view_project_assignment = groups.can_view_project_assignment(
-        event.visibility,
-        event.projects_visible,
-        event.project_assignments_visible,
-    );
+    let permissions = TeamViewPermissions::new(&groups, &event);
 
-    let can_view_finalists = groups.can_view_finalists(event.visibility, event.finalists_visible);
-
-    Ok(Json(Team::from((
-        team,
-        can_view_project_assignment,
-        can_view_finalists,
-    ))))
+    Ok(Json(Team::from((team, permissions))))
 }
 
 /// Get my roles on a team

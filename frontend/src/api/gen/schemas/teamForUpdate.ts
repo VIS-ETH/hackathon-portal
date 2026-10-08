@@ -28,6 +28,12 @@ export interface TeamForUpdate {
   private_address_override?: string | null;
   /** @nullable */
   project_id?: string | null;
+  /**
+   * The public repository with the code of the team, must be an http(s) URL.
+   * An empty string removes it.
+   * @nullable
+   */
+  repository_url?: string | null;
   /** @nullable */
   ssh_config_override?: string | null;
 }

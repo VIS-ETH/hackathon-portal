@@ -10,6 +10,8 @@ import { Card } from "@mantine/core";
 type TeamDetailsCardProps = {
   team: Team;
   canViewProject: boolean;
+  canViewRepository?: boolean;
+  onEditRepository?: () => void;
   // the photo beside the details instead of above them (from sm up)
   horizontal?: boolean;
 };
@@ -17,13 +19,19 @@ type TeamDetailsCardProps = {
 const TeamDetailsCard = ({
   team,
   canViewProject,
+  canViewRepository,
+  onEditRepository,
   horizontal,
 }: TeamDetailsCardProps) => {
   if (horizontal) {
     return (
       <Card {...cardProps}>
         <Card.Section {...cardSectionProps}>
-          <TeamDetails team={team} canViewProject={canViewProject} />
+          <TeamDetails
+            team={team}
+            canViewProject={canViewProject}
+            canViewRepository={canViewRepository}
+          />
         </Card.Section>
       </Card>
     );
@@ -38,7 +46,12 @@ const TeamDetailsCard = ({
       )}
 
       <Card.Section {...cardSectionProps}>
-        <TeamLinks team={team} canViewProject={canViewProject} />
+        <TeamLinks
+          team={team}
+          canViewProject={canViewProject}
+          canViewRepository={canViewRepository}
+          onEditRepository={onEditRepository}
+        />
       </Card.Section>
     </Card>
   );

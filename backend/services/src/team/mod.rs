@@ -260,6 +260,18 @@ impl TeamService {
             active_team.finalist = Set(*finalist);
         }
 
+        if let Some(repository_url) = &team_fu.repository_url {
+            let repository_url = repository_url.trim();
+
+            if repository_url.is_empty() {
+                active_team.repository_url = Set(None);
+            } else {
+                let repository_url = normalize_repository_url(repository_url)
+                    .ok_or(ServiceError::InvalidRepositoryUrl)?;
+                active_team.repository_url = Set(Some(repository_url));
+            }
+        }
+
         let team = active_team.update(&txn).await?;
 
         txn.commit().await?;
@@ -636,6 +648,7 @@ impl TeamService {
             ingress_config,
             ingress_url,
             finalist: team_model.finalist,
+            repository_url: team_model.repository_url,
         };
 
         Ok(team)
@@ -725,5 +738,81 @@ fn apply_override_and_template(
         (Some(overridden), _) => Some(overridden.to_string()),
         (None, Some(template)) => Some(apply_template(template, team)),
         (None, None) => None,
+    }
+}
+
+/// Accepts absolute http(s) URLs with a domain and without credentials, so that the URL
+/// can be safely used as a public link. Returns the normalized URL, which is what the
+/// frontend's `new URL(value).href` yields as well.
+fn normalize_repository_url(url: &str) -> Option<String> {
+    const MAX_LENGTH: usize = 500;
+
+    // the parser would percent-encode or strip these instead of rejecting them
+    if url.chars().any(|c| c.is_whitespace() || c.is_control()) {
+        return None;
+    }
+
+    let url = url::Url::parse(url).ok()?;
+
+    let valid = matches!(url.scheme(), "http" | "https")
+        && url.host_str().is_some_and(|host| host.contains('.'))
+        && url.username().is_empty()
+        && url.password().is_none()
+        && url.as_str().len() <= MAX_LENGTH;
+
+    valid.then(|| url.into())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::normalize_repository_url;
+
+    #[test]
+    fn accepts_and_normalizes_http_and_https_urls() {
+        for (url, normalized) in [
+            (
+                "https://github.com/team/project",
+                "https://github.com/team/project",
+            ),
+            (
+                "http://gitlab.example.com/team/project",
+                "http://gitlab.example.com/team/project",
+            ),
+            (
+                "HTTPS://GitHub.com/team/project",
+                "https://github.com/team/project",
+            ),
+            (
+                "https:github.com/team/project",
+                "https://github.com/team/project",
+            ),
+        ] {
+            assert_eq!(
+                normalize_repository_url(url).as_deref(),
+                Some(normalized),
+                "{url}"
+            );
+        }
+    }
+
+    #[test]
+    fn rejects_other_urls() {
+        for url in [
+            "javascript:alert(1)",
+            "ftp://example.com/repo",
+            "github.com/team/project",
+            "https://",
+            "https:///path",
+            "https://@/repo",
+            "https://:443/repo",
+            "https://user:pass@github.com/team/project",
+            "https://github.com/team/my project",
+        ] {
+            assert_eq!(normalize_repository_url(url), None, "{url}");
+        }
+        assert_eq!(
+            normalize_repository_url(&format!("https://github.com/{}", "a".repeat(500))),
+            None
+        );
     }
 }

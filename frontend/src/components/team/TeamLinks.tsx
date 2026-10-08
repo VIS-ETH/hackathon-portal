@@ -3,9 +3,14 @@ import IconTextGroup from "../IconTextGroup";
 import { useGetEvent, useGetProject } from "@/api/gen";
 import { Team } from "@/api/gen/schemas";
 
-import { Stack, Text } from "@mantine/core";
+import { Anchor, Group, Stack, Text } from "@mantine/core";
 
-import { IconListDetails, IconUsers, IconWorld } from "@tabler/icons-react";
+import {
+  IconBrandGit,
+  IconListDetails,
+  IconUsers,
+  IconWorld,
+} from "@tabler/icons-react";
 import Link from "next/link";
 
 type TeamLinksProps = {
@@ -13,9 +18,18 @@ type TeamLinksProps = {
   canViewProject: boolean;
   // also link the team's page, for views outside of it
   teamPage?: boolean;
+  canViewRepository?: boolean;
+  // given if the repository may be edited
+  onEditRepository?: () => void;
 };
 
-const TeamLinks = ({ team, canViewProject, teamPage }: TeamLinksProps) => {
+const TeamLinks = ({
+  team,
+  canViewProject,
+  teamPage,
+  canViewRepository,
+  onEditRepository,
+}: TeamLinksProps) => {
   const { data: event } = useGetEvent(team.event_id);
   const { data: project } = useGetProject(team?.project_id ?? "", {
     query: { enabled: !!team?.project_id && canViewProject },
@@ -62,11 +76,39 @@ const TeamLinks = ({ team, canViewProject, teamPage }: TeamLinksProps) => {
     </IconTextGroup>
   );
 
+  const repositoryLink = canViewRepository && (
+    <IconTextGroup Icon={IconBrandGit}>
+      {team.repository_url ? (
+        <Link
+          href={team.repository_url}
+          passHref
+          referrerPolicy="no-referrer"
+          target="_blank"
+          title={team.repository_url}
+        >
+          <Text>Source Code</Text>
+        </Link>
+      ) : onEditRepository ? (
+        <Group gap="xs">
+          <Text c="red" fw={600}>
+            No code repository linked
+          </Text>
+          <Anchor component="button" onClick={onEditRepository}>
+            Add Repository
+          </Anchor>
+        </Group>
+      ) : (
+        <Text c="dimmed">No code repository</Text>
+      )}
+    </IconTextGroup>
+  );
+
   return (
     <Stack gap="sm">
       {teamLink}
       {projectLink}
       {ingressUrlLink}
+      {repositoryLink}
     </Stack>
   );
 };

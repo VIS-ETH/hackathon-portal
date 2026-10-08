@@ -12,6 +12,7 @@ import { Button, Menu } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 
 import {
+  IconBrandGit,
   IconChevronDown,
   IconKey,
   IconNetwork,
@@ -25,9 +26,15 @@ type TeamMenuProps = {
   team: Team;
   refetchTeam: () => void;
   policies: Policies;
+  onEditRepository: () => void;
 };
 
-const TeamMenu = ({ team, refetchTeam, policies }: TeamMenuProps) => {
+const TeamMenu = ({
+  team,
+  refetchTeam,
+  policies,
+  onEditRepository,
+}: TeamMenuProps) => {
   const [uploadPhotoOpened, uploadPhotoHandles] = useDisclosure();
   const [accessDetailsOpened, accessDetailsHandles] = useDisclosure();
   const [secretsOpened, secretsHandles] = useDisclosure();
@@ -73,6 +80,18 @@ const TeamMenu = ({ team, refetchTeam, policies }: TeamMenuProps) => {
     </>
   );
 
+  const repositorySection = policies.can_update_team_blog && (
+    <>
+      <Menu.Label>Code Repository</Menu.Label>
+      <Menu.Item
+        leftSection={<IconBrandGit {...iconProps} />}
+        onClick={onEditRepository}
+      >
+        Edit Repository
+      </Menu.Item>
+    </>
+  );
+
   const accessDetailsItem = policies.can_view_team_confidential && (
     <>
       <Menu.Item
@@ -109,7 +128,7 @@ const TeamMenu = ({ team, refetchTeam, policies }: TeamMenuProps) => {
     </>
   );
 
-  if (!photoSection && !infrastructureSection) {
+  if (!photoSection && !repositorySection && !infrastructureSection) {
     return undefined;
   }
 
@@ -126,6 +145,7 @@ const TeamMenu = ({ team, refetchTeam, policies }: TeamMenuProps) => {
         </Menu.Target>
         <Menu.Dropdown miw={200}>
           {photoSection}
+          {repositorySection}
           {infrastructureSection}
         </Menu.Dropdown>
       </Menu>

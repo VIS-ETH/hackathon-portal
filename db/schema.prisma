@@ -122,6 +122,7 @@ model team {
   ingress_enabled          Boolean @default(false)
   ingress_config           Json    @default("{\"version\":1,\"mode\":\"Managed\",\"config\":{\"server_port\":8080,\"access_control_mode\":\"AuthenticationAuthorization\"}}")
   blog_version             Int     @default(0) // incremented on every blog update, used to detect concurrent edits
+  repository_url           String? // public repository with the code of the team, shown in the blog
 
   // relations
   event   event    @relation(fields: [event_id], references: [id])

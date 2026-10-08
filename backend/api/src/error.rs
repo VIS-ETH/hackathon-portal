@@ -238,6 +238,10 @@ impl From<&ServiceError> for PublicError {
                                         StatusCode::CONFLICT,
                                         "The blog has been changed by someone else in the meantime".to_string(),
                                     ),
+            ServiceError::InvalidRepositoryUrl => (
+                                        StatusCode::BAD_REQUEST,
+                                        "The repository must be a valid http(s) URL".to_string(),
+                                    ),
             ServiceError::UploadContentTypeNotAllowed => (
                                         StatusCode::BAD_REQUEST,
                                         "You may not upload files of this type".to_string(),

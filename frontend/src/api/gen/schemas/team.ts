@@ -27,6 +27,11 @@ export interface Team {
   private_address?: string | null;
   /** @nullable */
   project_id?: string | null;
+  /**
+   * The public repository with the code of the team, visible like the blog.
+   * @nullable
+   */
+  repository_url?: string | null;
   slug: string;
   /** @nullable */
   ssh_config?: string | null;

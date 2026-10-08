@@ -89,6 +89,8 @@ pub enum ServiceError {
 
     TeamBlogConflict,
 
+    InvalidRepositoryUrl,
+
     UploadRateLimitExceeded,
 
     UploadContentLengthExceeded {

@@ -2479,7 +2479,7 @@
       "get": {
         "tags": ["teams"],
         "summary": "Get all teams of an event",
-        "description": "`project_id` requires `view_project_assignment` and `finalist` requires `view_finalists`.",
+        "description": "`project_id` requires `view_project_assignment`, `finalist` requires `view_finalists` and\n`repository_url` requires `view_team_blog`.",
         "operationId": "get_teams",
         "parameters": [
           {
@@ -2715,7 +2715,7 @@
       "get": {
         "tags": ["teams"],
         "summary": "Get a team by slug",
-        "description": "`project_id` requires `view_project_assignment` and `finalist` requires `view_finalists`.",
+        "description": "`project_id` requires `view_project_assignment`, `finalist` requires `view_finalists` and\n`repository_url` requires `view_team_blog`.",
         "operationId": "get_team_by_slug",
         "parameters": [
           {
@@ -2756,7 +2756,7 @@
       "get": {
         "tags": ["teams"],
         "summary": "Get a team by id",
-        "description": "`project_id` requires `view_project_assignment` and `finalist` requires `view_finalists`.",
+        "description": "`project_id` requires `view_project_assignment`, `finalist` requires `view_finalists` and\n`repository_url` requires `view_team_blog`.",
         "operationId": "get_team",
         "parameters": [
           {
@@ -2821,7 +2821,7 @@
       "patch": {
         "tags": ["teams"],
         "summary": "Update a team",
-        "description": "Requires `view_event`. Changing the name, photo or ingress config requires `update_team_name`, `update_team_photo` or `update_team_ingress_config`. All other fields require `manage_event`.",
+        "description": "Requires `view_event`. Changing the name, photo, repository or ingress config requires `update_team_name`, `update_team_photo`, `update_team_blog` or `update_team_ingress_config`. All other fields require `manage_event`.",
         "operationId": "update_team",
         "parameters": [
           {
@@ -2861,6 +2861,7 @@
           "view_event",
           "update_team_name",
           "update_team_photo",
+          "update_team_blog",
           "update_team_ingress_config",
           "manage_event"
         ]
@@ -3531,6 +3532,7 @@
           "private_address": { "type": ["string", "null"] },
           "private_address_override": { "type": ["string", "null"] },
           "project_id": { "type": ["string", "null"], "format": "uuid" },
+          "repository_url": { "type": ["string", "null"] },
           "slug": { "type": "string" },
           "ssh_config": { "type": ["string", "null"] },
           "ssh_config_override": { "type": ["string", "null"] }
@@ -4381,6 +4383,10 @@
           "photo_url": { "type": ["string", "null"] },
           "private_address": { "type": ["string", "null"] },
           "project_id": { "type": ["string", "null"], "format": "uuid" },
+          "repository_url": {
+            "type": ["string", "null"],
+            "description": "The public repository with the code of the team, visible like the blog."
+          },
           "slug": { "type": "string" },
           "ssh_config": { "type": ["string", "null"] }
         }
@@ -4469,6 +4475,10 @@
           "photo_id": { "type": ["string", "null"], "format": "uuid" },
           "private_address_override": { "type": ["string", "null"] },
           "project_id": { "type": ["string", "null"], "format": "uuid" },
+          "repository_url": {
+            "type": ["string", "null"],
+            "description": "The public repository with the code of the team, must be an http(s) URL.\nAn empty string removes it."
+          },
           "ssh_config_override": { "type": ["string", "null"] }
         }
       },

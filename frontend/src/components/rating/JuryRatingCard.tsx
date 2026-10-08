@@ -43,7 +43,12 @@ const JuryRatingCard = ({ team }: JuryRatingCardProps) => {
 
   return (
     <Stack>
-      <TeamDetailsCard team={team} canViewProject={true} horizontal />
+      <TeamDetailsCard
+        team={team}
+        canViewProject={true}
+        canViewRepository={policies?.can_view_team_blog ?? false}
+        horizontal
+      />
       {project && (
         <Accordion variant="contained" radius="md">
           <Accordion.Item value="disclosure">

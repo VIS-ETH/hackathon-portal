@@ -1,3 +1,5 @@
+use hackathon_portal_services::authorization::groups::Groups;
+use hackathon_portal_services::event::models::Event as EventBO;
 use hackathon_portal_services::infrastructure::models::IngressConfig;
 use hackathon_portal_services::ranking::models::TeamRanking;
 use hackathon_portal_services::team::models::Team as TeamBO;
@@ -29,20 +31,53 @@ pub struct Team {
     pub ingress_config: IngressConfig,
     pub ingress_url: Option<String>,
     pub finalist: Option<bool>,
+    /// The public repository with the code of the team, visible like the blog.
+    pub repository_url: Option<String>,
 }
 
-impl From<(TeamBO, bool, bool)> for Team {
-    fn from(value: (TeamBO, bool, bool)) -> Self {
-        let (team, can_view_project_assignment, can_view_finalists) = value;
+/// Which restricted fields of a team the user may view, all others are redacted.
+#[derive(Debug, Clone, Copy, Default)]
+pub struct TeamViewPermissions {
+    pub project_assignment: bool,
+    pub finalists: bool,
+    pub repository: bool,
+}
 
-        let project_id = if can_view_project_assignment {
+impl TeamViewPermissions {
+    /// The groups must include the user's roles on the team, since its affiliates may view
+    /// the repository like the blog.
+    #[must_use]
+    pub fn new(groups: &Groups, event: &EventBO) -> Self {
+        Self {
+            project_assignment: groups.can_view_project_assignment(
+                event.visibility,
+                event.projects_visible,
+                event.project_assignments_visible,
+            ),
+            finalists: groups.can_view_finalists(event.visibility, event.finalists_visible),
+            repository: groups.can_view_team_blog(event.visibility, event.phase),
+        }
+    }
+}
+
+impl From<(TeamBO, TeamViewPermissions)> for Team {
+    fn from(value: (TeamBO, TeamViewPermissions)) -> Self {
+        let (team, permissions) = value;
+
+        let project_id = if permissions.project_assignment {
             team.project_id
         } else {
             None
         };
 
-        let finalist = if can_view_finalists {
+        let finalist = if permissions.finalists {
             Some(team.finalist)
+        } else {
+            None
+        };
+
+        let repository_url = if permissions.repository {
+            team.repository_url
         } else {
             None
         };
@@ -63,6 +98,7 @@ impl From<(TeamBO, bool, bool)> for Team {
             ingress_config: team.ingress_config,
             ingress_url: team.ingress_url,
             finalist,
+            repository_url,
         }
     }
 }
@@ -90,6 +126,7 @@ pub struct AdminTeam {
     pub ingress_config: IngressConfig,
     pub ingress_url: Option<String>,
     pub finalist: bool,
+    pub repository_url: Option<String>,
 }
 
 impl From<TeamBO> for AdminTeam {
@@ -116,6 +153,7 @@ impl From<TeamBO> for AdminTeam {
             ingress_config: value.ingress_config,
             ingress_url: value.ingress_url,
             finalist: value.finalist,
+            repository_url: value.repository_url,
         }
     }
 }

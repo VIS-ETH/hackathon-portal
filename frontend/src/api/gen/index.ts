@@ -8239,7 +8239,8 @@ export const useUpdateSidequest = <TError = PublicError, TContext = unknown>(
 };
 
 /**
- * `project_id` requires `view_project_assignment` and `finalist` requires `view_finalists`.
+ * `project_id` requires `view_project_assignment`, `finalist` requires `view_finalists` and
+ * `repository_url` requires `view_team_blog`.
  * @summary Get all teams of an event
  */
 export const getTeams = (
@@ -9083,7 +9084,8 @@ export function useGetTeamsRoles<
 }
 
 /**
- * `project_id` requires `view_project_assignment` and `finalist` requires `view_finalists`.
+ * `project_id` requires `view_project_assignment`, `finalist` requires `view_finalists` and
+ * `repository_url` requires `view_team_blog`.
  * @summary Get a team by slug
  */
 export const getTeamBySlug = (
@@ -9247,7 +9249,8 @@ export function useGetTeamBySlug<
 }
 
 /**
- * `project_id` requires `view_project_assignment` and `finalist` requires `view_finalists`.
+ * `project_id` requires `view_project_assignment`, `finalist` requires `view_finalists` and
+ * `repository_url` requires `view_team_blog`.
  * @summary Get a team by id
  */
 export const getTeam = (
@@ -9475,7 +9478,7 @@ export const useDeleteTeam = <TError = PublicError, TContext = unknown>(
 };
 
 /**
- * Requires `view_event`. Changing the name, photo or ingress config requires `update_team_name`, `update_team_photo` or `update_team_ingress_config`. All other fields require `manage_event`.
+ * Requires `view_event`. Changing the name, photo, repository or ingress config requires `update_team_name`, `update_team_photo`, `update_team_blog` or `update_team_ingress_config`. All other fields require `manage_event`.
  * @summary Update a team
  */
 export const updateTeam = (

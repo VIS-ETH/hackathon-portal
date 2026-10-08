@@ -36,6 +36,8 @@ export interface AdminTeam {
   private_address_override?: string | null;
   /** @nullable */
   project_id?: string | null;
+  /** @nullable */
+  repository_url?: string | null;
   slug: string;
   /** @nullable */
   ssh_config?: string | null;

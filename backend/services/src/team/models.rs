@@ -28,6 +28,7 @@ pub struct Team {
     pub ingress_config: IngressConfig,
     pub ingress_url: Option<String>,
     pub finalist: bool,
+    pub repository_url: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
@@ -50,6 +51,9 @@ pub struct TeamForUpdate {
     pub ingress_enabled: Option<bool>,
     pub ingress_config: Option<IngressConfig>,
     pub finalist: Option<bool>,
+    /// The public repository with the code of the team, must be an http(s) URL.
+    /// An empty string removes it.
+    pub repository_url: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]

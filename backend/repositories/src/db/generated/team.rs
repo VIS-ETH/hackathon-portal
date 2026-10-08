@@ -33,6 +33,8 @@ pub struct Model {
     pub ingress_config: Json,
     pub finalist: bool,
     pub blog_version: i32,
+    #[sea_orm(column_type = "Text", nullable)]
+    pub repository_url: Option<String>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

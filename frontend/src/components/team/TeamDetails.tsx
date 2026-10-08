@@ -9,9 +9,15 @@ type TeamDetailsProps = {
   team: Team;
   canViewProject: boolean;
   teamPage?: boolean;
+  canViewRepository?: boolean;
 };
 
-const TeamDetails = ({ team, canViewProject, teamPage }: TeamDetailsProps) => {
+const TeamDetails = ({
+  team,
+  canViewProject,
+  teamPage,
+  canViewRepository,
+}: TeamDetailsProps) => {
   return (
     <Flex direction={{ base: "column", sm: "row" }} gap="md">
       <TeamImage
@@ -24,6 +30,7 @@ const TeamDetails = ({ team, canViewProject, teamPage }: TeamDetailsProps) => {
         team={team}
         canViewProject={canViewProject}
         teamPage={teamPage}
+        canViewRepository={canViewRepository}
       />
     </Flex>
   );
