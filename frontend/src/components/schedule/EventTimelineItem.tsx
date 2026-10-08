@@ -8,7 +8,7 @@ import { cardProps, iconProps, secondaryButtonProps } from "@/styles/common";
 import { useState } from "react";
 import { FormattedDate, FormattedDateTimeRange } from "react-intl";
 
-import { Button, Card, Group, Text, Timeline } from "@mantine/core";
+import { Anchor, Button, Card, Group, Text, Timeline } from "@mantine/core";
 
 import { useDisclosure } from "@mantine/hooks";
 
@@ -83,23 +83,15 @@ const EventTimelineItem = ({
                 />
               </Text>
               {appointment.content.length > contentLength && (
-                <Text ta="left">
-                  <Button
-                    variant="subtle"
-                    size="xs"
-                    mt="xs"
-                    p={0}
-                    h="auto"
-                    onClick={() => setShowFullContent(!showFullContent)}
-                    styles={{
-                      root: {
-                        textDecoration: "none",
-                      },
-                    }}
-                  >
-                    {showFullContent ? "Show less" : "Show more"}
-                  </Button>
-                </Text>
+                <Anchor
+                  component="button"
+                  size="sm"
+                  w="fit-content"
+                  mt="xs"
+                  onClick={() => setShowFullContent(!showFullContent)}
+                >
+                  {showFullContent ? "Show less" : "Show more"}
+                </Anchor>
               )}
             </>
           )}

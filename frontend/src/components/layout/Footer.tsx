@@ -24,7 +24,11 @@ const Footer = ({ wide = false }: FooterProps) => {
             }}
           >
             <Flex align="center" justify={{ base: "center", md: "flex-start" }}>
-              <Link href="https://inf.ethz.ch">
+              <Link
+                href="https://inf.ethz.ch"
+                target="_blank"
+                referrerPolicy="no-referrer"
+              >
                 <Image
                   h={60}
                   w="auto"
@@ -34,7 +38,11 @@ const Footer = ({ wide = false }: FooterProps) => {
               </Link>
             </Flex>
             <Flex align="center" justify="center">
-              <Link href="https://vis.ethz.ch">
+              <Link
+                href="https://vis.ethz.ch"
+                target="_blank"
+                referrerPolicy="no-referrer"
+              >
                 <Image
                   h={50}
                   w="auto"
@@ -55,6 +63,7 @@ const Footer = ({ wide = false }: FooterProps) => {
                 <Link
                   href="https://vis.ethz.ch"
                   target="_blank"
+                  referrerPolicy="no-referrer"
                   style={{
                     textDecoration: "underline",
                     textDecorationStyle: "dotted",
@@ -67,6 +76,7 @@ const Footer = ({ wide = false }: FooterProps) => {
                 <Link
                   href="https://github.com/VIS-ETH/hackathon-portal"
                   target="_blank"
+                  referrerPolicy="no-referrer"
                   style={{
                     textDecoration: "underline",
                     textDecorationStyle: "dotted",

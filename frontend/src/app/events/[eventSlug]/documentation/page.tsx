@@ -19,7 +19,7 @@ const Documentation = () => {
       {event.documentation_content ? (
         <MarkdownCard trusted content={event.documentation_content} allowHtml />
       ) : (
-        <Text>No documentation available.</Text>
+        <Text c="dimmed">No documentation available.</Text>
       )}
     </Stack>
   );

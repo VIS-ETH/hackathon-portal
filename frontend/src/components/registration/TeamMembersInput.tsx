@@ -66,6 +66,14 @@ const TeamMembersInput = ({ team, refetch }: TeamMembersInputProps) => {
 
   const handleRemove = async (userId: string) => {
     if (members?.length === 1) {
+      const confirmation = confirm(
+        "You're the last member of this team. Removing yourself deletes the team.",
+      );
+
+      if (!confirmation) {
+        return;
+      }
+
       await deleteTeamMutation.mutateAsync({
         teamId: team.id,
       });
@@ -76,9 +84,9 @@ const TeamMembersInput = ({ team, refetch }: TeamMembersInputProps) => {
           [userId]: [TeamRole.Member],
         },
       });
+      refetchMembers();
     }
 
-    refetchMembers();
     refetch?.();
   };
 

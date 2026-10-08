@@ -1,26 +1,26 @@
 import EventTimelineItem from "./EventTimelineItem";
 
 import { Appointment } from "@/api/gen/schemas";
-import { cardProps } from "@/styles/common";
 
 import { useState } from "react";
 import { FormattedDate } from "react-intl";
 
-import { Card, Switch, Text, Timeline } from "@mantine/core";
+import { Stack, Text, Timeline, Title } from "@mantine/core";
 
 type EventTimelineProps = {
   appointments: Appointment[];
+  showAll: boolean;
   manage?: boolean;
   refetch?: () => void;
 };
 
 const EventTimeline = ({
   appointments,
+  showAll,
   manage,
   refetch,
 }: EventTimelineProps) => {
   const [now] = useState(new Date());
-  const [showAll, setShowAll] = useState(false);
 
   // Events will be shown for 30 minutes after they end
   const grace = 1000 * 60 * 30;
@@ -54,24 +54,20 @@ const EventTimeline = ({
     return new Date(a).getTime() - new Date(b).getTime();
   });
 
-  const renderDayTimelines = () => {
-    return sortedDates.map((dateKey, dayIndex) => {
-      const appointmentsForDay = groupedAppointments[dateKey];
-      const date = new Date(dateKey);
-
-      return (
-        <div key={dateKey}>
-          <Text size="xl" fw={600} mb="md" mt={dayIndex > 0 ? "xl" : undefined}>
+  return filteredAppointments.length ? (
+    <Stack gap="xl">
+      {sortedDates.map((dateKey) => (
+        <Stack key={dateKey}>
+          <Title order={3}>
             <FormattedDate
-              value={date}
+              value={new Date(dateKey)}
               weekday="long"
               day="numeric"
               month="long"
             />
-          </Text>
-
-          <Timeline lineWidth={2} mb="xl">
-            {appointmentsForDay.map((appointment) => (
+          </Title>
+          <Timeline lineWidth={2}>
+            {groupedAppointments[dateKey].map((appointment) => (
               <EventTimelineItem
                 key={appointment.id}
                 appointment={appointment}
@@ -80,26 +76,11 @@ const EventTimeline = ({
               />
             ))}
           </Timeline>
-        </div>
-      );
-    });
-  };
-
-  return (
-    <>
-      <Switch
-        label={`Show all (${appointments.length})`}
-        checked={showAll}
-        onChange={(event) => setShowAll(event.currentTarget.checked)}
-      />
-      {filteredAppointments.length ? (
-        <div>{renderDayTimelines()}</div>
-      ) : (
-        <Card {...cardProps} style={{ borderStyle: "dashed" }}>
-          <Text>No appointments found</Text>
-        </Card>
-      )}
-    </>
+        </Stack>
+      ))}
+    </Stack>
+  ) : (
+    <Text c="dimmed">No appointments found</Text>
   );
 };
 

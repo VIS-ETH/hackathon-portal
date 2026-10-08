@@ -8,7 +8,7 @@ import { highlightedCardProps, inputProps } from "@/styles/common";
 
 import { useState } from "react";
 
-import { Card, Select, SimpleGrid, Stack, Text, Title } from "@mantine/core";
+import { Card, Select, SimpleGrid, Stack, Text } from "@mantine/core";
 
 import { produce } from "immer";
 
@@ -48,6 +48,8 @@ const ProjectPreferencesInput = ({
     return wellDefined && correctLength;
   };
 
+  const incomplete = localPPS.includes(undefined);
+
   const handleSave = async (index: number, value: string) => {
     const newPPS = produce(localPPS, (draft) => {
       draft[index] = value;
@@ -59,7 +61,7 @@ const ProjectPreferencesInput = ({
       return;
     }
 
-    updatePPSMutation.mutateAsync({
+    await updatePPSMutation.mutateAsync({
       teamId: team.id,
       data: newPPS.filter((pp) => pp !== undefined),
     });
@@ -77,9 +79,9 @@ const ProjectPreferencesInput = ({
               <Text>
                 {index == 0 ? "Highest Project Priority" : "Project Priority"}
               </Text>
-              <Title mt="sm" order={2}>
+              <Text mt="sm" fz="h2" lh="h2" fw={700}>
                 {index + 1}
-              </Title>
+              </Text>
               <Select
                 {...inputProps}
                 mt="md"
@@ -98,7 +100,12 @@ const ProjectPreferencesInput = ({
           </Card>
         ))}
       </SimpleGrid>
-      {remotePPS && !validatePPS(localPPS) && (
+      {remotePPS && incomplete && (
+        <Text c="dimmed">
+          Select {N_PREFERENCES} different projects to save your preferences.
+        </Text>
+      )}
+      {remotePPS && !incomplete && !validatePPS(localPPS) && (
         <Text c="red">Please select {N_PREFERENCES} unique projects.</Text>
       )}
     </Stack>

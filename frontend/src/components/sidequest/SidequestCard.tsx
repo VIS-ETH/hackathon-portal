@@ -1,18 +1,16 @@
 import LinkCard from "../LinkCard";
 
-import { useGetEvent } from "@/api/gen";
 import { Sidequest } from "@/api/gen/schemas";
 
 type SidequestCardProps = {
+  eventSlug: string;
   sidequest: Sidequest;
 };
 
-const SidequestCard = ({ sidequest }: SidequestCardProps) => {
-  const { data: event } = useGetEvent(sidequest.event_id);
-
+const SidequestCard = ({ eventSlug, sidequest }: SidequestCardProps) => {
   return (
     <LinkCard
-      href={`/events/${event?.slug}/sidequests/${sidequest.slug}`}
+      href={`/events/${eventSlug}/sidequests/${sidequest.slug}`}
       title={sidequest.name}
     />
   );

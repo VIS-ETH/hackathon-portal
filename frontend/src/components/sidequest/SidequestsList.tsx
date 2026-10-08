@@ -5,7 +5,7 @@ import { useGetSidequests } from "@/api/gen";
 import { Event } from "@/api/gen/schemas";
 import { iconProps, secondaryButtonProps } from "@/styles/common";
 
-import { Button, Group, Stack } from "@mantine/core";
+import { Button, Group, Stack, Text } from "@mantine/core";
 
 import { useDisclosure } from "@mantine/hooks";
 
@@ -36,8 +36,15 @@ const SidequestsList = ({ event, manage }: SidequestsListProps) => {
             </Button>
           )}
         </Group>
+        {sidequests?.length === 0 && (
+          <Text c="dimmed">No sidequests found</Text>
+        )}
         {sidequests?.map((sidequest) => (
-          <SidequestCard key={sidequest.id} sidequest={sidequest} />
+          <SidequestCard
+            key={sidequest.id}
+            eventSlug={event.slug}
+            sidequest={sidequest}
+          />
         ))}
       </Stack>
       <CreateSidequestDrawer

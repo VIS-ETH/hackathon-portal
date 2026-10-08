@@ -192,10 +192,10 @@ const TeamBlogEditor = ({
       ) : (
         <Alert
           {...alertProps}
-          icon={<IconInfoCircle {...iconProps} />}
+          icon={<IconInfoCircle {...largeIconProps} />}
           color="gray"
         >
-          <Text size="sm">
+          <Text>
             Saving replaces the whole blog. If someone else saves while you are
             editing, you will be warned and saving is disabled, so that their
             changes are not overwritten. Agree with your team on who edits the
@@ -246,16 +246,20 @@ const TeamBlogEditor = ({
 
         <Tabs.Panel {...tabsPanelProps} value="preview">
           <Card {...cardProps}>
-            <Stack gap="xl">
-              {sections.map((section) => (
-                <TeamBlogSection
-                  key={section.key}
-                  content={section.content}
-                  layout={section.layout}
-                  imageUrl={section.image_url}
-                />
-              ))}
-            </Stack>
+            {sections.length > 0 ? (
+              <Stack gap="xl">
+                {sections.map((section) => (
+                  <TeamBlogSection
+                    key={section.key}
+                    content={section.content}
+                    layout={section.layout}
+                    imageUrl={section.image_url}
+                  />
+                ))}
+              </Stack>
+            ) : (
+              <Text c="dimmed">Nothing to preview</Text>
+            )}
           </Card>
         </Tabs.Panel>
       </Tabs>

@@ -61,6 +61,7 @@ export const useResolveParams = () => {
   );
 
   return {
+    eventSlug,
     event,
     refetchEvent,
     roles,

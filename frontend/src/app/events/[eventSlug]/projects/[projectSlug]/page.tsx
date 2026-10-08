@@ -84,17 +84,14 @@ const Project = () => {
           )}
         </Group>
         {project.stakeholders.length > 0 && (
-          <Group justify="left" align="baseline" gap={"xs"}>
-            <Title order={4}>
+          <Text>
+            <Text span c="dimmed">
               {project.stakeholders.length > 1 ? "Stakeholders" : "Stakeholder"}
-              :
-            </Title>
-            <Text>
-              {project.stakeholders
-                .map((stakeholder) => stakeholder.name)
-                .join(", ")}
-            </Text>
-          </Group>
+            </Text>{" "}
+            {project.stakeholders
+              .map((stakeholder) => stakeholder.name)
+              .join(", ")}
+          </Text>
         )}
         <MarkdownCard trusted content={project.content} />
       </Stack>

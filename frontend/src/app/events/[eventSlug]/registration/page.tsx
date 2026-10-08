@@ -9,9 +9,9 @@ import TeamMembersInput from "@/components/registration/TeamMembersInput";
 import TeamNameInput from "@/components/registration/TeamNameInput";
 import { useResolveParams } from "@/hooks/useResolveParams";
 
-import { Stack } from "@mantine/core";
+import { Stack, Title } from "@mantine/core";
 
-const Documentation = () => {
+const Registration = () => {
   const { event, policies } = useResolveParams();
 
   const { data: teams, refetch: refetchTeams } = useGetTeams(
@@ -36,11 +36,11 @@ const Documentation = () => {
     },
   );
 
-  if (!event || !teamsRoles) {
+  if (!event || !teams || !teamsRoles) {
     return <PageSkeleton />;
   }
 
-  const team = teams?.find((team) =>
+  const team = teams.find((team) =>
     teamsRoles[team.id]?.includes(TeamRole.Member),
   );
 
@@ -50,20 +50,21 @@ const Documentation = () => {
   };
 
   return (
-    <>
+    <Stack>
+      <Title order={2}>Registration</Title>
       {team ? (
-        <Stack gap="lg">
+        <>
           <TeamNameInput team={team} refetch={refetch} />
           <TeamMembersInput team={team} refetch={refetch} />
           {policies?.can_view_project && (
             <ProjectPreferencesInput team={team} refetch={refetch} />
           )}
-        </Stack>
+        </>
       ) : (
         <CreateTeamCard eventId={event.id} refetch={refetch} />
       )}
-    </>
+    </Stack>
   );
 };
 
-export default Documentation;
+export default Registration;

@@ -44,7 +44,7 @@ type NavbarProps = {
 const Navbar = ({ wide = false }: NavbarProps) => {
   const pathname = usePathname();
   const { data: me } = useGetMe();
-  const { event, policies } = useResolveParams();
+  const { eventSlug, event, policies } = useResolveParams();
   const [drawerOpened, drawerHandles] = useDisclosure(false);
   const { discordAuthUrl } = useDiscord();
   const mySecrets = useMySecrets();
@@ -54,48 +54,48 @@ const Navbar = ({ wide = false }: NavbarProps) => {
   const tabs = [
     {
       label: "Overview",
-      path: `/events/${event?.slug}`,
+      path: `/events/${eventSlug}`,
       visible: true,
     },
     {
       label: "Schedule",
-      path: `/events/${event?.slug}/schedule`,
+      path: `/events/${eventSlug}/schedule`,
       visible: policies?.can_view_event_internal,
     },
     {
       label: "Registration",
-      path: `/events/${event?.slug}/registration`,
+      path: `/events/${eventSlug}/registration`,
       visible: policies?.can_create_team,
     },
     {
       label: "Rating",
-      path: `/events/${event?.slug}/rating`,
+      path: `/events/${eventSlug}/rating`,
       visible:
         policies?.can_manage_jury_rating || policies?.can_manage_public_vote,
     },
     {
       label: "Teams",
-      path: `/events/${event?.slug}/teams`,
+      path: `/events/${eventSlug}/teams`,
       visible: true,
     },
     {
       label: "Projects",
-      path: `/events/${event?.slug}/projects`,
+      path: `/events/${eventSlug}/projects`,
       visible: policies?.can_view_project,
     },
     {
       label: "Sidequests",
-      path: `/events/${event?.slug}/sidequests`,
+      path: `/events/${eventSlug}/sidequests`,
       visible: policies?.can_view_sidequest,
     },
     {
       label: "Documentation",
-      path: `/events/${event?.slug}/documentation`,
+      path: `/events/${eventSlug}/documentation`,
       visible: policies?.can_view_event_internal,
     },
     {
       label: "Admin",
-      path: `/events/${event?.slug}/admin`,
+      path: `/events/${eventSlug}/admin`,
       visible: policies?.can_manage_event,
     },
   ].filter((tab) => tab.visible);
@@ -120,9 +120,13 @@ const Navbar = ({ wide = false }: NavbarProps) => {
   ));
 
   const desktopTabs = tabs.map((t) => (
-    <Link key={t.path} href={t.path}>
-      <Tabs.Tab value={t.path}>{t.label}</Tabs.Tab>
-    </Link>
+    <Tabs.Tab
+      key={t.path}
+      value={t.path}
+      renderRoot={(props) => <Link {...props} href={t.path} />}
+    >
+      {t.label}
+    </Tabs.Tab>
   ));
 
   const title = (
@@ -155,7 +159,11 @@ const Navbar = ({ wide = false }: NavbarProps) => {
               hiddenFrom="sm"
             />
             <Box visibleFrom="sm">
-              <UserMenu />
+              <UserMenu
+                onOpenSecrets={
+                  mySecrets.length > 0 ? secretsHandles.open : undefined
+                }
+              />
             </Box>
           </Group>
           <Drawer
@@ -171,16 +179,16 @@ const Navbar = ({ wide = false }: NavbarProps) => {
               <Divider my="sm" />
               {mobileTabs}
               <Divider my="sm" />
-              <Link
+              <a
                 href={discordAuthUrl}
-                className={cx(classes.mobileLink)}
+                className={classes.mobileLink}
                 referrerPolicy="no-referrer"
               >
                 (Re)connect Discord Account
-              </Link>
+              </a>
               {mySecrets.length > 0 && (
                 <UnstyledButton
-                  className={cx(classes.mobileLink)}
+                  className={classes.mobileLink}
                   w="100%"
                   onClick={() => {
                     // The drawer would cover the modal.
@@ -193,7 +201,7 @@ const Navbar = ({ wide = false }: NavbarProps) => {
               )}
               {logoutUrl && (
                 // plain anchor: the logout URL is not a Next.js route and must not be prefetched
-                <a href={logoutUrl} className={cx(classes.mobileLink)}>
+                <a href={logoutUrl} className={classes.mobileLink}>
                   Logout
                 </a>
               )}

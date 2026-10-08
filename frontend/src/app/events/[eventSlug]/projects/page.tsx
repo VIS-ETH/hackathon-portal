@@ -7,7 +7,7 @@ import ProjectCard from "@/components/project/ProjectCard";
 import { useResolveParams } from "@/hooks/useResolveParams";
 import { iconProps, secondaryButtonProps } from "@/styles/common";
 
-import { Button, Group, Stack, Title } from "@mantine/core";
+import { Button, Group, Stack, Text, Title } from "@mantine/core";
 
 import { useDisclosure } from "@mantine/hooks";
 
@@ -45,8 +45,13 @@ const Projects = () => {
             </Button>
           )}
         </Group>
+        {projects.length === 0 && <Text c="dimmed">No projects found</Text>}
         {projects.map((project) => (
-          <ProjectCard key={project.id} project={project} />
+          <ProjectCard
+            key={project.id}
+            eventSlug={event.slug}
+            project={project}
+          />
         ))}
       </Stack>
       <CreateProjectDrawer

@@ -33,7 +33,7 @@ const Home = () => {
   );
 
   return (
-    <Container my="xl" bg="">
+    <Container my="xl">
       <Stack>
         <Center my="xl">
           <Image src="/assets/viscon-logo.svg" alt="VIScon Logo" maw={200} />
