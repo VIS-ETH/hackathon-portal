@@ -24,6 +24,11 @@ export const containerProps: Partial<ContainerProps> = {
   size: "md",
 };
 
+export const wideContainerProps: Partial<ContainerProps> = {
+  ...containerProps,
+  size: "xl",
+};
+
 export const inputProps: Partial<InputProps> = {
   size: "md",
   radius: "md",

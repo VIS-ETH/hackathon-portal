@@ -16,7 +16,7 @@ const ActionsTd = ({ team, refetch }: ActionsTdProps) => {
 
   const handleDelete = async () => {
     const confirmation = window.confirm(
-      `Are you sure you want to delete team ${team.name}?`,
+      `Are you sure you want to delete team ${team.name}?\n\nIts members, mentors and stakeholders lose their assignment to it. A team with sidequest scores or ratings can't be deleted.`,
     );
 
     if (!confirmation) {

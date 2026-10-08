@@ -9,7 +9,11 @@ import { useDiscord } from "@/hooks/useDiscord";
 import { useLogoutUrl } from "@/hooks/useLogoutUrl";
 import { useMySecrets } from "@/hooks/useMySecrets";
 import { useResolveParams } from "@/hooks/useResolveParams";
-import { badgeProps, containerProps } from "@/styles/common";
+import {
+  badgeProps,
+  containerProps,
+  wideContainerProps,
+} from "@/styles/common";
 
 import {
   Badge,
@@ -33,7 +37,11 @@ import cx from "clsx";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const Navbar = () => {
+type NavbarProps = {
+  wide?: boolean;
+};
+
+const Navbar = ({ wide = false }: NavbarProps) => {
   const pathname = usePathname();
   const { data: me } = useGetMe();
   const { event, policies } = useResolveParams();
@@ -136,7 +144,7 @@ const Navbar = () => {
 
   return (
     <Box bg="var(--mantine-color-primary-2)">
-      <Container {...containerProps}>
+      <Container {...(wide ? wideContainerProps : containerProps)}>
         <Stack gap={0}>
           <Group justify="space-between" py="md">
             {title}

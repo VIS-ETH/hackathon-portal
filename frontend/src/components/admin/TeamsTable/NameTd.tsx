@@ -3,7 +3,7 @@ import { AdminTeam } from "@/api/gen/schemas";
 import { useBlurSave } from "@/hooks/useBlurSave";
 import { inputProps } from "@/styles/common";
 
-import { Table, TextInput, TextInputProps } from "@mantine/core";
+import { Table, Text, TextInput, TextInputProps } from "@mantine/core";
 
 type NameTdProps = {
   team: AdminTeam;
@@ -31,6 +31,14 @@ const NameTd = ({ team, ro, refetch }: NameTdProps) => {
 
   const name = useBlurSave(team.name, handleUpdate);
 
+  if (ro) {
+    return (
+      <Table.Td>
+        <Text size="sm">{team.name}</Text>
+      </Table.Td>
+    );
+  }
+
   return (
     <Table.Td>
       <TextInput
@@ -41,7 +49,6 @@ const NameTd = ({ team, ro, refetch }: NameTdProps) => {
         onBlur={name.commit}
         disabled={name.saving}
         onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
-        readOnly={ro}
       />
     </Table.Td>
   );

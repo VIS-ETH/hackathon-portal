@@ -2,7 +2,7 @@ import DiscordBanner from "../banner/DiscordBanner";
 import Navbar from "./Navbar";
 
 import Footer from "@/components/layout/Footer";
-import { containerProps } from "@/styles/common";
+import { containerProps, wideContainerProps } from "@/styles/common";
 
 import { PropsWithChildren } from "react";
 
@@ -12,30 +12,32 @@ type AppLayoutProps = PropsWithChildren & {
   showHeader?: boolean;
   showFooter?: boolean;
   suppressDiscordBanner?: boolean;
+  wide?: boolean;
 };
 
 const AppLayout = ({
   showHeader = true,
   showFooter = true,
   suppressDiscordBanner = false,
+  wide = false,
   children,
 }: Readonly<AppLayoutProps>) => {
   return (
     <>
       {showHeader && (
         <Box component="header">
-          <Navbar />
+          <Navbar wide={wide} />
         </Box>
       )}
       <Box component="main" flex="1">
-        <Container {...containerProps} py="xl">
+        <Container {...(wide ? wideContainerProps : containerProps)} py="xl">
           {!suppressDiscordBanner && <DiscordBanner />}
           {children}
         </Container>
       </Box>
       {showFooter && (
         <Box component="footer">
-          <Footer />
+          <Footer wide={wide} />
         </Box>
       )}
     </>

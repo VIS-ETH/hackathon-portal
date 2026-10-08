@@ -180,7 +180,7 @@ const EventSettings = ({ event, refetch }: EventSettingsProps) => {
     }
 
     const confirmation = confirm(
-      `WARNING - READ THIS: Are you sure that you want to submit the following patch for ${event.name}?\n\nIf you are not 100% sure of the implications, CANCEL and ASK FOR HELP.\n\n${stringify(dataToPrint)}`,
+      `Warning: are you sure that you want to submit the following changes to ${event.name}?\n\nIf you are not completely sure of the implications, cancel and ask for help.\n\n${stringify(dataToPrint)}`,
     );
 
     if (!confirmation) {

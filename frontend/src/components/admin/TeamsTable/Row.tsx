@@ -36,7 +36,9 @@ const TeamsTableRow = ({
   return (
     <Table.Tr>
       <Table.Td>
-        <Text ff="monospace">{fmtTeamIndex(team.index)}</Text>
+        <Text size="sm" ff="monospace">
+          {fmtTeamIndex(team.index)}
+        </Text>
       </Table.Td>
       <NameTd team={team} ro={view != TableView.General} refetch={refetch} />
       {(view == TableView.Projects ||

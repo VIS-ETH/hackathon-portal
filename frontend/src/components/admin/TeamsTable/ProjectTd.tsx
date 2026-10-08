@@ -1,8 +1,8 @@
-import { useUpdateTeam } from "@/api/gen";
+import { useGetProjects, useUpdateTeam } from "@/api/gen";
 import { AdminTeam } from "@/api/gen/schemas";
 import ProjectSelect from "@/components/select/ProjectSelect";
 
-import { Table } from "@mantine/core";
+import { Table, Text } from "@mantine/core";
 
 import { NIL } from "uuid";
 
@@ -14,6 +14,9 @@ type ProjectTdProps = {
 
 const ProjectTd = ({ team, ro, refetch }: ProjectTdProps) => {
   const updateTeamMutation = useUpdateTeam();
+  const { data: projects = [] } = useGetProjects({
+    event_id: team.event_id,
+  });
 
   const handleUpdate = async (projectId: string | undefined) => {
     await updateTeamMutation.mutateAsync({
@@ -26,6 +29,21 @@ const ProjectTd = ({ team, ro, refetch }: ProjectTdProps) => {
     refetch?.();
   };
 
+  if (ro) {
+    const project = projects.find((p) => p.id === team.project_id);
+    return (
+      <Table.Td>
+        {project ? (
+          <Text size="sm">{project.name}</Text>
+        ) : (
+          <Text size="sm" c="dimmed">
+            No project
+          </Text>
+        )}
+      </Table.Td>
+    );
+  }
+
   return (
     <Table.Td>
       <ProjectSelect
@@ -33,7 +51,6 @@ const ProjectTd = ({ team, ro, refetch }: ProjectTdProps) => {
         projectId={team.project_id ?? undefined}
         setProject={(project) => handleUpdate(project?.id)}
         size="xs"
-        readOnly={ro}
       />
     </Table.Td>
   );

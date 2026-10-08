@@ -3,7 +3,7 @@ export type TableView = (typeof TableView)[keyof typeof TableView];
 export const TableView = {
   General: "General",
   Projects: "Projects",
-  Infra: "Infra",
+  Infra: "Infrastructure",
   Members: "Members",
   Mentors: "Mentors",
   Stakeholders: "Stakeholders",

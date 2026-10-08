@@ -1,7 +1,7 @@
 import { useUpdateTeam } from "@/api/gen";
 import { AdminTeam, TeamForUpdate } from "@/api/gen/schemas";
 import { useBlurSave } from "@/hooks/useBlurSave";
-import { inputProps } from "@/styles/common";
+import { codeInputProps, codeTextareaProps } from "@/styles/common";
 
 import {
   Checkbox,
@@ -48,8 +48,19 @@ const InfrastructureTds = ({ team, refetch }: InfrastructureTdsProps) => {
   return (
     <>
       <Table.Td>
+        <Checkbox
+          size="xs"
+          checked={team.ingress_enabled}
+          onChange={(e) =>
+            handleUpdate({
+              ingress_enabled: e.target.checked,
+            })
+          }
+        />
+      </Table.Td>
+      <Table.Td>
         <TextInput
-          {...(inputProps as TextInputProps)}
+          {...(codeInputProps as TextInputProps)}
           size="xs"
           placeholder={team.managed_address ?? "N/A"}
           value={managedAddress.value}
@@ -61,7 +72,7 @@ const InfrastructureTds = ({ team, refetch }: InfrastructureTdsProps) => {
       </Table.Td>
       <Table.Td>
         <TextInput
-          {...(inputProps as TextInputProps)}
+          {...(codeInputProps as TextInputProps)}
           size="xs"
           placeholder={team.direct_address ?? "N/A"}
           value={directAddress.value}
@@ -73,7 +84,7 @@ const InfrastructureTds = ({ team, refetch }: InfrastructureTdsProps) => {
       </Table.Td>
       <Table.Td>
         <TextInput
-          {...(inputProps as TextInputProps)}
+          {...(codeInputProps as TextInputProps)}
           size="xs"
           placeholder={team.private_address ?? "N/A"}
           value={privateAddress.value}
@@ -85,24 +96,15 @@ const InfrastructureTds = ({ team, refetch }: InfrastructureTdsProps) => {
       </Table.Td>
       <Table.Td>
         <Textarea
-          {...(inputProps as TextareaProps)}
+          {...(codeTextareaProps as TextareaProps)}
           size="xs"
+          minRows={3}
+          wrap="off"
           placeholder={team.ssh_config ?? "N/A"}
           value={sshConfig.value}
           onChange={(e) => sshConfig.setDraft(e.currentTarget.value)}
           onBlur={sshConfig.commit}
           disabled={sshConfig.saving}
-        />
-      </Table.Td>
-      <Table.Td>
-        <Checkbox
-          size="xs"
-          checked={team.ingress_enabled}
-          onChange={(e) =>
-            handleUpdate({
-              ingress_enabled: e.target.checked,
-            })
-          }
         />
       </Table.Td>
     </>

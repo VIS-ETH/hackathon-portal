@@ -2,18 +2,21 @@ import TeamsTableRow from "./Row";
 import { TableView } from "./TableView";
 
 import {
+  getGetProjectsMatchingQueryKey,
   useGetAdminTeams,
   useGetTeamsAffiliates,
   useGetTeamsProjectPreferences,
   useIndexTeams,
 } from "@/api/gen";
 import { Event } from "@/api/gen/schemas";
-import IconTextGroup from "@/components/IconTextGroup";
 import NoEntriesTr from "@/components/NoEntriesTr";
+import { confirmDiscard } from "@/hooks/useUnsavedChanges";
 import {
+  alertProps,
   cardProps,
   cardSectionProps,
   iconProps,
+  largeIconProps,
   segmentedControlProps,
   toolbarButtonProps,
 } from "@/styles/common";
@@ -21,6 +24,7 @@ import {
 import { useState } from "react";
 
 import {
+  Alert,
   Button,
   Card,
   Group,
@@ -32,10 +36,11 @@ import {
 } from "@mantine/core";
 
 import {
-  IconAlertTriangle,
+  IconAlertCircle,
   IconListNumbers,
   IconRefresh,
 } from "@tabler/icons-react";
+import { useQueryClient } from "@tanstack/react-query";
 
 // Shared fallback, so rows without entries get the same array on every render.
 const EMPTY: never[] = [];
@@ -46,34 +51,68 @@ type TeamsTableProps = {
 
 const TeamsTable = ({ event }: TeamsTableProps) => {
   const [view, setView] = useState<TableView>("General");
+  const queryClient = useQueryClient();
 
   const { data: teams = [], refetch: refetchTeams } = useGetAdminTeams({
     event_id: event.id,
   });
 
+  const showsAffiliates =
+    view == TableView.Members ||
+    view == TableView.Mentors ||
+    view == TableView.Stakeholders;
   const { data: teamsAffiliates, refetch: refetchTeamsAffiliates } =
     useGetTeamsAffiliates(
       { event_id: event.id },
-      {
-        query: {
-          enabled:
-            view == TableView.Members ||
-            view == TableView.Mentors ||
-            view == TableView.Stakeholders,
-        },
-      },
+      { query: { enabled: showsAffiliates } },
     );
 
-  const { data: teamsProjectPreferences } = useGetTeamsProjectPreferences(
+  const showsProjectPreferences = view == TableView.Projects;
+  const {
+    data: teamsProjectPreferences,
+    refetch: refetchTeamsProjectPreferences,
+  } = useGetTeamsProjectPreferences(
     { event_id: event.id },
-    { query: { enabled: view == TableView.Projects } },
+    { query: { enabled: showsProjectPreferences } },
   );
+
+  const handleRefresh = () => {
+    refetchTeams();
+    if (showsAffiliates) refetchTeamsAffiliates();
+    if (showsProjectPreferences) {
+      refetchTeamsProjectPreferences();
+      // The matching is fetched per row.
+      queryClient.invalidateQueries({
+        queryKey: getGetProjectsMatchingQueryKey(event.id),
+      });
+    }
+  };
+
+  // Idx and Name, plus the view's own columns in the header below
+  const columnCount =
+    2 +
+    {
+      [TableView.General]: 1,
+      [TableView.Projects]: 5,
+      [TableView.Infra]: 5,
+      [TableView.Members]: event.max_team_size,
+      [TableView.Mentors]: 3,
+      [TableView.Stakeholders]: 2,
+      [TableView.Notes]: 2,
+    }[view];
 
   const indexTeamsMutation = useIndexTeams();
 
+  const handleViewChange = (value: string) => {
+    // Switching unmounts the view's fields, which discards their drafts.
+    if (value !== view && confirmDiscard()) {
+      setView(value as TableView);
+    }
+  };
+
   const handleIndexTeams = async () => {
     const confirmation = confirm(
-      "WARNING - READ THIS: Teams should be indexed at most once per event. The indices are not necessarily stable and the original order is not necessarily preserved. This will cause big confusion for the participants. Are you sure you want to index the teams?",
+      "Warning: teams should be indexed at most once per event. Indexing again can change the indices and doesn't necessarily keep the original order, which confuses the participants. Are you sure you want to index the teams?",
     );
 
     if (!confirmation) {
@@ -89,55 +128,59 @@ const TeamsTable = ({ event }: TeamsTableProps) => {
 
   return (
     <Stack>
+      <Alert
+        {...alertProps}
+        icon={<IconAlertCircle {...largeIconProps} />}
+        color="red"
+        title="Team changes apply immediately"
+      >
+        <Text>
+          Selects and checkboxes save right away. Text and number fields save
+          when you leave them, and single-line text fields also on{" "}
+          <strong>Enter</strong>. Closing or reloading the page with an unsaved
+          edit asks first. <strong>Index Teams</strong> and{" "}
+          <strong>Delete</strong> ask for confirmation.
+        </Text>
+      </Alert>
+      <Group>
+        <SegmentedControl
+          {...(segmentedControlProps as SegmentedControlProps)}
+          data={Object.values(TableView)}
+          value={view}
+          onChange={handleViewChange}
+          disabled={teams.length === 0}
+        />
+      </Group>
       <Card {...cardProps}>
-        <Card.Section {...cardSectionProps}>
-          <IconTextGroup
-            Icon={IconAlertTriangle}
-            iconProps={{ color: "red" }}
-            lg
-          >
-            <Text c="red" fw={600}>
-              Unless specified otherwise, all changes are APPLIED IMMEDIATELY.
-              <br />
-              Text fields are saved when you leave the field or press Enter.
-            </Text>
-          </IconTextGroup>
-        </Card.Section>
         <Card.Section {...cardSectionProps}>
           <Group>
             <Button
               {...toolbarButtonProps}
               leftSection={<IconRefresh {...iconProps} />}
-              onClick={() => {
-                refetchTeams();
-              }}
+              onClick={handleRefresh}
             >
               Refresh
             </Button>
-            <Button
-              {...toolbarButtonProps}
-              color="red"
-              leftSection={<IconListNumbers {...iconProps} />}
-              onClick={handleIndexTeams}
-            >
-              Index Teams
-            </Button>
-
-            <SegmentedControl
-              {...(segmentedControlProps as SegmentedControlProps)}
-              data={Object.values(TableView)}
-              value={view}
-              onChange={(value) => setView(value as keyof typeof TableView)}
-              disabled={teams.length === 0}
-            />
+            {view === TableView.General && (
+              <Button
+                {...toolbarButtonProps}
+                color="red"
+                leftSection={<IconListNumbers {...iconProps} />}
+                onClick={handleIndexTeams}
+              >
+                Index Teams
+              </Button>
+            )}
           </Group>
         </Card.Section>
         <Card.Section>
           <Table.ScrollContainer minWidth={0}>
-            <Table striped>
+            <Table striped horizontalSpacing="md">
               <Table.Thead>
                 <Table.Tr>
-                  <Table.Th miw={50}>Idx</Table.Th>
+                  <Table.Th w={60} miw={60}>
+                    Idx
+                  </Table.Th>
                   <Table.Th miw={200}>Name</Table.Th>
                   {(view == TableView.Projects ||
                     view == TableView.Mentors ||
@@ -156,11 +199,11 @@ const TeamsTable = ({ event }: TeamsTableProps) => {
                   )}
                   {view == TableView.Infra && (
                     <>
-                      <Table.Th miw={200}>Managed Address</Table.Th>
-                      <Table.Th miw={200}>Direct Address</Table.Th>
-                      <Table.Th miw={200}>Private Address</Table.Th>
+                      <Table.Th w={80}>Ingress</Table.Th>
+                      <Table.Th miw={250}>Managed Address</Table.Th>
+                      <Table.Th miw={250}>Direct Address</Table.Th>
+                      <Table.Th miw={250}>Private Address</Table.Th>
                       <Table.Th miw={300}>SSH Config</Table.Th>
-                      <Table.Th miw={200}>Ingress Enabled</Table.Th>
                     </>
                   )}
                   {view == TableView.Members &&
@@ -184,11 +227,13 @@ const TeamsTable = ({ event }: TeamsTableProps) => {
 
                   {view == TableView.Notes && (
                     <>
-                      <Table.Th>Comment</Table.Th>
-                      <Table.Th>Extra Points</Table.Th>
+                      <Table.Th miw={300}>Comment</Table.Th>
+                      <Table.Th w={150}>Extra Points</Table.Th>
                     </>
                   )}
-                  {view == TableView.General && <Table.Th>Actions</Table.Th>}
+                  {view == TableView.General && (
+                    <Table.Th w={1}>Actions</Table.Th>
+                  )}
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
@@ -208,7 +253,7 @@ const TeamsTable = ({ event }: TeamsTableProps) => {
                     />
                   ))
                 ) : (
-                  <NoEntriesTr colSpan={3} />
+                  <NoEntriesTr colSpan={columnCount} />
                 )}
               </Table.Tbody>
             </Table>

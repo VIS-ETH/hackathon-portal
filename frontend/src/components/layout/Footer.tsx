@@ -1,16 +1,20 @@
 import classes from "./Footer.module.css";
 
-import { iconProps } from "@/styles/common";
+import { containerProps, iconProps, wideContainerProps } from "@/styles/common";
 
 import { Container, Flex, Image, SimpleGrid, Stack, Text } from "@mantine/core";
 
 import { IconHeartFilled } from "@tabler/icons-react";
 import Link from "next/link";
 
-const Footer = () => {
+type FooterProps = {
+  wide?: boolean;
+};
+
+const Footer = ({ wide = false }: FooterProps) => {
   return (
     <div className={classes.footer}>
-      <Container my="lg">
+      <Container {...(wide ? wideContainerProps : containerProps)} my="lg">
         <Stack gap={0}>
           <SimpleGrid
             spacing="xl"

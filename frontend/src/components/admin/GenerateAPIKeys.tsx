@@ -2,11 +2,28 @@
 
 import { useCreateTeamAiApiKey } from "@/api/gen";
 import { SecretSubject } from "@/api/gen/schemas";
-import { iconProps, toolbarButtonProps } from "@/styles/common";
+import {
+  badgeProps,
+  iconProps,
+  inputProps,
+  modalProps,
+  primaryButtonProps,
+  toolbarButtonProps,
+} from "@/styles/common";
+import { fmtTeamIndex } from "@/utils";
 
 import { useState } from "react";
 
-import { Button, Modal, NumberInput, Text } from "@mantine/core";
+import {
+  Badge,
+  Button,
+  Group,
+  Modal,
+  NumberInput,
+  NumberInputProps,
+  Stack,
+  Text,
+} from "@mantine/core";
 
 import { useDisclosure, useMap } from "@mantine/hooks";
 
@@ -40,7 +57,7 @@ const GenerateAPIKeys = ({ teams, refetch }: GenerateAPIKeysProps) => {
 
   const handleGenerateKeys = async () => {
     const confirmation = confirm(
-      `Are you sure you want to generate AI API keys for ${teams.length} teams with a total budget of $${(budget as number) * teams.length}? \nThis should only be DONE ONCE and only AFTER indexing the teams.`,
+      `Are you sure you want to generate AI API keys for ${teams.length} teams with a total budget of $${(budget as number) * teams.length}?\n\nDo this only once, and only after indexing the teams.`,
     );
 
     if (!confirmation) {
@@ -54,37 +71,60 @@ const GenerateAPIKeys = ({ teams, refetch }: GenerateAPIKeysProps) => {
   return (
     <>
       <Modal
+        {...modalProps}
         opened={opened}
         onClose={close}
         title="AI API Key Generation"
         centered
       >
-        <NumberInput
-          label="Budget"
-          placeholder="USD"
-          prefix="$"
-          value={budget}
-          onChange={(value) => setBudget(value)}
-          min={0}
-        />
-        <Text>
-          Maximal total expenses {(budget as number) * teams.length} USD
-        </Text>
-        <Button
-          mt="md"
-          w="100%"
-          onClick={handleGenerateKeys}
-          disabled={budget === ""}
-        >
-          Generate AI Keys for Teams{" "}
-        </Button>
+        <Stack>
+          <NumberInput
+            {...(inputProps as NumberInputProps)}
+            size="sm"
+            label="Budget per team"
+            description={`$${(budget as number) * teams.length} in total for ${teams.length} teams`}
+            placeholder="USD"
+            prefix="$"
+            value={budget}
+            onChange={(value) => setBudget(value)}
+            min={0}
+          />
+          <Button
+            {...primaryButtonProps}
+            onClick={handleGenerateKeys}
+            disabled={budget === ""}
+          >
+            Generate AI Keys for Teams
+          </Button>
 
-        {teamKeyStatus.size > 0 &&
-          teamKeyStatus.entries().map(([teamKey, status]) => (
-            <Text key={teamKey}>
-              {teamKey}: {status}
-            </Text>
-          ))}
+          {teamKeyStatus.size > 0 && (
+            <Stack gap="xs">
+              {teams
+                .filter((team) => teamKeyStatus.has(team.key))
+                .map((team) => (
+                  <Group key={team.key} justify="space-between" wrap="nowrap">
+                    <Text size="sm">
+                      {team.index != null && (
+                        <Text span inherit ff="monospace" c="dimmed">
+                          {fmtTeamIndex(team.index)}{" "}
+                        </Text>
+                      )}
+                      {team.label}
+                    </Text>
+                    {teamKeyStatus.get(team.key) === "success" ? (
+                      <Badge {...badgeProps} color="green" variant="light">
+                        Created
+                      </Badge>
+                    ) : (
+                      <Badge {...badgeProps} color="red" variant="light">
+                        Failed
+                      </Badge>
+                    )}
+                  </Group>
+                ))}
+            </Stack>
+          )}
+        </Stack>
       </Modal>
 
       <Button
