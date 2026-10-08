@@ -5,13 +5,7 @@ import { inputProps } from "@/styles/common";
 
 import { useEffect, useState } from "react";
 
-import {
-  PasswordInput,
-  PasswordInputProps,
-  Progress,
-  Stack,
-  Text,
-} from "@mantine/core";
+import { PasswordInput, Progress, Stack, Text } from "@mantine/core";
 
 type AIKeyUsageProps = {
   liteLLMUrl: string;
@@ -57,7 +51,7 @@ const SecretsList = ({ secrets }: SecretsListProps) => {
       {secrets.map((secret) => (
         <Stack key={secret.name} gap="xs">
           <PasswordInput
-            {...(inputProps as PasswordInputProps)}
+            {...inputProps}
             size="sm"
             label={secret.name}
             value={secret.value}

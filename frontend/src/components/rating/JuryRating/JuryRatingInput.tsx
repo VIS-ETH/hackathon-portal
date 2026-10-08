@@ -7,6 +7,8 @@ import {
   useUpdateJuryRating,
 } from "@/api/gen";
 
+import { useState } from "react";
+
 const JuryRatingInput = ({
   teamId,
   category,
@@ -18,6 +20,8 @@ const JuryRatingInput = ({
     team_id: teamId,
   });
 
+  const [saving, setSaving] = useState(false);
+
   const createRatingMutation = useCreateJuryRating();
   const updateRatingMutation = useUpdateJuryRating();
 
@@ -26,6 +30,21 @@ const JuryRatingInput = ({
   );
 
   const handleUpdate = async (value: number) => {
+    // Until the refetch returns the new rating, another click would create a second one.
+    if (saving) {
+      return;
+    }
+
+    setSaving(true);
+    try {
+      await saveRating(value);
+      await refetchRatings();
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const saveRating = async (value: number) => {
     if (rating) {
       await updateRatingMutation.mutateAsync({
         ratingId: rating.id,
@@ -42,8 +61,6 @@ const JuryRatingInput = ({
         },
       });
     }
-
-    refetchRatings();
   };
 
   return (

@@ -6,7 +6,7 @@ import { fmtTeamIndex } from "@/utils";
 
 import { memo } from "react";
 
-import { PasswordInput, PasswordInputProps, Table, Text } from "@mantine/core";
+import { PasswordInput, Table, Text } from "@mantine/core";
 
 type SecretCellProps = {
   secret: Secret;
@@ -30,7 +30,7 @@ const SecretCell = ({ secret, subject, onSecretChange }: SecretCellProps) => {
   return (
     <Table.Td>
       <PasswordInput
-        {...(inputProps as PasswordInputProps)}
+        {...inputProps}
         size="xs"
         placeholder="N/A"
         value={value.value}

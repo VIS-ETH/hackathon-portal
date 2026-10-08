@@ -1,12 +1,14 @@
+import EntitySelect from "./EntitySelect";
+
 import { useGetProjects } from "@/api/gen";
 import { Project } from "@/api/gen/schemas";
-import { inputProps } from "@/styles/common";
 
-import { useMemo } from "react";
+import { SelectProps } from "@mantine/core";
 
-import { Select, SelectProps } from "@mantine/core";
-
-type ProjectSelectProps = SelectProps & {
+type ProjectSelectProps = Omit<
+  SelectProps,
+  "data" | "value" | "onChange" | "placeholder" | "searchable" | "clearable"
+> & {
   eventId: string;
   projectId?: string;
   setProject: (project: Project | undefined) => void;
@@ -22,32 +24,13 @@ const ProjectSelect = ({
     event_id: eventId,
   });
 
-  const options = useMemo(
-    () =>
-      (projects ?? []).map((project) => ({
-        label: project.name,
-        value: project.id,
-      })),
-    [projects],
-  );
-
   return (
-    <Select
-      {...(inputProps as SelectProps)}
-      comboboxProps={{ keepMounted: false }}
+    <EntitySelect
       {...additionalProps}
-      data={options}
-      value={projectId ?? null} // Mantine expects null and not undefined
-      onChange={(value) => {
-        if (value === null) {
-          setProject(undefined);
-        } else {
-          setProject(projects?.find((project) => project.id === value));
-        }
-      }}
-      placeholder={`Select project`}
-      searchable
-      clearable
+      entities={projects}
+      entityId={projectId}
+      setEntity={setProject}
+      placeholder="Select project"
     />
   );
 };

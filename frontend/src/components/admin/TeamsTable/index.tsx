@@ -29,7 +29,6 @@ import {
   Card,
   Group,
   SegmentedControl,
-  SegmentedControlProps,
   Stack,
   Table,
   Text,
@@ -144,7 +143,7 @@ const TeamsTable = ({ event }: TeamsTableProps) => {
       </Alert>
       <Group>
         <SegmentedControl
-          {...(segmentedControlProps as SegmentedControlProps)}
+          {...segmentedControlProps}
           data={Object.values(TableView)}
           value={view}
           onChange={handleViewChange}

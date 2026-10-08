@@ -1,26 +1,20 @@
-import MarkdownCard from "../MarkdownCard";
+import DrawerMarkdown from "../DrawerMarkdown";
 
 import { useCreateProject } from "@/api/gen";
 import { ProjectForCreate } from "@/api/gen/schemas";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
-import { inputProps, primaryButtonProps, textareaProps } from "@/styles/common";
+import {
+  drawerProps,
+  inputProps,
+  primaryButtonProps,
+  textareaProps,
+} from "@/styles/common";
 
 import { useEffect } from "react";
 
-import {
-  Button,
-  Divider,
-  Drawer,
-  Stack,
-  TextInput,
-  TextInputProps,
-  Textarea,
-  TextareaProps,
-} from "@mantine/core";
+import { Button, Drawer, Stack, TextInput, Textarea } from "@mantine/core";
 
 import { useForm } from "@mantine/form";
-
-import { produce } from "immer";
 
 type CreateProjectDrawerProps = {
   eventId: string;
@@ -37,12 +31,8 @@ const CreateProjectDrawer = ({
 }: CreateProjectDrawerProps) => {
   const form = useForm<ProjectForCreate>({
     mode: "controlled",
+    initialValues: { event_id: eventId, name: "", content: "" },
     validateInputOnChange: true,
-    transformValues: (values) =>
-      produce(values, (draft) => {
-        draft.event_id = eventId;
-        return draft;
-      }),
   });
 
   const createProjectMutation = useCreateProject();
@@ -64,8 +54,7 @@ const CreateProjectDrawer = ({
 
   return (
     <Drawer
-      position="right"
-      size="xl"
+      {...drawerProps}
       opened={opened}
       onClose={() => confirmClose() && onClose()}
       title="Create Project"
@@ -73,13 +62,13 @@ const CreateProjectDrawer = ({
       <form onSubmit={form.onSubmit(handleSubmit)}>
         <Stack>
           <TextInput
-            {...(inputProps as TextInputProps)}
+            {...inputProps}
             {...form.getInputProps("name")}
             label="Name"
             required
           />
           <Textarea
-            {...(textareaProps as TextareaProps)}
+            {...textareaProps}
             {...form.getInputProps("content")}
             label="Content"
             description="Supports Markdown"
@@ -89,14 +78,11 @@ const CreateProjectDrawer = ({
             {...primaryButtonProps}
             type="submit"
             disabled={!form.isValid()}
+            loading={createProjectMutation.isPending}
           >
             Create
           </Button>
-          <Divider />
-          <MarkdownCard
-            trusted
-            content={form.getValues().content || "Nothing to preview"}
-          />
+          <DrawerMarkdown content={form.getValues().content} />
         </Stack>
       </form>
     </Drawer>

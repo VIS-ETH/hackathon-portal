@@ -14,16 +14,7 @@ import {
 
 import { useState } from "react";
 
-import {
-  Button,
-  Card,
-  Group,
-  Select,
-  SelectProps,
-  Stack,
-  Textarea,
-  TextareaProps,
-} from "@mantine/core";
+import { Button, Card, Group, Select, Stack, Textarea } from "@mantine/core";
 
 import { IconPlayerPlay } from "@tabler/icons-react";
 import { parse } from "yaml";
@@ -153,16 +144,17 @@ const SecretImportControls = ({
       <Card.Section {...cardSectionProps}>
         <Stack>
           <Textarea
-            {...(codeTextareaProps as TextareaProps)}
+            {...codeTextareaProps}
             value={input}
             onChange={(event) => setInput(event.currentTarget.value)}
+            label="Values"
+            description="YAML. Empty values are skipped."
             placeholder={placeholder}
-            description="Import values as YAML. Empty values are skipped."
             disabled={disabled}
           />
           <Group justify="space-between">
             <Select
-              {...(inputProps as SelectProps)}
+              {...inputProps}
               size="sm"
               placeholder="Secret"
               data={secrets.map((secret) => ({

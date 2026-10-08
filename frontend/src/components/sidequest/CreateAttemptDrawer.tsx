@@ -1,4 +1,4 @@
-import MarkdownCard from "../MarkdownCard";
+import DrawerMarkdown from "../DrawerMarkdown";
 import SidequestSelect from "../select/SidequestSelect";
 import TeamAffiliateSelect from "../select/TeamAffiliateSelect";
 import TeamSelect from "../select/TeamSelect";
@@ -16,18 +16,11 @@ import {
   TeamRole,
 } from "@/api/gen/schemas";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
-import { inputProps, primaryButtonProps } from "@/styles/common";
+import { drawerProps, inputProps, primaryButtonProps } from "@/styles/common";
 
 import { useState } from "react";
 
-import {
-  Button,
-  Divider,
-  Drawer,
-  NumberInput,
-  NumberInputProps,
-  Stack,
-} from "@mantine/core";
+import { Button, Drawer, NumberInput, Stack } from "@mantine/core";
 
 type CreateAttemptDrawerProps = {
   eventId: string;
@@ -45,7 +38,7 @@ const CreateAttemptDrawer = ({
   const [team, setTeam] = useState<Team | undefined>();
   const [user, setUser] = useState<TeamAffiliate | undefined>();
   const [sidequest, setSidequest] = useState<Sidequest | undefined>();
-  const [result, setResult] = useState<number>(0);
+  const [result, setResult] = useState<number | string>(0);
   const [prevOpened, setPrevOpened] = useState(opened);
 
   const { data: cooldown, refetch: refetchCooldown } =
@@ -80,7 +73,7 @@ const CreateAttemptDrawer = ({
   }
 
   const handleSubmit = async () => {
-    if (!team || !user || !sidequest) {
+    if (!team || !user || !sidequest || typeof result !== "number") {
       return;
     }
 
@@ -103,7 +96,7 @@ const CreateAttemptDrawer = ({
 
   return (
     <Drawer
-      position="right"
+      {...drawerProps}
       opened={opened}
       onClose={() => confirmClose() && onClose()}
       title="Create Attempt"
@@ -138,20 +131,19 @@ const CreateAttemptDrawer = ({
                     {canAttempt && (
                       <>
                         <NumberInput
-                          {...(inputProps as NumberInputProps)}
+                          {...inputProps}
                           value={result}
-                          onChange={(value) =>
-                            setResult(
-                              typeof value === "number"
-                                ? value
-                                : parseFloat(value),
-                            )
-                          }
+                          onChange={setResult}
                           label="Result"
                           description="Refer to the sidequest description for the expected unit"
                           required
                         />
-                        <Button {...primaryButtonProps} onClick={handleSubmit}>
+                        <Button
+                          {...primaryButtonProps}
+                          disabled={typeof result !== "number"}
+                          onClick={handleSubmit}
+                          loading={createAttemptMutation.isPending}
+                        >
                           Create
                         </Button>
                       </>
@@ -160,8 +152,7 @@ const CreateAttemptDrawer = ({
                 )}
               </>
             )}
-            <Divider />
-            <MarkdownCard trusted content={sidequest.description} />
+            <DrawerMarkdown content={sidequest.description} />
           </>
         )}
       </Stack>

@@ -26,7 +26,6 @@ import {
   Combobox,
   Group,
   Select,
-  SelectProps,
   Skeleton,
   Stack,
   Text,
@@ -164,7 +163,7 @@ const RankingPanel = ({ eventId }: RankingPanelProps) => {
       <Card.Section {...cardSectionProps}>
         <Group>
           <Select
-            {...(inputProps as SelectProps)}
+            {...inputProps}
             size="sm"
             w={280}
             allowDeselect={false}

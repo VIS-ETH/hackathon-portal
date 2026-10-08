@@ -7,7 +7,7 @@ import { primaryButtonProps, textareaProps } from "@/styles/common";
 
 import { useState } from "react";
 
-import { Button, Group, Stack, Textarea, TextareaProps } from "@mantine/core";
+import { Button, Group, Stack, Textarea } from "@mantine/core";
 
 type EventContentControlsProps = {
   event: Event;
@@ -43,7 +43,7 @@ const EventContentControls = ({
   return (
     <Stack>
       <Textarea
-        {...(textareaProps as TextareaProps)}
+        {...textareaProps}
         value={localContent}
         onChange={(e) => setLocalContent(e.currentTarget.value)}
         label={label}
@@ -59,6 +59,7 @@ const EventContentControls = ({
           {...primaryButtonProps}
           disabled={!hasChanges}
           onClick={handleSave}
+          loading={updateEventMutation.isPending}
         >
           Save
         </Button>

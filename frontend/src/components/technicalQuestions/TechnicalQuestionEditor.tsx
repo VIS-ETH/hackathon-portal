@@ -15,11 +15,9 @@ import {
   Checkbox,
   Group,
   NumberInput,
-  NumberInputProps,
   Stack,
   Text,
   TextInput,
-  TextInputProps,
   Textarea,
 } from "@mantine/core";
 
@@ -159,7 +157,7 @@ const TechnicalQuestionEditor = ({
   return (
     <Stack>
       <TextInput
-        {...(inputProps as TextInputProps)}
+        {...inputProps}
         label="Question"
         value={question}
         onChange={(e) => setQuestion(e.currentTarget.value)}
@@ -172,7 +170,7 @@ const TechnicalQuestionEditor = ({
       />
       <Group grow>
         <NumberInput
-          {...(inputProps as NumberInputProps)}
+          {...inputProps}
           label="Min points"
           value={minPoints}
           onChange={(value) =>
@@ -181,7 +179,7 @@ const TechnicalQuestionEditor = ({
           allowDecimal={false}
         />
         <NumberInput
-          {...(inputProps as NumberInputProps)}
+          {...inputProps}
           label="Max points"
           value={maxPoints}
           onChange={(value) =>

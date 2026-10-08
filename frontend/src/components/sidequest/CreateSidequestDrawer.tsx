@@ -1,27 +1,27 @@
-import MarkdownCard from "../MarkdownCard";
+import DrawerMarkdown from "../DrawerMarkdown";
 
 import { useCreateSidequest } from "@/api/gen";
 import { SidequestForCreate } from "@/api/gen/schemas";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
-import { inputProps, primaryButtonProps, textareaProps } from "@/styles/common";
+import {
+  drawerProps,
+  inputProps,
+  primaryButtonProps,
+  textareaProps,
+} from "@/styles/common";
 
 import { useEffect } from "react";
 
 import {
   Button,
   Checkbox,
-  Divider,
   Drawer,
   Stack,
   TextInput,
-  TextInputProps,
   Textarea,
-  TextareaProps,
 } from "@mantine/core";
 
 import { useForm } from "@mantine/form";
-
-import { produce } from "immer";
 
 type CreateSidequestDrawerProps = {
   eventId: string;
@@ -38,13 +38,13 @@ const CreateSidequestDrawer = ({
 }: CreateSidequestDrawerProps) => {
   const form = useForm<SidequestForCreate>({
     mode: "controlled",
+    initialValues: {
+      event_id: eventId,
+      name: "",
+      description: "",
+      is_higher_result_better: false,
+    },
     validateInputOnChange: true,
-    transformValues: (values) =>
-      produce(values, (draft) => {
-        draft.event_id = eventId;
-        draft.is_higher_result_better = !!draft.is_higher_result_better;
-        return draft;
-      }),
   });
 
   const createSidequestMutation = useCreateSidequest();
@@ -66,8 +66,7 @@ const CreateSidequestDrawer = ({
 
   return (
     <Drawer
-      position="right"
-      size="xl"
+      {...drawerProps}
       opened={opened}
       onClose={() => confirmClose() && onClose()}
       title="Create Sidequest"
@@ -75,14 +74,14 @@ const CreateSidequestDrawer = ({
       <form onSubmit={form.onSubmit(handleSubmit)}>
         <Stack>
           <TextInput
-            {...(inputProps as TextInputProps)}
+            {...inputProps}
             {...form.getInputProps("name")}
             key={form.key("name")}
             label="Name"
             required
           />
           <Textarea
-            {...(textareaProps as TextareaProps)}
+            {...textareaProps}
             {...form.getInputProps("description")}
             key={form.key("description")}
             label="Description"
@@ -100,14 +99,11 @@ const CreateSidequestDrawer = ({
             {...primaryButtonProps}
             type="submit"
             disabled={!form.isValid()}
+            loading={createSidequestMutation.isPending}
           >
             Create
           </Button>
-          <Divider />
-          <MarkdownCard
-            trusted
-            content={form.getValues().description || "Nothing to preview"}
-          />
+          <DrawerMarkdown content={form.getValues().description} />
         </Stack>
       </form>
     </Drawer>

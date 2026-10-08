@@ -1,6 +1,7 @@
+import EntitySelect from "./EntitySelect";
+
 import { useGetTeams } from "@/api/gen";
 import { Team } from "@/api/gen/schemas";
-import { inputProps } from "@/styles/common";
 import { fmtTeamIndex } from "@/utils";
 
 import { useMemo } from "react";
@@ -9,12 +10,22 @@ import {
   ComboboxItem,
   Group,
   OptionsFilter,
-  Select,
   SelectProps,
   Text,
 } from "@mantine/core";
 
-type TeamSelectProps = SelectProps & {
+type TeamSelectProps = Omit<
+  SelectProps,
+  | "data"
+  | "value"
+  | "onChange"
+  | "placeholder"
+  | "searchable"
+  | "clearable"
+  | "leftSection"
+  | "renderOption"
+  | "filter"
+> & {
   eventId: string;
   teamId?: string;
   setTeam: (team: Team | undefined) => void;
@@ -29,15 +40,6 @@ const TeamSelect = ({
   const { data: teams } = useGetTeams({
     event_id: eventId,
   });
-
-  const options = useMemo(
-    () =>
-      (teams ?? []).map((team) => ({
-        label: team.name,
-        value: team.id,
-      })),
-    [teams],
-  );
 
   // the index is rendered next to the name, in monospace
   const indexById = useMemo(
@@ -62,19 +64,11 @@ const TeamSelect = ({
   };
 
   return (
-    <Select
-      {...(inputProps as SelectProps)}
-      comboboxProps={{ keepMounted: false }}
+    <EntitySelect
       {...additionalProps}
-      data={options}
-      value={teamId ?? null} // Mantine expects null and not undefined
-      onChange={(value) => {
-        if (value === null) {
-          setTeam(undefined);
-        } else {
-          setTeam(teams?.find((team) => team.id === value));
-        }
-      }}
+      entities={teams}
+      entityId={teamId}
+      setEntity={setTeam}
       leftSection={teamId ? teamIndex(teamId) : undefined}
       renderOption={({ option }) => (
         <Group gap="xs" wrap="nowrap" align="baseline">
@@ -83,9 +77,7 @@ const TeamSelect = ({
         </Group>
       )}
       filter={filter}
-      placeholder={`Select team`}
-      searchable
-      clearable
+      placeholder="Select team"
     />
   );
 };

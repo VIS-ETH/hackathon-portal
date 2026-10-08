@@ -3,14 +3,7 @@ import { AdminTeam, TeamForUpdate } from "@/api/gen/schemas";
 import { useBlurSave } from "@/hooks/useBlurSave";
 import { codeInputProps, codeTextareaProps } from "@/styles/common";
 
-import {
-  Checkbox,
-  Table,
-  TextInput,
-  TextInputProps,
-  Textarea,
-  TextareaProps,
-} from "@mantine/core";
+import { Checkbox, Table, TextInput, Textarea } from "@mantine/core";
 
 type InfrastructureTdsProps = {
   team: AdminTeam;
@@ -60,7 +53,7 @@ const InfrastructureTds = ({ team, refetch }: InfrastructureTdsProps) => {
       </Table.Td>
       <Table.Td>
         <TextInput
-          {...(codeInputProps as TextInputProps)}
+          {...codeInputProps}
           size="xs"
           placeholder={team.managed_address ?? "N/A"}
           value={managedAddress.value}
@@ -72,7 +65,7 @@ const InfrastructureTds = ({ team, refetch }: InfrastructureTdsProps) => {
       </Table.Td>
       <Table.Td>
         <TextInput
-          {...(codeInputProps as TextInputProps)}
+          {...codeInputProps}
           size="xs"
           placeholder={team.direct_address ?? "N/A"}
           value={directAddress.value}
@@ -84,7 +77,7 @@ const InfrastructureTds = ({ team, refetch }: InfrastructureTdsProps) => {
       </Table.Td>
       <Table.Td>
         <TextInput
-          {...(codeInputProps as TextInputProps)}
+          {...codeInputProps}
           size="xs"
           placeholder={team.private_address ?? "N/A"}
           value={privateAddress.value}
@@ -96,7 +89,7 @@ const InfrastructureTds = ({ team, refetch }: InfrastructureTdsProps) => {
       </Table.Td>
       <Table.Td>
         <Textarea
-          {...(codeTextareaProps as TextareaProps)}
+          {...codeTextareaProps}
           size="xs"
           minRows={3}
           wrap="off"

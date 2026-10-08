@@ -4,13 +4,7 @@ import { AccessControlMode, ManagedIngressConfig } from "@/api/gen/schemas";
 import { cardSectionProps, inputProps } from "@/styles/common";
 import { parseIntStrict } from "@/utils";
 
-import {
-  Card,
-  NumberInput,
-  NumberInputProps,
-  Radio,
-  Stack,
-} from "@mantine/core";
+import { Card, NumberInput, Radio, Stack } from "@mantine/core";
 
 import { produce } from "immer";
 
@@ -73,7 +67,7 @@ const ManagedIngressControls = ({
       </Card.Section>
       <Card.Section {...cardSectionProps}>
         <NumberInput
-          {...(inputProps as NumberInputProps)}
+          {...inputProps}
           size="sm"
           value={config.server_port}
           onChange={(value) => handleUpdateServerPort(value)}

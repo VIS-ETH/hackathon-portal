@@ -13,6 +13,10 @@ type CreateTeamProps = {
 const CreateTeamCard = ({ eventId, refetch }: CreateTeamProps) => {
   const createTeamMutations = useCreateTeam();
 
+  // Until the refetched team replaces this card, so it isn't created twice.
+  const creating =
+    createTeamMutations.isPending || createTeamMutations.isSuccess;
+
   const handleCreate = async () => {
     const name = `${faker.color.human()} ${faker.animal.type()}`;
 
@@ -41,7 +45,11 @@ const CreateTeamCard = ({ eventId, refetch }: CreateTeamProps) => {
           </Stack>
         </Center>
         <Center>
-          <Button {...primaryButtonProps} onClick={handleCreate}>
+          <Button
+            {...primaryButtonProps}
+            onClick={handleCreate}
+            loading={creating}
+          >
             Create Team
           </Button>
         </Center>

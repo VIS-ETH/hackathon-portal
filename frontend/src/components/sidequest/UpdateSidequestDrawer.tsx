@@ -1,56 +1,45 @@
-import MarkdownCard from "../MarkdownCard";
+import DrawerMarkdown from "../DrawerMarkdown";
 
 import { useUpdateSidequest } from "@/api/gen";
 import { Sidequest, SidequestForUpdate } from "@/api/gen/schemas";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
-import { inputProps, primaryButtonProps, textareaProps } from "@/styles/common";
+import {
+  drawerProps,
+  inputProps,
+  primaryButtonProps,
+  textareaProps,
+} from "@/styles/common";
+import { modifiedValues } from "@/utils/form";
 
 import { useEffect } from "react";
 
 import {
   Button,
   Checkbox,
-  Divider,
   Drawer,
   Stack,
   TextInput,
-  TextInputProps,
   Textarea,
-  TextareaProps,
 } from "@mantine/core";
 
 import { useForm } from "@mantine/form";
-
-import { produce } from "immer";
 
 type UpdateSidequestDrawerProps = {
   sidequest: Sidequest;
   opened: boolean;
   onClose: () => void;
-  refetch?: () => void;
+  onUpdated?: (sidequest: Sidequest) => void;
 };
 
 const UpdateSidequestDrawer = ({
   sidequest,
   opened,
   onClose,
-  refetch,
+  onUpdated,
 }: UpdateSidequestDrawerProps) => {
   const form = useForm<SidequestForUpdate>({
     mode: "controlled",
     validateInputOnChange: true,
-    transformValues: (values) =>
-      produce(values, (draft) => {
-        if (draft.name === sidequest.name) {
-          delete draft.name;
-        }
-
-        if (draft.description === sidequest.description) {
-          delete draft.description;
-        }
-
-        return draft;
-      }),
   });
 
   const updateSidequestMutation = useUpdateSidequest();
@@ -67,20 +56,19 @@ const UpdateSidequestDrawer = ({
     form.reset();
   }, [form.setInitialValues, form.reset, sidequest, opened]);
 
-  const handleSubmit = async (data: SidequestForUpdate) => {
-    await updateSidequestMutation.mutateAsync({
+  const handleSubmit = async (values: SidequestForUpdate) => {
+    const updatedSidequest = await updateSidequestMutation.mutateAsync({
       sidequestId: sidequest.id,
-      data,
+      data: modifiedValues(form, values),
     });
 
-    refetch?.();
+    onUpdated?.(updatedSidequest);
     onClose();
   };
 
   return (
     <Drawer
-      position="right"
-      size="xl"
+      {...drawerProps}
       opened={opened}
       onClose={() => confirmClose() && onClose()}
       title="Update Sidequest"
@@ -88,20 +76,18 @@ const UpdateSidequestDrawer = ({
       <form onSubmit={form.onSubmit(handleSubmit)}>
         <Stack>
           <TextInput
-            {...(inputProps as TextInputProps)}
+            {...inputProps}
             {...form.getInputProps("name")}
             key={form.key("name")}
             label="Name"
             required
-            placeholder={sidequest.name}
           />
           <Textarea
-            {...(textareaProps as TextareaProps)}
+            {...textareaProps}
             {...form.getInputProps("description")}
             key={form.key("description")}
             label="Description"
             description="Supports Markdown"
-            placeholder={sidequest.description}
             required
           />
           <Checkbox
@@ -115,14 +101,11 @@ const UpdateSidequestDrawer = ({
             {...primaryButtonProps}
             type="submit"
             disabled={!form.isValid()}
+            loading={updateSidequestMutation.isPending}
           >
             Update
           </Button>
-          <Divider />
-          <MarkdownCard
-            trusted
-            content={form.getValues().description || "Nothing to preview"}
-          />
+          <DrawerMarkdown content={form.getValues().description} />
         </Stack>
       </form>
     </Drawer>

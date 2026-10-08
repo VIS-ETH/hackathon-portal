@@ -20,7 +20,6 @@ import {
   Group,
   Modal,
   NumberInput,
-  NumberInputProps,
   Stack,
   Text,
 } from "@mantine/core";
@@ -37,6 +36,7 @@ type GenerateAPIKeysProps = {
 const GenerateAPIKeys = ({ teams, refetch }: GenerateAPIKeysProps) => {
   const [budget, setBudget] = useState<string | number>("");
   const [opened, { open, close }] = useDisclosure(false);
+  const [generating, setGenerating] = useState(false);
   const generateKeysMutation = useCreateTeamAiApiKey();
   const teamKeyStatus = useMap<string, string>();
 
@@ -64,8 +64,13 @@ const GenerateAPIKeys = ({ teams, refetch }: GenerateAPIKeysProps) => {
       return;
     }
 
-    await Promise.all(teams.map(createKeyForTeam));
-    await refetch();
+    setGenerating(true);
+    try {
+      await Promise.all(teams.map(createKeyForTeam));
+      await refetch();
+    } finally {
+      setGenerating(false);
+    }
   };
 
   return (
@@ -79,7 +84,7 @@ const GenerateAPIKeys = ({ teams, refetch }: GenerateAPIKeysProps) => {
       >
         <Stack>
           <NumberInput
-            {...(inputProps as NumberInputProps)}
+            {...inputProps}
             size="sm"
             label="Budget per team"
             description={`$${(budget as number) * teams.length} in total for ${teams.length} teams`}
@@ -93,6 +98,7 @@ const GenerateAPIKeys = ({ teams, refetch }: GenerateAPIKeysProps) => {
             {...primaryButtonProps}
             onClick={handleGenerateKeys}
             disabled={budget === ""}
+            loading={generating}
           >
             Generate AI Keys for Teams
           </Button>

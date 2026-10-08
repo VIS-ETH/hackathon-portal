@@ -1,7 +1,16 @@
+import DrawerMarkdown from "../DrawerMarkdown";
+import { AppointmentFormValues } from "./UpdateAppointmentDrawer";
+
 import { useCreateAppointment } from "@/api/gen";
 import { AppointmentForCreate } from "@/api/gen/schemas";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
-import { inputProps, primaryButtonProps, textareaProps } from "@/styles/common";
+import {
+  drawerProps,
+  inputProps,
+  primaryButtonProps,
+  textareaProps,
+} from "@/styles/common";
+import { toUtcDate } from "@/utils/form";
 
 import { useEffect } from "react";
 
@@ -11,15 +20,11 @@ import {
   Drawer,
   Stack,
   TextInput,
-  TextInputProps,
   Textarea,
-  TextareaProps,
 } from "@mantine/core";
 
-import { DateTimePicker, DateTimePickerProps } from "@mantine/dates";
-import { useForm } from "@mantine/form";
-
-import { produce } from "immer";
+import { DateTimePicker } from "@mantine/dates";
+import { isNotEmpty, useForm } from "@mantine/form";
 
 type CreateAppointmentDrawerProps = {
   eventId: string;
@@ -35,24 +40,29 @@ const CreateAppointmentDrawer = ({
   refetch,
 }: CreateAppointmentDrawerProps) => {
   const form = useForm<
-    AppointmentForCreate & {
-      setEnd: boolean;
-    }
+    AppointmentFormValues,
+    (values: AppointmentFormValues) => AppointmentForCreate
   >({
     mode: "controlled",
+    initialValues: {
+      title: "",
+      description: "",
+      content: "",
+      start: "",
+      end: "",
+      setEnd: false,
+    },
+    validate: {
+      title: isNotEmpty("Title must not be empty"),
+      start: isNotEmpty("Start must not be empty"),
+    },
     validateInputOnChange: true,
-    transformValues: (values) =>
-      produce(values, (draft) => {
-        draft.title = values.title;
-        draft.event_id = eventId;
-        draft.start = new Date(values.start).toISOString().replace("Z", "");
-        if (values.end) {
-          draft.end = new Date(values.end).toISOString().replace("Z", "");
-        } else {
-          draft.end = null;
-        }
-        return draft;
-      }),
+    transformValues: ({ setEnd, ...values }) => ({
+      ...values,
+      event_id: eventId,
+      start: toUtcDate(values.start),
+      end: setEnd && values.end ? toUtcDate(values.end) : null,
+    }),
   });
   const createAppointmentMutation = useCreateAppointment();
 
@@ -71,7 +81,7 @@ const CreateAppointmentDrawer = ({
 
   return (
     <Drawer
-      position="right"
+      {...drawerProps}
       opened={opened}
       onClose={() => confirmClose() && onClose()}
       title="Create Appointment"
@@ -79,31 +89,30 @@ const CreateAppointmentDrawer = ({
       <form onSubmit={form.onSubmit(handleSubmit)}>
         <Stack>
           <TextInput
-            {...(inputProps as TextInputProps)}
+            {...inputProps}
             {...form.getInputProps("title")}
             label="Title"
             placeholder="Opening Ceremony"
             required
           />
           <TextInput
-            {...(inputProps as TextInputProps)}
+            {...inputProps}
             {...form.getInputProps("description")}
             label="Description"
             placeholder="Audimax (HG F30)"
           />
           <Textarea
-            {...(textareaProps as TextareaProps)}
+            {...textareaProps}
             {...form.getInputProps("content")}
             label="Content"
             description="Supports Markdown"
           />
           <DateTimePicker
-            {...(inputProps as DateTimePickerProps)}
+            {...inputProps}
             {...form.getInputProps("start")}
             label="Start"
             required
           />
-          {/* {typeof (form.getValues().startDate)} */}
           <Checkbox
             checked={form.getValues().setEnd}
             onChange={() =>
@@ -113,7 +122,7 @@ const CreateAppointmentDrawer = ({
           />
           {form.getValues().setEnd && (
             <DateTimePicker
-              {...(inputProps as DateTimePickerProps)}
+              {...inputProps}
               {...form.getInputProps("end")}
               label="End"
             />
@@ -122,9 +131,11 @@ const CreateAppointmentDrawer = ({
             {...primaryButtonProps}
             type="submit"
             disabled={!form.isValid()}
+            loading={createAppointmentMutation.isPending}
           >
             Create
           </Button>
+          <DrawerMarkdown content={form.getValues().content} />
         </Stack>
       </form>
     </Drawer>

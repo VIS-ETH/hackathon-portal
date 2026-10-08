@@ -1,6 +1,7 @@
 "use client";
 
 import { useDeleteProject, useGetProjects } from "@/api/gen";
+import { Project as ProjectDTO } from "@/api/gen/schemas";
 import MarkdownCard from "@/components/MarkdownCard";
 import PageSkeleton from "@/components/PageSkeleton";
 import UpdateProjectDrawer from "@/components/project/UpdateProjectDrawer";
@@ -33,9 +34,14 @@ const Project = () => {
     return <PageSkeleton />;
   }
 
-  const refetch = () => {
-    refetchProject();
+  // A rename changes the slug, so the page moves to the new URL.
+  const handleUpdated = (updatedProject: ProjectDTO) => {
     refetchProjects();
+    if (updatedProject.slug === project.slug) {
+      refetchProject();
+    } else {
+      router.replace(`/events/${event.slug}/projects/${updatedProject.slug}`);
+    }
   };
 
   const handleDelete = async () => {
@@ -96,7 +102,7 @@ const Project = () => {
         project={project}
         opened={opened}
         onClose={handles.close}
-        refetch={refetch}
+        onUpdated={handleUpdated}
       />
     </>
   );

@@ -8,15 +8,7 @@ import { highlightedCardProps, inputProps } from "@/styles/common";
 
 import { useState } from "react";
 
-import {
-  Card,
-  Select,
-  SelectProps,
-  SimpleGrid,
-  Stack,
-  Text,
-  Title,
-} from "@mantine/core";
+import { Card, Select, SimpleGrid, Stack, Text, Title } from "@mantine/core";
 
 import { produce } from "immer";
 
@@ -89,7 +81,7 @@ const ProjectPreferencesInput = ({
                 {index + 1}
               </Title>
               <Select
-                {...(inputProps as SelectProps)}
+                {...inputProps}
                 mt="md"
                 data={projects?.map((project) => ({
                   label: project.name,

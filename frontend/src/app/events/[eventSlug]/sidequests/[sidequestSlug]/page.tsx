@@ -1,6 +1,7 @@
 "use client";
 
 import { useDeleteSidequest, useGetSidequests } from "@/api/gen";
+import { Sidequest as SidequestDTO } from "@/api/gen/schemas";
 import IconTextGroup from "@/components/IconTextGroup";
 import MarkdownCard from "@/components/MarkdownCard";
 import PageSkeleton from "@/components/PageSkeleton";
@@ -40,9 +41,16 @@ const Sidequest = () => {
     return <PageSkeleton />;
   }
 
-  const refetch = () => {
-    refetchSidequest();
+  // A rename changes the slug, so the page moves to the new URL.
+  const handleUpdated = (updatedSidequest: SidequestDTO) => {
     refetchSidequests();
+    if (updatedSidequest.slug === sidequest.slug) {
+      refetchSidequest();
+    } else {
+      router.replace(
+        `/events/${event.slug}/sidequests/${updatedSidequest.slug}`,
+      );
+    }
   };
 
   const handleDelete = async () => {
@@ -104,7 +112,7 @@ const Sidequest = () => {
         sidequest={sidequest}
         opened={opened}
         onClose={handles.close}
-        refetch={refetch}
+        onUpdated={handleUpdated}
       />
     </>
   );

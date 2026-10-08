@@ -12,7 +12,7 @@ import {
 
 import { useState } from "react";
 
-import { Button, Card, Group, TextInput, TextInputProps } from "@mantine/core";
+import { Button, Card, Group, TextInput } from "@mantine/core";
 
 type TeamNameInputProps = {
   team: Team;
@@ -56,10 +56,10 @@ const TeamNameInput = ({ team, refetch }: TeamNameInputProps) => {
       <Card.Section {...cardSectionProps}>
         <Group align="center">
           <TextInput
-            {...(inputProps as TextInputProps)}
+            {...inputProps}
             value={localName}
             onChange={(event) => setLocalName(event.currentTarget.value)}
-            placeholder={team.name}
+            aria-label="Team name"
             flex={1}
           />
           <Button

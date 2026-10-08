@@ -3,7 +3,7 @@ import { AdminTeam } from "@/api/gen/schemas";
 import { useBlurSave } from "@/hooks/useBlurSave";
 import { inputProps } from "@/styles/common";
 
-import { Table, Text, TextInput, TextInputProps } from "@mantine/core";
+import { Table, Text, TextInput } from "@mantine/core";
 
 type NameTdProps = {
   team: AdminTeam;
@@ -42,7 +42,7 @@ const NameTd = ({ team, ro, refetch }: NameTdProps) => {
   return (
     <Table.Td>
       <TextInput
-        {...(inputProps as TextInputProps)}
+        {...inputProps}
         size="xs"
         value={name.value}
         onChange={(e) => name.setDraft(e.currentTarget.value)}

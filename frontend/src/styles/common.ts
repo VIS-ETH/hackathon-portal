@@ -6,6 +6,7 @@ import {
   CardProps,
   CardSectionProps,
   ContainerProps,
+  DrawerProps,
   InputProps,
   MenuProps,
   ModalProps,
@@ -29,40 +30,35 @@ export const wideContainerProps: Partial<ContainerProps> = {
   size: "xl",
 };
 
-export const inputProps: Partial<InputProps> = {
+export const inputProps = {
   size: "md",
   radius: "md",
-};
+} satisfies Partial<InputProps>;
 
-export const textareaProps: Partial<TextareaProps> = {
+export const textareaProps = {
   size: "md",
   radius: "md",
   minRows: 5,
   maxRows: 15,
   autosize: true,
-};
+} satisfies Partial<TextareaProps>;
 
 // data-monospace is Mantine's own switch for a monospace input, as used by JsonInput
-export const codeInputProps: Partial<InputProps> & {
-  "data-monospace": boolean;
-} = {
+export const codeInputProps = {
   ...inputProps,
   "data-monospace": true,
 };
 
-export const codeTextareaProps: Partial<TextareaProps> & {
-  "data-monospace": boolean;
-} = {
+export const codeTextareaProps = {
   ...textareaProps,
   "data-monospace": true,
 };
 
-export const segmentedControlProps: Partial<SegmentedControlProps> = {
+export const segmentedControlProps = {
   size: "sm",
   radius: "md",
   withItemsBorders: false,
-  data: [],
-};
+} satisfies Partial<SegmentedControlProps>;
 
 export const primaryButtonProps: Partial<ButtonProps> = {
   radius: "md",
@@ -131,6 +127,11 @@ export const menuProps: Partial<MenuProps> = {
 
 export const modalProps: Partial<ModalProps> = {
   radius: "md",
+};
+
+export const drawerProps: Partial<DrawerProps> = {
+  position: "right",
+  size: "md",
 };
 
 export const alertProps: Partial<AlertProps> = {

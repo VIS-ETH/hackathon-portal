@@ -1,7 +1,15 @@
+import DrawerMarkdown from "../DrawerMarkdown";
+
 import { useUpdateAppointment } from "@/api/gen";
-import { Appointment, AppointmentForUpdate } from "@/api/gen/schemas";
+import { Appointment } from "@/api/gen/schemas";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
-import { inputProps, primaryButtonProps, textareaProps } from "@/styles/common";
+import {
+  drawerProps,
+  inputProps,
+  primaryButtonProps,
+  textareaProps,
+} from "@/styles/common";
+import { fromUtcDate, modifiedValues, toUtcDate } from "@/utils/form";
 
 import { useEffect } from "react";
 
@@ -11,15 +19,33 @@ import {
   Drawer,
   Stack,
   TextInput,
-  TextInputProps,
   Textarea,
-  TextareaProps,
 } from "@mantine/core";
 
-import { DateTimePicker, DateTimePickerProps } from "@mantine/dates";
+import { DateTimePicker } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 
-import { produce } from "immer";
+export type AppointmentFormValues = {
+  title: string;
+  description: string;
+  content: string;
+  start: string;
+  end: string;
+  setEnd: boolean;
+};
+
+// The backend clears the end when it receives the Unix epoch.
+const CLEARED_END = "1970-01-01T00:00:00";
+
+// In the format the inputs emit, so that untouched fields aren't modified.
+const toFormValues = (appointment: Appointment): AppointmentFormValues => ({
+  title: appointment.title,
+  description: appointment.description ?? "",
+  content: appointment.content ?? "",
+  start: fromUtcDate(appointment.start),
+  end: fromUtcDate(appointment.end ?? appointment.start),
+  setEnd: !!appointment.end,
+});
 
 type UpdateAppointmentDrawerProps = {
   appointment: Appointment;
@@ -34,27 +60,14 @@ const UpdateAppointmentDrawer = ({
   onClose,
   refetch,
 }: UpdateAppointmentDrawerProps) => {
-  const form = useForm<
-    AppointmentForUpdate & {
-      setEnd: boolean;
-    }
-  >({
+  const form = useForm<AppointmentFormValues>({
     mode: "controlled",
     validateInputOnChange: true,
-    transformValues: (values) =>
-      produce(values, (draft) => {
-        draft.title = values.title;
-        if (values.start) {
-          // should always be true
-          draft.start = new Date(values.start).toISOString().replace("Z", "");
-        }
-        if (values.end) {
-          draft.end = new Date(values.end).toISOString().replace("Z", "");
-        } else {
-          draft.end = null;
-        }
-        return draft;
-      }),
+    transformValues: (values) => ({
+      ...values,
+      start: toUtcDate(values.start),
+      end: toUtcDate(values.end),
+    }),
   });
 
   const updateAppointmentMutation = useUpdateAppointment();
@@ -62,19 +75,19 @@ const UpdateAppointmentDrawer = ({
   const confirmClose = useUnsavedChanges(form.isDirty());
 
   useEffect(() => {
-    form.setInitialValues({
-      title: appointment.title,
-      description: appointment.description,
-      content: appointment.content,
-      start: `${appointment.start}Z`,
-      end: `${appointment.end ?? appointment.start}Z`,
-      setEnd: !!appointment.end,
-    });
-
+    form.setInitialValues(toFormValues(appointment));
     form.reset();
   }, [form.setInitialValues, form.reset, appointment, opened]);
 
-  const handleSubmit = async (data: AppointmentForUpdate) => {
+  const handleSubmit = async (values: AppointmentFormValues) => {
+    const { setEnd, ...data } = modifiedValues(form, values);
+    if (setEnd !== undefined) {
+      // Turning the end on sends its default, which isn't modified itself.
+      data.end = setEnd ? values.end : CLEARED_END;
+    } else if (!values.setEnd) {
+      delete data.end;
+    }
+
     await updateAppointmentMutation.mutateAsync({
       appointmentId: appointment.id,
       data,
@@ -86,34 +99,33 @@ const UpdateAppointmentDrawer = ({
 
   return (
     <Drawer
-      position="right"
+      {...drawerProps}
       opened={opened}
       onClose={() => confirmClose() && onClose()}
-      title="Create Appointment"
+      title="Update Appointment"
     >
       <form onSubmit={form.onSubmit(handleSubmit)}>
         <Stack>
           <TextInput
-            {...(inputProps as TextInputProps)}
+            {...inputProps}
             {...form.getInputProps("title")}
             label="Title"
-            placeholder={appointment.title}
+            placeholder="Opening Ceremony"
           />
           <TextInput
-            {...(inputProps as TextInputProps)}
+            {...inputProps}
             {...form.getInputProps("description")}
             label="Description"
-            placeholder={appointment.description ?? ""}
+            placeholder="Audimax (HG F30)"
           />
           <Textarea
-            {...(textareaProps as TextareaProps)}
+            {...textareaProps}
             {...form.getInputProps("content")}
             label="Content"
             description="Supports Markdown"
-            placeholder={appointment.content ?? ""}
           />
           <DateTimePicker
-            {...(inputProps as DateTimePickerProps)}
+            {...inputProps}
             {...form.getInputProps("start")}
             label="Start"
           />
@@ -126,7 +138,7 @@ const UpdateAppointmentDrawer = ({
           />
           {form.getValues().setEnd && (
             <DateTimePicker
-              {...(inputProps as DateTimePickerProps)}
+              {...inputProps}
               {...form.getInputProps("end")}
               label="End"
             />
@@ -135,9 +147,11 @@ const UpdateAppointmentDrawer = ({
             {...primaryButtonProps}
             type="submit"
             disabled={!form.isValid()}
+            loading={updateAppointmentMutation.isPending}
           >
             Update
           </Button>
+          <DrawerMarkdown content={form.getValues().content} />
         </Stack>
       </form>
     </Drawer>

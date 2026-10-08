@@ -1,72 +1,52 @@
-import MarkdownCard from "../MarkdownCard";
+import DrawerMarkdown from "../DrawerMarkdown";
 
-import { useGetEventAffiliates, useUpdateProject } from "@/api/gen";
+import { getProject, useGetEventAffiliates, useUpdateProject } from "@/api/gen";
 import { EventRole, Project, ProjectForUpdate } from "@/api/gen/schemas";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
-import { inputProps, primaryButtonProps, textareaProps } from "@/styles/common";
+import {
+  drawerProps,
+  inputProps,
+  primaryButtonProps,
+  textareaProps,
+} from "@/styles/common";
+import { modifiedValues } from "@/utils/form";
 
 import { useEffect } from "react";
 
 import {
   Button,
-  Divider,
   Drawer,
   MultiSelect,
   Stack,
   TextInput,
-  TextInputProps,
   Textarea,
-  TextareaProps,
 } from "@mantine/core";
 
 import { useForm } from "@mantine/form";
-
-import { produce } from "immer";
 
 type UpdateProjectDrawerProps = {
   project: Project;
   opened: boolean;
   onClose: () => void;
-  refetch?: () => void;
+  onUpdated?: (project: Project) => void;
 };
 
 const UpdateProjectDrawer = ({
   project,
   opened,
   onClose,
-  refetch,
+  onUpdated,
 }: UpdateProjectDrawerProps) => {
   const form = useForm<ProjectForUpdate>({
     mode: "controlled",
     validateInputOnChange: true,
-    transformValues: (values) =>
-      produce(values, (draft) => {
-        if (draft.name === project.name) {
-          delete draft.name;
-        }
-
-        if (draft.content === project.content) {
-          delete draft.content;
-        }
-
-        if (draft.stakeholder_ids?.length === project.stakeholders?.length) {
-          const stakeholderIds = project.stakeholders?.map((s) => s.id) || [];
-          const isSame = stakeholderIds.every((id) =>
-            draft.stakeholder_ids?.includes(id),
-          );
-
-          if (isSame) {
-            delete draft.stakeholder_ids;
-          }
-        }
-
-        return draft;
-      }),
   });
 
-  const { data: stakeholder } = useGetEventAffiliates(project.event_id, {
-    role: EventRole.Stakeholder,
-  });
+  const { data: stakeholder } = useGetEventAffiliates(
+    project.event_id,
+    { role: EventRole.Stakeholder },
+    { query: { enabled: opened } },
+  );
 
   const updateProjectMutation = useUpdateProject();
 
@@ -82,20 +62,20 @@ const UpdateProjectDrawer = ({
     form.reset();
   }, [form.setInitialValues, form.reset, project, opened]);
 
-  const handleSubmit = async (data: ProjectForUpdate) => {
+  const handleSubmit = async (values: ProjectForUpdate) => {
     await updateProjectMutation.mutateAsync({
       projectId: project.id,
-      data,
+      data: modifiedValues(form, values),
     });
 
-    refetch?.();
+    // The update's response type is wrong in the API spec, so fetch the project.
+    onUpdated?.(await getProject(project.id));
     onClose();
   };
 
   return (
     <Drawer
-      position="right"
-      size="xl"
+      {...drawerProps}
       opened={opened}
       onClose={() => confirmClose() && onClose()}
       title="Update Project"
@@ -103,11 +83,10 @@ const UpdateProjectDrawer = ({
       <form onSubmit={form.onSubmit(handleSubmit)}>
         <Stack>
           <TextInput
-            {...(inputProps as TextInputProps)}
+            {...inputProps}
             {...form.getInputProps("name")}
             label="Name"
             required
-            placeholder={project.name}
           />
           <MultiSelect
             {...form.getInputProps("stakeholder_ids")}
@@ -117,25 +96,21 @@ const UpdateProjectDrawer = ({
             }
           />
           <Textarea
-            {...(textareaProps as TextareaProps)}
+            {...textareaProps}
             {...form.getInputProps("content")}
             label="Content"
             description="Supports Markdown"
-            placeholder={project.content}
             required
           />
           <Button
             {...primaryButtonProps}
             type="submit"
             disabled={!form.isValid()}
+            loading={updateProjectMutation.isPending}
           >
             Update
           </Button>
-          <Divider />
-          <MarkdownCard
-            trusted
-            content={form.getValues().content || "Nothing to preview"}
-          />
+          <DrawerMarkdown content={form.getValues().content} />
         </Stack>
       </form>
     </Drawer>

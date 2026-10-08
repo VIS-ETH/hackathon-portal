@@ -20,7 +20,6 @@ import {
   Stack,
   Text,
   Textarea,
-  TextareaProps,
 } from "@mantine/core";
 
 import { IconPlayerPlay } from "@tabler/icons-react";
@@ -72,10 +71,11 @@ const InvitationControls = ({ event, onInvite }: InvitationControlsProps) => {
       <Card.Section {...cardSectionProps}>
         <Stack>
           <Textarea
-            {...(codeTextareaProps as TextareaProps)}
+            {...codeTextareaProps}
             value={input}
             onChange={(event) => setInput(event.currentTarget.value)}
-            description="User Auth IDs. ETH email addresses must be normalized, e.g. be of the form 'ethzusername@ethz.ch'."
+            label="User auth IDs"
+            description="ETH email addresses must be normalized, e.g. be of the form 'ethzusername@ethz.ch'."
             placeholder={PLACEHOLDER}
           />
           <Group justify="space-between">

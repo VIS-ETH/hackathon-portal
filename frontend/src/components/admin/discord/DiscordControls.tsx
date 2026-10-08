@@ -29,7 +29,6 @@ import {
   Tabs,
   Text,
   TextInput,
-  TextInputProps,
 } from "@mantine/core";
 
 import { useDisclosure } from "@mantine/hooks";
@@ -102,7 +101,7 @@ const DiscordConfigPage = ({ event, refetch }: DiscordControlsProps) => {
       <DataLossAlert />
 
       <TextInput
-        {...(inputProps as TextInputProps)}
+        {...inputProps}
         label="Discord server ID"
         description="The ID of your Discord server"
         placeholder="123456789012345678"

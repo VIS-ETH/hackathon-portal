@@ -3,13 +3,7 @@ import { AdminTeam } from "@/api/gen/schemas";
 import { useBlurSave } from "@/hooks/useBlurSave";
 import { inputProps } from "@/styles/common";
 
-import {
-  NumberInput,
-  NumberInputProps,
-  Table,
-  Textarea,
-  TextareaProps,
-} from "@mantine/core";
+import { NumberInput, Table, Textarea } from "@mantine/core";
 
 type ExtraScoreTdProps = {
   team: AdminTeam;
@@ -53,7 +47,7 @@ const ExtraScoreTd = ({ team, refetch }: ExtraScoreTdProps) => {
     <>
       <Table.Td>
         <Textarea
-          {...(inputProps as TextareaProps)}
+          {...inputProps}
           size="xs"
           autosize
           value={comment.value}
@@ -64,7 +58,7 @@ const ExtraScoreTd = ({ team, refetch }: ExtraScoreTdProps) => {
       </Table.Td>
       <Table.Td>
         <NumberInput
-          {...(inputProps as NumberInputProps)}
+          {...inputProps}
           size="xs"
           value={extraScore.value}
           onChange={extraScore.setDraft}

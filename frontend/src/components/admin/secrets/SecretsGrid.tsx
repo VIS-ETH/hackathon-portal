@@ -33,7 +33,6 @@ import {
   Table,
   Text,
   TextInput,
-  TextInputProps,
 } from "@mantine/core";
 
 import { useClipboard } from "@mantine/hooks";
@@ -161,7 +160,7 @@ const SecretsGrid = ({
               Refresh
             </Button>
             <TextInput
-              {...(inputProps as TextInputProps)}
+              {...inputProps}
               size="sm"
               placeholder="New secret name"
               value={newName}

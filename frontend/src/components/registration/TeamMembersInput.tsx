@@ -42,6 +42,9 @@ const TeamMembersInput = ({ team, refetch }: TeamMembersInputProps) => {
   const deleteTeamRolesMutation = useDeleteTeamRoles();
   const deleteTeamMutation = useDeleteTeam();
 
+  const removing =
+    deleteTeamRolesMutation.isPending || deleteTeamMutation.isPending;
+
   const handleAdd = async () => {
     const userId = selectedParticipant?.id;
 
@@ -96,6 +99,7 @@ const TeamMembersInput = ({ team, refetch }: TeamMembersInputProps) => {
             leftSection={<IconPlus {...iconProps} />}
             disabled={!selectedParticipant}
             onClick={handleAdd}
+            loading={putTeamRolesMutation.isPending}
           >
             Add
           </Button>
@@ -109,6 +113,7 @@ const TeamMembersInput = ({ team, refetch }: TeamMembersInputProps) => {
               {...secondaryButtonProps}
               leftSection={<IconX {...iconProps} />}
               color="red"
+              disabled={removing}
               onClick={() => handleRemove(member.id)}
             >
               Remove

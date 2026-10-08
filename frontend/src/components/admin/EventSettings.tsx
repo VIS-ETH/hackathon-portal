@@ -33,24 +33,21 @@ import {
   Divider,
   Group,
   NumberInput,
-  NumberInputProps,
   Select,
-  SelectProps,
   SimpleGrid,
   Stack,
   Text,
   TextInput,
-  TextInputProps,
   Textarea,
-  TextareaProps,
   Tooltip,
   UnstyledButton,
 } from "@mantine/core";
 
-import { DateTimePicker, DateTimePickerProps } from "@mantine/dates";
+import { DateTimePicker } from "@mantine/dates";
 import { isInRange, isNotEmpty, useForm } from "@mantine/form";
 
 import { IconArrowBackUp } from "@tabler/icons-react";
+import { useRouter } from "next/navigation";
 import { stringify } from "yaml";
 
 type EventSettingsProps = {
@@ -120,6 +117,7 @@ const toFormValues = (event: Event): EventForUpdate => ({
 });
 
 const EventSettings = ({ event, refetch }: EventSettingsProps) => {
+  const router = useRouter();
   const form = useForm<EventForUpdate>({
     mode: "controlled",
     initialValues: toFormValues(event),
@@ -194,7 +192,12 @@ const EventSettings = ({ event, refetch }: EventSettingsProps) => {
 
     form.setInitialValues(toFormValues(updatedEvent));
     form.reset();
-    refetch?.();
+    // A rename changes the slug, which the admin page is loaded by.
+    if (updatedEvent.slug === event.slug) {
+      refetch?.();
+    } else {
+      router.replace(`/events/${updatedEvent.slug}/admin#general`);
+    }
   };
 
   return (
@@ -203,39 +206,39 @@ const EventSettings = ({ event, refetch }: EventSettingsProps) => {
         <Stack>
           <SimpleGrid cols={{ xs: 1, md: 3 }}>
             <TextInput
-              {...(inputProps as TextInputProps)}
+              {...inputProps}
               {...form.getInputProps("name")}
               key={form.key("name")}
               {...fieldLabel("Name", "name")}
             />
             <DateTimePicker
-              {...(inputProps as DateTimePickerProps)}
+              {...inputProps}
               {...form.getInputProps("start")}
               key={form.key("start")}
               {...fieldLabel("Start", "start")}
             />
             <DateTimePicker
-              {...(inputProps as DateTimePickerProps)}
+              {...inputProps}
               {...form.getInputProps("end")}
               key={form.key("end")}
               {...fieldLabel("End", "end")}
             />
             <Select
-              {...(inputProps as SelectProps)}
+              {...inputProps}
               {...form.getInputProps("visibility")}
               key={form.key("visibility")}
               data={Object.values(EventVisibility)}
               {...fieldLabel("Visibility", "visibility")}
             />
             <Select
-              {...(inputProps as SelectProps)}
+              {...inputProps}
               {...form.getInputProps("phase")}
               key={form.key("phase")}
               data={Object.values(EventPhase)}
               {...fieldLabel("Phase", "phase")}
             />
             <NumberInput
-              {...(inputProps as NumberInputProps)}
+              {...inputProps}
               {...form.getInputProps("max_team_size")}
               key={form.key("max_team_size")}
               {...fieldLabel("Max team size", "max_team_size")}
@@ -243,7 +246,7 @@ const EventSettings = ({ event, refetch }: EventSettingsProps) => {
               step={1}
             />
             <NumberInput
-              {...(inputProps as NumberInputProps)}
+              {...inputProps}
               {...form.getInputProps("sidequest_cooldown")}
               key={form.key("sidequest_cooldown")}
               {...fieldLabel(
@@ -254,7 +257,7 @@ const EventSettings = ({ event, refetch }: EventSettingsProps) => {
               step={1}
             />
             <NumberInput
-              {...(inputProps as NumberInputProps)}
+              {...inputProps}
               {...form.getInputProps("max_teams_per_project")}
               key={form.key("max_teams_per_project")}
               {...fieldLabel("Max teams per project", "max_teams_per_project")}
@@ -262,7 +265,7 @@ const EventSettings = ({ event, refetch }: EventSettingsProps) => {
               step={1}
             />
             <TextInput
-              {...(inputProps as TextInputProps)}
+              {...inputProps}
               {...form.getInputProps("master_ai_api_key")}
               key={form.key("master_ai_api_key")}
               {...fieldLabel("Master AI API key", "master_ai_api_key")}
@@ -272,7 +275,7 @@ const EventSettings = ({ event, refetch }: EventSettingsProps) => {
           <Divider label="Team Blog" labelPosition="left" />
           <SimpleGrid cols={{ xs: 1, md: 3 }}>
             <NumberInput
-              {...(inputProps as NumberInputProps)}
+              {...inputProps}
               {...form.getInputProps("blog_max_sections")}
               key={form.key("blog_max_sections")}
               {...fieldLabel("Max sections per blog", "blog_max_sections")}
@@ -280,7 +283,7 @@ const EventSettings = ({ event, refetch }: EventSettingsProps) => {
               step={1}
             />
             <NumberInput
-              {...(inputProps as NumberInputProps)}
+              {...inputProps}
               {...form.getInputProps("blog_max_images")}
               key={form.key("blog_max_images")}
               {...fieldLabel("Max images per blog", "blog_max_images")}
@@ -288,7 +291,7 @@ const EventSettings = ({ event, refetch }: EventSettingsProps) => {
               step={1}
             />
             <NumberInput
-              {...(inputProps as NumberInputProps)}
+              {...inputProps}
               {...form.getInputProps("blog_max_characters")}
               key={form.key("blog_max_characters")}
               {...fieldLabel("Max characters per blog", "blog_max_characters")}
@@ -296,7 +299,7 @@ const EventSettings = ({ event, refetch }: EventSettingsProps) => {
               step={1}
             />
             <NumberInput
-              {...(inputProps as NumberInputProps)}
+              {...inputProps}
               {...form.getInputProps("blog_max_image_size_mb")}
               key={form.key("blog_max_image_size_mb")}
               {...fieldLabel(
@@ -310,7 +313,7 @@ const EventSettings = ({ event, refetch }: EventSettingsProps) => {
           <Divider label="Infrastructure" labelPosition="left" />
           <SimpleGrid cols={{ xs: 1, md: 3 }}>
             <TextInput
-              {...(codeInputProps as TextInputProps)}
+              {...codeInputProps}
               {...form.getInputProps("managed_address_template")}
               key={form.key("managed_address_template")}
               {...fieldLabel(
@@ -319,7 +322,7 @@ const EventSettings = ({ event, refetch }: EventSettingsProps) => {
               )}
             />
             <TextInput
-              {...(codeInputProps as TextInputProps)}
+              {...codeInputProps}
               {...form.getInputProps("direct_address_template")}
               key={form.key("direct_address_template")}
               {...fieldLabel(
@@ -328,7 +331,7 @@ const EventSettings = ({ event, refetch }: EventSettingsProps) => {
               )}
             />
             <TextInput
-              {...(codeInputProps as TextInputProps)}
+              {...codeInputProps}
               {...form.getInputProps("private_address_template")}
               key={form.key("private_address_template")}
               {...fieldLabel(
@@ -337,7 +340,7 @@ const EventSettings = ({ event, refetch }: EventSettingsProps) => {
               )}
             />
             <Textarea
-              {...(codeTextareaProps as TextareaProps)}
+              {...codeTextareaProps}
               {...form.getInputProps("ssh_config_template")}
               key={form.key("ssh_config_template")}
               {...fieldLabel("SSH config template", "ssh_config_template")}

@@ -23,7 +23,6 @@ import {
   Stack,
   Text,
   Textarea,
-  TextareaProps,
 } from "@mantine/core";
 
 import { MIME_TYPES } from "@mantine/dropzone";
@@ -175,13 +174,14 @@ const TeamBlogSectionEditor = ({
             </Group>
           )}
           <Textarea
-            {...(textareaProps as TextareaProps)}
+            {...textareaProps}
             value={section.content}
             onChange={(e) =>
               onChange({ ...section, content: e.currentTarget.value })
             }
-            placeholder="Write about your design, progress or learnings..."
+            label="Content"
             description="Supports Markdown. Embedded images and HTML are not rendered."
+            placeholder="Write about your design, progress or learnings..."
           />
         </Stack>
       </Card.Section>
