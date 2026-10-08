@@ -48,7 +48,6 @@ export const useDiscord = () => {
     }
   }, [event, discord, localStorageKey]);
 
-  // Optional: function to dismiss the banner
   const dismissBanner = () => {
     if (localStorageKey) {
       localStorage.setItem(localStorageKey, "1");
@@ -59,8 +58,6 @@ export const useDiscord = () => {
 
   return {
     discordAuthUrl,
-    redirectUri,
-    localStorageKey,
     showBanner,
     dismissBanner,
   };

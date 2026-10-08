@@ -3,7 +3,7 @@
 import { useGetEvent, usePostEventDiscordOauth } from "@/api/gen";
 import { alertProps } from "@/styles/common";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import {
   Alert,
@@ -50,18 +50,30 @@ const DiscordOauth = () => {
     });
   };
 
+  // The code can be exchanged only once; StrictMode runs mount effects twice.
+  const connectStarted = useRef(false);
+
   useEffect(() => {
+    if (connectStarted.current) {
+      return;
+    }
+    connectStarted.current = true;
+
     connectDiscord()
-      .then(() => {
-        setStatus("success");
-        setTimeout(() => {
-          router.push(homeHref);
-        }, 3000);
-      })
+      .then(() => setStatus("success"))
       .catch(() => setStatus("error"));
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (status !== "success") {
+      return;
+    }
+
+    const timer = setTimeout(() => router.push(homeHref), 3000);
+    return () => clearTimeout(timer);
+  }, [status, homeHref, router]);
 
   return (
     <Center mih="60vh">

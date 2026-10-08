@@ -1,12 +1,12 @@
 "use client";
 
 import PageSkeleton from "@/components/PageSkeleton";
-import DiscordControls from "@/components/admin/DiscordControls";
 import EventAffiliatesTable from "@/components/admin/EventAffiliatesTable";
 import EventContentTab from "@/components/admin/EventContentTab";
 import EventSettings from "@/components/admin/EventSettings";
 import RankingTab from "@/components/admin/RankingTab";
 import TeamsTable from "@/components/admin/TeamsTable";
+import DiscordControls from "@/components/admin/discord/DiscordControls";
 import SecretsTab from "@/components/admin/secrets/SecretsTab";
 import { useResolveParams } from "@/hooks/useResolveParams";
 import { confirmDiscard } from "@/hooks/useUnsavedChanges";
