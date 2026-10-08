@@ -1,5 +1,6 @@
 import classes from "./Navbar.module.css";
 import UserMenu from "./UserMenu";
+import userMenuClasses from "./UserMenu.module.css";
 
 import { useGetMe } from "@/api/gen";
 import UserSecretsModal from "@/components/secrets/UserSecretsModal";
@@ -10,6 +11,7 @@ import { useResolveParams } from "@/hooks/useResolveParams";
 import {
   badgeProps,
   containerProps,
+  iconProps,
   wideContainerProps,
 } from "@/styles/common";
 
@@ -31,6 +33,7 @@ import {
 
 import { useDisclosure } from "@mantine/hooks";
 
+import { IconKey } from "@tabler/icons-react";
 import cx from "clsx";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -154,13 +157,22 @@ const Navbar = ({ wide = false }: NavbarProps) => {
               size="sm"
               hiddenFrom="sm"
             />
-            <Box visibleFrom="sm">
-              <UserMenu
-                onOpenSecrets={
-                  mySecrets.length > 0 ? secretsHandles.open : undefined
-                }
-              />
-            </Box>
+            <Group gap="xs" visibleFrom="sm">
+              {mySecrets.length > 0 && (
+                <UnstyledButton
+                  className={userMenuClasses.user}
+                  onClick={secretsHandles.open}
+                >
+                  <Group gap={7} align="center">
+                    <IconKey {...iconProps} />
+                    <Text fw={500} size="sm" lh={1}>
+                      My Secrets
+                    </Text>
+                  </Group>
+                </UnstyledButton>
+              )}
+              <UserMenu />
+            </Group>
           </Group>
           <Drawer
             opened={drawerOpened}

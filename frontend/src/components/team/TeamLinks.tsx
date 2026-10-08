@@ -79,15 +79,27 @@ const TeamLinks = ({
   const repositoryLink = canViewRepository && (
     <IconTextGroup Icon={IconBrandGit}>
       {team.repository_url ? (
-        <Link
-          href={team.repository_url}
-          passHref
-          referrerPolicy="no-referrer"
-          target="_blank"
-          title={team.repository_url}
-        >
-          <Text>Source Code</Text>
-        </Link>
+        <Group gap="xs">
+          <Link
+            href={team.repository_url}
+            passHref
+            referrerPolicy="no-referrer"
+            target="_blank"
+            title={team.repository_url}
+          >
+            <Text>Source Code</Text>
+          </Link>
+          {onEditRepository && (
+            <Anchor
+              component="button"
+              size="sm"
+              c="dimmed"
+              onClick={onEditRepository}
+            >
+              Edit
+            </Anchor>
+          )}
+        </Group>
       ) : onEditRepository ? (
         <Group gap="xs">
           <Text c="red" fw={600}>

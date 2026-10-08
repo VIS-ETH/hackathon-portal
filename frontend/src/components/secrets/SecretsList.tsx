@@ -73,7 +73,7 @@ const SecretsList = ({ secrets }: SecretsListProps) => {
     <Stack gap="lg">
       {secrets.map((secret, index) => (
         <Fragment key={secret.name}>
-          {/* the modal body's padding, so the divider spans the whole modal */}
+          {/* the modal body's or card section's padding, so the divider spans the whole width */}
           {index > 0 && <Divider mx="-md" />}
           <Stack gap="xs">
             <Text fw={700}>{secret.name}</Text>

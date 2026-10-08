@@ -12,17 +12,11 @@ import { useDisclosure } from "@mantine/hooks";
 import {
   IconBrandDiscord,
   IconChevronDown,
-  IconKey,
   IconLogout,
 } from "@tabler/icons-react";
 import cx from "clsx";
 
-type UserMenuProps = {
-  // undefined without secrets
-  onOpenSecrets?: () => void;
-};
-
-const UserMenu = ({ onOpenSecrets }: UserMenuProps) => {
+const UserMenu = () => {
   const { data: me } = useGetMe();
   const [opened, handles] = useDisclosure();
   const { discordAuthUrl } = useDiscord();
@@ -61,14 +55,6 @@ const UserMenu = ({ onOpenSecrets }: UserMenuProps) => {
         >
           (Re)connect Discord Account
         </Menu.Item>
-        {onOpenSecrets && (
-          <Menu.Item
-            leftSection={<IconKey {...iconProps} />}
-            onClick={onOpenSecrets}
-          >
-            My Secrets
-          </Menu.Item>
-        )}
         {logoutUrl && (
           <Menu.Item
             component="a"
