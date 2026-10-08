@@ -8,6 +8,7 @@ import HistoryChart from "@/components/sidequest/HistoryChart";
 import OverviewLeaderboardTable from "@/components/sidequest/OverviewLeaderboardTable";
 import SidequestsList from "@/components/sidequest/SidequestsList";
 import { useResolveParams } from "@/hooks/useResolveParams";
+import { confirmDiscard } from "@/hooks/useUnsavedChanges";
 import {
   cardProps,
   iconProps,
@@ -38,7 +39,7 @@ const Sidequests = () => {
   }, []);
 
   const handleTabChange = (value: string | null) => {
-    if (value) {
+    if (value && value !== activeTab && confirmDiscard()) {
       setActiveTab(value);
       window.history.replaceState(null, "", `#${value}`);
     }

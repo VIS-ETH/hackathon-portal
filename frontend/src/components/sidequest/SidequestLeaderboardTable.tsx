@@ -2,6 +2,7 @@ import NoEntriesTr from "../NoEntriesTr";
 
 import { useGetSidequestsUserLeaderboard } from "@/api/gen";
 import { Sidequest } from "@/api/gen/schemas";
+import { fmtResult } from "@/utils";
 
 import { Table } from "@mantine/core";
 
@@ -24,7 +25,7 @@ const SidequestLeaderboardTable = ({
       <Table striped horizontalSpacing="md">
         <Table.Thead>
           <Table.Tr>
-            <Table.Th>User</Table.Th>
+            <Table.Th>Participant</Table.Th>
             <Table.Th w={100} ta="right">
               Result
             </Table.Th>
@@ -38,7 +39,7 @@ const SidequestLeaderboardTable = ({
             leaderboard.map((entry) => (
               <Table.Tr key={entry.user_id}>
                 <Table.Td>{entry.user_name}</Table.Td>
-                <Table.Td ta="right">{entry.result}</Table.Td>
+                <Table.Td ta="right">{fmtResult(entry.result)}</Table.Td>
                 <Table.Td ta="right">{entry.points}</Table.Td>
               </Table.Tr>
             ))

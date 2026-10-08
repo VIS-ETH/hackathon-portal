@@ -1,8 +1,7 @@
-import NoEntriesTr from "../NoEntriesTr";
 import EventAffiliateSelect from "../select/EventAffiliateSelect";
 import SidequestSelect from "../select/SidequestSelect";
 import TeamSelect from "../select/TeamSelect";
-import AttemptsTableRow from "./AttemptsTableRow";
+import AttemptsTable from "./AttemptsTable";
 import CreateAttemptDrawer from "./CreateAttemptDrawer";
 
 import { useGetSidequestAttempts } from "@/api/gen";
@@ -17,12 +16,11 @@ import {
 
 import { useState } from "react";
 
-import { Button, Card, Group, Stack, Table } from "@mantine/core";
+import { Button, Card, Group, Stack } from "@mantine/core";
 
 import { useDisclosure } from "@mantine/hooks";
 
 import { IconPlus, IconRefresh } from "@tabler/icons-react";
-import objectHash from "object-hash";
 
 type AttemptsTableForSidequestMasterProps = {
   eventId: string;
@@ -70,14 +68,15 @@ const AttemptsTableForSidequestMaster = ({
             >
               Refresh
             </Button>
-            <SidequestSelect
+            <EventAffiliateSelect
               eventId={eventId}
-              sidequestId={sidequestFilter?.id}
-              setSidequest={(sidequest) => {
-                setSidequestFilter(sidequest);
+              affiliateId={userFilter?.id}
+              setAffiliate={(affiliate) => {
+                setSidequestFilter(undefined);
                 setTeamFilter(undefined);
-                setUserFilter(undefined);
+                setUserFilter(affiliate);
               }}
+              role={EventRole.Participant}
               size="sm"
             />
             <TeamSelect
@@ -90,50 +89,25 @@ const AttemptsTableForSidequestMaster = ({
               }}
               size="sm"
             />
-            <EventAffiliateSelect
+            <SidequestSelect
               eventId={eventId}
-              affiliateId={userFilter?.id}
-              setAffiliate={(affiliate) => {
-                setSidequestFilter(undefined);
+              sidequestId={sidequestFilter?.id}
+              setSidequest={(sidequest) => {
+                setSidequestFilter(sidequest);
                 setTeamFilter(undefined);
-                setUserFilter(affiliate);
+                setUserFilter(undefined);
               }}
-              role={EventRole.Participant}
               size="sm"
             />
           </Group>
         </Card.Section>
         <Card.Section>
-          <Table.ScrollContainer minWidth={1000}>
-            <Table striped layout="fixed">
-              <Table.Thead>
-                <Table.Tr>
-                  <Table.Th>User</Table.Th>
-                  <Table.Th>Sidequest</Table.Th>
-                  <Table.Th>Result</Table.Th>
-                  <Table.Th>Day</Table.Th>
-                  <Table.Th>Time</Table.Th>
-                  <Table.Th>Actions</Table.Th>
-                </Table.Tr>
-              </Table.Thead>
-              <Table.Tbody>
-                {attempts.length ? (
-                  attempts.map((attempt) => (
-                    <AttemptsTableRow
-                      key={objectHash(attempt)}
-                      eventId={eventId}
-                      attempt={attempt}
-                      withUserName
-                      manage
-                      refetch={refetchAttempts}
-                    />
-                  ))
-                ) : (
-                  <NoEntriesTr colSpan={6} />
-                )}
-              </Table.Tbody>
-            </Table>
-          </Table.ScrollContainer>
+          <AttemptsTable
+            eventId={eventId}
+            attempts={attempts}
+            manage
+            refetch={refetchAttempts}
+          />
         </Card.Section>
       </Card>
       <CreateAttemptDrawer

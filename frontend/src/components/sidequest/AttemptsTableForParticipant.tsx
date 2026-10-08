@@ -1,5 +1,4 @@
-import NoEntriesTr from "../NoEntriesTr";
-import AttemptsTableRow from "./AttemptsTableRow";
+import AttemptsTable from "./AttemptsTable";
 import CooldownText from "./CooldownText";
 
 import {
@@ -14,10 +13,9 @@ import {
   toolbarButtonProps,
 } from "@/styles/common";
 
-import { Button, Card, Group, Stack, Table } from "@mantine/core";
+import { Button, Card, Group, Stack } from "@mantine/core";
 
 import { IconRefresh } from "@tabler/icons-react";
-import objectHash from "object-hash";
 
 type AttemptsTableForParticipantProps = {
   eventId: string;
@@ -65,32 +63,11 @@ const AttemptsTableForParticipant = ({
           </Group>
         </Card.Section>
         <Card.Section>
-          <Table.ScrollContainer minWidth={1000}>
-            <Table striped layout="fixed">
-              <Table.Thead>
-                <Table.Tr>
-                  <Table.Th>Sidequest</Table.Th>
-                  <Table.Th>Result</Table.Th>
-                  <Table.Th>Day</Table.Th>
-                  <Table.Th>Time</Table.Th>
-                </Table.Tr>
-              </Table.Thead>
-              <Table.Tbody>
-                {attempts.length ? (
-                  attempts.map((attempt) => (
-                    <AttemptsTableRow
-                      key={objectHash(attempt)}
-                      eventId={eventId}
-                      attempt={attempt}
-                      refetch={refetchAttempts}
-                    />
-                  ))
-                ) : (
-                  <NoEntriesTr colSpan={4} />
-                )}
-              </Table.Tbody>
-            </Table>
-          </Table.ScrollContainer>
+          <AttemptsTable
+            eventId={eventId}
+            attempts={attempts}
+            refetch={refetchAttempts}
+          />
         </Card.Section>
       </Card>
     </Stack>

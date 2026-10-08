@@ -29,14 +29,21 @@ const HistoryChart = ({ eventId, grow }: HistoryChartProps) => {
     event_id: eventId,
   });
 
-  const series = Object.entries(history).map(([teamId, entries]) => {
-    return {
-      name: teams.find((team) => team.id === teamId)?.name ?? "Unknown",
-      data: entries.map((entry) => {
-        return { x: `${entry.date}Z`, y: Math.round(entry.score * 10) / 10 };
-      }),
-    };
-  });
+  // the history is a map without a stable order; sorting keeps each team's color
+  const series = Object.entries(history)
+    .map(([teamId, entries]) => ({
+      team: teams.find((team) => team.id === teamId),
+      entries,
+    }))
+    .sort((a, b) => (a.team?.index ?? Infinity) - (b.team?.index ?? Infinity))
+    .map(({ team, entries }) => {
+      return {
+        name: team?.name ?? "Unknown",
+        data: entries.map((entry) => {
+          return { x: `${entry.date}Z`, y: Math.round(entry.score * 10) / 10 };
+        }),
+      };
+    });
 
   const options: ApexOptions = {
     chart: {
