@@ -8,11 +8,9 @@ import RankingTab from "@/components/admin/RankingTab";
 import TeamsTable from "@/components/admin/TeamsTable";
 import DiscordControls from "@/components/admin/discord/DiscordControls";
 import SecretsTab from "@/components/admin/secrets/SecretsTab";
+import { useHashTab } from "@/hooks/useHashTab";
 import { useResolveParams } from "@/hooks/useResolveParams";
-import { confirmDiscard } from "@/hooks/useUnsavedChanges";
 import { iconProps, pageTabsProps, tabsPanelProps } from "@/styles/common";
-
-import { useEffect, useState } from "react";
 
 import { Tabs } from "@mantine/core";
 
@@ -26,45 +24,26 @@ import {
   IconUsers,
 } from "@tabler/icons-react";
 
+const TABS = [
+  "general",
+  "roles",
+  "teams",
+  "secrets",
+  "ranking",
+  "content",
+  "discord",
+];
+
 const Admin = () => {
   const { event, refetchEvent } = useResolveParams();
-  const [activeTab, setActiveTab] = useState<string>("general");
-
-  useEffect(() => {
-    const hash = window.location.hash.slice(1);
-    const validTabs = [
-      "general",
-      "roles",
-      "teams",
-      "secrets",
-      "ranking",
-      "content",
-      "discord",
-    ];
-    if (validTabs.includes(hash)) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- window.location.hash is a browser-only API unavailable during SSR render
-      setActiveTab(hash);
-    }
-  }, []);
-
-  const handleTabChange = (value: string | null) => {
-    if (value && value !== activeTab && confirmDiscard()) {
-      setActiveTab(value);
-      window.history.replaceState(null, "", `#${value}`);
-    }
-  };
+  const [activeTab, handleTabChange] = useHashTab(TABS, "general");
 
   if (!event) {
     return <PageSkeleton />;
   }
 
   return (
-    <Tabs
-      {...pageTabsProps}
-      value={activeTab}
-      onChange={handleTabChange}
-      keepMounted={false}
-    >
+    <Tabs {...pageTabsProps} value={activeTab} onChange={handleTabChange}>
       <Tabs.List>
         <Tabs.Tab value="general" leftSection={<IconSettings {...iconProps} />}>
           General

@@ -7,8 +7,8 @@ import AttemptsTableForSidequestMaster from "@/components/sidequest/AttemptsTabl
 import HistoryChart from "@/components/sidequest/HistoryChart";
 import OverviewLeaderboardTable from "@/components/sidequest/OverviewLeaderboardTable";
 import SidequestsList from "@/components/sidequest/SidequestsList";
+import { useHashTab } from "@/hooks/useHashTab";
 import { useResolveParams } from "@/hooks/useResolveParams";
-import { confirmDiscard } from "@/hooks/useUnsavedChanges";
 import {
   cardProps,
   iconProps,
@@ -16,34 +16,15 @@ import {
   tabsPanelProps,
 } from "@/styles/common";
 
-import { useEffect, useState } from "react";
-
 import { Card, Stack, Tabs } from "@mantine/core";
 
 import { IconStopwatch, IconTicTac, IconTrophy } from "@tabler/icons-react";
 
+const TABS = ["leaderboard", "sidequests", "attempts"];
+
 const Sidequests = () => {
   const { event, roles, policies } = useResolveParams();
-  const [activeTab, setActiveTab] = useState<string>("leaderboard");
-
-  useEffect(() => {
-    const hash = window.location.hash.slice(1);
-    if (
-      hash === "leaderboard" ||
-      hash === "sidequests" ||
-      hash === "attempts"
-    ) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- window.location.hash is a browser-only API unavailable during SSR render
-      setActiveTab(hash);
-    }
-  }, []);
-
-  const handleTabChange = (value: string | null) => {
-    if (value && value !== activeTab && confirmDiscard()) {
-      setActiveTab(value);
-      window.history.replaceState(null, "", `#${value}`);
-    }
-  };
+  const [activeTab, handleTabChange] = useHashTab(TABS, "leaderboard");
 
   if (!event || !roles || !policies) {
     return <PageSkeleton />;

@@ -1,12 +1,12 @@
 import EventContentControls from "./EventContentControls";
 
 import { Event } from "@/api/gen/schemas";
+import ScrollableSegmentedControl from "@/components/ScrollableSegmentedControl";
 import { confirmDiscard } from "@/hooks/useUnsavedChanges";
-import { segmentedControlProps } from "@/styles/common";
 
 import { useState } from "react";
 
-import { Group, SegmentedControl, Stack } from "@mantine/core";
+import { Group, Stack } from "@mantine/core";
 
 const TARGETS = {
   welcome: { field: "welcome_content", label: "Welcome content" },
@@ -41,8 +41,7 @@ const EventContentTab = ({ event, refetch }: EventContentTabProps) => {
   return (
     <Stack>
       <Group>
-        <SegmentedControl
-          {...segmentedControlProps}
+        <ScrollableSegmentedControl
           data={TARGET_TABS}
           value={target}
           onChange={handleTargetChange}

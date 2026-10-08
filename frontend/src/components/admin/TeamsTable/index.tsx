@@ -10,6 +10,7 @@ import {
 } from "@/api/gen";
 import { Event } from "@/api/gen/schemas";
 import NoEntriesTr from "@/components/NoEntriesTr";
+import ScrollableSegmentedControl from "@/components/ScrollableSegmentedControl";
 import { confirmDiscard } from "@/hooks/useUnsavedChanges";
 import {
   alertProps,
@@ -17,22 +18,12 @@ import {
   cardSectionProps,
   iconProps,
   largeIconProps,
-  segmentedControlProps,
   toolbarButtonProps,
 } from "@/styles/common";
 
 import { useState } from "react";
 
-import {
-  Alert,
-  Button,
-  Card,
-  Group,
-  SegmentedControl,
-  Stack,
-  Table,
-  Text,
-} from "@mantine/core";
+import { Alert, Button, Card, Group, Stack, Table, Text } from "@mantine/core";
 
 import {
   IconAlertCircle,
@@ -142,8 +133,7 @@ const TeamsTable = ({ event }: TeamsTableProps) => {
         </Text>
       </Alert>
       <Group>
-        <SegmentedControl
-          {...segmentedControlProps}
+        <ScrollableSegmentedControl
           data={Object.values(TableView)}
           value={view}
           onChange={handleViewChange}

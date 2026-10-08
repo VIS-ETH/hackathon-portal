@@ -11,13 +11,13 @@ import {
   SecretSubject,
 } from "@/api/gen/schemas";
 import NoEntriesTr from "@/components/NoEntriesTr";
+import ScrollableSegmentedControl from "@/components/ScrollableSegmentedControl";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import {
   cardProps,
   cardSectionProps,
   iconProps,
   inputProps,
-  segmentedControlProps,
   toolbarButtonProps,
 } from "@/styles/common";
 
@@ -28,7 +28,6 @@ import {
   Button,
   Card,
   Group,
-  SegmentedControl,
   Stack,
   Table,
   Text,
@@ -190,8 +189,7 @@ const SecretsGrid = ({
         </Card.Section>
         {isUserScope && (
           <Card.Section {...cardSectionProps}>
-            <SegmentedControl
-              {...segmentedControlProps}
+            <ScrollableSegmentedControl
               data={roleFilterTabs}
               value={roleFilterValue}
               onChange={(value) =>

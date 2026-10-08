@@ -4,10 +4,10 @@ import TeamBlogSection from "./TeamBlogSection";
 import { useGetEvent, useGetTeamBlog } from "@/api/gen";
 import { Team } from "@/api/gen/schemas";
 import {
+  cardHeaderButtonProps,
   cardProps,
   cardSectionProps,
   iconProps,
-  secondaryButtonProps,
 } from "@/styles/common";
 
 import { Button, Card, Stack, Text } from "@mantine/core";
@@ -38,7 +38,7 @@ const TeamBlogCard = ({ team, canUpdate }: TeamBlogCardProps) => {
           canUpdate &&
           event && (
             <Button
-              {...secondaryButtonProps}
+              {...cardHeaderButtonProps}
               component={Link}
               href={`/events/${event.slug}/teams/${team.slug}/blog/edit`}
               leftSection={<IconPencil {...iconProps} />}

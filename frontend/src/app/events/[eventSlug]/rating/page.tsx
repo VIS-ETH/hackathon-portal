@@ -1,34 +1,29 @@
 "use client";
 
 import PageSkeleton from "@/components/PageSkeleton";
+import ScrollableSegmentedControl from "@/components/ScrollableSegmentedControl";
 import PublicVoteInput from "@/components/rating/PublicVoteInput";
 import RatingInput from "@/components/rating/RatingInput";
+import { useHashTab } from "@/hooks/useHashTab";
 import { useResolveParams } from "@/hooks/useResolveParams";
-import { confirmDiscard } from "@/hooks/useUnsavedChanges";
-import { segmentedControlProps } from "@/styles/common";
 
-import { useEffect, useState } from "react";
-
-import { Group, SegmentedControl, Stack, Text, Title } from "@mantine/core";
+import { Group, Stack, Text, Title } from "@mantine/core";
 
 const VIEWS = [
   { label: "Public Vote", value: "vote" },
   { label: "Jury Rating", value: "jury" },
 ];
+const VIEW_VALUES = VIEWS.map((view) => view.value);
 
 const Page = () => {
   const { event, policies } = useResolveParams();
 
   // only used when the user may do both
-  const [view, setView] = useState<string | null>(null);
-
-  useEffect(() => {
-    const hash = window.location.hash.slice(1);
-    if (VIEWS.some((v) => v.value === hash)) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- window.location.hash is a browser-only API unavailable during SSR render
-      setView(hash);
-    }
-  }, []);
+  // defaults to whatever is open, e.g. for admins
+  const [activeView, handleViewChange] = useHashTab(
+    VIEW_VALUES,
+    event?.jury_rating_open ? "jury" : "vote",
+  );
 
   if (!event || !policies) {
     return <PageSkeleton />;
@@ -38,21 +33,11 @@ const Page = () => {
   const canRate = policies.can_manage_jury_rating;
 
   if (canVote && canRate) {
-    // defaults to whatever is open, e.g. for admins
-    const activeView = view ?? (event.jury_rating_open ? "jury" : "vote");
-    const handleViewChange = (value: string) => {
-      if (confirmDiscard()) {
-        setView(value);
-        window.history.replaceState(null, "", `#${value}`);
-      }
-    };
-
     return (
       <Stack>
         <Group justify="space-between">
           <Title order={2}>Rating</Title>
-          <SegmentedControl
-            {...segmentedControlProps}
+          <ScrollableSegmentedControl
             data={VIEWS}
             value={activeView}
             onChange={handleViewChange}

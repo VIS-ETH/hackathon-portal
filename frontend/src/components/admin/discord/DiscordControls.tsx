@@ -14,6 +14,7 @@ import {
   inputProps,
   primaryButtonProps,
   tabsPanelProps,
+  tabsProps,
 } from "@/styles/common";
 
 import { useState } from "react";
@@ -110,7 +111,7 @@ const DiscordConfigPage = ({ event, refetch }: DiscordControlsProps) => {
         required
       />
 
-      <Tabs defaultValue="edit">
+      <Tabs {...tabsProps} defaultValue="edit">
         <Tabs.List>
           <Tabs.Tab value="edit" leftSection={<IconEdit {...iconProps} />}>
             Edit

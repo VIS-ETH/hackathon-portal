@@ -8,10 +8,10 @@ import { useGetProject, useGetTechnicalTeamRating } from "@/api/gen";
 import { JuryRatingCategory, Team } from "@/api/gen/schemas";
 import { useResolveParams } from "@/hooks/useResolveParams";
 import {
+  cardHeaderButtonProps,
   cardProps,
   cardSectionProps,
   iconProps,
-  secondaryButtonProps,
 } from "@/styles/common";
 
 import { Accordion, Button, Card, Stack, Text } from "@mantine/core";
@@ -79,7 +79,7 @@ const JuryRatingCard = ({ team }: JuryRatingCardProps) => {
             title="Technical Questions"
             actions={
               <Button
-                {...secondaryButtonProps}
+                {...cardHeaderButtonProps}
                 leftSection={<IconRefresh {...iconProps} />}
                 onClick={() => refetchTechnicalRating()}
               >

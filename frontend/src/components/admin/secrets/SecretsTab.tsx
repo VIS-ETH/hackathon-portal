@@ -9,12 +9,12 @@ import {
   SecretScope,
   SecretSubject,
 } from "@/api/gen/schemas";
+import ScrollableSegmentedControl from "@/components/ScrollableSegmentedControl";
 import { confirmDiscard } from "@/hooks/useUnsavedChanges";
-import { segmentedControlProps } from "@/styles/common";
 
 import { useCallback, useMemo, useState } from "react";
 
-import { Group, SegmentedControl, Stack } from "@mantine/core";
+import { Group, Stack } from "@mantine/core";
 
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -71,8 +71,7 @@ const SecretsTab = ({ event }: SecretsTabProps) => {
   return (
     <Stack>
       <Group>
-        <SegmentedControl
-          {...segmentedControlProps}
+        <ScrollableSegmentedControl
           data={SCOPE_TABS}
           value={scope}
           onChange={handleScopeChange}

@@ -2,13 +2,13 @@ import CardHeader from "../CardHeader";
 import Uploader from "../Uploader";
 
 import { BlogSectionLayout } from "@/api/gen/schemas";
+import ScrollableSegmentedControl from "@/components/ScrollableSegmentedControl";
 import {
   cardProps,
   cardSectionProps,
   iconProps,
   modalProps,
   secondaryButtonProps,
-  segmentedControlProps,
   textareaProps,
 } from "@/styles/common";
 
@@ -19,7 +19,6 @@ import {
   Group,
   Image,
   Modal,
-  SegmentedControl,
   Stack,
   Text,
   Textarea,
@@ -97,6 +96,7 @@ const TeamBlogSectionEditor = ({
           <Group gap="xs">
             <ActionIcon
               variant="subtle"
+              size="sm"
               aria-label="Move section up"
               disabled={index === 0}
               onClick={() => onMove(-1)}
@@ -105,6 +105,7 @@ const TeamBlogSectionEditor = ({
             </ActionIcon>
             <ActionIcon
               variant="subtle"
+              size="sm"
               aria-label="Move section down"
               disabled={index === count - 1}
               onClick={() => onMove(1)}
@@ -113,6 +114,7 @@ const TeamBlogSectionEditor = ({
             </ActionIcon>
             <ActionIcon
               variant="subtle"
+              size="sm"
               color="red"
               aria-label="Delete section"
               onClick={onDelete}
@@ -133,10 +135,9 @@ const TeamBlogSectionEditor = ({
                 fit="contain"
               />
               <Group justify="space-between">
-                <Group gap="xs">
+                <Group gap="xs" miw={0}>
                   <Text size="sm">Image position</Text>
-                  <SegmentedControl
-                    {...segmentedControlProps}
+                  <ScrollableSegmentedControl
                     data={layoutOptions}
                     value={section.layout}
                     onChange={(value) =>

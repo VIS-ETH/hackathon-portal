@@ -1,26 +1,18 @@
 import { useInviteUsers } from "@/api/gen";
 import { Event, EventRole, UserForCreate } from "@/api/gen/schemas";
+import ScrollableSegmentedControl from "@/components/ScrollableSegmentedControl";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import {
   cardProps,
   cardSectionProps,
   codeTextareaProps,
   iconProps,
-  segmentedControlProps,
   toolbarButtonProps,
 } from "@/styles/common";
 
 import { useState } from "react";
 
-import {
-  Button,
-  Card,
-  Group,
-  SegmentedControl,
-  Stack,
-  Text,
-  Textarea,
-} from "@mantine/core";
+import { Button, Card, Group, Stack, Text, Textarea } from "@mantine/core";
 
 import { IconPlayerPlay } from "@tabler/icons-react";
 
@@ -79,10 +71,9 @@ const InvitationControls = ({ event, onInvite }: InvitationControlsProps) => {
             placeholder={PLACEHOLDER}
           />
           <Group justify="space-between">
-            <Group>
+            <Group miw={0}>
               <Text size="sm">Default role</Text>
-              <SegmentedControl
-                {...segmentedControlProps}
+              <ScrollableSegmentedControl
                 data={Object.values(EventRole)}
                 value={role}
                 onChange={(value) => setRole(value as EventRole)}

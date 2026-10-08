@@ -10,7 +10,6 @@ import {
   InputProps,
   MenuProps,
   ModalProps,
-  SegmentedControlProps,
   SkeletonProps,
   TabsPanelProps,
   TabsProps,
@@ -54,12 +53,6 @@ export const codeTextareaProps = {
   "data-monospace": true,
 };
 
-export const segmentedControlProps = {
-  size: "sm",
-  radius: "md",
-  withItemsBorders: false,
-} satisfies Partial<SegmentedControlProps>;
-
 export const primaryButtonProps: Partial<ButtonProps> = {
   radius: "md",
   size: "md",
@@ -73,6 +66,11 @@ export const secondaryButtonProps: Partial<ButtonProps> = {
 export const toolbarButtonProps: Partial<ButtonProps> = {
   ...secondaryButtonProps,
   size: "sm",
+};
+
+export const cardHeaderButtonProps: Partial<ButtonProps> = {
+  ...secondaryButtonProps,
+  size: "compact-xs",
 };
 
 export const tooltipProps: Partial<TooltipProps> = {
@@ -138,7 +136,12 @@ export const alertProps: Partial<AlertProps> = {
   radius: "md",
 };
 
+export const tabsProps: Partial<TabsProps> = {
+  keepMounted: false,
+};
+
 export const pageTabsProps: Partial<TabsProps> = {
+  ...tabsProps,
   mt: "-md",
 };
 
@@ -159,23 +162,6 @@ export const largeIconProps: Partial<IconProps> = {
 export const skeletonProps: Partial<SkeletonProps> = {
   height: 24,
   radius: "md",
-};
-
-export const cursorPointerStyle: CSSProperties = {
-  cursor: "pointer",
-};
-
-export const fullSizeDivStyle: CSSProperties = {
-  top: 0,
-  left: 0,
-  bottom: 0,
-  right: 0,
-  position: "fixed",
-};
-
-export const linkStyle: CSSProperties = {
-  textDecoration: "none",
-  color: "inherit",
 };
 
 export const podiumPlaces = [

@@ -1,12 +1,12 @@
 import TechnicalQuestions from "../technicalQuestions/TechnicalQuestionList";
 
+import ScrollableSegmentedControl from "@/components/ScrollableSegmentedControl";
 import RankingPanel from "@/components/admin/RankingPanel";
 import { confirmDiscard } from "@/hooks/useUnsavedChanges";
-import { segmentedControlProps } from "@/styles/common";
 
 import { useState } from "react";
 
-import { Group, SegmentedControl, Stack } from "@mantine/core";
+import { Group, Stack } from "@mantine/core";
 
 type RankingTabProps = {
   eventId: string;
@@ -19,8 +19,7 @@ const RankingTab = ({ eventId }: RankingTabProps) => {
   return (
     <Stack>
       <Group>
-        <SegmentedControl
-          {...segmentedControlProps}
+        <ScrollableSegmentedControl
           value={currentView}
           onChange={(view) => confirmDiscard() && setCurrentView(view)}
           data={views}

@@ -4,13 +4,13 @@ import InvitationControls from "./InvitationControls";
 
 import { useGetEventAffiliates } from "@/api/gen";
 import { Event, EventRole } from "@/api/gen/schemas";
+import ScrollableSegmentedControl from "@/components/ScrollableSegmentedControl";
 import {
   alertProps,
   cardProps,
   cardSectionProps,
   iconProps,
   largeIconProps,
-  segmentedControlProps,
   toolbarButtonProps,
 } from "@/styles/common";
 
@@ -22,7 +22,6 @@ import {
   Card,
   Checkbox,
   Group,
-  SegmentedControl,
   Stack,
   Table,
   Text,
@@ -87,8 +86,7 @@ const EventAffiliatesTable = ({ event }: EventAffiliatesTableProps) => {
             >
               Refresh
             </Button>
-            <SegmentedControl
-              {...segmentedControlProps}
+            <ScrollableSegmentedControl
               data={roleFilterTabs}
               value={roleFilterValue}
               onChange={(value) =>

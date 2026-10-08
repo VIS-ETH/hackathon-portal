@@ -1,6 +1,6 @@
 import ReactMarkdown, { Components } from "react-markdown";
 
-import { Box } from "@mantine/core";
+import { Anchor, Box } from "@mantine/core";
 
 import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
@@ -11,11 +11,26 @@ type Markdown = {
   trusted?: boolean;
 };
 
+const trustedComponents: Components = {
+  a: ({ href, children }) => (
+    <Anchor inherit td="underline dotted" c="inherit" href={href}>
+      {children}
+    </Anchor>
+  ),
+};
+
 const untrustedComponents: Components = {
   a: ({ href, children }) => (
-    <a href={href} target="_blank" rel="noopener noreferrer nofollow ugc">
+    <Anchor
+      inherit
+      td="underline dotted"
+      c="inherit"
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer nofollow ugc"
+    >
       {children}
-    </a>
+    </Anchor>
   ),
 };
 
@@ -26,7 +41,7 @@ const Markdown = ({ content, allowHtml, trusted }: Markdown) => {
         remarkPlugins={[remarkGfm]}
         rehypePlugins={allowHtml && trusted ? [rehypeRaw] : []}
         disallowedElements={trusted ? undefined : ["img"]}
-        components={trusted ? undefined : untrustedComponents}
+        components={trusted ? trustedComponents : untrustedComponents}
       >
         {content}
       </ReactMarkdown>
