@@ -76,17 +76,23 @@ const SecretsList = ({ secrets }: SecretsListProps) => {
           {/* the modal body's or card section's padding, so the divider spans the whole width */}
           {index > 0 && <Divider mx="-md" />}
           <Stack gap="xs">
-            <Text fw={700}>{secret.name}</Text>
-            {secret.description && (
-              // Long links, e.g. redeem URLs, would overflow the modal.
-              <Text
-                size="sm"
-                component="div"
-                style={{ overflowWrap: "anywhere" }}
-              >
-                <Markdown trusted allowHtml content={secret.description} />
+            {/* styled like the input labels and descriptions of the access details */}
+            <Stack gap={2}>
+              <Text size="sm" fw={500}>
+                {secret.name}
               </Text>
-            )}
+              {secret.description && (
+                // Long links, e.g. redeem URLs, would overflow the modal.
+                <Text
+                  size="xs"
+                  c="dimmed"
+                  component="div"
+                  style={{ overflowWrap: "anywhere" }}
+                >
+                  <Markdown trusted allowHtml content={secret.description} />
+                </Text>
+              )}
+            </Stack>
             <Group gap="xs" wrap="nowrap">
               <PasswordInput
                 {...inputProps}

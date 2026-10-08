@@ -78,6 +78,10 @@ const Team = () => {
           )}
         </SimpleGrid>
 
+        {policies.can_view_team_blog && (
+          <TeamBlogCard team={team} canUpdate={policies.can_update_team_blog} />
+        )}
+
         {policies.can_view_team_confidential && (
           <SimpleGrid cols={{ xs: 1, sm: secrets.length ? 2 : 1 }}>
             <AccessDetailsCard
@@ -90,10 +94,6 @@ const Team = () => {
             />
             {secrets.length > 0 && <TeamSecretsCard secrets={secrets} />}
           </SimpleGrid>
-        )}
-
-        {policies.can_view_team_blog && (
-          <TeamBlogCard team={team} canUpdate={policies.can_update_team_blog} />
         )}
       </Stack>
 
