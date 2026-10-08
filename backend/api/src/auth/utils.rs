@@ -24,6 +24,23 @@ pub fn normalize_ethz_auth_id(auth_id: &str, username: &str) -> String {
     auth_id.to_string()
 }
 
+/// Repairs names that were UTF-8 encoded but decoded as Latin-1 somewhere upstream,
+/// e.g. `"MÃ¼ller"` becomes `"Müller"`.
+///
+/// Genuine names are left untouched: they either contain characters beyond Latin-1,
+/// or their Latin-1 bytes do not form valid UTF-8 (e.g. `"Müller"` is `4D FC ...`).
+pub fn repair_mojibake(name: &str) -> String {
+    let bytes = name
+        .chars()
+        .map(|c| u8::try_from(c).ok())
+        .collect::<Option<Vec<_>>>();
+
+    match bytes.map(String::from_utf8) {
+        Some(Ok(repaired)) => repaired,
+        _ => name.to_string(),
+    }
+}
+
 pub fn extract_header(headers: &HeaderMap, key: &str) -> Option<String> {
     headers.get(key).map(|value| {
         // value.to_str() apparently fails on non-ascii characters
@@ -31,4 +48,23 @@ pub fn extract_header(headers: &HeaderMap, key: &str) -> Option<String> {
         let lossy = String::from_utf8_lossy(bytes);
         lossy.to_string()
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn repair_mojibake_fixes_latin1_decoded_utf8() {
+        assert_eq!(repair_mojibake("JosÃ© GarcÃ\u{AD}a"), "José García");
+        assert_eq!(repair_mojibake("Ã\u{89}mile Ã\u{85}berg"), "Émile Åberg");
+        assert_eq!(repair_mojibake("Å\u{9E}ule"), "Şule");
+    }
+
+    #[test]
+    fn repair_mojibake_keeps_genuine_names() {
+        for name in ["John Doe", "Müller", "Zoë Łukasz", "Ã"] {
+            assert_eq!(repair_mojibake(name), name);
+        }
+    }
 }

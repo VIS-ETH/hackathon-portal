@@ -1,4 +1,4 @@
-use crate::auth::utils::{extract_header, normalize_ethz_auth_id};
+use crate::auth::utils::{extract_header, normalize_ethz_auth_id, repair_mojibake};
 use crate::auth::AuthenticationResult;
 use crate::{ApiError, ApiResult};
 use axum::body::Body;
@@ -106,7 +106,7 @@ impl JwtAuthenticator {
 
         Ok(Some(AuthenticationResult {
             auth_id: normalized_auth_id,
-            name: name.clone(),
+            name: repair_mojibake(name),
         }))
     }
 }

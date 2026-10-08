@@ -50,12 +50,12 @@ const ManagedIngressControls = ({
             <Radio
               value={AccessControlMode.AuthenticationAuthorization}
               label="Authentication & authorization (recommended)"
-              description="Grants access only to authorized users (your team members and hackathon staff). Your application will receive the X-User-Id and X-User-Name headers to identify the user."
+              description="Grants access only to authorized users (your team members and hackathon staff). Your application will receive the X-User-Id and X-User-Name headers to identify the user (non-ASCII characters in the name are percent-encoded)."
             />
             <Radio
               value={AccessControlMode.Authentication}
               label="Authentication only"
-              description="Grants access to anyone with a Switch edu-ID account. Note that anyone can self-register an edu-ID. Your application will receive the X-User-Id and X-User-Name headers to identify the user."
+              description="Grants access to anyone with a Switch edu-ID account. Note that anyone can self-register an edu-ID. Your application will receive the X-User-Id and X-User-Name headers to identify the user (non-ASCII characters in the name are percent-encoded)."
             />
             <Radio
               value={AccessControlMode.None}

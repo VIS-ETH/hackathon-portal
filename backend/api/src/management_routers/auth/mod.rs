@@ -8,9 +8,19 @@ use axum::routing::get;
 use axum::Router;
 use hackathon_portal_repositories::db::{EventRole, TeamRole};
 use hackathon_portal_services::infrastructure::models::{AccessControlMode, IngressMode};
+use percent_encoding::{utf8_percent_encode, AsciiSet, CONTROLS};
 use std::collections::HashMap;
 use std::sync::Arc;
 use tracing::{info, warn};
+
+/// Header values are decoded as Latin-1 by most frameworks, so non-ASCII characters
+/// (always encoded by `utf8_percent_encode`) are percent-encoded, while ASCII names
+/// are passed through unchanged. `%` is encoded to keep decoding unambiguous.
+const USER_NAME_ENCODE_SET: &AsciiSet = &CONTROLS.add(b'%');
+
+fn encode_user_name(name: &str) -> String {
+    utf8_percent_encode(name, USER_NAME_ENCODE_SET).to_string()
+}
 
 pub fn get_router(state: &ApiState) -> Router {
     Router::new()
@@ -27,7 +37,7 @@ pub fn get_router(state: &ApiState) -> Router {
     responses(
         (status = StatusCode::OK, body = (), headers(
             ("X-User-Id" = String, description = "Auth id of the user, unless access control is off"),
-            ("X-User-Name" = String, description = "Name of the user, unless access control is off"),
+            ("X-User-Name" = String, description = "Name of the user with non-ASCII characters percent-encoded (UTF-8), unless access control is off"),
         )),
         (status = StatusCode::INTERNAL_SERVER_ERROR, body = PublicError),
     ),
@@ -119,7 +129,22 @@ pub async fn check_authorization(
 
     let mut response_headers = HeaderMap::new();
     response_headers.insert("X-User-Id", HeaderValue::from_str(&ctx.user().auth_id)?);
-    response_headers.insert("X-User-Name", HeaderValue::from_str(&ctx.user().name)?);
+    response_headers.insert(
+        "X-User-Name",
+        HeaderValue::from_str(&encode_user_name(&ctx.user().name))?,
+    );
 
     Ok(response_headers)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn encode_user_name_only_encodes_non_ascii() {
+        assert_eq!(encode_user_name("John Doe"), "John Doe");
+        assert_eq!(encode_user_name("Zoë"), "Zo%C3%AB");
+        assert_eq!(encode_user_name("100%"), "100%25");
+    }
 }
