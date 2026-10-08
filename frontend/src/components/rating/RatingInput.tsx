@@ -1,7 +1,5 @@
-"use client";
-
 import { useGetTeams } from "@/api/gen";
-import { Team } from "@/api/gen/schemas/team";
+import { Team } from "@/api/gen/schemas";
 import JuryRatingCard from "@/components/rating/JuryRatingCard";
 import TeamSelect from "@/components/select/TeamSelect";
 import { useResolveParams } from "@/hooks/useResolveParams";

@@ -45,7 +45,7 @@ const JuryRating = ({
           <Rating
             count={Math.max(...Array.from(SCALE_DESCRIPTIONS.keys()))}
             fractions={2}
-            value={rating ?? 0}
+            value={rating}
             onChange={(value) => setRating?.(value)}
             onHover={setHover}
             readOnly={feedbackOnly}

@@ -1,5 +1,3 @@
-"use client";
-
 import classes from "./Navbar.module.css";
 import UserMenu from "./UserMenu";
 
@@ -112,7 +110,7 @@ const Navbar = ({ wide = false }: NavbarProps) => {
       href={t.path}
       onClick={drawerHandles.close}
       className={cx(classes.mobileLink, {
-        [classes.mobileLinkActive]: t.path == activePath,
+        [classes.mobileLinkActive]: t.path === activePath,
       })}
     >
       {t.label}
@@ -131,17 +129,15 @@ const Navbar = ({ wide = false }: NavbarProps) => {
 
   const title = (
     <Link href="/">
-      <Group>
-        <Group align="center">
-          <Text fw={700} size="lg">
-            {event?.name ?? "Loading"}
-          </Text>
-          {event && (
-            <Badge {...badgeProps} visibleFrom="sm">
-              {event.phase}
-            </Badge>
-          )}
-        </Group>
+      <Group align="center">
+        <Text fw={700} size="lg">
+          {event?.name ?? "Loading"}
+        </Text>
+        {event && (
+          <Badge {...badgeProps} visibleFrom="sm">
+            {event.phase}
+          </Badge>
+        )}
       </Group>
     </Link>
   );

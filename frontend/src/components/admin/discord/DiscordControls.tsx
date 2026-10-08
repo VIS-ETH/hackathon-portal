@@ -63,7 +63,7 @@ type DiscordControlsProps = {
   refetch?: () => void;
 };
 
-const DiscordConfigPage = ({ event, refetch }: DiscordControlsProps) => {
+const DiscordControls = ({ event, refetch }: DiscordControlsProps) => {
   const [yamlInput, setYamlInput] = useState(event.discord_config || "");
   const [serverId, setServerId] = useState<string | undefined>(
     event.discord_server_id || "",
@@ -202,4 +202,4 @@ const DiscordConfigPage = ({ event, refetch }: DiscordControlsProps) => {
   );
 };
 
-export default DiscordConfigPage;
+export default DiscordControls;

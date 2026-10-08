@@ -11,7 +11,6 @@ import {
   Card,
   Center,
   Container,
-  Group,
   Image,
   Skeleton,
   Stack,
@@ -55,12 +54,10 @@ const Home = () => {
               <>
                 {hiddenEventIds.length ? (
                   <Card {...cardProps} style={{ borderStyle: "dashed" }}>
-                    <Group justify="space-between">
-                      <Text c="dimmed">
-                        You are part of {hiddenEventIds.length} hidden event
-                        {hiddenEventIds.length > 1 ? "s" : ""}.
-                      </Text>
-                    </Group>
+                    <Text c="dimmed">
+                      You are part of {hiddenEventIds.length} hidden event
+                      {hiddenEventIds.length > 1 ? "s" : ""}.
+                    </Text>
                   </Card>
                 ) : (
                   <Text c="dimmed">

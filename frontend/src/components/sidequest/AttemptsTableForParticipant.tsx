@@ -13,7 +13,7 @@ import {
   toolbarButtonProps,
 } from "@/styles/common";
 
-import { Button, Card, Group, Stack } from "@mantine/core";
+import { Button, Card, Group } from "@mantine/core";
 
 import { IconRefresh } from "@tabler/icons-react";
 
@@ -45,32 +45,30 @@ const AttemptsTableForParticipant = ({
     });
 
   return (
-    <Stack>
-      <Card {...cardProps}>
-        <Card.Section {...cardSectionProps}>
-          <Group justify="space-between">
-            <Button
-              {...toolbarButtonProps}
-              leftSection={<IconRefresh {...iconProps} />}
-              onClick={() => {
-                refetchAttempts();
-                refetchCooldown();
-              }}
-            >
-              Refresh
-            </Button>
-            {cooldown && <CooldownText cooldown={cooldown} />}
-          </Group>
-        </Card.Section>
-        <Card.Section>
-          <AttemptsTable
-            eventId={eventId}
-            attempts={attempts}
-            refetch={refetchAttempts}
-          />
-        </Card.Section>
-      </Card>
-    </Stack>
+    <Card {...cardProps}>
+      <Card.Section {...cardSectionProps}>
+        <Group justify="space-between">
+          <Button
+            {...toolbarButtonProps}
+            leftSection={<IconRefresh {...iconProps} />}
+            onClick={() => {
+              refetchAttempts();
+              refetchCooldown();
+            }}
+          >
+            Refresh
+          </Button>
+          {cooldown && <CooldownText cooldown={cooldown} />}
+        </Group>
+      </Card.Section>
+      <Card.Section>
+        <AttemptsTable
+          eventId={eventId}
+          attempts={attempts}
+          refetch={refetchAttempts}
+        />
+      </Card.Section>
+    </Card>
   );
 };
 

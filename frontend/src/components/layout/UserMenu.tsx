@@ -54,7 +54,7 @@ const UserMenu = ({ onOpenSecrets }: UserMenuProps) => {
       <Menu.Dropdown>
         <Menu.Label>{me?.auth_id}</Menu.Label>
         <Menu.Item
-          component="a" // 'a' for anchor tag
+          component="a"
           href={discordAuthUrl}
           referrerPolicy="no-referrer"
           leftSection={<IconBrandDiscord {...iconProps} />}

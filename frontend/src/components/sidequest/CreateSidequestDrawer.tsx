@@ -44,7 +44,6 @@ const CreateSidequestDrawer = ({
       description: "",
       is_higher_result_better: false,
     },
-    validateInputOnChange: true,
   });
 
   const createSidequestMutation = useCreateSidequest();
@@ -98,7 +97,6 @@ const CreateSidequestDrawer = ({
           <Button
             {...primaryButtonProps}
             type="submit"
-            disabled={!form.isValid()}
             loading={createSidequestMutation.isPending}
           >
             Create

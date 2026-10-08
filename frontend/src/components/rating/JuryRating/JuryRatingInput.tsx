@@ -26,7 +26,7 @@ const JuryRatingInput = ({
   const updateRatingMutation = useUpdateJuryRating();
 
   const rating = ratings.find(
-    (r) => r.category === category && r.user_id == me?.id,
+    (r) => r.category === category && r.user_id === me?.id,
   );
 
   const handleUpdate = async (value: number) => {

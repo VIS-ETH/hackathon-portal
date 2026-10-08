@@ -2,7 +2,7 @@ import { useDeleteTeam } from "@/api/gen";
 import { AdminTeam } from "@/api/gen/schemas";
 import { iconProps, secondaryButtonProps } from "@/styles/common";
 
-import { Button, Group, Table } from "@mantine/core";
+import { Button, Table } from "@mantine/core";
 
 import { IconTrash } from "@tabler/icons-react";
 
@@ -32,16 +32,14 @@ const ActionsTd = ({ team, refetch }: ActionsTdProps) => {
 
   return (
     <Table.Td>
-      <Group gap="xs">
-        <Button
-          {...secondaryButtonProps}
-          leftSection={<IconTrash {...iconProps} />}
-          color="red"
-          onClick={handleDelete}
-        >
-          Delete
-        </Button>
-      </Group>
+      <Button
+        {...secondaryButtonProps}
+        leftSection={<IconTrash {...iconProps} />}
+        color="red"
+        onClick={handleDelete}
+      >
+        Delete
+      </Button>
     </Table.Td>
   );
 };

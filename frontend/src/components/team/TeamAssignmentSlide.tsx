@@ -30,10 +30,8 @@ const TeamAssignmentSlide = ({ team }: TeamAssignmentSlideProps) => {
 
   const { data: affiliates = [] } = useGetTeamAffiliates(team.id);
 
-  const mentors =
-    affiliates.filter((a) => a.roles.includes(TeamRole.Mentor)) ?? [];
-  const members =
-    affiliates.filter((a) => a.roles.includes(TeamRole.Member)) ?? [];
+  const mentors = affiliates.filter((a) => a.roles.includes(TeamRole.Mentor));
+  const members = affiliates.filter((a) => a.roles.includes(TeamRole.Member));
 
   const textProps = { size: "lg" } satisfies TextProps;
 

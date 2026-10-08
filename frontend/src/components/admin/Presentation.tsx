@@ -188,7 +188,6 @@ const Presentation = <T,>({
           flex={1}
           display="flex"
           style={hiddenScrollbarStyle}
-          // TODO: fix scrolling annoyance (we can scroll past "100%" and see the lower parts of the hexagons which should be clipped)
         >
           {[-1, 0, 1].map((offset) => {
             const slideIndex = currentIndex + offset;
@@ -200,11 +199,11 @@ const Presentation = <T,>({
             return (
               <Box
                 key={toKey(elements[slideIndex])}
-                hidden={offset != 0}
+                hidden={offset !== 0}
                 flex={1}
                 style={hiddenScrollbarStyle}
               >
-                {toContent(elements[slideIndex], offset == 0)}
+                {toContent(elements[slideIndex], offset === 0)}
               </Box>
             );
           })}

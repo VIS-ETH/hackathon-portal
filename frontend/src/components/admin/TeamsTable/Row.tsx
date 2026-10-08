@@ -40,23 +40,23 @@ const TeamsTableRow = ({
           {fmtTeamIndex(team.index)}
         </Text>
       </Table.Td>
-      <NameTd team={team} ro={view != TableView.General} refetch={refetch} />
-      {(view == TableView.Projects ||
-        view == TableView.Mentors ||
-        view == TableView.Stakeholders) && (
+      <NameTd team={team} ro={view !== TableView.General} refetch={refetch} />
+      {(view === TableView.Projects ||
+        view === TableView.Mentors ||
+        view === TableView.Stakeholders) && (
         <ProjectTd
           team={team}
-          ro={view != TableView.Projects}
+          ro={view !== TableView.Projects}
           refetch={refetch}
         />
       )}
-      {view == TableView.Projects && (
+      {view === TableView.Projects && (
         <MatchingTds team={team} projectPreferences={projectPreferences} />
       )}
-      {view == TableView.Infra && (
+      {view === TableView.Infra && (
         <InfrastructureTds team={team} refetch={refetch} />
       )}
-      {view == TableView.Members && (
+      {view === TableView.Members && (
         <AffiliateTds
           team={team}
           affiliates={affiliates}
@@ -65,7 +65,7 @@ const TeamsTableRow = ({
           max={event.max_team_size}
         />
       )}
-      {view == TableView.Mentors && (
+      {view === TableView.Mentors && (
         <AffiliateTds
           team={team}
           affiliates={affiliates}
@@ -74,7 +74,7 @@ const TeamsTableRow = ({
           max={2}
         />
       )}
-      {view == TableView.Stakeholders && (
+      {view === TableView.Stakeholders && (
         <AffiliateTds
           team={team}
           affiliates={affiliates}
@@ -83,10 +83,12 @@ const TeamsTableRow = ({
           max={1}
         />
       )}
-      {view == TableView.Notes && (
+      {view === TableView.Notes && (
         <ExtraScoreTd team={team} refetch={refetch} />
       )}
-      {view == TableView.General && <ActionsTd team={team} refetch={refetch} />}
+      {view === TableView.General && (
+        <ActionsTd team={team} refetch={refetch} />
+      )}
     </Table.Tr>
   );
 };

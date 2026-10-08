@@ -73,7 +73,7 @@ const TechnicalQuestionGrading = ({
             <Button
               {...toolbarButtonProps}
               variant={
-                score !== undefined && score != max_points
+                score !== undefined && score !== max_points
                   ? "filled"
                   : "default"
               }
@@ -83,7 +83,7 @@ const TechnicalQuestionGrading = ({
             </Button>
             <Button
               {...toolbarButtonProps}
-              variant={score == max_points ? "filled" : "default"}
+              variant={score === max_points ? "filled" : "default"}
               onClick={() => scoreMutation(max_points)}
             >
               Yes

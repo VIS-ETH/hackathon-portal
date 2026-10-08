@@ -64,7 +64,6 @@ const NetworkConfigModal = ({
     >
       {team.ingress_enabled ? (
         <SimpleGrid maw={1200} cols={{ base: 1, md: 2 }}>
-          {/* TODO: allow for independent scrolling */}
           <Stack>
             <GenericIngressControls
               config={localIngressConfig}

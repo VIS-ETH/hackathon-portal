@@ -1,5 +1,3 @@
-"use client";
-
 import TeamImage from "../team/TeamImage";
 
 import {

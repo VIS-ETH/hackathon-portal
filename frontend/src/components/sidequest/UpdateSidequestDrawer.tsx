@@ -39,7 +39,6 @@ const UpdateSidequestDrawer = ({
 }: UpdateSidequestDrawerProps) => {
   const form = useForm<SidequestForUpdate>({
     mode: "controlled",
-    validateInputOnChange: true,
   });
 
   const updateSidequestMutation = useUpdateSidequest();
@@ -100,7 +99,6 @@ const UpdateSidequestDrawer = ({
           <Button
             {...primaryButtonProps}
             type="submit"
-            disabled={!form.isValid()}
             loading={updateSidequestMutation.isPending}
           >
             Update

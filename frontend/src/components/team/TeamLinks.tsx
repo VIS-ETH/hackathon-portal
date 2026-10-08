@@ -1,5 +1,3 @@
-"use client";
-
 import IconTextGroup from "../IconTextGroup";
 
 import { useGetEvent, useGetProject } from "@/api/gen";

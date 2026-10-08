@@ -111,7 +111,7 @@ const getChartCustom = (team: Team, config: CustomIngressConfig) => {
 };
 
 const getChart = (team: Team, config: IngressConfig) => {
-  if (config.mode == "Managed") {
+  if (config.mode === "Managed") {
     return getChartManaged(team, config.config);
   } else {
     return getChartCustom(team, config.config);

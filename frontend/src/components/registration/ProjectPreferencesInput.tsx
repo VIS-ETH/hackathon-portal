@@ -36,7 +36,7 @@ const ProjectPreferencesInput = ({
 
   if (remotePPS !== prevRemotePPS) {
     setPrevRemotePPS(remotePPS);
-    if (remotePPS?.length == N_PREFERENCES) {
+    if (remotePPS?.length === N_PREFERENCES) {
       setLocalPPS(remotePPS);
     }
   }
@@ -77,7 +77,7 @@ const ProjectPreferencesInput = ({
           <Card {...highlightedCardProps} key={index} ta="center">
             <>
               <Text>
-                {index == 0 ? "Highest Project Priority" : "Project Priority"}
+                {index === 0 ? "Highest Project Priority" : "Project Priority"}
               </Text>
               <Text mt="sm" fz="h2" lh="h2" fw={700}>
                 {index + 1}

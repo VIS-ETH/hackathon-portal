@@ -32,7 +32,6 @@ const CreateProjectDrawer = ({
   const form = useForm<ProjectForCreate>({
     mode: "controlled",
     initialValues: { event_id: eventId, name: "", content: "" },
-    validateInputOnChange: true,
   });
 
   const createProjectMutation = useCreateProject();
@@ -77,7 +76,6 @@ const CreateProjectDrawer = ({
           <Button
             {...primaryButtonProps}
             type="submit"
-            disabled={!form.isValid()}
             loading={createProjectMutation.isPending}
           >
             Create

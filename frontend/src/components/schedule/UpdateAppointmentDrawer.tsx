@@ -62,7 +62,6 @@ const UpdateAppointmentDrawer = ({
 }: UpdateAppointmentDrawerProps) => {
   const form = useForm<AppointmentFormValues>({
     mode: "controlled",
-    validateInputOnChange: true,
     transformValues: (values) => ({
       ...values,
       start: toUtcDate(values.start),
@@ -146,7 +145,6 @@ const UpdateAppointmentDrawer = ({
           <Button
             {...primaryButtonProps}
             type="submit"
-            disabled={!form.isValid()}
             loading={updateAppointmentMutation.isPending}
           >
             Update

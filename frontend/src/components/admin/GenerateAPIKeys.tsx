@@ -1,5 +1,3 @@
-"use client";
-
 import { useCreateTeamAiApiKey } from "@/api/gen";
 import { SecretSubject } from "@/api/gen/schemas";
 import {

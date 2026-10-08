@@ -40,7 +40,7 @@ const GenericIngressControls = ({
     setConfig(
       produce(config, (draft) => {
         draft.mode = mode;
-        draft.config = draft.config =
+        draft.config =
           mode === "Managed" ? DEFAULT_MANAGED_CONFIG : DEFAULT_CUSTOM_CONFIG;
       }),
     );
@@ -82,7 +82,7 @@ const GenericIngressControls = ({
   return (
     <Card {...cardProps}>
       {modeControls}
-      {config.mode == "Managed" && (
+      {config.mode === "Managed" && (
         <ManagedIngressControls
           config={config.config}
           setConfig={setGenericConfig}

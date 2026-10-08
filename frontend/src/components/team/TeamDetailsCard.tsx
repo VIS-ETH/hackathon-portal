@@ -1,5 +1,3 @@
-"use client";
-
 import TeamDetails from "./TeamDetails";
 import TeamImage from "./TeamImage";
 import TeamLinks from "./TeamLinks";

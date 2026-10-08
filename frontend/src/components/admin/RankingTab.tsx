@@ -1,4 +1,4 @@
-import TechnicalQuestions from "../technicalQuestions/TechnicalQuestionList";
+import TechnicalQuestionList from "../technicalQuestions/TechnicalQuestionList";
 
 import ScrollableSegmentedControl from "@/components/ScrollableSegmentedControl";
 import RankingPanel from "@/components/admin/RankingPanel";
@@ -28,7 +28,7 @@ const RankingTab = ({ eventId }: RankingTabProps) => {
 
       {currentView === "Ranking" && <RankingPanel eventId={eventId} />}
       {currentView === "Technical Questions" && (
-        <TechnicalQuestions eventId={eventId} />
+        <TechnicalQuestionList eventId={eventId} />
       )}
     </Stack>
   );

@@ -24,7 +24,7 @@ const UploadTeamPhotoModal = ({
   const updateTeamMutation = useUpdateTeam();
 
   const handleUploaded = async (ids: string[]) => {
-    if (ids.length != 1) {
+    if (ids.length !== 1) {
       throw new Error("Expected exactly one uploaded file");
     }
 

@@ -39,7 +39,6 @@ const UpdateProjectDrawer = ({
 }: UpdateProjectDrawerProps) => {
   const form = useForm<ProjectForUpdate>({
     mode: "controlled",
-    validateInputOnChange: true,
   });
 
   const { data: stakeholder } = useGetEventAffiliates(
@@ -106,7 +105,6 @@ const UpdateProjectDrawer = ({
           <Button
             {...primaryButtonProps}
             type="submit"
-            disabled={!form.isValid()}
             loading={updateProjectMutation.isPending}
           >
             Update
