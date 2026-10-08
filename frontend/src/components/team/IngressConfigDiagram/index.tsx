@@ -6,7 +6,7 @@ import {
   Team,
 } from "@/api/gen/schemas";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useId, useRef } from "react";
 
 import { Center } from "@mantine/core";
 
@@ -22,6 +22,7 @@ const IngressConfigDiagram = ({
   currentConfig,
 }: IngressConfigDiagramProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const id = `ingress-diagram-${useId().replace(/[^\w-]/g, "")}`;
 
   const chart = getChart(team, currentConfig);
 
@@ -30,20 +31,30 @@ const IngressConfigDiagram = ({
   }, []);
 
   useEffect(() => {
-    if (typeof window !== "undefined" && containerRef.current) {
-      containerRef.current.removeAttribute("data-processed");
-      mermaid.contentLoaded();
-    }
-  }, [chart]);
+    let cancelled = false;
+    mermaid.render(id, chart).then(({ svg }) => {
+      if (!cancelled && containerRef.current) {
+        containerRef.current.innerHTML = svg;
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [id, chart]);
 
-  return (
-    <Center className="mermaid" ref={containerRef}>
-      {chart}
-    </Center>
-  );
+  return <Center ref={containerRef} />;
 };
 
+// An edge from the internet, labeled with the address if the team has one.
+const internetEdge = (address: string | null | undefined, to: string) =>
+  address ? `inet -- ${address} --> ${to};` : `inet --> ${to};`;
+
 const getChartManaged = (team: Team, config: ManagedIngressConfig) => {
+  const inetToRp = internetEdge(
+    team.managed_address && `https://${team.managed_address}`,
+    "rp",
+  );
+
   switch (config.access_control_mode) {
     case AccessControlMode.AuthenticationAuthorization:
       return `
@@ -53,7 +64,7 @@ const getChartManaged = (team: Team, config: ManagedIngressConfig) => {
           auth(<b>Our Authentication & Authorization</b><br>Verifies Login & Permissions);
           vm(<b>Your Server</b><br>http://0.0.0.0:${config.server_port});
 
-          inet -- https://${team.managed_address} --> rp;
+          ${inetToRp}
           rp --> auth;
           auth -- <b>New Headers</b><br>X-User-Id<br>X-User-Name --> vm;
       `;
@@ -65,7 +76,7 @@ const getChartManaged = (team: Team, config: ManagedIngressConfig) => {
           auth(<b>Our Authentication</b><br>Verifies Login);
           vm(<b>Your Server</b><br>http://0.0.0.0:${config.server_port});
 
-          inet -- https://${team.managed_address} --> rp;
+          ${inetToRp}
           rp --> auth;
           auth -- <b>New Headers</b><br>X-User-Id<br>X-User-Name --> vm;
       `;
@@ -76,7 +87,7 @@ const getChartManaged = (team: Team, config: ManagedIngressConfig) => {
           rp(<b>Our Reverse Proxy</b><br>Terminates TLS);
           vm(<b>Your Server</b><br>http://0.0.0.0:${config.server_port});
 
-          inet -- https://${team.managed_address} --> rp;
+          ${inetToRp}
           rp --> vm;
       `;
   }
@@ -84,13 +95,18 @@ const getChartManaged = (team: Team, config: ManagedIngressConfig) => {
 
 const getChartCustom = (team: Team, config: CustomIngressConfig) => {
   const serverProtocol = config.server_protocol.toLocaleLowerCase();
+  const inetToVm = internetEdge(
+    team.direct_address &&
+      `${serverProtocol}://${team.direct_address}:${config.server_port}`,
+    "vm",
+  );
 
   return `
     graph TD
       inet{Internet};
       vm(<b>Your Server</b><br>${serverProtocol}://0.0.0.0:${config.server_port});
 
-      inet -- ${serverProtocol}://${team.direct_address}:${config.server_port} --> vm;
+      ${inetToVm}
   `;
 };
 

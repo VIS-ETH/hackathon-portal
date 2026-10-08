@@ -60,13 +60,13 @@ const GenericIngressControls = ({
         value={config.mode}
         onChange={(value) => setMode(value as IngressMode)}
         name="ingressMode"
-        label="Ingress Mode"
+        label="Ingress mode"
         description="Control how your application is exposed to the internet."
       >
         <Stack my="xs" gap="xs">
           <Radio
             value="Managed"
-            label="Managed (Recommended)"
+            label="Managed (recommended)"
             description="Expose your application via our reverse proxy. We'll provide basic security, including handling TLS certificates and access control."
           />
           <Radio

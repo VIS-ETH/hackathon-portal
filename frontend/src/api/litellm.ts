@@ -6,47 +6,36 @@ export async function getKeyInfo(
   apiKey: string,
 ): Promise<{ usedBudget: number; maxBudget: number }> {
   const keyUrl = `${liteLLMUrl}/key/info?key=${apiKey}`;
-  let teamId;
-  try {
-    const response = await fetch(keyUrl, {
-      method: "GET",
-      headers: {
-        accept: "application/json",
-        "x-litellm-api-key": apiKey,
-      },
-    });
+  const keyResponse = await fetch(keyUrl, {
+    method: "GET",
+    headers: {
+      accept: "application/json",
+      "x-litellm-api-key": apiKey,
+    },
+  });
 
-    if (!response.ok) {
-      throw new Error(`Request failed with status ${response.status}`);
-    }
-
-    const data = await response.json();
-    teamId = data.info.team_id;
-  } catch (error) {
-    console.error("Error fetching key info:", error);
-    throw error;
+  if (!keyResponse.ok) {
+    throw new Error(`Request failed with status ${keyResponse.status}`);
   }
+
+  const keyData = await keyResponse.json();
+  const teamId = keyData.info.team_id;
 
   const teamUrl = `${liteLLMUrl}/team/info?team_id=${teamId}`;
+  const teamResponse = await fetch(teamUrl, {
+    method: "GET",
+    headers: {
+      accept: "application/json",
+      "x-litellm-api-key": apiKey,
+    },
+  });
 
-  try {
-    const response = await fetch(teamUrl, {
-      method: "GET",
-      headers: {
-        accept: "application/json",
-        "x-litellm-api-key": apiKey,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`Request failed with status ${response.status}`);
-    }
-    const data = await response.json();
-    const maxBudget = data.team_info.max_budget;
-    const usedBudget = data.team_info.spend;
-    return { usedBudget, maxBudget };
-  } catch (error) {
-    console.error("Error fetching team info:", error);
-    throw error;
+  if (!teamResponse.ok) {
+    throw new Error(`Request failed with status ${teamResponse.status}`);
   }
+
+  const teamData = await teamResponse.json();
+  const maxBudget = teamData.team_info.max_budget;
+  const usedBudget = teamData.team_info.spend;
+  return { usedBudget, maxBudget };
 }

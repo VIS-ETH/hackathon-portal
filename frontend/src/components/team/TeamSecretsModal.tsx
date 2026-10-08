@@ -1,9 +1,9 @@
 import { useGetTeamSecrets } from "@/api/gen";
 import { Team } from "@/api/gen/schemas";
 import SecretsList from "@/components/secrets/SecretsList";
-import { modalProps } from "@/styles/common";
+import { modalProps, skeletonProps } from "@/styles/common";
 
-import { Center, Modal, Text } from "@mantine/core";
+import { Center, Modal, Skeleton, Text } from "@mantine/core";
 
 type TeamSecretsModalProps = {
   team: Team;
@@ -12,7 +12,7 @@ type TeamSecretsModalProps = {
 };
 
 const TeamSecretsModal = ({ team, opened, onClose }: TeamSecretsModalProps) => {
-  const { data: secrets = [] } = useGetTeamSecrets(team.id, {
+  const { data: secrets, isLoading } = useGetTeamSecrets(team.id, {
     query: { enabled: opened },
   });
 
@@ -23,7 +23,9 @@ const TeamSecretsModal = ({ team, opened, onClose }: TeamSecretsModalProps) => {
       onClose={onClose}
       title="Team Secrets"
     >
-      {secrets.length ? (
+      {isLoading ? (
+        <Skeleton {...skeletonProps} />
+      ) : secrets?.length ? (
         <SecretsList secrets={secrets} />
       ) : (
         <Center>

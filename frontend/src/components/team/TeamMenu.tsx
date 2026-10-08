@@ -35,6 +35,14 @@ const TeamMenu = ({ team, refetchTeam, policies }: TeamMenuProps) => {
   const updateTeamMutation = useUpdateTeam();
 
   const handleDeletePhoto = async () => {
+    const confirmation = confirm(
+      "Delete the team photo? This can't be undone.",
+    );
+
+    if (!confirmation) {
+      return;
+    }
+
     await updateTeamMutation.mutateAsync({
       teamId: team.id,
       data: {
@@ -111,7 +119,7 @@ const TeamMenu = ({ team, refetchTeam, policies }: TeamMenuProps) => {
         <Menu.Target>
           <Button
             {...secondaryButtonProps}
-            leftSection={<IconChevronDown {...iconProps} />}
+            rightSection={<IconChevronDown {...iconProps} />}
           >
             Administration
           </Button>

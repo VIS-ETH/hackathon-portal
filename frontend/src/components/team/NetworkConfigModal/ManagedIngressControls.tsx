@@ -43,13 +43,13 @@ const ManagedIngressControls = ({
             handleUpdateAccessControlMode(value as AccessControlMode)
           }
           name="accessControlMode"
-          label="Access Control Mode"
+          label="Access control mode"
           description="Control who can access your application and what user information is passed to it."
         >
           <Stack my="xs" gap="xs">
             <Radio
               value={AccessControlMode.AuthenticationAuthorization}
-              label="Authentication & Authorization (Recommended)"
+              label="Authentication & authorization (recommended)"
               description="Grants access only to authorized users (your team members and hackathon staff). Your application will receive the X-User-Id and X-User-Name headers to identify the user."
             />
             <Radio
@@ -76,7 +76,7 @@ const ManagedIngressControls = ({
           max={65535}
           step={1}
           name="serverPort"
-          label="Server Port"
+          label="Server port"
           description="The internal port your application listens on. This must match the port configured in your code (e.g., `process.env.PORT` or `app.listen(8080)`)."
         />
       </Card.Section>

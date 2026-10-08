@@ -1,4 +1,4 @@
-import { createContext, useState } from "react";
+import { createContext, useCallback, useState } from "react";
 
 import { produce } from "immer";
 
@@ -27,9 +27,9 @@ export const ErrorContextProvider = ({
     );
   };
 
-  const closeError = (id: string) => {
+  const closeError = useCallback((id: string) => {
     setErrors((prev) => prev.filter(([key]) => key !== id));
-  };
+  }, []);
 
   return (
     <ErrorContext.Provider value={{ errors, setError, closeError }}>

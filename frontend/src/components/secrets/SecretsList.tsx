@@ -15,13 +15,24 @@ type AIKeyUsageProps = {
 const AIKeyUsage = ({ liteLLMUrl, apiKey }: AIKeyUsageProps) => {
   const [usedBudget, setUsedBudget] = useState<number | null>(null);
   const [maxBudget, setMaxBudget] = useState<number | null>(null);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
-    getKeyInfo(liteLLMUrl, apiKey).then(({ usedBudget, maxBudget }) => {
-      setUsedBudget(usedBudget);
-      setMaxBudget(maxBudget);
-    });
+    getKeyInfo(liteLLMUrl, apiKey)
+      .then(({ usedBudget, maxBudget }) => {
+        setUsedBudget(usedBudget);
+        setMaxBudget(maxBudget);
+      })
+      .catch(() => setFailed(true));
   }, [liteLLMUrl, apiKey]);
+
+  if (failed) {
+    return (
+      <Text size="sm" c="dimmed">
+        Usage unavailable
+      </Text>
+    );
+  }
 
   return (
     <>

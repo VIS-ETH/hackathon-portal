@@ -15,7 +15,6 @@ import {
   TabsProps,
   TextProps,
   TextareaProps,
-  TooltipProps,
 } from "@mantine/core";
 
 import { IconProps } from "@tabler/icons-react";
@@ -71,11 +70,6 @@ export const toolbarButtonProps: Partial<ButtonProps> = {
 export const cardHeaderButtonProps: Partial<ButtonProps> = {
   ...secondaryButtonProps,
   size: "compact-xs",
-};
-
-export const tooltipProps: Partial<TooltipProps> = {
-  w: 200,
-  multiline: true,
 };
 
 export const cardProps: Partial<CardProps> = {

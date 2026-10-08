@@ -14,8 +14,9 @@ const ErrorNotificationsAffix = () => {
       {errors.map(([id, error]) => (
         <ErrorNotification
           key={id}
+          id={id}
           error={error}
-          onClose={() => closeError(id)}
+          onClose={closeError}
         />
       ))}
     </Affix>

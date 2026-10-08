@@ -1,7 +1,7 @@
-import { DEFAULT_MANAGED_CONFIG } from "./GenericIngressControls";
+import { DEFAULT_CUSTOM_CONFIG } from "./GenericIngressControls";
 
 import { CustomIngressConfig, ServerProtocol } from "@/api/gen/schemas";
-import { cardSectionProps } from "@/styles/common";
+import { cardSectionProps, inputProps } from "@/styles/common";
 import { parseIntStrict } from "@/utils";
 
 import { Card, NumberInput, Radio, Stack } from "@mantine/core";
@@ -21,7 +21,7 @@ const CustomIngressControls = ({
     setConfig(
       produce(config, (draft) => {
         draft.server_port =
-          parseIntStrict(port) ?? DEFAULT_MANAGED_CONFIG.server_port;
+          parseIntStrict(port) ?? DEFAULT_CUSTOM_CONFIG.server_port;
       }),
     );
   };
@@ -38,14 +38,16 @@ const CustomIngressControls = ({
     <>
       <Card.Section {...cardSectionProps}>
         <NumberInput
+          {...inputProps}
+          size="sm"
           value={config.server_port}
           onChange={(value) => handleUpdateServerPort(value)}
-          placeholder={DEFAULT_MANAGED_CONFIG.server_port.toString()}
+          placeholder={DEFAULT_CUSTOM_CONFIG.server_port.toString()}
           min={1}
           max={65535}
           step={1}
           name="serverPort"
-          label="Server Port"
+          label="Server port"
           description="The internal port your application listens on. This must match the port configured in your code (e.g., `process.env.PORT` or `app.listen(8080)`)."
         />
       </Card.Section>
@@ -56,7 +58,7 @@ const CustomIngressControls = ({
             handleUpdateServerProtocol(value as ServerProtocol)
           }
           name="serverProtocol"
-          label="Server Protocol"
+          label="Server protocol"
           description="The protocol your application uses to communicate."
         >
           <Stack my="xs" gap="xs">

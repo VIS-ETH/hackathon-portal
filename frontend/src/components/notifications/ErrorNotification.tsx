@@ -7,14 +7,15 @@ import { Notification } from "@mantine/core";
 import axios from "axios";
 
 type ErrorNotificationProps = {
+  id: string;
   error: Error;
-  onClose: () => void;
+  onClose: (id: string) => void;
 };
 
-const ErrorNotification = ({ error, onClose }: ErrorNotificationProps) => {
+const ErrorNotification = ({ id, error, onClose }: ErrorNotificationProps) => {
   const getErrorMessage = (error: Error) => {
     if (axios.isAxiosError<PublicError>(error) && error.response) {
-      return error.response.data.message;
+      return error.response.data?.message ?? error.message;
     }
 
     return error.message;
@@ -22,10 +23,10 @@ const ErrorNotification = ({ error, onClose }: ErrorNotificationProps) => {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      onClose();
+      onClose(id);
     }, 5000);
     return () => clearTimeout(timer);
-  }, [onClose]);
+  }, [id, onClose]);
 
   return (
     <Notification
@@ -34,7 +35,7 @@ const ErrorNotification = ({ error, onClose }: ErrorNotificationProps) => {
       color="red"
       radius="md"
       withBorder
-      onClose={onClose}
+      onClose={() => onClose(id)}
     >
       {getErrorMessage(error)}
     </Notification>

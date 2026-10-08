@@ -1,14 +1,14 @@
 import { useCreateUpload } from "@/api/gen";
 import { MediaUsage } from "@/api/gen/schemas";
-import { cardProps, largeIconProps } from "@/styles/common";
+import { alertProps, largeIconProps } from "@/styles/common";
 
 import { Fragment, useState } from "react";
 
-import { Card, Code, Stack, Text } from "@mantine/core";
+import { Alert, Code, List, Stack, Text } from "@mantine/core";
 
 import { Dropzone, FileRejection } from "@mantine/dropzone";
 
-import { IconUpload, IconX } from "@tabler/icons-react";
+import { IconAlertCircle, IconUpload, IconX } from "@tabler/icons-react";
 
 type UploaderProps = {
   eventId: string;
@@ -98,7 +98,9 @@ const Uploader = ({
     }
 
     setIsUploading(false);
-    onUploaded(uploadedIds, uploadedFiles);
+    if (uploadedIds.length > 0) {
+      onUploaded(uploadedIds, uploadedFiles);
+    }
   };
 
   const handleOnReject = (rejectedFiles: FileRejection[]) => {
@@ -158,34 +160,44 @@ const Uploader = ({
         </Stack>
       </Dropzone>
       {rejectedFiles.length > 0 && (
-        <Card {...cardProps} bg="var(--mantine-color-orange-0)">
-          <Text size="sm" c="orange">
-            The following files did not meet the requirements listed above.
-            Please check and try again.
-            <ul>
-              {rejectedFiles.map(({ file, errors }) => (
-                <li key={file.name}>
-                  <strong>{file.name}</strong> (
-                  {errors.map((e) => e.message).join(". ")})
-                </li>
-              ))}
-            </ul>
-          </Text>
-        </Card>
+        <Alert
+          {...alertProps}
+          icon={<IconAlertCircle {...largeIconProps} />}
+          color="yellow"
+          title="Some files don't meet the requirements above"
+        >
+          <List>
+            {rejectedFiles.map(({ file, errors }) => (
+              <List.Item key={file.name}>
+                <strong>{file.name}</strong> (
+                {errors
+                  .map((e) =>
+                    e.code === "file-too-large"
+                      ? `File is larger than ${maxSizeMB} MB`
+                      : e.message,
+                  )
+                  .join(". ")}
+                )
+              </List.Item>
+            ))}
+          </List>
+        </Alert>
       )}
       {failedUploads.length > 0 && (
-        <Card {...cardProps} bg="var(--mantine-color-red-0)">
-          <Text size="sm" c="red">
-            The following files could not be uploaded due to an error.
-            <ul>
-              {failedUploads.map((file) => (
-                <li key={file.name}>
-                  <strong>{file.name}</strong>
-                </li>
-              ))}
-            </ul>
-          </Text>
-        </Card>
+        <Alert
+          {...alertProps}
+          icon={<IconAlertCircle {...largeIconProps} />}
+          color="red"
+          title="Some files couldn't be uploaded"
+        >
+          <List>
+            {failedUploads.map((file) => (
+              <List.Item key={file.name}>
+                <strong>{file.name}</strong>
+              </List.Item>
+            ))}
+          </List>
+        </Alert>
       )}
     </Stack>
   );

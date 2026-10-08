@@ -89,6 +89,7 @@ const UpdateProjectDrawer = ({
             required
           />
           <MultiSelect
+            {...inputProps}
             {...form.getInputProps("stakeholder_ids")}
             label="Stakeholders"
             data={
