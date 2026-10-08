@@ -25,7 +25,8 @@ pub struct ServerConfig {
     #[serde(default = "ServerConfig::default_management_port")]
     pub management_port: u16,
 
-    pub allowed_origins: Option<Vec<String>>,
+    /// Browser origins allowed by CORS and to send writes, e.g. the frontend's.
+    pub allowed_origins: Vec<String>,
 
     /// Where the frontend's logout links point to. Logout links are hidden if unset.
     pub logout_url: Option<String>,

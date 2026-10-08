@@ -4,6 +4,7 @@ use crate::{ApiError, ApiResult};
 use axum::body::Body;
 use axum::extract::Request;
 use axum::extract::State;
+use axum::http::{header, HeaderValue, Method};
 use axum::middleware::Next;
 use axum::response::Response;
 use hackathon_portal_services::user::models::UserForCreate;
@@ -18,6 +19,39 @@ struct ResolvedUserId(Uuid);
 pub async fn mw_require_auth(ctx: Option<Ctx>, req: Request, next: Next) -> ApiResult<Response> {
     ctx.ok_or(ApiError::NoCtxInRequest)?;
     Ok(next.run(req).await)
+}
+
+/// Team apps are same-site with the portal, so the browser attaches the session cookie to writes they
+/// trigger. CORS only hides the response, this rejects the request itself.
+pub async fn mw_check_origin(
+    State(allowed_origins): State<Arc<[HeaderValue]>>,
+    req: Request,
+    next: Next,
+) -> ApiResult<Response> {
+    if !is_allowed_origin(
+        req.method(),
+        req.headers().get(header::ORIGIN),
+        &allowed_origins,
+    ) {
+        return Err(ApiError::Forbidden {
+            action: "send this request from another site".to_string(),
+        });
+    }
+
+    Ok(next.run(req).await)
+}
+
+/// Browsers send Origin on every request that isn't a GET or HEAD, so a missing one means a non-browser client.
+fn is_allowed_origin(
+    method: &Method,
+    origin: Option<&HeaderValue>,
+    allowed_origins: &[HeaderValue],
+) -> bool {
+    if matches!(*method, Method::GET | Method::HEAD | Method::OPTIONS) {
+        return true;
+    }
+
+    origin.is_none_or(|origin| allowed_origins.contains(origin))
 }
 
 pub async fn mw_resolve_ctx(
@@ -93,4 +127,55 @@ pub async fn mw_log_request(req: Request, next: Next) -> Response {
     }
 
     res
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const PORTAL: &str = "https://hackathon.ethz.ch";
+    const TEAM: &str = "https://01.hackathon.ethz.ch";
+    // shares *.hackathon.ethz.ch with prod, so it is same-site too
+    const STAGING: &str = "https://staging.hackathon.ethz.ch";
+
+    fn allowed(method: &Method, origin: Option<&'static str>) -> bool {
+        let origin = origin.map(HeaderValue::from_static);
+        is_allowed_origin(method, origin.as_ref(), &[HeaderValue::from_static(PORTAL)])
+    }
+
+    #[test]
+    fn is_allowed_origin_lets_safe_methods_through() {
+        assert!(allowed(&Method::GET, Some(TEAM)));
+        assert!(allowed(&Method::HEAD, Some(TEAM)));
+        assert!(allowed(&Method::OPTIONS, Some(TEAM)));
+    }
+
+    #[test]
+    fn is_allowed_origin_checks_writes() {
+        assert!(allowed(&Method::POST, None));
+        assert!(allowed(&Method::POST, Some(PORTAL)));
+        assert!(!allowed(&Method::POST, Some(TEAM)));
+        assert!(!allowed(&Method::PUT, Some(TEAM)));
+        assert!(!allowed(&Method::PATCH, Some(TEAM)));
+        assert!(!allowed(&Method::DELETE, Some(TEAM)));
+        assert!(!allowed(&Method::POST, Some("null")));
+        assert!(!allowed(&Method::POST, Some(STAGING)));
+    }
+
+    #[test]
+    fn is_allowed_origin_matches_exactly() {
+        assert!(!allowed(&Method::POST, Some("https://hackathon.ethz.ch/")));
+        assert!(!allowed(&Method::POST, Some("http://hackathon.ethz.ch")));
+        assert!(!allowed(
+            &Method::POST,
+            Some("https://hackathon.ethz.ch:8443")
+        ));
+    }
+
+    #[test]
+    fn is_allowed_origin_with_empty_allowlist_only_lets_non_browsers_write() {
+        let portal = HeaderValue::from_static(PORTAL);
+        assert!(!is_allowed_origin(&Method::POST, Some(&portal), &[]));
+        assert!(is_allowed_origin(&Method::POST, None, &[]));
+    }
 }

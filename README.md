@@ -20,7 +20,8 @@
    docker network create portal_private
    ```
 
-3. Create `compose.override.yaml` with the following content. It opens ports for local development.
+3. Create `compose.override.yaml` with the following content. It opens ports for local development, and lets the
+   containerized frontend (served by Traefik on port 80 with `--profile prod`) send writes to the backend.
 
    ```yaml
    services:
@@ -31,6 +32,10 @@
      postgres:
        ports:
          - 5432:5432
+
+     backend:
+       environment:
+         PORTAL__SERVER__ALLOWED_ORIGINS: http://localhost
    ```
 
 4. Create an `.env` file from the example (`cp .env.example .env`), and update the values as needed.
