@@ -1,51 +1,48 @@
-import TechnicalQuestionEntry from "../../technicalQuestions/TechnicalQuestionEntry";
+import LabeledRow from "../../LabeledRow";
 import FeedbackCard from "./FeedbackCard";
 
-import { TeamRanking, TechnicalQuestion } from "@/api/gen/schemas";
+import { TeamRanking } from "@/api/gen/schemas";
 
-import { useMemo } from "react";
+import { Text } from "@mantine/core";
 
 type TechnicalFeedbackProps = {
   entry: TeamRanking;
-  eventId: string;
 };
 
-const TechnicalFeedback = ({ entry, eventId }: TechnicalFeedbackProps) => {
+const TechnicalFeedback = ({ entry }: TechnicalFeedbackProps) => {
   // the answers are part of the ranking, so they show the questions as they were when it
-  // was computed; memoized because TechnicalQuestionEntry resets on a new question object
-  const answers = useMemo(
-    () =>
-      (entry.technical.answers ?? []).map((answer) => ({
-        question: {
-          id: answer.question_id,
-          event_id: eventId,
-          question: answer.question,
-          description: answer.description,
-          min_points: answer.min_points,
-          max_points: answer.max_points,
-          binary: answer.binary,
-        } satisfies TechnicalQuestion,
-        score: answer.score,
-      })),
-    [entry.technical.answers, eventId],
-  );
-
+  // was computed
   return (
     <FeedbackCard
       title="Technical Ranking"
       category={entry.technical}
-      rows={answers.map((answer) => ({
-        key: answer.question.id,
-        content: (
-          <TechnicalQuestionEntry
-            technicalQuestion={answer.question}
-            teamId={entry.team_id}
-            initialScore={answer.score ?? undefined}
-            mode="feedback"
-            eventId={eventId}
-          />
-        ),
-      }))}
+      rows={(entry.technical.answers ?? []).map((answer) => {
+        const { binary, min_points, max_points, score } = answer;
+        // binary questions are scored with either min or max points
+        const points =
+          score === null || score === undefined
+            ? "–"
+            : binary
+              ? score === max_points
+                ? max_points
+                : min_points
+              : score;
+
+        return {
+          key: answer.question_id,
+          content: (
+            <LabeledRow
+              label={answer.question}
+              description={answer.description}
+            >
+              <Text>
+                {points}
+                <Text span c="dimmed">{` / ${max_points}`}</Text>
+              </Text>
+            </LabeledRow>
+          ),
+        };
+      })}
     />
   );
 };

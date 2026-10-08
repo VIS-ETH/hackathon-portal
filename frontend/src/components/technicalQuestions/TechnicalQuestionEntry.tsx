@@ -53,29 +53,6 @@ const TechnicalQuestionEntry = ({
 
   const { binary, min_points, max_points } = technicalQuestion;
 
-  if (mode === "feedback") {
-    // binary questions are scored with either min or max points
-    const score =
-      initialScore === undefined
-        ? "–"
-        : binary
-          ? initialScore == max_points
-            ? max_points
-            : min_points
-          : initialScore;
-    return (
-      <LabeledRow
-        label={technicalQuestion.question}
-        description={technicalQuestion.description}
-      >
-        <Text>
-          {score}
-          <Text span c="dimmed">{` / ${max_points}`}</Text>
-        </Text>
-      </LabeledRow>
-    );
-  }
-
   return (
     <LabeledRow
       label={technicalQuestion.question}

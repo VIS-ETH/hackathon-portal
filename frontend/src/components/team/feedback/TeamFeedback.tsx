@@ -5,9 +5,8 @@ import SidequestFeedback from "./SidequestFeedback";
 import TechnicalFeedback from "./TechnicalFeedback";
 
 import { TeamRanking } from "@/api/gen/schemas";
-import { useResolveParams } from "@/hooks/useResolveParams";
 
-import { Group, Loader, Stack, Title } from "@mantine/core";
+import { Group, Stack, Title } from "@mantine/core";
 
 type TeamFeedbackProps = {
   entry: TeamRanking;
@@ -22,12 +21,6 @@ const TeamFeedback = ({
   adminView = false,
   maxTotalPoints = 0,
 }: TeamFeedbackProps) => {
-  const { event } = useResolveParams();
-
-  if (!event) {
-    return <Loader />;
-  }
-
   return (
     <Stack>
       {!adminView && (
@@ -42,7 +35,7 @@ const TeamFeedback = ({
         </>
       )}
 
-      <TechnicalFeedback entry={entry} eventId={event.id} />
+      <TechnicalFeedback entry={entry} />
       <JuryFeedback entry={entry} />
       {entry.finalist && <PublicFeedback entry={entry} />}
       <SidequestFeedback entry={entry} />

@@ -1,4 +1,4 @@
-import TeamRankingEntry from "./TeamRankingEntry";
+import TeamRankingEntry, { TeamRankingHeader } from "./TeamRankingEntry";
 
 import {
   useCreateRankingSnapshot,
@@ -9,9 +9,12 @@ import {
   useSetCurrentRankingSnapshot,
 } from "@/api/gen";
 import {
+  cardProps,
+  cardSectionProps,
+  iconProps,
   inputProps,
-  secondaryButtonProps,
-  segmentedControlProps,
+  skeletonProps,
+  toolbarButtonProps,
 } from "@/styles/common";
 
 import { useState } from "react";
@@ -19,8 +22,9 @@ import { useIntl } from "react-intl";
 
 import {
   Button,
+  Card,
+  Combobox,
   Group,
-  SegmentedControl,
   Select,
   SelectProps,
   Skeleton,
@@ -28,17 +32,20 @@ import {
   Text,
 } from "@mantine/core";
 
+import { IconPlus, IconRefresh } from "@tabler/icons-react";
+import { isEqual } from "lodash";
+
 type RankingPanelProps = {
   eventId: string;
 };
 
-type Mode = "Snapshot" | "Live";
+const LIVE = "live";
 
 const RankingPanel = ({ eventId }: RankingPanelProps) => {
   const intl = useIntl();
-  const [mode, setMode] = useState<Mode>("Snapshot");
-  // null means "the current snapshot"
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  // a snapshot id or LIVE; null means the current snapshot, or the live
+  // ranking if there's none
+  const [selected, setSelected] = useState<string | null>(null);
 
   const { data: teams = [], refetch: refetchTeams } = useGetAdminTeams({
     event_id: eventId,
@@ -49,28 +56,40 @@ const RankingPanel = ({ eventId }: RankingPanelProps) => {
     data: snapshots,
     isLoading: snapshotsLoading,
     refetch: refetchSnapshots,
-  } = useGetRankingSnapshots(eventId, {
-    query: { enabled: mode === "Snapshot" },
-  });
-  const snapshotId =
-    selectedId ?? snapshots?.find((snapshot) => snapshot.is_current)?.id;
-  const selectedSnapshot = snapshots?.find(
-    (snapshot) => snapshot.id === snapshotId,
-  );
+  } = useGetRankingSnapshots(eventId);
+  const value = snapshots
+    ? (selected ??
+      snapshots.find((snapshot) => snapshot.is_current)?.id ??
+      LIVE)
+    : null;
+  const isLive = value === LIVE;
+  const selectedSnapshot = snapshots?.find((snapshot) => snapshot.id === value);
 
   const snapshotQuery = useGetRanking(
     eventId,
-    { snapshot_id: snapshotId },
-    { query: { enabled: mode === "Snapshot" && !!snapshotId } },
+    { snapshot_id: selectedSnapshot?.id },
+    { query: { enabled: !!selectedSnapshot } },
   );
   const liveQuery = useGetLiveRanking(eventId, {
-    query: { enabled: mode === "Live" },
+    query: { enabled: isLive },
   });
+  // the snapshots are sorted newest first
+  const latestId = snapshots?.[0]?.id;
+  const latestQuery = useGetRanking(
+    eventId,
+    { snapshot_id: latestId },
+    { query: { enabled: isLive && !!latestId } },
+  );
+  const liveChanged =
+    !!liveQuery.data &&
+    (!latestId ||
+      (!!latestQuery.data &&
+        !isEqual(liveQuery.data, latestQuery.data.ranking)));
 
   const createSnapshotMutation = useCreateRankingSnapshot({
     mutation: {
       onSuccess: () => {
-        setSelectedId(null);
+        setSelected(null);
         return refetchSnapshots();
       },
     },
@@ -89,107 +108,137 @@ const RankingPanel = ({ eventId }: RankingPanelProps) => {
     createSnapshotMutation.mutate({ eventId });
   };
 
-  const fmtSnapshot = (createdAt: string, isCurrent: boolean) =>
-    intl.formatDate(new Date(`${createdAt}Z`), {
-      dateStyle: "medium",
-      timeStyle: "medium",
-    }) + (isCurrent ? " (current)" : "");
+  const fmtDate = (date: Date) =>
+    intl.formatDate(date, { dateStyle: "medium", timeStyle: "medium" });
 
-  const controls =
-    mode === "Snapshot" ? (
-      <Group>
-        {snapshots && snapshots.length > 0 && (
-          <Select
-            {...(inputProps as SelectProps)}
-            size="xs"
-            w={280}
-            allowDeselect={false}
-            value={snapshotId ?? null}
-            onChange={setSelectedId}
-            data={snapshots.map((snapshot) => ({
-              value: snapshot.id,
-              label: fmtSnapshot(snapshot.created_at, snapshot.is_current),
-            }))}
-          />
-        )}
-        {selectedSnapshot && !selectedSnapshot.is_current && (
-          <Button
-            {...secondaryButtonProps}
-            loading={setCurrentSnapshotMutation.isPending}
-            onClick={() =>
-              setCurrentSnapshotMutation.mutate({
-                eventId,
-                data: { snapshot_id: selectedSnapshot.id },
-              })
-            }
-          >
-            Make current
-          </Button>
-        )}
-      </Group>
-    ) : (
-      <Group>
-        <Button
-          {...secondaryButtonProps}
-          onClick={() => liveQuery.refetch()}
-          loading={liveQuery.isFetching}
-        >
-          Refresh
-        </Button>
-        <Button
-          {...secondaryButtonProps}
-          onClick={createSnapshot}
-          loading={createSnapshotMutation.isPending}
-        >
-          Create snapshot from live
-        </Button>
-      </Group>
+  // LIVE and CURRENT are rendered as monospace tags after the date
+  const tagText = (id: string | null) =>
+    id === LIVE
+      ? "LIVE"
+      : snapshots?.find((snapshot) => snapshot.id === id)?.is_current
+        ? "CURRENT"
+        : undefined;
+  const tag = (text: string | undefined) =>
+    text && (
+      <Text span inherit ff="monospace" c="dimmed">
+        {text}
+      </Text>
     );
+  const valueTag = tagText(value);
 
-  const ranking =
-    mode === "Live" ? liveQuery.data : snapshotQuery.data?.ranking;
-  const isLoading =
-    mode === "Live"
-      ? liveQuery.isLoading
-      : snapshotsLoading || snapshotQuery.isLoading;
+  const ranking = isLive ? liveQuery.data : snapshotQuery.data?.ranking;
+  const isLoading = isLive
+    ? liveQuery.isLoading
+    : snapshotsLoading || snapshotQuery.isLoading;
 
   let content;
   if (isLoading) {
-    content = Array.from({ length: 11 }, (_, i) => (
-      <Skeleton key={i} height={60} radius="md" />
-    ));
-  } else if (mode === "Snapshot" && snapshots?.length === 0) {
     content = (
-      <Text c="dimmed" ta="center" py="xl">
-        No ranking snapshot yet. Create one from the live ranking.
-      </Text>
+      <Card.Section {...cardSectionProps}>
+        <Stack>
+          {Array.from({ length: 11 }, (_, i) => (
+            <Skeleton key={i} {...skeletonProps} />
+          ))}
+        </Stack>
+      </Card.Section>
     );
-  } else {
-    content = ranking?.teams.map((entry) => (
-      <TeamRankingEntry
-        key={entry.team_id}
-        entry={entry}
-        maxTotalPoints={ranking.max_total_points}
-        team={teamsById.get(entry.team_id)}
-        onTeamUpdated={refetchTeams}
-      />
-    ));
+  } else if (ranking) {
+    content = (
+      <>
+        <TeamRankingHeader />
+        {ranking.teams.map((entry) => (
+          <TeamRankingEntry
+            key={entry.team_id}
+            entry={entry}
+            maxTotalPoints={ranking.max_total_points}
+            team={teamsById.get(entry.team_id)}
+            onTeamUpdated={refetchTeams}
+          />
+        ))}
+      </>
+    );
   }
 
   return (
-    <Stack pt={"md"}>
-      <Group justify="space-between" w={"100%"}>
-        <SegmentedControl
-          {...segmentedControlProps}
-          size="xs"
-          value={mode}
-          onChange={(value) => setMode(value as Mode)}
-          data={["Snapshot", "Live"]}
-        />
-        {controls}
-      </Group>
+    <Card {...cardProps}>
+      <Card.Section {...cardSectionProps}>
+        <Group>
+          <Select
+            {...(inputProps as SelectProps)}
+            size="sm"
+            w={280}
+            allowDeselect={false}
+            value={value}
+            onChange={setSelected}
+            data={[
+              {
+                value: LIVE,
+                // when the live ranking was last fetched
+                label: liveQuery.dataUpdatedAt
+                  ? fmtDate(new Date(liveQuery.dataUpdatedAt))
+                  : "Not fetched yet",
+              },
+              ...(snapshots ?? []).map((snapshot) => ({
+                value: snapshot.id,
+                label: fmtDate(new Date(`${snapshot.created_at}Z`)),
+              })),
+            ]}
+            rightSection={
+              valueTag && (
+                <Group gap="xs" wrap="nowrap">
+                  {tag(valueTag)}
+                  <Combobox.Chevron />
+                </Group>
+              )
+            }
+            rightSectionWidth={valueTag && { LIVE: 80, CURRENT: 104 }[valueTag]}
+            rightSectionPointerEvents="none"
+            renderOption={({ option }) => (
+              <Group gap="xs" wrap="nowrap" justify="space-between" w="100%">
+                {option.label}
+                {tag(tagText(option.value))}
+              </Group>
+            )}
+          />
+          {selectedSnapshot && !selectedSnapshot.is_current && (
+            <Button
+              {...toolbarButtonProps}
+              loading={setCurrentSnapshotMutation.isPending}
+              onClick={() =>
+                setCurrentSnapshotMutation.mutate({
+                  eventId,
+                  data: { snapshot_id: selectedSnapshot.id },
+                })
+              }
+            >
+              Make Current
+            </Button>
+          )}
+          {isLive && (
+            <>
+              <Button
+                {...toolbarButtonProps}
+                leftSection={<IconRefresh {...iconProps} />}
+                onClick={() => liveQuery.refetch()}
+                loading={liveQuery.isFetching}
+              >
+                Refresh
+              </Button>
+              <Button
+                {...toolbarButtonProps}
+                leftSection={<IconPlus {...iconProps} />}
+                onClick={createSnapshot}
+                disabled={!liveChanged}
+                loading={createSnapshotMutation.isPending}
+              >
+                Create Snapshot
+              </Button>
+            </>
+          )}
+        </Group>
+      </Card.Section>
       {content}
-    </Stack>
+    </Card>
   );
 };
 
