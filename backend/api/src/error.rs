@@ -181,6 +181,10 @@ impl From<&ServiceError> for PublicError {
             ServiceError::SlugNotUnique { slug } => {
                 (StatusCode::CONFLICT, format!("Slug '{slug}' is not unique"))
             }
+            ServiceError::SlugEmpty { name } => (
+                StatusCode::BAD_REQUEST,
+                format!("Name '{name}' does not produce a valid slug"),
+            ),
             ServiceError::ResourceStillInUse { resource, id } => (
                                         StatusCode::CONFLICT,
                                         format!("{resource} '{id}' is still in use"),

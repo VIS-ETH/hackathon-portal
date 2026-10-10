@@ -663,6 +663,12 @@ impl TeamService {
     ) -> ServiceResult<String> {
         let slug = slugify(name);
 
+        if slug.is_empty() {
+            return Err(ServiceError::SlugEmpty {
+                name: name.to_string(),
+            });
+        }
+
         let conflicting =
             TeamRepository::count_conflicting_by_slug(db, &slug, event_id, current_team_id).await?;
 

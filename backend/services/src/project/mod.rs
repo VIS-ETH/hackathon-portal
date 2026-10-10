@@ -274,6 +274,12 @@ impl ProjectService {
     ) -> ServiceResult<String> {
         let slug = slugify(name);
 
+        if slug.is_empty() {
+            return Err(ServiceError::SlugEmpty {
+                name: name.to_string(),
+            });
+        }
+
         let conflicting =
             ProjectRepository::count_conflicting_by_slug(db, &slug, event_id, current_project_id)
                 .await?;

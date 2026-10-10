@@ -295,6 +295,12 @@ impl EventService {
     ) -> ServiceResult<String> {
         let slug = slugify(name);
 
+        if slug.is_empty() {
+            return Err(ServiceError::SlugEmpty {
+                name: name.to_string(),
+            });
+        }
+
         let conflicting =
             EventRepository::count_conflicting_by_slug(db, &slug, current_event_id).await?;
 

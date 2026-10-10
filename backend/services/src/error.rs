@@ -25,6 +25,10 @@ pub enum ServiceError {
         slug: String,
     },
 
+    SlugEmpty {
+        name: String,
+    },
+
     ResourceStillInUse {
         resource: String,
         id: String,
